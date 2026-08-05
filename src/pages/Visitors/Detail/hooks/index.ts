@@ -1,0 +1,1 @@
+export { useVisitorDetail } from './useVisitorDetail';

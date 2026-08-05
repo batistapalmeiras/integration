@@ -1,0 +1,15 @@
+{
+  "extends": ["react-app"],
+  "plugins": ["react-hooks"],
+  "rules": {
+    "react-hooks/exhaustive-deps": "warn",
+    "import/no-duplicates": "warn",
+    "import/order": [
+      "warn",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+        "newlines-between": "ignore"
+      }
+    ]
+  }
+}
