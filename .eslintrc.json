@@ -1,6 +1,6 @@
 {
   "extends": ["react-app"],
-  "plugins": ["react-hooks"],
+  "plugins": ["react-hooks", "i18next"],
   "rules": {
     "react-hooks/exhaustive-deps": "warn",
     "import/no-duplicates": "warn",
@@ -9,6 +9,15 @@
       {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
         "newlines-between": "ignore"
+      }
+    ],
+    "i18next/no-literal-string": [
+      "warn",
+      {
+        "mode": "jsx-only",
+        "jsx-attributes": {
+          "include": ["label", "placeholder", "title", "subtitle", "description"]
+        }
       }
     ]
   }
