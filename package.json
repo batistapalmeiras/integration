@@ -33,6 +33,8 @@
     "@types/react-dom": "^19.2.3",
     "@types/styled-components": "^5.1.36",
     "@vitejs/plugin-react": "^4.3.4",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-i18next": "^6.1.5",
     "eslint-plugin-react-hooks": "^4.6.2",
     "jsdom": "^25.0.1",
     "typescript": "5.1.6",
