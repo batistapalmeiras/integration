@@ -46,5 +46,6 @@ export function useLayout() {
     showCoffee: isAdmin || user?.role === UserRole.Pastor,
     showClasses: isAdmin || user?.role === UserRole.Teacher,
     showAdmin: isAdmin,
+    showReports: isAdmin,
   };
 }

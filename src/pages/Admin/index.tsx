@@ -1,7 +1,10 @@
+// React
+import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Skeleton, StatCard, StatLabel, StatsGrid, StatValue } from 'bp-kit';
+import { Button, Empty, PageHeader, Skeleton, StatCard, StatLabel, StatsGrid, StatValue, text } from 'bp-kit';
 // Local
-import { RowActions, Table, TableWrapper, Td, Th } from '../../components/Table';
+import { RowActions, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META } from '../../types/person';
 import { useAdmin } from './hooks';
 import { Hint, Section } from './styles';
@@ -18,6 +21,7 @@ const PIPELINE_STATUSES: PersonStatus[] = [
 const OUTCOME_STATUSES: PersonStatus[] = ['member', 'archived'];
 
 export function AdminPage() {
+  const navigate = useNavigate();
   const { counts, cohort, pendingMembers, loading, error, closeCohort, confirmMember } = useAdmin();
 
   return (
@@ -25,7 +29,7 @@ export function AdminPage() {
       <PageHeader title="Administração" subtitle="Visão geral do processo de integração" />
 
       {loading && <Skeleton $h="240px" />}
-      {!loading && error && <Empty title="Erro ao carregar" description={error} />}
+      {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
 
       {!loading && !error && (
         <>
@@ -65,22 +69,22 @@ export function AdminPage() {
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Nome</Th>
-                      <Th>Ações</Th>
+                      <Th>{text.fields.name}</Th>
+                      <Th>{text.actions.actionsColumn}</Th>
                     </tr>
                   </thead>
                   <tbody>
                     {pendingMembers.map((person) => (
-                      <tr key={person.id}>
-                        <Td data-label="Nome">{person.name}</Td>
-                        <Td data-label="Ações">
+                      <Tr key={person.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
+                        <Td>{person.name}</Td>
+                        <Td onClick={(e) => e.stopPropagation()}>
                           <RowActions>
                             <Button size="sm" variant="secondary" onClick={() => confirmMember(person)}>
                               Confirmar como membro
                             </Button>
                           </RowActions>
                         </Td>
-                      </tr>
+                      </Tr>
                     ))}
                   </tbody>
                 </Table>

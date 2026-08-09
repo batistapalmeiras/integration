@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
+import { attachToNextWelcomeCoffee } from '../../../../domain/cafeSchedule';
 import { supabase } from '../../../../lib/supabase';
 import { CreateVisitorFormValues, ContactAttemptFormValues } from '../../validators';
 import { Person } from '../../types';
@@ -60,16 +61,22 @@ export function useVisitorDetail(id: string) {
   };
 
   const registerContactAttempt = async (values: ContactAttemptFormValues) => {
+    // Contact is always made via WhatsApp by the volunteer — no channel choice in the UI.
     const { error: attemptError } = await supabase.from('contact_attempts').insert({
       person_id: id,
-      channel: values.channel,
+      channel: 'text',
       result: values.result,
       made_by: user?.id,
     });
     if (attemptError) throw attemptError;
 
-    const toStatus = values.result === 'accepted' ? 'welcome_coffee' : 'retry_contact';
-    await changeStatus(toStatus, values.note);
+    const toStatus =
+      values.result === 'accepted' ? 'welcome_coffee' : values.result === 'declined' ? 'archived' : 'retry_contact';
+    await changeStatus(toStatus);
+
+    if (values.result === 'accepted') {
+      await attachToNextWelcomeCoffee(id);
+    }
   };
 
   const archive = () => changeStatus('archived');

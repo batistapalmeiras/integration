@@ -2,13 +2,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, ModalActions, ModalTitle, TextInput } from 'bp-kit';
+import { Button, ModalActions, ModalTitle, text, TextInput } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { isSunday } from '../domain';
 
 const schema = z.object({
-  firstDate: z.string().min(1, 'Informe a data').refine(isSunday, 'A primeira aula precisa ser em um domingo'),
+  firstDate: z
+    .string()
+    .min(1, text.validation.required('a data'))
+    .refine(isSunday, 'A primeira aula precisa ser em um domingo'),
 });
 
 type FormValues = z.infer<typeof schema>;

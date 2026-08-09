@@ -1,12 +1,14 @@
 // React
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 // Libs
-import { Button, RawSelect, TextInput } from 'bp-kit';
+import { Button, RadioGroup } from 'bp-kit';
 // Local
-import { CHANNEL_LABELS, RESULT_LABELS } from '../../types';
+import { RESULT_LABELS } from '../../types';
 import { ContactAttemptFormValues, contactAttemptSchema } from '../../validators';
-import { Actions } from '../styles';
+import { Actions, Form } from '../styles';
+
+const RESULT_OPTIONS = Object.entries(RESULT_LABELS).map(([value, label]) => ({ value, label }));
 
 interface Props {
   onSubmit: (values: ContactAttemptFormValues) => Promise<void>;
@@ -15,41 +17,30 @@ interface Props {
 export function ContactTab({ onSubmit }: Props) {
   const {
     control,
-    register,
     handleSubmit,
     formState: { isSubmitting },
   } = useForm<ContactAttemptFormValues>({
     resolver: zodResolver(contactAttemptSchema),
-    defaultValues: { channel: 'text', result: 'accepted' },
+    defaultValues: { result: 'accepted' },
   });
 
   const submit = handleSubmit(onSubmit);
 
   return (
-    <form onSubmit={submit}>
-      <RawSelect label="Canal" {...register('channel')}>
-        {Object.entries(CHANNEL_LABELS).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </RawSelect>
-
-      <RawSelect label="Resultado" {...register('result')}>
-        {Object.entries(RESULT_LABELS).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </RawSelect>
-
-      <TextInput label="Observação (opcional)" control={control} name="note" placeholder="Ex: pediu pra ligar depois das 18h" />
+    <Form onSubmit={submit}>
+      <Controller
+        control={control}
+        name="result"
+        render={({ field }) => (
+          <RadioGroup label="Resultado" name="result" options={RESULT_OPTIONS} value={field.value} onChange={field.onChange} />
+        )}
+      />
 
       <Actions>
         <Button type="submit" variant="primary" disabled={isSubmitting}>
           {isSubmitting ? 'Salvando...' : 'Registrar'}
         </Button>
       </Actions>
-    </form>
+    </Form>
   );
 }
