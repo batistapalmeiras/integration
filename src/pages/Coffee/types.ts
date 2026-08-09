@@ -10,9 +10,7 @@ export interface CoffeeAttendance {
   id: string;
   person_id: string;
   coffee_event_id: string;
-  confirmed: boolean;
   attended: boolean;
-  presented_by_pastor: boolean;
 }
 
 export interface AttendeeRow extends CoffeeAttendance {

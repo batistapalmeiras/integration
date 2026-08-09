@@ -9,6 +9,9 @@ import { ClassesPage } from '../pages/Classes';
 import { CoffeePage } from '../pages/Coffee';
 import { LoginPage } from '../pages/Login';
 import { ProfilePage } from '../pages/Profile';
+import { ReportsPage } from '../pages/Reports';
+import { CohortRosterPage } from '../pages/Reports/components/CohortRosterPage';
+import { PeopleReportPage } from '../pages/Reports/components/PeopleReportPage';
 import { VisitorsPage } from '../pages/Visitors';
 import { VisitorDetailPage } from '../pages/Visitors/Detail';
 import { NewVisitorPage } from '../pages/Visitors/New';
@@ -50,7 +53,15 @@ export function AppRouter() {
                     <Route
                       path={`${AppRoute.Visitors}/:id`}
                       element={
-                        <ProtectedRoute roles={[UserRole.Reception, UserRole.IntegrationTeam, UserRole.Admin]}>
+                        <ProtectedRoute
+                          roles={[
+                            UserRole.Reception,
+                            UserRole.IntegrationTeam,
+                            UserRole.Admin,
+                            UserRole.Pastor,
+                            UserRole.Teacher,
+                          ]}
+                        >
                           <VisitorDetailPage />
                         </ProtectedRoute>
                       }
@@ -76,6 +87,30 @@ export function AppRouter() {
                       element={
                         <ProtectedRoute roles={[UserRole.Admin]}>
                           <AdminPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={AppRoute.Reports}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Admin]}>
+                          <ReportsPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={`${AppRoute.Reports}/turmas/:id`}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Admin]}>
+                          <CohortRosterPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={`${AppRoute.Reports}/pessoas`}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Admin]}>
+                          <PeopleReportPage />
                         </ProtectedRoute>
                       }
                     />

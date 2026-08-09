@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
+import { Archive } from 'lucide-react';
 import { Button, Empty, PageHeader, Skeleton, Tab, TabBar, useAuthCtx } from 'bp-kit';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
@@ -9,6 +10,7 @@ import { AppRoute } from '../../../routes/paths';
 import { UserRole } from '../../../types/enums';
 import { ContactTab } from './components/ContactTab';
 import { DetailsTab } from './components/DetailsTab';
+import { ProgressStepper } from './components/ProgressStepper';
 import { WhatsAppTab } from './components/WhatsAppTab';
 import { useVisitorDetail } from './hooks';
 import { Content, StatusRow } from './styles';
@@ -57,6 +59,7 @@ export function VisitorDetailPage() {
             ) : (
               !isClosedOut && (
                 <Button variant="secondary" onClick={() => archive().then(() => navigate(AppRoute.Visitors))}>
+                  <Archive size={16} />
                   Arquivar
                 </Button>
               )
@@ -69,11 +72,13 @@ export function VisitorDetailPage() {
         <StatusPill status={person.status} />
       </StatusRow>
 
+      <ProgressStepper status={person.status} />
+
       <TabBar>
         <Tab $active={tab === DetailTab.Details} onClick={() => setTab(DetailTab.Details)}>
           Detalhes
         </Tab>
-        {canManage && (
+        {canManage && person.status !== 'member' && (
           <Tab $active={tab === DetailTab.WhatsApp} onClick={() => setTab(DetailTab.WhatsApp)}>
             WhatsApp
           </Tab>
@@ -86,7 +91,7 @@ export function VisitorDetailPage() {
       </TabBar>
 
       {tab === DetailTab.Details && <DetailsTab person={person} canEdit={canManage} onSave={handleSave} />}
-      {tab === DetailTab.WhatsApp && canManage && <WhatsAppTab person={person} />}
+      {tab === DetailTab.WhatsApp && canManage && person.status !== 'member' && <WhatsAppTab person={person} />}
       {tab === DetailTab.Contact && canManage && !isClosedOut && <ContactTab onSubmit={handleRegisterContact} />}
     </Content>
   );

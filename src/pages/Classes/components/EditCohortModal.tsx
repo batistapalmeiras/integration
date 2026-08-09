@@ -2,16 +2,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, ModalActions, ModalTitle, TextInput } from 'bp-kit';
+import { Button, ModalActions, ModalTitle, text, TextInput } from 'bp-kit';
 import { z } from 'zod';
 // Local
+import { Form } from '../styles';
 import { Lesson } from '../types';
 
 const schema = z.object({
-  date1: z.string().min(1, 'Informe a data'),
-  date2: z.string().min(1, 'Informe a data'),
-  date3: z.string().min(1, 'Informe a data'),
-  date4: z.string().min(1, 'Informe a data'),
+  date1: z.string().min(1, text.validation.required('a data')),
+  date2: z.string().min(1, text.validation.required('a data')),
+  date3: z.string().min(1, text.validation.required('a data')),
+  date4: z.string().min(1, text.validation.required('a data')),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -45,7 +46,7 @@ export function EditCohortModal({ lessons, close, onSave }: Props) {
   return (
     <>
       <ModalTitle>Editar datas das aulas</ModalTitle>
-      <form onSubmit={submit}>
+      <Form onSubmit={submit}>
         <TextInput label="Aula 1" control={control} name="date1" type="date" />
         <TextInput label="Aula 2" control={control} name="date2" type="date" />
         <TextInput label="Aula 3" control={control} name="date3" type="date" />
@@ -59,7 +60,7 @@ export function EditCohortModal({ lessons, close, onSave }: Props) {
             {isSubmitting ? 'Salvando...' : 'Salvar'}
           </Button>
         </ModalActions>
-      </form>
+      </Form>
     </>
   );
 }

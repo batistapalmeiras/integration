@@ -2,7 +2,7 @@
 import React from 'react';
 // Libs
 import { Brand } from 'bp-kit';
-import { GraduationCap, LogOut, ShieldCheck, User, UserCircle, Users as UsersIcon } from 'lucide-react';
+import { FileBarChart, GraduationCap, LogOut, ShieldCheck, User, UserCircle, Users as UsersIcon } from 'lucide-react';
 import { Coffee as CoffeeIcon } from 'lucide-react';
 // Components
 import icon from '../../assets/icon.png';
@@ -47,6 +47,7 @@ export function Layout({ children }: ILayoutProps) {
     showCoffee,
     showClasses,
     showAdmin,
+    showReports,
   } = useLayout();
 
   const homeRoute = showVisitors
@@ -57,7 +58,7 @@ export function Layout({ children }: ILayoutProps) {
         ? AppRoute.Classes
         : AppRoute.Admin;
 
-  const visibleTabs = [showVisitors, showCoffee, showClasses, showAdmin].filter(Boolean).length;
+  const visibleTabs = [showVisitors, showCoffee, showClasses, showAdmin, showReports].filter(Boolean).length;
   const shouldShowBottomBar = visibleTabs > 1;
 
   return (
@@ -85,6 +86,11 @@ export function Layout({ children }: ILayoutProps) {
             {showAdmin && (
               <NavLink to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
                 Admin
+              </NavLink>
+            )}
+            {showReports && (
+              <NavLink to={AppRoute.Reports} $active={isActive(AppRoute.Reports)}>
+                Relatórios
               </NavLink>
             )}
           </Nav>
@@ -147,6 +153,12 @@ export function Layout({ children }: ILayoutProps) {
             <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
               <ShieldCheck size={22} />
               <BottomTabLabel $active={isActive(AppRoute.Admin)}>Admin</BottomTabLabel>
+            </BottomTab>
+          )}
+          {showReports && (
+            <BottomTab to={AppRoute.Reports} $active={isActive(AppRoute.Reports)}>
+              <FileBarChart size={22} />
+              <BottomTabLabel $active={isActive(AppRoute.Reports)}>Relatórios</BottomTabLabel>
             </BottomTab>
           )}
         </BottomBar>

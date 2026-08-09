@@ -2,11 +2,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, TextInput } from 'bp-kit';
+import { Button, text, TextInput } from 'bp-kit';
 // Local
+import { PHONE_PLACEHOLDER } from '../../../../domain/text';
 import { CreateVisitorFormValues, createVisitorSchema } from '../../validators';
 import { Person } from '../../types';
-import { Actions } from '../styles';
+import { Actions, Form } from '../styles';
 
 interface Props {
   person: Person;
@@ -34,19 +35,39 @@ export function DetailsTab({ person, canEdit, onSave }: Props) {
   });
 
   return (
-    <form onSubmit={submit}>
-      <TextInput label="Nome" control={control} name="name" placeholder="Nome completo" disabled={!canEdit} />
-      <TextInput label="Telefone" control={control} name="phone" mask="phone" placeholder="(11) 99999-9999" disabled={!canEdit} />
+    <Form onSubmit={submit}>
+      <TextInput
+        label={text.fields.name}
+        control={control}
+        name="name"
+        placeholder={text.fields.fullName}
+        disabled={!canEdit}
+      />
+      <TextInput
+        label={text.fields.email}
+        control={control}
+        name="email"
+        type="email"
+        placeholder={text.fields.emailPlaceholder}
+        disabled={!canEdit}
+      />
+      <TextInput
+        label={text.fields.phone}
+        control={control}
+        name="phone"
+        mask="phone"
+        placeholder={PHONE_PLACEHOLDER}
+        disabled={!canEdit}
+      />
       <TextInput label="Idade" control={control} name="age" type="text" inputMode="numeric" placeholder="Idade" disabled={!canEdit} />
-      <TextInput label="E-mail" control={control} name="email" type="email" placeholder="seu@email.com" disabled={!canEdit} />
 
       {canEdit && (
         <Actions>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit" variant="primary" disabled={isSubmitting || person.status === 'archived'}>
             {isSubmitting ? 'Salvando...' : 'Salvar alterações'}
           </Button>
         </Actions>
       )}
-    </form>
+    </Form>
   );
 }

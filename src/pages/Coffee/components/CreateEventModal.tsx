@@ -2,13 +2,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, ModalActions, ModalTitle, TextInput } from 'bp-kit';
+import { Button, ModalActions, ModalTitle, text, TextInput } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { firstSundayOfMonth, formatDate } from '../domain';
 import { Hint } from '../styles';
 
-const schema = z.object({ month: z.string().min(1, 'Selecione o mês') });
+const schema = z.object({ month: z.string().min(1, text.validation.selectRequired('o mês')) });
 type FormValues = z.infer<typeof schema>;
 
 interface Props {

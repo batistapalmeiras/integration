@@ -1,7 +1,10 @@
+// React
+import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Checkbox, Empty, PageHeader, Skeleton, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Checkbox, Empty, PageHeader, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 // Local
-import { RowActions, Table, TableWrapper, Td, Th } from '../../components/Table';
+import { RowActions, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
@@ -12,6 +15,7 @@ import { CountBadge } from './styles';
 const MEMBERSHIP_THRESHOLD = 3;
 
 export function ClassesPage() {
+  const navigate = useNavigate();
   const { user } = useAuthCtx();
   const {
     cohort,
@@ -52,7 +56,7 @@ export function ClassesPage() {
 
       {loading && <Skeleton $h="240px" />}
 
-      {!loading && error && <Empty title="Erro ao carregar" description={error} />}
+      {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
 
       {!loading && !error && !cohort && (
         <Empty
@@ -70,12 +74,12 @@ export function ClassesPage() {
           <Table>
             <thead>
               <tr>
-                <Th>Nome</Th>
+                <Th>{text.fields.name}</Th>
                 {lessons.map((lesson) => (
                   <Th key={lesson.id}>{`Aula ${lesson.number} (${formatDate(lesson.date)})`}</Th>
                 ))}
                 <Th>Presenças</Th>
-                {isAdmin && <Th>Ações</Th>}
+                {isAdmin && <Th>{text.actions.actionsColumn}</Th>}
               </tr>
             </thead>
             <tbody>
@@ -84,10 +88,10 @@ export function ClassesPage() {
                 const alreadyPromoted = row.person.status !== 'integration';
 
                 return (
-                  <tr key={row.id}>
-                    <Td data-label="Nome">{row.person.name}</Td>
+                  <Tr key={row.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${row.person.id}`)}>
+                    <Td>{row.person.name}</Td>
                     {lessons.map((lesson) => (
-                      <Td key={lesson.id} data-label={`Aula ${lesson.number}`}>
+                      <Td key={lesson.id} onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={row.attendanceByLesson[lesson.id]?.attended ?? false}
                           disabled={!canRecordAttendance}
@@ -95,11 +99,11 @@ export function ClassesPage() {
                         />
                       </Td>
                     ))}
-                    <Td data-label="Presenças">
+                    <Td>
                       <CountBadge $eligible={eligible}>{row.attendedCount}/{lessons.length}</CountBadge>
                     </Td>
                     {isAdmin && (
-                      <Td data-label="Ações">
+                      <Td onClick={(e) => e.stopPropagation()}>
                         {eligible && !alreadyPromoted && (
                           <RowActions>
                             <Button size="sm" variant="secondary" onClick={() => promoteToMembershipPending(row)}>
@@ -109,7 +113,7 @@ export function ClassesPage() {
                         )}
                       </Td>
                     )}
-                  </tr>
+                  </Tr>
                 );
               })}
             </tbody>

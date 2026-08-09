@@ -149,9 +149,7 @@ create table public.coffee_attendance (
   id                  uuid primary key default gen_random_uuid(),
   person_id           uuid not null references public.people (id) on delete cascade,
   coffee_event_id     uuid not null references public.coffee_events (id) on delete cascade,
-  confirmed           boolean not null default false,
   attended            boolean not null default false,
-  presented_by_pastor boolean not null default false,
   unique (person_id, coffee_event_id)
 );
 

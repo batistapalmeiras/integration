@@ -5,5 +5,6 @@ export enum AppRoute {
   Coffee = '/cafe-de-boas-vindas',
   Classes = '/turma',
   Admin = '/admin',
+  Reports = '/relatorios',
   Profile = '/perfil',
 }
