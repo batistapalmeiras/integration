@@ -7,4 +7,5 @@ export enum AppRoute {
   Admin = '/admin',
   Reports = '/relatorios',
   Profile = '/perfil',
+  IntegrationSignup = '/integracao/inscricao',
 }

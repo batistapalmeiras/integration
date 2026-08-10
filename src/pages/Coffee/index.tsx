@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, PageHeader, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
 // Local
 import { RowActions, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
@@ -13,8 +13,7 @@ import { useCoffee } from './hooks';
 export function CoffeePage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { event, attendees, activeCohort, loading, error, createEvent, markAttended, markNotAttended, inviteToClasses } =
-    useCoffee();
+  const { event, attendees, loading, error, createEvent, markAttended, markNotAttended } = useCoffee();
   const { open, close, modal } = useModal();
 
   const canPlan = user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin;
@@ -75,16 +74,7 @@ export function CoffeePage() {
                       </RowActions>
                     )}
                     {canPlan && attendance.attended && (
-                      <RowActions>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          disabled={!activeCohort}
-                          onClick={() => inviteToClasses(attendance)}
-                        >
-                          {activeCohort ? 'Convidar para Integração' : 'Nenhuma turma ativa'}
-                        </Button>
-                      </RowActions>
+                      <Typography type="caption">Aguardando inscrição</Typography>
                     )}
                   </Td>
                 </Tr>

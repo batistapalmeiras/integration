@@ -7,6 +7,7 @@ import { Layout } from '../components/Layout';
 import { AdminPage } from '../pages/Admin';
 import { ClassesPage } from '../pages/Classes';
 import { CoffeePage } from '../pages/Coffee';
+import { IntegrationSignupPage } from '../pages/IntegrationSignup';
 import { LoginPage } from '../pages/Login';
 import { ProfilePage } from '../pages/Profile';
 import { ReportsPage } from '../pages/Reports';
@@ -27,6 +28,7 @@ export function AppRouter() {
       <AuthProvider client={supabase}>
         <Routes>
           <Route path={AppRoute.Login} element={<LoginPage />} />
+          <Route path={AppRoute.IntegrationSignup} element={<IntegrationSignupPage />} />
 
           <Route
             path="/*"

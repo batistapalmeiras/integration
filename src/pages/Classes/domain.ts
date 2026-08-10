@@ -1,7 +1,4 @@
-export function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-');
-  return `${day}/${month}/${year}`;
-}
+export { formatDate } from '../../domain/dates';
 
 export function isSunday(dateStr: string): boolean {
   const [year, month, day] = dateStr.split('-').map(Number);

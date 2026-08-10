@@ -16,8 +16,3 @@ export interface CoffeeAttendance {
 export interface AttendeeRow extends CoffeeAttendance {
   person: Pick<Person, 'id' | 'name' | 'phone' | 'status'>;
 }
-
-export interface ActiveCohort {
-  id: string;
-  name: string;
-}

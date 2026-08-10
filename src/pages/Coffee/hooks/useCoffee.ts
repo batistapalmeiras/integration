@@ -5,22 +5,18 @@ import { useAuthCtx } from 'bp-kit';
 // Local
 import { findOrCreateCoffeeEvent } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
-import { ActiveCohort, AttendeeRow, CoffeeEvent } from '../types';
+import { AttendeeRow, CoffeeEvent } from '../types';
 
 export function useCoffee() {
   const { user } = useAuthCtx();
   const [event, setEvent] = useState<CoffeeEvent | null>(null);
   const [attendees, setAttendees] = useState<AttendeeRow[]>([]);
-  const [activeCohort, setActiveCohort] = useState<ActiveCohort | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-
-    const { data: cohortData } = await supabase.from('cohorts').select('id,name').eq('status', 'active').maybeSingle();
-    setActiveCohort((cohortData as ActiveCohort | null) ?? null);
 
     const { data: events, error: eventsError } = await supabase
       .from('coffee_events')
@@ -104,46 +100,14 @@ export function useCoffee() {
     await load();
   };
 
-  // Enrolls a café attendee into a cohort and advances their status — shared
-  // by the auto-enroll-on-attendance path and the manual fallback button for
-  // people who attended before a cohort was open.
-  const enrollInCohort = async (attendance: AttendeeRow, cohort: ActiveCohort) => {
-    const { error: enrollError } = await supabase.from('enrollments').insert({
-      person_id: attendance.person.id,
-      cohort_id: cohort.id,
-    });
-    if (enrollError) throw enrollError;
-
-    const { error: statusError } = await supabase
-      .from('people')
-      .update({ status: 'integration', updated_at: new Date().toISOString() })
-      .eq('id', attendance.person.id);
-    if (statusError) throw statusError;
-
-    await supabase.from('status_history').insert({
-      person_id: attendance.person.id,
-      from_status: 'welcome_coffee',
-      to_status: 'integration',
-      changed_by: user?.id,
-      note: `Convidado para a turma "${cohort.name}"`,
-    });
-
-    await load();
-  };
-
+  // Marking attendance no longer enrolls the person in a cohort — that only
+  // happens once they submit the public "Inscrição na Integração" form
+  // (submit_integration_signup), so staff has nothing left to do here beyond
+  // recording who showed up.
   const markAttended = async (attendance: AttendeeRow) => {
     const { error: updateError } = await supabase.from('coffee_attendance').update({ attended: true }).eq('id', attendance.id);
     if (updateError) throw updateError;
-
-    // If there's an open cohort right now, attending the café already
-    // enrolls the person — no separate manual "invite" click needed. If
-    // there isn't one yet, they stay visible with a manual invite option
-    // for whenever a cohort opens (see inviteToClasses below).
-    if (activeCohort) {
-      await enrollInCohort(attendance, activeCohort);
-    } else {
-      await load();
-    }
+    await load();
   };
 
   const markNotAttended = async (attendance: AttendeeRow) => {
@@ -164,20 +128,13 @@ export function useCoffee() {
     await load();
   };
 
-  const inviteToClasses = async (attendance: AttendeeRow) => {
-    if (!activeCohort) return;
-    await enrollInCohort(attendance, activeCohort);
-  };
-
   return {
     event,
     attendees,
-    activeCohort,
     loading,
     error,
     createEvent,
     markAttended,
     markNotAttended,
-    inviteToClasses,
   };
 }

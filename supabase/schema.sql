@@ -56,7 +56,14 @@ create table public.people (
     'initial_contact', 'retry_contact', 'welcome_coffee', 'integration',
     'membership_pending', 'member', 'archived'
   )),
-  notes         text,
+  notes                  text,
+  -- Filled in by the person themselves via the public "Inscrição na
+  -- Integração" form (see submit_integration_signup below), not by staff.
+  attending_since        text,
+  previous_church        text,
+  baptism_info           text,
+  conversion_testimony   text,
+  marital_status_story   text,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
@@ -268,3 +275,151 @@ select
 from public.enrollments e
 left join public.lesson_attendance la on la.enrollment_id = e.id
 group by e.id, e.person_id, e.cohort_id;
+
+-- -----------------------------------------------------------------------------
+-- Public "Inscrição na Integração" flow (sent via WhatsApp after the welcome
+-- coffee) — the ONLY things an unauthenticated visitor can do in this schema.
+-- Three steps in the UI, three narrow entry points below:
+--   1. intro screen           -> get_active_cohort_schedule()
+--   2. phone check            -> check_welcome_coffee_phone()
+--   3. full form submission   -> submit_integration_signup()
+--
+-- SECURITY DEFINER throughout: no RLS policy on people/cohorts/enrollments/
+-- status_history ever grants anon direct access — anon can only ever call
+-- these functions. find_welcome_coffee_person is the shared phone-lookup
+-- used by steps 2 and 3; it has no grant to anon, so it's only reachable
+-- through the two functions below that do grant to anon.
+-- -----------------------------------------------------------------------------
+create or replace function public.find_welcome_coffee_person(p_phone text)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_match_count int;
+  v_person_id   uuid;
+begin
+  select count(*) into v_match_count
+    from public.people
+    where phone = p_phone and status = 'welcome_coffee';
+
+  if v_match_count = 0 then
+    raise exception 'Não encontramos seu cadastro com esse telefone. Fale com a Equipe de Integração.';
+  end if;
+
+  if v_match_count > 1 then
+    raise exception 'Encontramos mais de um cadastro com esse telefone. Fale com a Equipe de Integração.';
+  end if;
+
+  select id into v_person_id
+    from public.people
+    where phone = p_phone and status = 'welcome_coffee'
+    limit 1;
+
+  return v_person_id;
+end;
+$$;
+
+create or replace function public.get_active_cohort_schedule()
+returns table (cohort_name text, lesson_dates date[])
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_cohort_id   uuid;
+  v_cohort_name text;
+  v_lesson_dates date[];
+begin
+  select id, name into v_cohort_id, v_cohort_name
+    from public.cohorts
+    where status = 'active';
+
+  -- No active cohort: return zero rows: the intro screen just skips the
+  -- schedule block instead of erroring on a purely informational step.
+  if v_cohort_id is null then
+    return;
+  end if;
+
+  select array_agg(l.date order by l.number) into v_lesson_dates
+    from public.lessons l
+    where l.cohort_id = v_cohort_id;
+
+  return query select v_cohort_name, v_lesson_dates;
+end;
+$$;
+
+grant execute on function public.get_active_cohort_schedule() to anon;
+
+create or replace function public.check_welcome_coffee_phone(p_phone text)
+returns table (person_name text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_person_id uuid;
+begin
+  v_person_id := public.find_welcome_coffee_person(p_phone);
+  return query select name from public.people where id = v_person_id;
+end;
+$$;
+
+grant execute on function public.check_welcome_coffee_phone(text) to anon;
+
+create or replace function public.submit_integration_signup(
+  p_phone                text,
+  p_attending_since      text,
+  p_previous_church      text,
+  p_baptism_info         text,
+  p_conversion_testimony text,
+  p_marital_status_story text
+)
+returns table (cohort_name text, lesson_dates date[])
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_person_id   uuid;
+  v_cohort_id   uuid;
+  v_cohort_name text;
+  v_lesson_dates date[];
+begin
+  v_person_id := public.find_welcome_coffee_person(p_phone);
+
+  select id, name into v_cohort_id, v_cohort_name
+    from public.cohorts
+    where status = 'active';
+
+  if v_cohort_id is null then
+    raise exception 'Não há turma ativa no momento. Fale com a Equipe de Integração.';
+  end if;
+
+  update public.people
+    set attending_since = p_attending_since,
+        previous_church = p_previous_church,
+        baptism_info = p_baptism_info,
+        conversion_testimony = p_conversion_testimony,
+        marital_status_story = p_marital_status_story,
+        status = 'integration',
+        updated_at = now()
+    where id = v_person_id;
+
+  insert into public.enrollments (person_id, cohort_id)
+    values (v_person_id, v_cohort_id)
+    on conflict (person_id, cohort_id) do nothing;
+
+  insert into public.status_history (person_id, from_status, to_status, note)
+    values (v_person_id, 'welcome_coffee', 'integration', 'Inscrição via formulário público');
+
+  select array_agg(l.date order by l.number) into v_lesson_dates
+    from public.lessons l
+    where l.cohort_id = v_cohort_id;
+
+  return query select v_cohort_name, v_lesson_dates;
+end;
+$$;
+
+grant execute on function public.submit_integration_signup(text, text, text, text, text, text) to anon;
