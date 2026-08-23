@@ -1,16 +1,18 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Empty, Pagination, RawSelect, SearchInput, Skeleton, text } from 'bp-kit';
+import { Button, Empty, Pagination, SearchInput, Skeleton, text, useModal } from 'bp-kit';
+import { SlidersHorizontal } from 'lucide-react';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
 import { AppRoute } from '../../../routes/paths';
-import { STATUS_META } from '../../../types/person';
 import { usePeopleReport } from '../hooks';
-import { FiltersRow, HideOnMobile, NameCell, NameSubtitle, PlainTable, PlainTableWrap } from '../styles';
+import { FiltersButtonRow, PlainTable, PlainTableWrap, SearchRow } from '../styles';
+import { PeopleFiltersModal } from './PeopleFiltersModal';
 
 export function PeopleSection() {
   const navigate = useNavigate();
+  const { open, close, modal } = useModal();
   const {
     people,
     cohortNames,
@@ -28,36 +30,37 @@ export function PeopleSection() {
     hasFilter,
   } = usePeopleReport();
 
+  const activeFilterCount = (statusFilter !== 'all' ? 1 : 0) + (cohortFilter !== 'all' ? 1 : 0);
+
+  const openFilters = () =>
+    open(
+      <PeopleFiltersModal
+        close={close}
+        statusFilter={statusFilter}
+        cohortFilter={cohortFilter}
+        cohortNames={cohortNames}
+        onApply={(status, cohort) => {
+          setStatusFilter(status);
+          setCohortFilter(cohort);
+        }}
+      />,
+    );
+
   if (loading) return <Skeleton $h="240px" />;
   if (error) return <Empty title={text.feedback.loadError} description={error} />;
 
   return (
     <div>
-      <FiltersRow>
-        <RawSelect
-          label={text.fields.status}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-        >
-          <option value="all">Todos</option>
-          {Object.entries(STATUS_META).map(([value, meta]) => (
-            <option key={value} value={value}>
-              {meta.label}
-            </option>
-          ))}
-        </RawSelect>
+      <FiltersButtonRow>
+        <Button variant="secondary" onClick={openFilters}>
+          <SlidersHorizontal size={16} />
+          Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+        </Button>
+      </FiltersButtonRow>
 
-        <RawSelect label="Turma" value={cohortFilter} onChange={(e) => setCohortFilter(e.target.value)}>
-          <option value="all">Todas</option>
-          {cohortNames.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </RawSelect>
-      </FiltersRow>
-
-      <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+      <SearchRow>
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+      </SearchRow>
 
       {people.length === 0 ? (
         <Empty
@@ -72,22 +75,15 @@ export function PeopleSection() {
                 <tr>
                   <th>{text.fields.name}</th>
                   <th>{text.fields.status}</th>
-                  <HideOnMobile>Turma</HideOnMobile>
                 </tr>
               </thead>
               <tbody>
                 {people.map((person) => (
                   <tr key={person.id} onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
-                    <td>
-                      <NameCell>
-                        {person.name}
-                        <NameSubtitle>{person.cohortNames || '—'}</NameSubtitle>
-                      </NameCell>
-                    </td>
+                    <td>{person.name}</td>
                     <td>
                       <StatusPill status={person.status} />
                     </td>
-                    <HideOnMobile as="td">{person.cohortNames || '—'}</HideOnMobile>
                   </tr>
                 ))}
               </tbody>
@@ -97,6 +93,8 @@ export function PeopleSection() {
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
+
+      {modal}
     </div>
   );
 }

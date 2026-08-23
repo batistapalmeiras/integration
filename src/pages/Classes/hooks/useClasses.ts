@@ -126,6 +126,13 @@ export function useClasses() {
     await load();
   };
 
+  const closeCohort = async () => {
+    if (!cohort) return;
+    const { error: closeError } = await supabase.from('cohorts').update({ status: 'closed' }).eq('id', cohort.id);
+    if (closeError) throw closeError;
+    await load();
+  };
+
   return {
     cohort,
     lessons,
@@ -134,5 +141,6 @@ export function useClasses() {
     error,
     createCohort,
     updateLessonDates,
+    closeCohort,
   };
 }

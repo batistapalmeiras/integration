@@ -190,20 +190,22 @@ export const BottomTabLabel = styled.span<{ $active: boolean }>`
   letter-spacing: 0.2px;
 `;
 
-export const Main = styled.main`
+export const Main = styled.main<{ $hasBottomBar: boolean }>`
   min-height: calc(100vh - 64px);
   background: ${({ theme }) => theme.colors.canvas};
 
-  @media (max-width: 744px) { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+  @media (max-width: 744px) {
+    padding-bottom: ${({ $hasBottomBar }) => ($hasBottomBar ? 'calc(56px + env(safe-area-inset-bottom))' : '0')};
+  }
 `;
 
 export const MainInner = styled.div`
   max-width: 1280px;
   margin: 0 auto;
-  padding: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.xl} ${({ theme }) => theme.spacing.xl};
   animation: ${fadeUp} 0.25s ease;
 
   @media (max-width: 744px) {
-    padding: ${({ theme }) => theme.spacing.lg} ${({ theme }) => theme.spacing.base};
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.lg};
   }
 `;

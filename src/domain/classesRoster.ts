@@ -30,6 +30,25 @@ export async function getActiveCohortWithLessons(): Promise<{ cohort: ActiveCoho
   return { cohort: cohort as ActiveCohort, lessons: (lessons ?? []) as CohortLesson[] };
 }
 
+export async function hasActiveCohort(): Promise<boolean> {
+  const { data, error } = await supabase.from('cohorts').select('id').eq('status', 'active').maybeSingle();
+  if (error) throw error;
+  return !!data;
+}
+
+// The turma this person is/was enrolled in, for display on their profile —
+// independent of whether that cohort is still active.
+export async function getPersonCohortName(personId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('enrollments')
+    .select('cohort:cohorts(name)')
+    .eq('person_id', personId);
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as { cohort: { name: string } }[];
+  return rows[0]?.cohort.name ?? null;
+}
+
 export async function getPersonEnrollmentId(personId: string, cohortId: string): Promise<string | null> {
   const { data, error } = await supabase
     .from('enrollments')

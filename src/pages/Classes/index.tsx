@@ -16,13 +16,15 @@ const MEMBERSHIP_THRESHOLD = 4;
 export function ClassesPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { cohort, lessons, enrollments, loading, error, createCohort, updateLessonDates } = useClasses();
+  const { cohort, lessons, enrollments, loading, error, createCohort, updateLessonDates, closeCohort } = useClasses();
   const { open, close, modal } = useModal();
 
-  const canManageCohort = user?.role === UserRole.Admin || user?.role === UserRole.Teacher;
+  const isAdmin = user?.role === UserRole.Admin;
+  const canManageCohort = isAdmin || user?.role === UserRole.Teacher;
 
   const openCreateModal = () => open(<CreateCohortModal close={close} onCreate={createCohort} />);
-  const openEditModal = () => open(<EditCohortModal lessons={lessons} close={close} onSave={updateLessonDates} />);
+  const openEditModal = () =>
+    open(<EditCohortModal lessons={lessons} close={close} onSave={updateLessonDates} onCloseCohort={closeCohort} />);
 
   return (
     <div>

@@ -1,10 +1,8 @@
 // Libs
 import styled from 'styled-components';
+import { Form as BaseForm } from 'bp-kit';
 
-export const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
+export const Form = styled(BaseForm)`
   max-width: 420px;
 `;
 

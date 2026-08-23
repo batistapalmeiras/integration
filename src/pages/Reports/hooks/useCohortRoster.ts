@@ -81,5 +81,12 @@ export function useCohortRoster(cohortId: string) {
     load();
   }, [load]);
 
-  return { cohort, roster, loading, error };
+  const closeCohort = async () => {
+    if (!cohort) return;
+    const { error: closeError } = await supabase.from('cohorts').update({ status: 'closed' }).eq('id', cohort.id);
+    if (closeError) throw closeError;
+    await load();
+  };
+
+  return { cohort, roster, loading, error, closeCohort };
 }

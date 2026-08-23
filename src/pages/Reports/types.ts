@@ -21,8 +21,9 @@ export interface PersonReportRow {
   id: string;
   name: string;
   status: PersonStatus;
-  cohortNames: string;
 }
+
+export type StatusCounts = Partial<Record<PersonStatus, number>>;
 
 export interface AnnualCounts {
   initialContact: number;

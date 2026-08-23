@@ -6,6 +6,7 @@ import { useAuthCtx } from 'bp-kit';
 import {
   attachToNextWelcomeCoffee,
   getCoffeeAttendanceForPerson,
+  getPersonAttendedCoffeeDate,
   hasUpcomingCoffeeEvent,
   markClassInviteDeclined,
   markClassInviteNoResponse,
@@ -18,7 +19,9 @@ import {
   getActiveCohortWithLessons,
   getLessonAttendanceMap,
   getMakeupLink,
+  getPersonCohortName,
   getPersonEnrollmentId,
+  hasActiveCohort,
   promoteToMembershipPending as promoteToMembershipPendingRequest,
   toggleLessonAttendance,
 } from '../../../../domain/classesRoster';
@@ -47,8 +50,11 @@ export function useVisitorDetail(id: string) {
   const [coffeeAttendance, setCoffeeAttendance] = useState<CoffeeAttendance | null>(null);
   const [coffeeLoading, setCoffeeLoading] = useState(false);
   const [hasCoffeeEvent, setHasCoffeeEvent] = useState<boolean | null>(null);
+  const [hasCohort, setHasCohort] = useState<boolean | null>(null);
   const [integrationClass, setIntegrationClass] = useState<IntegrationClassState | null>(null);
   const [integrationLoading, setIntegrationLoading] = useState(false);
+  const [profileCoffeeDate, setProfileCoffeeDate] = useState<string | null>(null);
+  const [profileCohortName, setProfileCohortName] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -62,6 +68,13 @@ export function useVisitorDetail(id: string) {
     load();
   }, [load]);
 
+  // Historical, independent of the person's current pipeline stage — shown
+  // on the profile card regardless of whether they're still at that step.
+  useEffect(() => {
+    getPersonAttendedCoffeeDate(id).then(setProfileCoffeeDate);
+    getPersonCohortName(id).then(setProfileCohortName);
+  }, [id]);
+
   const loadCoffeeAttendance = useCallback(async () => {
     setCoffeeLoading(true);
     const attendance = await getCoffeeAttendanceForPerson(id);
@@ -70,7 +83,10 @@ export function useVisitorDetail(id: string) {
   }, [id]);
 
   useEffect(() => {
-    if (person?.status === 'welcome_coffee') loadCoffeeAttendance();
+    if (person?.status === 'welcome_coffee') {
+      loadCoffeeAttendance();
+      hasActiveCohort().then(setHasCohort);
+    }
   }, [person?.status, loadCoffeeAttendance]);
 
   useEffect(() => {
@@ -219,6 +235,23 @@ export function useVisitorDetail(id: string) {
     await load();
   };
 
+  const confirmMember = async (smallGroup: string, ministry: string) => {
+    const { error: updateError } = await supabase
+      .from('people')
+      .update({ status: 'member', small_group: smallGroup, ministry, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (updateError) throw updateError;
+
+    await supabase.from('status_history').insert({
+      person_id: id,
+      from_status: 'membership_pending',
+      to_status: 'member',
+      changed_by: user?.id,
+    });
+
+    await load();
+  };
+
   return {
     person,
     loading,
@@ -229,6 +262,7 @@ export function useVisitorDetail(id: string) {
     archive,
     reactivate,
     hasCoffeeEvent,
+    hasCohort,
     coffeeAttendance,
     coffeeLoading,
     markAttended,
@@ -240,5 +274,8 @@ export function useVisitorDetail(id: string) {
     toggleClassAttendance,
     getClassMakeupLink,
     promoteToMembershipPending,
+    confirmMember,
+    profileCoffeeDate,
+    profileCohortName,
   };
 }

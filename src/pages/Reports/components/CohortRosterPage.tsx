@@ -1,7 +1,7 @@
 // React
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Empty, PageHeader, Skeleton, text } from 'bp-kit';
+import { Button, Empty, PageHeader, Skeleton, text } from 'bp-kit';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
 import { AppRoute } from '../../../routes/paths';
@@ -11,14 +11,25 @@ import { CountBadge, HideOnMobile, NameCell, NameSubtitle, PlainTable, PlainTabl
 export function CohortRosterPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cohort, roster, loading, error } = useCohortRoster(id ?? '');
+  const { cohort, roster, loading, error, closeCohort } = useCohortRoster(id ?? '');
 
   if (loading) return <Skeleton $h="320px" />;
   if (error || !cohort) return <Empty title="Turma não encontrada" description={error ?? ''} />;
 
   return (
     <div>
-      <PageHeader title={cohort.name} subtitle={cohort.status === 'active' ? 'Turma ativa' : 'Turma encerrada'} back />
+      <PageHeader
+        title={cohort.name}
+        subtitle={cohort.status === 'active' ? 'Turma ativa' : 'Turma encerrada'}
+        back
+        action={
+          cohort.status === 'active' ? (
+            <Button variant="secondary" onClick={closeCohort}>
+              Encerrar turma
+            </Button>
+          ) : undefined
+        }
+      />
 
       {roster.length === 0 ? (
         <Empty title="Ninguém matriculado" description="Essa turma não teve matrículas." />
