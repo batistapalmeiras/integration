@@ -61,6 +61,11 @@ export async function createOrUpdateCoffeeEvent(eventDate: string): Promise<stri
   return insertCoffeeEvent(eventDate);
 }
 
+export async function hasUpcomingCoffeeEvent(): Promise<boolean> {
+  const future = await findFutureCoffeeEvent();
+  return !!future;
+}
+
 export async function attachToNextWelcomeCoffee(personId: string): Promise<void> {
   const future = await findFutureCoffeeEvent();
   const eventId = future ? future.id : await insertCoffeeEvent(nextWelcomeCoffeeDate());

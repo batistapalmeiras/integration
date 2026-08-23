@@ -69,6 +69,11 @@ create table public.people (
   -- that point, not before.
   small_group            text,
   ministry                text,
+  -- Set the first time staff opens the WhatsApp compose box for this
+  -- person's current contact stage — persisted so the "Resultado" form
+  -- stays visible on a later visit instead of hiding again until they
+  -- click "Abrir WhatsApp" a second time.
+  whatsapp_opened_at     timestamptz,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );

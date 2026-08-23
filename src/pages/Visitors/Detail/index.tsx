@@ -12,6 +12,7 @@ import { PersonCard } from './components/PersonCard';
 import { ProgressStepper } from './components/ProgressStepper';
 import { useVisitorDetail } from './hooks';
 import { Content, Hint } from './styles';
+import { ContactAttemptFormValues } from '../validators';
 
 const STAGE_HINTS: Partial<Record<string, string>> = {
   membership_pending: 'Aguardando confirmação do Pastor na tela de Admin.',
@@ -27,6 +28,8 @@ export function VisitorDetailPage() {
     loading,
     error,
     registerContactAttempt,
+    markWhatsAppOpened,
+    hasCoffeeEvent,
     coffeeAttendance,
     coffeeLoading,
     markAttended,
@@ -47,6 +50,11 @@ export function VisitorDetailPage() {
   if (loading) return <Skeleton $h="320px" />;
   if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
 
+  const handleRegisterContact = async (values: ContactAttemptFormValues) => {
+    await registerContactAttempt(values);
+    navigate(AppRoute.Visitors);
+  };
+
   return (
     <Content>
       <PageHeader title={person.name} subtitle="Visitante" back />
@@ -56,7 +64,12 @@ export function VisitorDetailPage() {
       <PersonCard person={person} onClick={() => navigate(`${AppRoute.Visitors}/${id}/editar`)} />
 
       {canManage && (person.status === 'initial_contact' || person.status === 'retry_contact') && (
-        <ContactStagePanel person={person} onRegisterContact={registerContactAttempt} />
+        <ContactStagePanel
+          person={person}
+          hasCoffeeEvent={hasCoffeeEvent}
+          onRegisterContact={handleRegisterContact}
+          onWhatsAppOpened={markWhatsAppOpened}
+        />
       )}
 
       {canManage && person.status === 'welcome_coffee' && (

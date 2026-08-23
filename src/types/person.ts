@@ -19,6 +19,7 @@ export interface Person {
   email: string | null;
   status: PersonStatus;
   notes: string | null;
+  whatsapp_opened_at: string | null;
   created_at: string;
   updated_at: string;
 }
