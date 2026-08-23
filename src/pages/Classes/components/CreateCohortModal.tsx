@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, ModalActions, ModalTitle, text, TextInput } from 'bp-kit';
+import { Button, DatePicker, ModalActions, ModalTitle, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { isSunday } from '../domain';
@@ -37,7 +37,12 @@ export function CreateCohortModal({ close, onCreate }: Props) {
     <>
       <ModalTitle>Nova turma de integração</ModalTitle>
       <form onSubmit={submit}>
-        <TextInput label="Data da 1ª aula" control={control} name="firstDate" type="date" />
+        <DatePicker
+          label="Data da 1ª aula"
+          control={control}
+          name="firstDate"
+          isDateDisabled={(date) => date.getDay() !== 0}
+        />
 
         <ModalActions>
           <Button type="button" variant="secondary" onClick={close}>

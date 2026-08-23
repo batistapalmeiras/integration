@@ -27,26 +27,43 @@ export function nextWelcomeCoffeeDate(referenceDate = new Date()): string {
   return firstSundayOfMonth(nextMonthValue);
 }
 
-export async function findOrCreateCoffeeEvent(eventDate: string): Promise<string> {
-  const { data: existing, error: findError } = await supabase
+// Only one upcoming café can exist at a time — this is the single source of
+// truth for "the" café that every entry point below shares, so creating or
+// attaching never accidentally produces a second future event.
+async function findFutureCoffeeEvent(): Promise<{ id: string; event_date: string } | null> {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const { data, error } = await supabase
     .from('coffee_events')
-    .select('id')
-    .eq('event_date', eventDate)
+    .select('id, event_date')
+    .gte('event_date', todayKey)
+    .order('event_date', { ascending: true })
+    .limit(1)
     .maybeSingle();
-  if (findError) throw findError;
-  if (existing) return existing.id as string;
+  if (error) throw error;
+  return data;
+}
 
-  const { data: created, error: createError } = await supabase
-    .from('coffee_events')
-    .insert({ event_date: eventDate })
-    .select('id')
-    .single();
-  if (createError) throw createError;
-  return created.id as string;
+async function insertCoffeeEvent(eventDate: string): Promise<string> {
+  const { data, error } = await supabase.from('coffee_events').insert({ event_date: eventDate }).select('id').single();
+  if (error) throw error;
+  return data.id as string;
+}
+
+// Used by the Coffee page's "Novo café"/"Editar café" action: reschedules
+// the existing upcoming café if there is one, otherwise creates it.
+export async function createOrUpdateCoffeeEvent(eventDate: string): Promise<string> {
+  const future = await findFutureCoffeeEvent();
+  if (future) {
+    const { error } = await supabase.from('coffee_events').update({ event_date: eventDate }).eq('id', future.id);
+    if (error) throw error;
+    return future.id;
+  }
+  return insertCoffeeEvent(eventDate);
 }
 
 export async function attachToNextWelcomeCoffee(personId: string): Promise<void> {
-  const eventId = await findOrCreateCoffeeEvent(nextWelcomeCoffeeDate());
+  const future = await findFutureCoffeeEvent();
+  const eventId = future ? future.id : await insertCoffeeEvent(nextWelcomeCoffeeDate());
   const { error } = await supabase
     .from('coffee_attendance')
     .upsert({ person_id: personId, coffee_event_id: eventId }, { onConflict: 'person_id,coffee_event_id' });

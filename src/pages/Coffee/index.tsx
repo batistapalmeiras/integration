@@ -17,15 +17,24 @@ export function CoffeePage() {
   const { open, close, modal } = useModal();
 
   const canPlan = user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin;
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const hasUpcomingEvent = !!event && event.event_date >= todayKey;
 
-  const openCreateModal = () => open(<CreateEventModal close={close} onCreate={createEvent} />);
+  const openCreateModal = () =>
+    open(
+      <CreateEventModal
+        close={close}
+        onCreate={createEvent}
+        initialMonth={hasUpcomingEvent ? event!.event_date.slice(0, 7) : undefined}
+      />,
+    );
 
   return (
     <div>
       <PageHeader
         title="Café de Boas-vindas"
         subtitle={event ? `${formatDate(event.event_date)} às ${event.event_time.slice(0, 5)}` : 'Nenhum café agendado'}
-        action={canPlan ? <Button onClick={openCreateModal}>Novo café</Button> : undefined}
+        action={canPlan ? <Button onClick={openCreateModal}>{hasUpcomingEvent ? 'Editar café' : 'Novo café'}</Button> : undefined}
       />
 
       {loading && <Skeleton $h="240px" />}

@@ -5,9 +5,11 @@ import { useParams } from 'react-router-dom';
 // Libs
 import { Button, Checkbox, InfoBox, Skeleton, Textarea, Typography } from 'bp-kit';
 // Local
+import { getMakeupVideoId } from '../../domain/makeupVideos';
 import { ErrorMsg, Form } from '../../components/PublicPage/styles';
 import { PublicPage } from '../../components/PublicPage';
 import { useMakeupAttendance } from './hooks/useMakeupAttendance';
+import { VideoWrapper } from './styles';
 import { makeupAttendanceSchema, MakeupAttendanceFormValues } from './validators/schema';
 
 export function MakeupAttendancePage() {
@@ -38,9 +40,20 @@ export function MakeupAttendancePage() {
       {!loading && context && !confirmed && !context.already_confirmed && (
         <Form onSubmit={onSubmit}>
           <Typography type="p">
-            Olá, {context.person_name}! Confirme abaixo que você assistiu a{' '}
-            <strong>Aula {context.lesson_number}</strong> da {context.cohort_name}.
+            Olá, {context.person_name}! Assista abaixo à <strong>Aula {context.lesson_number}</strong> da{' '}
+            {context.cohort_name} e confirme ao final.
           </Typography>
+
+          {getMakeupVideoId(context.lesson_number) && (
+            <VideoWrapper>
+              <iframe
+                src={`https://www.youtube.com/embed/${getMakeupVideoId(context.lesson_number)}`}
+                title={`Aula ${context.lesson_number}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </VideoWrapper>
+          )}
 
           <Controller
             control={control}

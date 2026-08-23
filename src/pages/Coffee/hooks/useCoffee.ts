@@ -1,7 +1,7 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
 // Local
-import { findOrCreateCoffeeEvent } from '../../../domain/cafeSchedule';
+import { createOrUpdateCoffeeEvent } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
@@ -93,7 +93,7 @@ export function useCoffee() {
   }, [load]);
 
   const createEvent = async (eventDate: string) => {
-    await findOrCreateCoffeeEvent(eventDate);
+    await createOrUpdateCoffeeEvent(eventDate);
     await load();
   };
 

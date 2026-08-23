@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, ModalActions, ModalTitle, text, TextInput } from 'bp-kit';
+import { Button, ModalActions, ModalTitle, MonthPicker, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { firstSundayOfMonth, formatDate } from '../domain';
@@ -14,15 +14,16 @@ type FormValues = z.infer<typeof schema>;
 interface Props {
   close: () => void;
   onCreate: (eventDate: string) => Promise<void>;
+  initialMonth?: string;
 }
 
-export function CreateEventModal({ close, onCreate }: Props) {
+export function CreateEventModal({ close, onCreate, initialMonth }: Props) {
   const {
     control,
     watch,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { month: initialMonth } });
 
   const month = watch('month');
   const previewDate = month ? firstSundayOfMonth(month) : null;
@@ -34,9 +35,9 @@ export function CreateEventModal({ close, onCreate }: Props) {
 
   return (
     <>
-      <ModalTitle>Novo café de boas-vindas</ModalTitle>
+      <ModalTitle>{initialMonth ? 'Editar café de boas-vindas' : 'Novo café de boas-vindas'}</ModalTitle>
       <form onSubmit={submit}>
-        <TextInput label="Mês" control={control} name="month" type="month" />
+        <MonthPicker label="Mês" control={control} name="month" />
         {previewDate && <Hint>Agendado para {formatDate(previewDate)}, 17h30 — 1º domingo do mês.</Hint>}
 
         <ModalActions>
@@ -44,7 +45,7 @@ export function CreateEventModal({ close, onCreate }: Props) {
             Cancelar
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Criar'}
+            {isSubmitting ? 'Salvando...' : initialMonth ? 'Salvar' : 'Criar'}
           </Button>
         </ModalActions>
       </form>

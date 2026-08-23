@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, ModalActions, ModalTitle, text, TextInput } from 'bp-kit';
+import { Button, DatePicker, ModalActions, ModalTitle, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { Form } from '../styles';
@@ -47,10 +47,10 @@ export function EditCohortModal({ lessons, close, onSave }: Props) {
     <>
       <ModalTitle>Editar datas das aulas</ModalTitle>
       <Form onSubmit={submit}>
-        <TextInput label="Aula 1" control={control} name="date1" type="date" />
-        <TextInput label="Aula 2" control={control} name="date2" type="date" />
-        <TextInput label="Aula 3" control={control} name="date3" type="date" />
-        <TextInput label="Aula 4" control={control} name="date4" type="date" />
+        <DatePicker label="Aula 1" control={control} name="date1" />
+        <DatePicker label="Aula 2" control={control} name="date2" />
+        <DatePicker label="Aula 3" control={control} name="date3" />
+        <DatePicker label="Aula 4" control={control} name="date4" />
 
         <ModalActions>
           <Button type="button" variant="secondary" onClick={close}>

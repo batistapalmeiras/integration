@@ -29,10 +29,12 @@ export function useIntegrationSignup(initialResult: CohortSchedule | null = null
 
     if (rpcError) {
       setError(rpcError.message);
-      return;
+      return null;
     }
 
-    setResult(data as CohortSchedule);
+    const schedule = data as CohortSchedule;
+    setResult(schedule);
+    return schedule;
   };
 
   return { submit, submitting, error, result };

@@ -31,8 +31,8 @@ export function IntegrationSignupPage() {
 
   const handleFormSubmit = async (values: SignupFormValues) => {
     setFormValues(values);
-    await submit(phone, values);
-    setStep('confirmation');
+    const signupResult = await submit(phone, values);
+    if (signupResult) setStep('confirmation');
   };
 
   return (
