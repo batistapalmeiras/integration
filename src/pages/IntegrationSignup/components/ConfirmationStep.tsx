@@ -1,9 +1,9 @@
 // Libs
-import { Typography } from 'bp-kit';
+import { InfoBox, Typography } from 'bp-kit';
 // Local
 import { formatDate } from '../../../domain/dates';
 import { CohortSchedule } from '../types';
-import { ConfirmationList } from '../styles';
+import { ConfirmationList, StepStack } from '../styles';
 
 interface Props {
   result: CohortSchedule;
@@ -11,7 +11,7 @@ interface Props {
 
 export function ConfirmationStep({ result }: Props) {
   return (
-    <>
+    <StepStack>
       <Typography type="p">
         Inscrição confirmada na turma <strong>{result.cohort_name}</strong>! Suas aulas serão:
       </Typography>
@@ -22,10 +22,10 @@ export function ConfirmationStep({ result }: Props) {
           </li>
         ))}
       </ConfirmationList>
-      <Typography type="caption">
+      <InfoBox variant="info">
         Reforçamos que é necessário estar presente em pelo menos 3 das 4 aulas para se tornar membro. Esperamos
         você!
-      </Typography>
-    </>
+      </InfoBox>
+    </StepStack>
   );
 }

@@ -64,6 +64,11 @@ create table public.people (
   baptism_info           text,
   conversion_testimony   text,
   marital_status_story   text,
+  -- Filled in by staff on the Admin page when confirming someone as a
+  -- member (see the 'member' status transition in the app) — required at
+  -- that point, not before.
+  small_group            text,
+  ministry                text,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
@@ -78,10 +83,10 @@ create policy "people_insert_reception_team_admin"
   on public.people for insert
   with check (public.current_role() in ('reception', 'integration_team', 'admin'));
 
-create policy "people_update_team_admin"
+create policy "people_update_team_pastor_admin"
   on public.people for update
-  using (public.current_role() in ('integration_team', 'admin'))
-  with check (public.current_role() in ('integration_team', 'admin'));
+  using (public.current_role() in ('integration_team', 'pastor', 'admin'))
+  with check (public.current_role() in ('integration_team', 'pastor', 'admin'));
 
 -- -----------------------------------------------------------------------------
 -- status_history — audit trail of status transitions for a person
@@ -102,9 +107,9 @@ create policy "status_history_select_all_authenticated"
   on public.status_history for select
   using (auth.uid() is not null);
 
-create policy "status_history_insert_team_admin"
+create policy "status_history_insert_team_pastor_admin"
   on public.status_history for insert
-  with check (public.current_role() in ('integration_team', 'admin'));
+  with check (public.current_role() in ('integration_team', 'pastor', 'admin'));
 
 -- -----------------------------------------------------------------------------
 -- contact_attempts — log of each WhatsApp contact attempt (unlimited retries)
@@ -246,6 +251,10 @@ create table public.lesson_attendance (
   enrollment_id uuid not null references public.enrollments (id) on delete cascade,
   lesson_id     uuid not null references public.lessons (id) on delete cascade,
   attended      boolean not null default false,
+  -- Filled in via the public makeup-attendance form (see
+  -- submit_makeup_attendance below) when someone who missed a lesson
+  -- confirms they watched the video for it instead.
+  makeup_notes  text,
   unique (enrollment_id, lesson_id)
 );
 
@@ -423,3 +432,109 @@ end;
 $$;
 
 grant execute on function public.submit_integration_signup(text, text, text, text, text, text) to anon;
+
+-- -----------------------------------------------------------------------------
+-- Public "reposição de aula" flow — someone who missed a lesson watches a
+-- video (sent manually via WhatsApp, link built by staff on the Turma page)
+-- and confirms it here. The lesson_attendance row's own id is the bearer
+-- token: it's an unguessable gen_random_uuid() already, so no separate
+-- token column/table is needed — the link is just
+-- /turma/reposicao/{lesson_attendance.id}.
+-- -----------------------------------------------------------------------------
+create or replace function public.get_makeup_attendance_context(p_token uuid)
+returns table (person_name text, lesson_number int, cohort_name text, already_confirmed boolean)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_person_name text;
+  v_lesson_number int;
+  v_cohort_name text;
+  v_attended boolean;
+begin
+  select p.name, l.number, c.name, la.attended
+    into v_person_name, v_lesson_number, v_cohort_name, v_attended
+    from public.lesson_attendance la
+    join public.enrollments e on e.id = la.enrollment_id
+    join public.people p on p.id = e.person_id
+    join public.lessons l on l.id = la.lesson_id
+    join public.cohorts c on c.id = l.cohort_id
+    where la.id = p_token;
+
+  if v_person_name is null then
+    raise exception 'Link inválido ou expirado.';
+  end if;
+
+  return query select v_person_name, v_lesson_number, v_cohort_name, v_attended;
+end;
+$$;
+
+grant execute on function public.get_makeup_attendance_context(uuid) to anon;
+
+create or replace function public.submit_makeup_attendance(p_token uuid, p_notes text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.lesson_attendance
+    set attended = true,
+        makeup_notes = p_notes
+    where id = p_token;
+
+  if not found then
+    raise exception 'Link inválido ou expirado.';
+  end if;
+end;
+$$;
+
+grant execute on function public.submit_makeup_attendance(uuid, text) to anon;
+
+-- -----------------------------------------------------------------------------
+-- Auto-archive people who missed their welcome coffee. The coffee is a fixed
+-- monthly event (1st Sunday, 17:30) — once that Sunday has passed without
+-- attended = true, the person is archived automatically (archiving is
+-- reversible; staff can reactivate and restart contact any time). Runs daily
+-- via pg_cron rather than being tied to someone opening the app.
+-- -----------------------------------------------------------------------------
+create or replace function public.archive_missed_welcome_coffee()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_person record;
+begin
+  for v_person in
+    select distinct p.id
+    from public.people p
+    join public.coffee_attendance ca on ca.person_id = p.id
+    join public.coffee_events ce on ce.id = ca.coffee_event_id
+    where p.status = 'welcome_coffee'
+      and ca.attended = false
+      and ce.event_date < current_date
+  loop
+    update public.people
+      set status = 'archived', updated_at = now()
+      where id = v_person.id;
+
+    insert into public.status_history (person_id, from_status, to_status, note)
+      values (v_person.id, 'welcome_coffee', 'archived', 'Arquivado automaticamente — não compareceu ao café de boas-vindas');
+  end loop;
+end;
+$$;
+
+-- Requires the pg_cron extension. On Supabase this can usually be enabled
+-- right here, but if this statement errors with a permissions issue, enable
+-- "pg_cron" first via Database -> Extensions in the dashboard, then re-run
+-- just the two statements below.
+create extension if not exists pg_cron with schema extensions;
+
+select cron.schedule(
+  'archive-missed-welcome-coffee',
+  '0 6 * * *', -- daily at 06:00 UTC (03:00 America/Sao_Paulo)
+  $$ select public.archive_missed_welcome_coffee(); $$
+);

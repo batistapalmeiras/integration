@@ -5,7 +5,6 @@ export const Wrapper = styled.div`
   display: flex;
   align-items: flex-start;
   width: 100%;
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
   overflow-x: auto;
 `;
 

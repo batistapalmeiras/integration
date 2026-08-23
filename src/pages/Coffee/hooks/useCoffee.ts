@@ -1,14 +1,11 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
-// Libs
-import { useAuthCtx } from 'bp-kit';
 // Local
 import { findOrCreateCoffeeEvent } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
 export function useCoffee() {
-  const { user } = useAuthCtx();
   const [event, setEvent] = useState<CoffeeEvent | null>(null);
   const [attendees, setAttendees] = useState<AttendeeRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,41 +97,11 @@ export function useCoffee() {
     await load();
   };
 
-  // Marking attendance no longer enrolls the person in a cohort — that only
-  // happens once they submit the public "Inscrição na Integração" form
-  // (submit_integration_signup), so staff has nothing left to do here beyond
-  // recording who showed up.
-  const markAttended = async (attendance: AttendeeRow) => {
-    const { error: updateError } = await supabase.from('coffee_attendance').update({ attended: true }).eq('id', attendance.id);
-    if (updateError) throw updateError;
-    await load();
-  };
-
-  const markNotAttended = async (attendance: AttendeeRow) => {
-    const { error: statusError } = await supabase
-      .from('people')
-      .update({ status: 'archived', updated_at: new Date().toISOString() })
-      .eq('id', attendance.person.id);
-    if (statusError) throw statusError;
-
-    await supabase.from('status_history').insert({
-      person_id: attendance.person.id,
-      from_status: 'welcome_coffee',
-      to_status: 'archived',
-      changed_by: user?.id,
-      note: 'Não compareceu ao café de boas-vindas',
-    });
-
-    await load();
-  };
-
   return {
     event,
     attendees,
     loading,
     error,
     createEvent,
-    markAttended,
-    markNotAttended,
   };
 }

@@ -1,13 +1,16 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Skeleton, StatCard, StatLabel, StatsGrid, StatValue, text } from 'bp-kit';
+import { Button, Empty, PageHeader, Skeleton, StatCard, StatLabel, StatsGrid, StatValue, text, useAuthCtx, useModal } from 'bp-kit';
 // Local
 import { RowActions, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
+import { UserRole } from '../../types/enums';
 import { PersonStatus, STATUS_META } from '../../types/person';
+import { ConfirmMemberModal } from './components/ConfirmMemberModal';
 import { useAdmin } from './hooks';
 import { Hint, Section } from './styles';
+import { PendingMember } from './types';
 
 // Split so each row of cards fills the grid evenly instead of one awkward
 // 7-card wrap — the active pipeline first, then the two outcomes.
@@ -22,7 +25,13 @@ const OUTCOME_STATUSES: PersonStatus[] = ['member', 'archived'];
 
 export function AdminPage() {
   const navigate = useNavigate();
+  const { user } = useAuthCtx();
   const { counts, cohort, pendingMembers, loading, error, closeCohort, confirmMember } = useAdmin();
+  const { open, close, modal } = useModal();
+  const isAdmin = user?.role === UserRole.Admin;
+
+  const openConfirmModal = (person: PendingMember) =>
+    open(<ConfirmMemberModal person={person} close={close} onConfirm={confirmMember} />);
 
   return (
     <div>
@@ -55,7 +64,7 @@ export function AdminPage() {
             <PageHeader
               title="Turma ativa"
               subtitle={cohort ? cohort.name : 'Nenhuma turma ativa no momento'}
-              action={cohort ? <Button variant="secondary" onClick={closeCohort}>Encerrar turma</Button> : undefined}
+              action={cohort && isAdmin ? <Button variant="secondary" onClick={closeCohort}>Encerrar turma</Button> : undefined}
             />
             {!cohort && <Hint>Abra uma nova turma na tela de Turma.</Hint>}
           </Section>
@@ -79,7 +88,7 @@ export function AdminPage() {
                         <Td>{person.name}</Td>
                         <Td onClick={(e) => e.stopPropagation()}>
                           <RowActions>
-                            <Button size="sm" variant="secondary" onClick={() => confirmMember(person)}>
+                            <Button size="sm" variant="secondary" onClick={() => openConfirmModal(person)}>
                               Confirmar como membro
                             </Button>
                           </RowActions>
@@ -93,6 +102,7 @@ export function AdminPage() {
           </Section>
         </>
       )}
+      {modal}
     </div>
   );
 }

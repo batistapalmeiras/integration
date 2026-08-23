@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, PageHeader, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
 // Local
-import { RowActions, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { CreateEventModal } from './components/CreateEventModal';
@@ -13,7 +13,7 @@ import { useCoffee } from './hooks';
 export function CoffeePage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { event, attendees, loading, error, createEvent, markAttended, markNotAttended } = useCoffee();
+  const { event, attendees, loading, error, createEvent } = useCoffee();
   const { open, close, modal } = useModal();
 
   const canPlan = user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin;
@@ -50,7 +50,7 @@ export function CoffeePage() {
               <tr>
                 <Th>{text.fields.name}</Th>
                 <Th>{text.fields.phone}</Th>
-                <Th>{text.actions.actionsColumn}</Th>
+                <Th>Situação</Th>
               </tr>
             </thead>
             <tbody>
@@ -62,20 +62,10 @@ export function CoffeePage() {
                 >
                   <Td>{attendance.person.name}</Td>
                   <Td>{attendance.person.phone}</Td>
-                  <Td onClick={(e) => e.stopPropagation()}>
-                    {canPlan && !attendance.attended && (
-                      <RowActions>
-                        <Button size="sm" variant="secondary" onClick={() => markNotAttended(attendance)}>
-                          Não compareceu
-                        </Button>
-                        <Button size="sm" variant="primary" onClick={() => markAttended(attendance)}>
-                          Compareceu
-                        </Button>
-                      </RowActions>
-                    )}
-                    {canPlan && attendance.attended && (
-                      <Typography type="caption">Aguardando inscrição</Typography>
-                    )}
+                  <Td>
+                    <Typography type="caption">
+                      {attendance.attended ? 'Compareceu — aguardando resposta ao convite' : 'Aguardando confirmação de presença'}
+                    </Typography>
                   </Td>
                 </Tr>
               ))}

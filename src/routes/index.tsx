@@ -9,12 +9,14 @@ import { ClassesPage } from '../pages/Classes';
 import { CoffeePage } from '../pages/Coffee';
 import { IntegrationSignupPage } from '../pages/IntegrationSignup';
 import { LoginPage } from '../pages/Login';
+import { MakeupAttendancePage } from '../pages/MakeupAttendance';
 import { ProfilePage } from '../pages/Profile';
 import { ReportsPage } from '../pages/Reports';
 import { CohortRosterPage } from '../pages/Reports/components/CohortRosterPage';
 import { PeopleReportPage } from '../pages/Reports/components/PeopleReportPage';
 import { VisitorsPage } from '../pages/Visitors';
 import { VisitorDetailPage } from '../pages/Visitors/Detail';
+import { VisitorEditPage } from '../pages/Visitors/Edit';
 import { NewVisitorPage } from '../pages/Visitors/New';
 // Local
 import { supabase } from '../lib/supabase';
@@ -29,6 +31,7 @@ export function AppRouter() {
         <Routes>
           <Route path={AppRoute.Login} element={<LoginPage />} />
           <Route path={AppRoute.IntegrationSignup} element={<IntegrationSignupPage />} />
+          <Route path={`${AppRoute.MakeupAttendance}/:token`} element={<MakeupAttendancePage />} />
 
           <Route
             path="/*"
@@ -69,9 +72,25 @@ export function AppRouter() {
                       }
                     />
                     <Route
+                      path={`${AppRoute.Visitors}/:id/editar`}
+                      element={
+                        <ProtectedRoute
+                          roles={[
+                            UserRole.Reception,
+                            UserRole.IntegrationTeam,
+                            UserRole.Admin,
+                            UserRole.Pastor,
+                            UserRole.Teacher,
+                          ]}
+                        >
+                          <VisitorEditPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
                       path={AppRoute.Coffee}
                       element={
-                        <ProtectedRoute roles={[UserRole.Pastor, UserRole.Admin]}>
+                        <ProtectedRoute roles={[UserRole.IntegrationTeam, UserRole.Pastor, UserRole.Admin]}>
                           <CoffeePage />
                         </ProtectedRoute>
                       }
@@ -87,7 +106,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Admin}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin]}>
+                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
                           <AdminPage />
                         </ProtectedRoute>
                       }

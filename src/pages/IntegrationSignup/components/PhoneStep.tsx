@@ -6,7 +6,7 @@ import { Button, text, TextInput, Typography } from 'bp-kit';
 // Local
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { useCheckPhone } from '../hooks/useCheckPhone';
-import { ErrorMsg, Form } from '../styles';
+import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
 import { PhoneStepFormValues, phoneStepSchema } from '../validators/schema';
 
 interface Props {

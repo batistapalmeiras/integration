@@ -1,0 +1,90 @@
+// Libs
+import { Link } from 'lucide-react';
+import { Button, Card, Checkbox, IconButton, Skeleton, Typography, useToast } from 'bp-kit';
+// Local
+import { CountBadge } from '../../../Classes/styles';
+import { formatDate } from '../../../../domain/dates';
+import { CardHeader, LessonList, LessonRow, StagePanel } from '../styles';
+
+interface IntegrationClassState {
+  lessons: { id: string; number: number; date: string }[];
+  attendanceByLesson: Record<string, { id: string; attended: boolean }>;
+  attendedCount: number;
+}
+
+const MEMBERSHIP_THRESHOLD = 3;
+
+interface Props {
+  integrationClass: IntegrationClassState | null;
+  loading: boolean;
+  canRecordAttendance: boolean;
+  isAdmin: boolean;
+  onToggle: (lessonId: string, attended: boolean) => Promise<void>;
+  onCopyMakeupLink: (lessonId: string) => Promise<string>;
+  onPromote: () => Promise<void>;
+}
+
+export function IntegrationStagePanel({ integrationClass, loading, canRecordAttendance, isAdmin, onToggle, onCopyMakeupLink, onPromote }: Props) {
+  const { show: showToast, toast } = useToast();
+
+  if (loading || !integrationClass) return <Skeleton $h="120px" />;
+
+  const { lessons, attendanceByLesson, attendedCount } = integrationClass;
+  const lastLesson = lessons[lessons.length - 1];
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const makeupUnlocked = !!lastLesson && lastLesson.date < todayKey;
+  const eligible = attendedCount >= MEMBERSHIP_THRESHOLD;
+
+  const copyMakeupLink = async (lessonId: string) => {
+    const link = await onCopyMakeupLink(lessonId);
+    await navigator.clipboard.writeText(link);
+    showToast('Link de reposição copiado!');
+  };
+
+  return (
+    <StagePanel>
+      <Card>
+        <CardHeader>
+          <Typography type="label">Presença nas aulas</Typography>
+          <CountBadge $eligible={eligible}>
+            {attendedCount}/{lessons.length} aulas
+          </CountBadge>
+        </CardHeader>
+
+        <LessonList>
+          {lessons.map((lesson) => {
+            const attended = attendanceByLesson[lesson.id]?.attended ?? false;
+            return (
+              <LessonRow key={lesson.id}>
+                <Checkbox
+                  label={`Aula ${lesson.number} (${formatDate(lesson.date)})`}
+                  checked={attended}
+                  disabled={!canRecordAttendance}
+                  onChange={(e) => onToggle(lesson.id, e.target.checked)}
+                />
+                {!attended && canRecordAttendance && makeupUnlocked && (
+                  <IconButton
+                    icon={<Link size={14} />}
+                    iconPosition="center"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => copyMakeupLink(lesson.id)}
+                    title="Copiar link de reposição"
+                  />
+                )}
+              </LessonRow>
+            );
+          })}
+        </LessonList>
+      </Card>
+
+      {isAdmin && eligible && (
+        <Button size="sm" variant="secondary" onClick={onPromote}>
+          Marcar pendente de membresia
+        </Button>
+      )}
+
+      {toast}
+    </StagePanel>
+  );
+}
