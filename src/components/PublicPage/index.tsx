@@ -16,7 +16,7 @@ export function PublicPage({ title, children }: Props) {
     <Page>
       <Content>
         <Header>
-          <Brand icon={icon} alt="Batista Palmeiras" name="Igreja Batista de Palmeiras" />
+          <Brand icon={icon} alt="Batista Palmeiras" name="Igreja Batista Palmeiras" />
           <Typography type="h4">{title}</Typography>
         </Header>
         {children}
