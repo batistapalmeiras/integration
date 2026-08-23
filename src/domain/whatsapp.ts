@@ -8,7 +8,7 @@ export function buildWhatsAppLink(phone: string, text: string): string {
 
 export function coffeeInviteMessage(name: string): string {
   const firstName = name.split(' ')[0];
-  return `Olá, ${firstName}! Tudo bem? Somos da Igreja Batista de Palmeiras e ficamos muito felizes com sua visita. Gostaríamos de te convidar para o nosso Café de Boas-vindas, um momento especial para te conhecermos melhor. Podemos te contar mais sobre isso?`;
+  return `Olá, ${firstName}! Tudo bem? Somos da Igreja Batista Palmeiras e ficamos muito felizes com sua visita. Gostaríamos de te convidar para o nosso Café de Boas-vindas, um momento especial para te conhecermos melhor. Podemos te contar mais sobre isso?`;
 }
 
 export function classInviteMessage(name: string): string {

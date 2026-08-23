@@ -19,7 +19,7 @@ export function LoginPage() {
         icon,
         iconAlt: 'Batista Palmeiras',
         name: 'Integração',
-        sub: 'Igreja Batista de Palmeiras',
+        sub: 'Igreja Batista Palmeiras',
         quote: 'Mais que uma Igreja, uma Família!',
       }}
       resolveRoute={resolveRoute}
