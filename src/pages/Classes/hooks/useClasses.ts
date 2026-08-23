@@ -1,14 +1,11 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
-// Libs
-import { useAuthCtx } from 'bp-kit';
 // Local
 import { supabase } from '../../../lib/supabase';
 import { formatDate, nextSundays } from '../domain';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
 export function useClasses() {
-  const { user } = useAuthCtx();
   const [cohort, setCohort] = useState<Cohort | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
@@ -129,31 +126,6 @@ export function useClasses() {
     await load();
   };
 
-  const toggleAttendance = async (enrollmentId: string, lessonId: string, attended: boolean) => {
-    const { error: upsertError } = await supabase
-      .from('lesson_attendance')
-      .upsert({ enrollment_id: enrollmentId, lesson_id: lessonId, attended }, { onConflict: 'enrollment_id,lesson_id' });
-    if (upsertError) throw upsertError;
-    await load();
-  };
-
-  const promoteToMembershipPending = async (row: EnrollmentRow) => {
-    const { error: updateError } = await supabase
-      .from('people')
-      .update({ status: 'membership_pending', updated_at: new Date().toISOString() })
-      .eq('id', row.person.id);
-    if (updateError) throw updateError;
-
-    await supabase.from('status_history').insert({
-      person_id: row.person.id,
-      from_status: 'integration',
-      to_status: 'membership_pending',
-      changed_by: user?.id,
-    });
-
-    await load();
-  };
-
   return {
     cohort,
     lessons,
@@ -162,7 +134,5 @@ export function useClasses() {
     error,
     createCohort,
     updateLessonDates,
-    toggleAttendance,
-    promoteToMembershipPending,
   };
 }

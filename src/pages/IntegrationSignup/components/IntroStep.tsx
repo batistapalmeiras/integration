@@ -3,7 +3,7 @@ import { Button, Typography } from 'bp-kit';
 // Local
 import { formatDate } from '../../../domain/dates';
 import { useCohortSchedule } from '../hooks/useCohortSchedule';
-import { ConfirmationList } from '../styles';
+import { ConfirmationList, StepStack } from '../styles';
 
 interface Props {
   onContinue: () => void;
@@ -13,7 +13,7 @@ export function IntroStep({ onContinue }: Props) {
   const { schedule, loading } = useCohortSchedule();
 
   return (
-    <>
+    <StepStack>
       <Typography type="p">Seja bem-vindo(a) à Igreja Batista Palmeiras!</Typography>
       <Typography type="p">
         É um privilégio ter você conosco. A Classe de Integração é o passo fundamental para quem deseja conhecer
@@ -48,6 +48,6 @@ export function IntroStep({ onContinue }: Props) {
       <Button type="button" variant="primary" size="lg" fullWidth onClick={onContinue}>
         Continuar
       </Button>
-    </>
+    </StepStack>
   );
 }

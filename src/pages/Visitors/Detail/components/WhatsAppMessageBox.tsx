@@ -1,31 +1,38 @@
 // React
 import { useState } from 'react';
 // Libs
-import { Button, RawTextarea } from 'bp-kit';
+import { Button, Card, RawTextarea } from 'bp-kit';
 // Local
-import { buildWhatsAppLink, defaultWhatsAppMessage } from '../../domain';
+import { buildWhatsAppLink } from '../../../../domain/whatsapp';
 import { Person } from '../../types';
 import { Actions } from '../styles';
 
 interface Props {
   person: Person;
+  defaultMessage: string;
+  buttonLabel?: string;
+  onOpen?: () => void;
+  bare?: boolean;
 }
 
-export function WhatsAppTab({ person }: Props) {
-  const [message, setMessage] = useState(() => defaultWhatsAppMessage(person.name));
+export function WhatsAppMessageBox({ person, defaultMessage, buttonLabel = 'Abrir WhatsApp', onOpen, bare }: Props) {
+  const [message, setMessage] = useState(defaultMessage);
 
   const openWhatsApp = () => {
     window.open(buildWhatsAppLink(person.phone, message), '_blank', 'noopener,noreferrer');
+    onOpen?.();
   };
 
-  return (
-    <div>
+  const content = (
+    <>
       <RawTextarea label="Mensagem" value={message} onChange={(e) => setMessage(e.target.value)} rows={6} />
       <Actions>
         <Button type="button" variant="primary" onClick={openWhatsApp}>
-          Abrir WhatsApp
+          {buttonLabel}
         </Button>
       </Actions>
-    </div>
+    </>
   );
+
+  return bare ? content : <Card>{content}</Card>;
 }

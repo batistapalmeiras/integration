@@ -1,24 +1,32 @@
 // React
+import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, Textarea, TextInput } from 'bp-kit';
 // Local
-import { ErrorMsg, Form } from '../styles';
+import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
 import { SignupFormValues, signupFormSchema } from '../validators/schema';
 
 interface Props {
   name: string;
   submitting: boolean;
   error: string | null;
+  initialValues?: Partial<SignupFormValues>;
   onSubmit: (values: SignupFormValues) => void;
+  onValuesChange: (values: Partial<SignupFormValues>) => void;
 }
 
-export function SignupFormStep({ name, submitting, error, onSubmit }: Props) {
-  const { control, handleSubmit } = useForm<SignupFormValues>({
+export function SignupFormStep({ name, submitting, error, initialValues, onSubmit, onValuesChange }: Props) {
+  const { control, handleSubmit, watch } = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
-    defaultValues: { name },
+    defaultValues: { name, ...initialValues },
   });
+
+  useEffect(() => {
+    const subscription = watch(onValuesChange);
+    return () => subscription.unsubscribe();
+  }, [watch, onValuesChange]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>

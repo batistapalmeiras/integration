@@ -8,4 +8,5 @@ export enum AppRoute {
   Reports = '/relatorios',
   Profile = '/perfil',
   IntegrationSignup = '/integracao/inscricao',
+  MakeupAttendance = '/turma/reposicao',
 }

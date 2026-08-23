@@ -60,10 +60,15 @@ export function useAdmin() {
     await load();
   };
 
-  const confirmMember = async (person: PendingMember) => {
+  const confirmMember = async (person: PendingMember, smallGroup: string, ministry: string) => {
     const { error: updateError } = await supabase
       .from('people')
-      .update({ status: 'member', updated_at: new Date().toISOString() })
+      .update({
+        status: 'member',
+        small_group: smallGroup,
+        ministry,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', person.id);
     if (updateError) throw updateError;
 

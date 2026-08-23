@@ -43,9 +43,9 @@ export function useLayout() {
     handleLogout,
     isActive,
     showVisitors: isAdmin || user?.role === UserRole.Reception || user?.role === UserRole.IntegrationTeam,
-    showCoffee: isAdmin || user?.role === UserRole.Pastor,
+    showCoffee: isAdmin || user?.role === UserRole.Pastor || user?.role === UserRole.IntegrationTeam,
     showClasses: isAdmin || user?.role === UserRole.Teacher,
-    showAdmin: isAdmin,
+    showAdmin: isAdmin || user?.role === UserRole.Pastor,
     showReports: isAdmin,
   };
 }

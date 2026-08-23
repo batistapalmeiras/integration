@@ -5,10 +5,10 @@ import { supabase } from '../../../lib/supabase';
 import { SignupFormValues } from '../validators/schema';
 import { CohortSchedule } from '../types';
 
-export function useIntegrationSignup() {
+export function useIntegrationSignup(initialResult: CohortSchedule | null = null) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<CohortSchedule | null>(null);
+  const [result, setResult] = useState<CohortSchedule | null>(initialResult);
 
   const submit = async (phone: string, values: SignupFormValues) => {
     setSubmitting(true);
