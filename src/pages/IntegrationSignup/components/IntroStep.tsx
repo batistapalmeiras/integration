@@ -1,5 +1,5 @@
 // Libs
-import { Button, Typography } from 'bp-kit';
+import { Button, InfoBox, Skeleton, Typography } from 'bp-kit';
 // Local
 import { formatDate } from '../../../domain/dates';
 import { useCohortSchedule } from '../hooks/useCohortSchedule';
@@ -11,6 +11,7 @@ interface Props {
 
 export function IntroStep({ onContinue }: Props) {
   const { schedule, loading } = useCohortSchedule();
+  const hasActiveCohort = !loading && !!schedule && schedule.lesson_dates?.length > 0;
 
   return (
     <StepStack>
@@ -28,13 +29,15 @@ export function IntroStep({ onContinue }: Props) {
         <strong>Duração:</strong> o curso é composto por 4 encontros presenciais.
       </Typography>
 
-      {!loading && schedule && schedule.lesson_dates?.length > 0 && (
+      {loading && <Skeleton $h="80px" />}
+
+      {hasActiveCohort && (
         <>
           <Typography type="p">
-            <strong>Cronograma das aulas — {schedule.cohort_name}</strong>
+            <strong>Cronograma das aulas — {schedule!.cohort_name}</strong>
           </Typography>
           <ConfirmationList>
-            {schedule.lesson_dates.map((date, i) => (
+            {schedule!.lesson_dates.map((date, i) => (
               <li key={date}>
                 {i + 1}ª aula — {formatDate(date)}
               </li>
@@ -43,9 +46,16 @@ export function IntroStep({ onContinue }: Props) {
         </>
       )}
 
+      {!loading && !hasActiveCohort && (
+        <InfoBox variant="warning">
+          Não há nenhuma turma de Integração ativa no momento. Fale com a Equipe de Integração para saber quando a
+          próxima começa.
+        </InfoBox>
+      )}
+
       <Typography type="p">Venha fazer parte da nossa família!</Typography>
 
-      <Button type="button" variant="primary" size="lg" fullWidth onClick={onContinue}>
+      <Button type="button" variant="primary" size="lg" fullWidth onClick={onContinue} disabled={!hasActiveCohort}>
         Continuar
       </Button>
     </StepStack>

@@ -19,7 +19,7 @@ export function ClassesPage() {
   const { cohort, lessons, enrollments, loading, error, createCohort, updateLessonDates } = useClasses();
   const { open, close, modal } = useModal();
 
-  const isAdmin = user?.role === UserRole.Admin;
+  const canManageCohort = user?.role === UserRole.Admin || user?.role === UserRole.Teacher;
 
   const openCreateModal = () => open(<CreateCohortModal close={close} onCreate={createCohort} />);
   const openEditModal = () => open(<EditCohortModal lessons={lessons} close={close} onSave={updateLessonDates} />);
@@ -30,7 +30,7 @@ export function ClassesPage() {
         title="Turma de Integração"
         subtitle={cohort ? cohort.name : 'Nenhuma turma ativa'}
         action={
-          isAdmin ? (
+          canManageCohort ? (
             cohort ? (
               <Button variant="secondary" onClick={openEditModal}>
                 Editar aulas
@@ -49,7 +49,7 @@ export function ClassesPage() {
       {!loading && !error && !cohort && (
         <Empty
           title="Nenhuma turma ativa"
-          description={isAdmin ? 'Abra uma nova turma pelo botão acima.' : 'Aguarde o administrador abrir a próxima turma.'}
+          description={canManageCohort ? 'Abra uma nova turma pelo botão acima.' : 'Aguarde o administrador abrir a próxima turma.'}
         />
       )}
 

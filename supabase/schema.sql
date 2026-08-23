@@ -194,10 +194,10 @@ create policy "cohorts_select_all_authenticated"
   on public.cohorts for select
   using (auth.uid() is not null);
 
-create policy "cohorts_manage_admin"
+create policy "cohorts_manage_admin_teacher"
   on public.cohorts for all
-  using (public.current_role() = 'admin')
-  with check (public.current_role() = 'admin');
+  using (public.current_role() in ('admin', 'teacher'))
+  with check (public.current_role() in ('admin', 'teacher'));
 
 -- -----------------------------------------------------------------------------
 -- lessons ("aulas") — the 4 classes of a cohort
@@ -216,10 +216,10 @@ create policy "lessons_select_all_authenticated"
   on public.lessons for select
   using (auth.uid() is not null);
 
-create policy "lessons_manage_admin"
+create policy "lessons_manage_admin_teacher"
   on public.lessons for all
-  using (public.current_role() = 'admin')
-  with check (public.current_role() = 'admin');
+  using (public.current_role() in ('admin', 'teacher'))
+  with check (public.current_role() in ('admin', 'teacher'));
 
 -- -----------------------------------------------------------------------------
 -- enrollments ("matrículas") — a person enrolled in a cohort
