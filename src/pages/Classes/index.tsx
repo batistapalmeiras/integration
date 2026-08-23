@@ -11,7 +11,7 @@ import { EditCohortModal } from './components/EditCohortModal';
 import { useClasses } from './hooks';
 import { CountBadge } from './styles';
 
-const MEMBERSHIP_THRESHOLD = 3;
+const MEMBERSHIP_THRESHOLD = 4;
 
 export function ClassesPage() {
   const navigate = useNavigate();

@@ -72,7 +72,7 @@ export function AdminPage() {
           <Section>
             <PageHeader title="Pendentes de membresia" subtitle="Concluíram as aulas e aguardam confirmação" />
             {pendingMembers.length === 0 ? (
-              <Empty title="Ninguém pendente" description="Quem completar 3 de 4 aulas aparece aqui." />
+              <Empty title="Ninguém pendente" description="Quem completar as 4 aulas aparece aqui." />
             ) : (
               <TableWrapper>
                 <Table>

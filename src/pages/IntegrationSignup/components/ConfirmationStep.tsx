@@ -23,7 +23,7 @@ export function ConfirmationStep({ result }: Props) {
         ))}
       </ConfirmationList>
       <InfoBox variant="info">
-        Reforçamos que é necessário estar presente em pelo menos 3 das 4 aulas para se tornar membro. Esperamos
+        Reforçamos que é necessário estar presente nas 4 aulas para se tornar membro. Esperamos
         você!
       </InfoBox>
     </StepStack>

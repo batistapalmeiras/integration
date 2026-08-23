@@ -12,7 +12,7 @@ interface IntegrationClassState {
   attendedCount: number;
 }
 
-const MEMBERSHIP_THRESHOLD = 3;
+const MEMBERSHIP_THRESHOLD = 4;
 
 interface Props {
   integrationClass: IntegrationClassState | null;
