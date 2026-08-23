@@ -6,6 +6,7 @@ import { useAuthCtx } from 'bp-kit';
 import {
   attachToNextWelcomeCoffee,
   getCoffeeAttendanceForPerson,
+  hasUpcomingCoffeeEvent,
   markClassInviteDeclined,
   markClassInviteNoResponse,
   markCoffeeAttended,
@@ -45,6 +46,7 @@ export function useVisitorDetail(id: string) {
   const [error, setError] = useState<string | null>(null);
   const [coffeeAttendance, setCoffeeAttendance] = useState<CoffeeAttendance | null>(null);
   const [coffeeLoading, setCoffeeLoading] = useState(false);
+  const [hasCoffeeEvent, setHasCoffeeEvent] = useState<boolean | null>(null);
   const [integrationClass, setIntegrationClass] = useState<IntegrationClassState | null>(null);
   const [integrationLoading, setIntegrationLoading] = useState(false);
 
@@ -70,6 +72,12 @@ export function useVisitorDetail(id: string) {
   useEffect(() => {
     if (person?.status === 'welcome_coffee') loadCoffeeAttendance();
   }, [person?.status, loadCoffeeAttendance]);
+
+  useEffect(() => {
+    if (person?.status === 'initial_contact' || person?.status === 'retry_contact') {
+      hasUpcomingCoffeeEvent().then(setHasCoffeeEvent);
+    }
+  }, [person?.status]);
 
   const loadIntegrationClass = useCallback(async () => {
     setIntegrationLoading(true);
@@ -131,6 +139,15 @@ export function useVisitorDetail(id: string) {
     await load();
   };
 
+  const markWhatsAppOpened = async () => {
+    const { error: updateError } = await supabase
+      .from('people')
+      .update({ whatsapp_opened_at: new Date().toISOString() })
+      .eq('id', id);
+    if (updateError) throw updateError;
+    await load();
+  };
+
   const registerContactAttempt = async (values: ContactAttemptFormValues) => {
     // Contact is always made via WhatsApp by the volunteer — no channel choice in the UI.
     const { error: attemptError } = await supabase.from('contact_attempts').insert({
@@ -143,6 +160,15 @@ export function useVisitorDetail(id: string) {
 
     const toStatus =
       values.result === 'accepted' ? 'welcome_coffee' : values.result === 'declined' ? 'archived' : 'retry_contact';
+
+    // "Sem resposta" keeps the person in the same contact stage for another
+    // round — clear the flag so they need to open WhatsApp again before
+    // registering that next attempt, instead of the form staying revealed
+    // from the attempt that just got a non-response.
+    if (values.result === 'no_response') {
+      await supabase.from('people').update({ whatsapp_opened_at: null }).eq('id', id);
+    }
+
     await changeStatus(toStatus);
 
     if (values.result === 'accepted') {
@@ -151,7 +177,10 @@ export function useVisitorDetail(id: string) {
   };
 
   const archive = () => changeStatus('archived');
-  const reactivate = () => changeStatus('retry_contact');
+  const reactivate = async () => {
+    await supabase.from('people').update({ whatsapp_opened_at: null }).eq('id', id);
+    await changeStatus('retry_contact');
+  };
 
   const markAttended = async () => {
     if (!coffeeAttendance) return;
@@ -196,8 +225,10 @@ export function useVisitorDetail(id: string) {
     error,
     updatePerson,
     registerContactAttempt,
+    markWhatsAppOpened,
     archive,
     reactivate,
+    hasCoffeeEvent,
     coffeeAttendance,
     coffeeLoading,
     markAttended,
