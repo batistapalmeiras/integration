@@ -18,6 +18,20 @@ export const FiltersRow = styled.div`
   }
 `;
 
+export const FiltersButtonRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+`;
+
+export const SearchRow = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
+
+export const SectionHeading = styled.div`
+  margin: ${({ theme }) => theme.spacing.xl} 0 ${({ theme }) => theme.spacing.sm};
+`;
+
 // Plain, always-a-table listing (no responsive collapse-to-card, unlike
 // src/components/Table) — matches bp-cantina's Report/OrdersList table,
 // which just scrolls horizontally on narrow screens instead of switching
@@ -94,6 +108,37 @@ export const NameSubtitle = styled.span`
   @media (max-width: 743px) {
     display: block;
   }
+`;
+
+export const SummaryStrip = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+
+  @media (max-width: 743px) {
+    flex-wrap: wrap;
+  }
+`;
+
+export const SummaryStat = styled.div`
+  flex: 1;
+  min-width: 120px;
+  padding: ${({ theme }) => theme.spacing.base};
+  border: 1px solid ${({ theme }) => theme.colors.hairline};
+  border-radius: ${({ theme }) => theme.rounded.md};
+`;
+
+export const SummaryValue = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.displaySm.fontSize};
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.ink};
+`;
+
+export const SummaryLabel = styled.div`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
+  color: ${({ theme }) => theme.colors.muted};
 `;
 
 export const CountBadge = styled.span<{ $eligible: boolean }>`

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { Button, DatePicker, ModalActions, ModalTitle, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
+import { DangerLink } from '../../Visitors/Detail/styles';
 import { Form } from '../styles';
 import { Lesson } from '../types';
 
@@ -21,9 +22,10 @@ interface Props {
   lessons: Lesson[];
   close: () => void;
   onSave: (lessonDates: [string, string, string, string]) => Promise<void>;
+  onCloseCohort: () => Promise<void>;
 }
 
-export function EditCohortModal({ lessons, close, onSave }: Props) {
+export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props) {
   const {
     control,
     handleSubmit,
@@ -60,6 +62,16 @@ export function EditCohortModal({ lessons, close, onSave }: Props) {
             {isSubmitting ? 'Salvando...' : 'Salvar'}
           </Button>
         </ModalActions>
+
+        <DangerLink
+          type="button"
+          onClick={async () => {
+            await onCloseCohort();
+            close();
+          }}
+        >
+          Encerrar turma
+        </DangerLink>
       </Form>
     </>
   );

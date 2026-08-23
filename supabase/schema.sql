@@ -13,12 +13,16 @@ create table public.profiles (
   id         uuid primary key references auth.users (id) on delete cascade,
   name       text not null,
   role       text not null check (role in ('admin', 'integration_team', 'pastor', 'reception', 'teacher')),
+  active     boolean not null default true,
   created_at timestamptz not null default now()
 );
 
 alter table public.profiles enable row level security;
 
--- Returns the caller's role, or null if they have no profile row yet.
+-- Returns the caller's role, or null if they have no profile row (or it's
+-- been disabled) — every RLS policy in this schema is built on this
+-- function, so disabling a profile here locks that person out everywhere
+-- at once, without touching any other policy.
 create function public.current_role()
 returns text
 language sql
@@ -26,7 +30,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select role from public.profiles where id = auth.uid();
+  select role from public.profiles where id = auth.uid() and active;
 $$;
 
 create policy "profiles_select_own_or_admin"

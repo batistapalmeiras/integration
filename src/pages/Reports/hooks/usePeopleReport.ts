@@ -1,95 +1,109 @@
 // React
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 // Local
 import { supabase } from '../../../lib/supabase';
 import { PersonStatus } from '../../../types/person';
 import { PersonReportRow } from '../types';
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function usePeopleReport() {
-  const [allPeople, setAllPeople] = useState<PersonReportRow[]>([]);
+  const [people, setPeople] = useState<PersonReportRow[]>([]);
   const [cohortNames, setCohortNames] = useState<string[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [statusFilter, setStatusFilter] = useState<'all' | PersonStatus>('all');
-  const [cohortFilter, setCohortFilter] = useState<string>('all');
-  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilterState] = useState<'all' | PersonStatus>('all');
+  const [cohortFilter, setCohortFilterState] = useState<string>('all');
+  const [search, setSearchState] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    supabase
+      .from('cohorts')
+      .select('name')
+      .order('name')
+      .then(({ data }) => setCohortNames((data ?? []).map((c) => c.name as string)));
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    const { data: peopleData, error: peopleError } = await supabase.from('people').select('id,name,status');
+    // Cohort filter is a many-to-many relation (enrollments), so it's
+    // resolved to a set of person ids first, then applied as an `.in()` on
+    // the main query below — keeps every filter (status, cohort, search)
+    // and the pagination itself running in the database, not in the browser.
+    let cohortPersonIds: string[] | null = null;
+    if (cohortFilter !== 'all') {
+      const { data, error: enrollError } = await supabase
+        .from('enrollments')
+        .select('person_id, cohort:cohorts!inner(name)')
+        .eq('cohort.name', cohortFilter);
+      if (enrollError) {
+        setError(enrollError.message);
+        setLoading(false);
+        return;
+      }
+      cohortPersonIds = (data ?? []).map((r) => r.person_id as string);
+      if (cohortPersonIds.length === 0) {
+        setPeople([]);
+        setTotalCount(0);
+        setLoading(false);
+        return;
+      }
+    }
+
+    let query = supabase.from('people').select('id,name,status', { count: 'exact' });
+    if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+    if (debouncedSearch) query = query.ilike('name', `%${debouncedSearch}%`);
+    if (cohortPersonIds) query = query.in('id', cohortPersonIds);
+    query = query.order('name').range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+
+    const { data: peopleData, count, error: peopleError } = await query;
     if (peopleError) {
       setError(peopleError.message);
       setLoading(false);
       return;
     }
 
-    const { data: enrollmentsData, error: enrollmentsError } = await supabase
-      .from('enrollments')
-      .select('person_id, cohort:cohorts(name)');
-
-    if (enrollmentsError) {
-      setError(enrollmentsError.message);
-      setLoading(false);
-      return;
-    }
-
-    const enrollments = (enrollmentsData ?? []) as unknown as { person_id: string; cohort: { name: string } }[];
-
-    const cohortsByPerson = new Map<string, string[]>();
-    for (const enrollment of enrollments) {
-      const list = cohortsByPerson.get(enrollment.person_id) ?? [];
-      list.push(enrollment.cohort.name);
-      cohortsByPerson.set(enrollment.person_id, list);
-    }
-
-    setAllPeople(
+    setTotalCount(count ?? 0);
+    setPeople(
       (peopleData ?? []).map((p) => ({
-        id: p.id,
-        name: p.name,
+        id: p.id as string,
+        name: p.name as string,
         status: p.status as PersonStatus,
-        cohortNames: (cohortsByPerson.get(p.id) ?? []).join(', '),
       })),
     );
-    setCohortNames(Array.from(new Set(enrollments.map((e) => e.cohort.name))).sort());
     setLoading(false);
-  }, []);
+  }, [statusFilter, cohortFilter, debouncedSearch, page]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const filteredPeople = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    return allPeople.filter((p) => {
-      if (statusFilter !== 'all' && p.status !== statusFilter) return false;
-      if (cohortFilter !== 'all' && !p.cohortNames.split(', ').includes(cohortFilter)) return false;
-      if (term && !p.name.toLowerCase().includes(term)) return false;
-      return true;
-    });
-  }, [allPeople, statusFilter, cohortFilter, search]);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
-  const totalPages = Math.max(1, Math.ceil(filteredPeople.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const people = filteredPeople.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-
-  const handleSearch = (value: string) => {
-    setSearch(value);
+  const setSearch = (value: string) => {
+    setSearchState(value);
     setPage(1);
   };
 
-  const handleStatusFilter = (value: 'all' | PersonStatus) => {
-    setStatusFilter(value);
+  const setStatusFilter = (value: 'all' | PersonStatus) => {
+    setStatusFilterState(value);
     setPage(1);
   };
 
-  const handleCohortFilter = (value: string) => {
-    setCohortFilter(value);
+  const setCohortFilter = (value: string) => {
+    setCohortFilterState(value);
     setPage(1);
   };
 
@@ -99,12 +113,12 @@ export function usePeopleReport() {
     loading,
     error,
     statusFilter,
-    setStatusFilter: handleStatusFilter,
+    setStatusFilter,
     cohortFilter,
-    setCohortFilter: handleCohortFilter,
+    setCohortFilter,
     search,
-    setSearch: handleSearch,
-    page: safePage,
+    setSearch,
+    page,
     totalPages,
     setPage,
     hasFilter: !!search.trim() || statusFilter !== 'all' || cohortFilter !== 'all',

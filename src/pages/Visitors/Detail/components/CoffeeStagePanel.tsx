@@ -1,5 +1,5 @@
 // Libs
-import { Button, Skeleton, Typography } from 'bp-kit';
+import { Button, InfoBox, Skeleton, Typography } from 'bp-kit';
 // Local
 import { RowActions } from '../../../../components/Table';
 import { classInviteMessage } from '../../../../domain/whatsapp';
@@ -16,13 +16,23 @@ interface Props {
   person: Person;
   attendance: CoffeeAttendance | null;
   loading: boolean;
+  hasCohort: boolean | null;
   onMarkAttended: () => Promise<void>;
   onMarkNotAttended: () => Promise<void>;
   onDeclined: () => Promise<void>;
   onNoResponse: () => Promise<void>;
 }
 
-export function CoffeeStagePanel({ person, attendance, loading, onMarkAttended, onMarkNotAttended, onDeclined, onNoResponse }: Props) {
+export function CoffeeStagePanel({
+  person,
+  attendance,
+  loading,
+  hasCohort,
+  onMarkAttended,
+  onMarkNotAttended,
+  onDeclined,
+  onNoResponse,
+}: Props) {
   if (loading || !attendance) return <Skeleton $h="80px" />;
 
   if (!attendance.attended) {
@@ -39,6 +49,16 @@ export function CoffeeStagePanel({ person, attendance, loading, onMarkAttended, 
             Compareceu
           </Button>
         </RowActions>
+      </StagePanel>
+    );
+  }
+
+  if (hasCohort === false) {
+    return (
+      <StagePanel>
+        <InfoBox variant="warning">
+          Não há turma de Integração ativa no momento. Peça para um professor abrir a turma antes de convidar.
+        </InfoBox>
       </StagePanel>
     );
   }

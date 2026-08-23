@@ -66,6 +66,23 @@ export async function hasUpcomingCoffeeEvent(): Promise<boolean> {
   return !!future;
 }
 
+// Most recent café the person actually attended, for display on their
+// profile — independent of their current pipeline stage, unlike
+// getCoffeeAttendanceForPerson (which only resolves against the
+// currently-relevant event).
+export async function getPersonAttendedCoffeeDate(personId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('coffee_attendance')
+    .select('coffee_event:coffee_events(event_date)')
+    .eq('person_id', personId)
+    .eq('attended', true);
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as { coffee_event: { event_date: string } }[];
+  if (rows.length === 0) return null;
+  return rows.map((r) => r.coffee_event.event_date).sort().at(-1) ?? null;
+}
+
 export async function attachToNextWelcomeCoffee(personId: string): Promise<void> {
   const future = await findFutureCoffeeEvent();
   const eventId = future ? future.id : await insertCoffeeEvent(nextWelcomeCoffeeDate());

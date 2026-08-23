@@ -2,10 +2,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, ModalActions, ModalTitle, text, TextInput } from 'bp-kit';
+import { Button, Form, ModalActions, ModalTitle, text, TextInput } from 'bp-kit';
 import { z } from 'zod';
 // Local
-import { PendingMember } from '../types';
+import { Person } from '../../types';
 
 const schema = z.object({
   smallGroup: z.string().min(1, text.validation.required('o PG')),
@@ -15,9 +15,9 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 interface Props {
-  person: PendingMember;
+  person: Pick<Person, 'id' | 'name'>;
   close: () => void;
-  onConfirm: (person: PendingMember, smallGroup: string, ministry: string) => Promise<void>;
+  onConfirm: (smallGroup: string, ministry: string) => Promise<void>;
 }
 
 export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
@@ -28,14 +28,14 @@ export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const submit = handleSubmit(async (values) => {
-    await onConfirm(person, values.smallGroup, values.ministry);
+    await onConfirm(values.smallGroup, values.ministry);
     close();
   });
 
   return (
     <>
       <ModalTitle>Confirmar {person.name} como membro</ModalTitle>
-      <form onSubmit={submit}>
+      <Form onSubmit={submit}>
         <TextInput label="PG (Pequeno Grupo)" control={control} name="smallGroup" placeholder="Nome do PG" />
         <TextInput label="Ministério" control={control} name="ministry" placeholder="Nome do ministério" />
 
@@ -47,7 +47,7 @@ export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
             {isSubmitting ? 'Salvando...' : 'Confirmar'}
           </Button>
         </ModalActions>
-      </form>
+      </Form>
     </>
   );
 }

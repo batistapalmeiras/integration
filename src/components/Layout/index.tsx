@@ -2,7 +2,7 @@
 import React from 'react';
 // Libs
 import { Brand } from 'bp-kit';
-import { FileBarChart, GraduationCap, LogOut, ShieldCheck, User, UserCircle, Users as UsersIcon } from 'lucide-react';
+import { Contact, GraduationCap, LogOut, Menu as MenuIcon, User, UserCircle, Users as UsersIcon } from 'lucide-react';
 import { Coffee as CoffeeIcon } from 'lucide-react';
 // Components
 import icon from '../../assets/icon.png';
@@ -43,11 +43,11 @@ export function Layout({ children }: ILayoutProps) {
     ref,
     handleLogout,
     isActive,
+    showPeople,
     showVisitors,
     showCoffee,
     showClasses,
     showAdmin,
-    showReports,
   } = useLayout();
 
   const homeRoute = showVisitors
@@ -56,10 +56,23 @@ export function Layout({ children }: ILayoutProps) {
       ? AppRoute.Coffee
       : showClasses
         ? AppRoute.Classes
-        : AppRoute.Admin;
+        : showAdmin
+          ? AppRoute.Admin
+          : AppRoute.People;
 
-  const visibleTabs = [showVisitors, showCoffee, showClasses, showAdmin, showReports].filter(Boolean).length;
-  const shouldShowBottomBar = visibleTabs > 1;
+  const visibleTabs = [showPeople, showVisitors, showCoffee, showClasses, showAdmin].filter(Boolean).length;
+
+  // Sub-pages reached through Menu (Relatórios, Turmas, Voluntários, etc.)
+  // aren't any tab's own screen — the bar would just sit there with nothing
+  // lit up, so hide it entirely instead.
+  const isOnATab =
+    (showVisitors && isActive(AppRoute.Visitors)) ||
+    (showCoffee && isActive(AppRoute.Coffee)) ||
+    (showClasses && isActive(AppRoute.Classes)) ||
+    (showPeople && isActive(AppRoute.People)) ||
+    (showAdmin && isActive(AppRoute.Admin));
+
+  const shouldShowBottomBar = visibleTabs > 1 && isOnATab;
 
   return (
     <>
@@ -83,14 +96,14 @@ export function Layout({ children }: ILayoutProps) {
                 Turma
               </NavLink>
             )}
-            {showAdmin && (
-              <NavLink to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
-                Admin
+            {showPeople && (
+              <NavLink to={AppRoute.People} $active={isActive(AppRoute.People)}>
+                Pessoas
               </NavLink>
             )}
-            {showReports && (
-              <NavLink to={AppRoute.Reports} $active={isActive(AppRoute.Reports)}>
-                Relatórios
+            {showAdmin && (
+              <NavLink to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
+                Menu
               </NavLink>
             )}
           </Nav>
@@ -125,7 +138,7 @@ export function Layout({ children }: ILayoutProps) {
         </HeaderInner>
       </Header>
 
-      <Main>
+      <Main $hasBottomBar={shouldShowBottomBar}>
         <MainInner>{children}</MainInner>
       </Main>
 
@@ -149,16 +162,16 @@ export function Layout({ children }: ILayoutProps) {
               <BottomTabLabel $active={isActive(AppRoute.Classes)}>Turma</BottomTabLabel>
             </BottomTab>
           )}
-          {showAdmin && (
-            <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
-              <ShieldCheck size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Admin)}>Admin</BottomTabLabel>
+          {showPeople && (
+            <BottomTab to={AppRoute.People} $active={isActive(AppRoute.People)}>
+              <Contact size={22} />
+              <BottomTabLabel $active={isActive(AppRoute.People)}>Pessoas</BottomTabLabel>
             </BottomTab>
           )}
-          {showReports && (
-            <BottomTab to={AppRoute.Reports} $active={isActive(AppRoute.Reports)}>
-              <FileBarChart size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Reports)}>Relatórios</BottomTabLabel>
+          {showAdmin && (
+            <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
+              <MenuIcon size={22} />
+              <BottomTabLabel $active={isActive(AppRoute.Admin)}>Menu</BottomTabLabel>
             </BottomTab>
           )}
         </BottomBar>

@@ -10,14 +10,17 @@ import { CoffeePage } from '../pages/Coffee';
 import { IntegrationSignupPage } from '../pages/IntegrationSignup';
 import { LoginPage } from '../pages/Login';
 import { MakeupAttendancePage } from '../pages/MakeupAttendance';
+import { PeoplePage } from '../pages/People';
 import { ProfilePage } from '../pages/Profile';
 import { ReportsPage } from '../pages/Reports';
 import { CohortRosterPage } from '../pages/Reports/components/CohortRosterPage';
-import { PeopleReportPage } from '../pages/Reports/components/PeopleReportPage';
+import { CohortsListPage } from '../pages/Reports/components/CohortsListPage';
 import { VisitorsPage } from '../pages/Visitors';
 import { VisitorDetailPage } from '../pages/Visitors/Detail';
 import { VisitorEditPage } from '../pages/Visitors/Edit';
 import { NewVisitorPage } from '../pages/Visitors/New';
+import { VolunteersPage } from '../pages/Volunteers';
+import { VolunteerDetailPage } from '../pages/Volunteers/Detail';
 // Local
 import { supabase } from '../lib/supabase';
 import { UserRole } from '../types/enums';
@@ -120,6 +123,14 @@ export function AppRouter() {
                       }
                     />
                     <Route
+                      path={`${AppRoute.Reports}/turmas`}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Admin]}>
+                          <CohortsListPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
                       path={`${AppRoute.Reports}/turmas/:id`}
                       element={
                         <ProtectedRoute roles={[UserRole.Admin]}>
@@ -128,13 +139,22 @@ export function AppRouter() {
                       }
                     />
                     <Route
-                      path={`${AppRoute.Reports}/pessoas`}
+                      path={AppRoute.Volunteers}
                       element={
                         <ProtectedRoute roles={[UserRole.Admin]}>
-                          <PeopleReportPage />
+                          <VolunteersPage />
                         </ProtectedRoute>
                       }
                     />
+                    <Route
+                      path={`${AppRoute.Volunteers}/:id`}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Admin]}>
+                          <VolunteerDetailPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path={AppRoute.People} element={<PeoplePage />} />
                     <Route path={AppRoute.Profile} element={<ProfilePage />} />
                     <Route path="*" element={<Navigate to={AppRoute.Visitors} replace />} />
                   </Routes>

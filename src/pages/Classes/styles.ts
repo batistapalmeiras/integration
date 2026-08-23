@@ -1,11 +1,7 @@
 // Libs
 import styled from 'styled-components';
 
-export const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
-`;
+export { Form } from 'bp-kit';
 
 export const CountBadge = styled.span<{ $eligible: boolean }>`
   display: inline-flex;

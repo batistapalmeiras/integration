@@ -8,14 +8,15 @@ import { UserRole } from '../../../types/enums';
 import { ContactStagePanel } from './components/ContactStagePanel';
 import { CoffeeStagePanel } from './components/CoffeeStagePanel';
 import { IntegrationStagePanel } from './components/IntegrationStagePanel';
+import { MembershipPendingStagePanel } from './components/MembershipPendingStagePanel';
 import { PersonCard } from './components/PersonCard';
+import { PersonDetailsCard } from './components/PersonDetailsCard';
 import { ProgressStepper } from './components/ProgressStepper';
 import { useVisitorDetail } from './hooks';
 import { Content, Hint } from './styles';
 import { ContactAttemptFormValues } from '../validators';
 
 const STAGE_HINTS: Partial<Record<string, string>> = {
-  membership_pending: 'Aguardando confirmação do Pastor na tela de Admin.',
   member: 'Processo de integração concluído.',
 };
 
@@ -30,6 +31,7 @@ export function VisitorDetailPage() {
     registerContactAttempt,
     markWhatsAppOpened,
     hasCoffeeEvent,
+    hasCohort,
     coffeeAttendance,
     coffeeLoading,
     markAttended,
@@ -41,11 +43,15 @@ export function VisitorDetailPage() {
     toggleClassAttendance,
     getClassMakeupLink,
     promoteToMembershipPending,
+    confirmMember,
+    profileCoffeeDate,
+    profileCohortName,
   } = useVisitorDetail(id ?? '');
 
   const isAdmin = user?.role === UserRole.Admin;
   const canManage = user?.role === UserRole.IntegrationTeam || isAdmin;
   const canRecordAttendance = user?.role === UserRole.Teacher || isAdmin;
+  const canConfirmMembership = isAdmin || user?.role === UserRole.Pastor;
 
   if (loading) return <Skeleton $h="320px" />;
   if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
@@ -63,6 +69,8 @@ export function VisitorDetailPage() {
 
       <PersonCard person={person} onClick={() => navigate(`${AppRoute.Visitors}/${id}/editar`)} />
 
+      <PersonDetailsCard person={person} coffeeDate={profileCoffeeDate} cohortName={profileCohortName} />
+
       {canManage && (person.status === 'initial_contact' || person.status === 'retry_contact') && (
         <ContactStagePanel
           person={person}
@@ -77,6 +85,7 @@ export function VisitorDetailPage() {
           person={person}
           attendance={coffeeAttendance}
           loading={coffeeLoading}
+          hasCohort={hasCohort}
           onMarkAttended={markAttended}
           onMarkNotAttended={markNotAttended}
           onDeclined={markInviteDeclined}
@@ -94,6 +103,10 @@ export function VisitorDetailPage() {
           onCopyMakeupLink={getClassMakeupLink}
           onPromote={promoteToMembershipPending}
         />
+      )}
+
+      {canConfirmMembership && person.status === 'membership_pending' && (
+        <MembershipPendingStagePanel person={person} onConfirm={confirmMember} />
       )}
 
       {canManage && STAGE_HINTS[person.status] && <Hint>{STAGE_HINTS[person.status]}</Hint>}

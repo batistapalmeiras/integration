@@ -25,11 +25,7 @@ export const Header = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
-export const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
-`;
+export { Form } from 'bp-kit';
 
 export const ErrorMsg = styled.p`
   color: ${({ theme }) => theme.colors.primaryErrorText};

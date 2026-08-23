@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, ModalActions, ModalTitle, MonthPicker, text } from 'bp-kit';
+import { Button, Form, ModalActions, ModalTitle, MonthPicker, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { firstSundayOfMonth, formatDate } from '../domain';
@@ -36,7 +36,7 @@ export function CreateEventModal({ close, onCreate, initialMonth }: Props) {
   return (
     <>
       <ModalTitle>{initialMonth ? 'Editar café de boas-vindas' : 'Novo café de boas-vindas'}</ModalTitle>
-      <form onSubmit={submit}>
+      <Form onSubmit={submit}>
         <MonthPicker label="Mês" control={control} name="month" />
         {previewDate && <Hint>Agendado para {formatDate(previewDate)}, 17h30 — 1º domingo do mês.</Hint>}
 
@@ -48,7 +48,7 @@ export function CreateEventModal({ close, onCreate, initialMonth }: Props) {
             {isSubmitting ? 'Salvando...' : initialMonth ? 'Salvar' : 'Criar'}
           </Button>
         </ModalActions>
-      </form>
+      </Form>
     </>
   );
 }
