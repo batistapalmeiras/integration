@@ -1,39 +1,30 @@
 // Libs
+import { ChevronRight } from 'lucide-react';
 import { Card, Typography } from 'bp-kit';
 // Local
-import { formatDate } from '../../../../domain/dates';
 import { Person } from '../../types';
-import { CardHeader, DetailLabel, DetailRow, DetailsList, DetailValue } from '../styles';
+import { PersonCardInfo, PersonCardRow } from '../styles';
 
 interface Props {
   person: Person;
   coffeeDate: string | null;
   cohortName: string | null;
+  onClick: () => void;
 }
 
-export function PersonDetailsCard({ person, coffeeDate, cohortName }: Props) {
-  const rows = [
-    cohortName && { label: 'Turma', value: cohortName },
-    coffeeDate && { label: 'Café', value: formatDate(coffeeDate) },
-    person.small_group && { label: 'PG', value: person.small_group },
-    person.ministry && { label: 'Ministério', value: person.ministry },
-  ].filter((row): row is { label: string; value: string } => !!row);
-
-  if (rows.length === 0) return null;
+export function PersonDetailsCard({ person, coffeeDate, cohortName, onClick }: Props) {
+  const hasDetails = !!cohortName || !!coffeeDate || !!person.small_group_id || !!person.ministry_id;
+  if (!hasDetails) return null;
 
   return (
-    <Card>
-      <CardHeader>
-        <Typography type="label">Detalhes</Typography>
-      </CardHeader>
-      <DetailsList>
-        {rows.map((row) => (
-          <DetailRow key={row.label}>
-            <DetailLabel>{row.label}</DetailLabel>
-            <DetailValue>{row.value}</DetailValue>
-          </DetailRow>
-        ))}
-      </DetailsList>
+    <Card $hoverable onClick={onClick} role="button" tabIndex={0}>
+      <PersonCardRow>
+        <PersonCardInfo>
+          <Typography type="h6">Detalhes</Typography>
+          <Typography type="caption">Turma, café e comunidade</Typography>
+        </PersonCardInfo>
+        <ChevronRight size={18} />
+      </PersonCardRow>
     </Card>
   );
 }

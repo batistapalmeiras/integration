@@ -21,6 +21,7 @@ export function MakeupAttendancePage() {
     formState: { errors },
   } = useForm<MakeupAttendanceFormValues>({
     resolver: zodResolver(makeupAttendanceSchema),
+    defaultValues: { notes: '' },
   });
 
   const onSubmit = handleSubmit((values) => submit(values.notes));

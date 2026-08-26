@@ -14,19 +14,16 @@ export function CoffeePage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const { event, attendees, loading, error, createEvent } = useCoffee();
-  const { open, close, modal } = useModal();
+  const { open, close, modal } = useModal('drawer');
 
-  const canPlan = user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin;
+  const canPlan =
+    user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
   const todayKey = new Date().toISOString().slice(0, 10);
   const hasUpcomingEvent = !!event && event.event_date >= todayKey;
 
   const openCreateModal = () =>
     open(
-      <CreateEventModal
-        close={close}
-        onCreate={createEvent}
-        initialMonth={hasUpcomingEvent ? event!.event_date.slice(0, 7) : undefined}
-      />,
+      <CreateEventModal close={close} onCreate={createEvent} initialDate={hasUpcomingEvent ? event!.event_date : undefined} />,
     );
 
   return (

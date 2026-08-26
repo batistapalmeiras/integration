@@ -36,8 +36,6 @@ export async function hasActiveCohort(): Promise<boolean> {
   return !!data;
 }
 
-// The turma this person is/was enrolled in, for display on their profile —
-// independent of whether that cohort is still active.
 export async function getPersonCohortName(personId: string): Promise<string | null> {
   const { data, error } = await supabase
     .from('enrollments')
@@ -83,9 +81,6 @@ export async function toggleLessonAttendance(enrollmentId: string, lessonId: str
   if (error) throw error;
 }
 
-// Never flips an existing row's attended flag — only creates one (as
-// not-attended) if it doesn't exist yet, so this can't accidentally
-// downgrade someone who's already marked present.
 export async function getMakeupLink(enrollmentId: string, lessonId: string): Promise<string> {
   const { data: existing, error: selectError } = await supabase
     .from('lesson_attendance')
@@ -107,19 +102,4 @@ export async function getMakeupLink(enrollmentId: string, lessonId: string): Pro
   }
 
   return `${window.location.origin}${AppRoute.MakeupAttendance}/${id}`;
-}
-
-export async function promoteToMembershipPending(personId: string, actorId?: string): Promise<void> {
-  const { error: updateError } = await supabase
-    .from('people')
-    .update({ status: 'membership_pending', updated_at: new Date().toISOString() })
-    .eq('id', personId);
-  if (updateError) throw updateError;
-
-  await supabase.from('status_history').insert({
-    person_id: personId,
-    from_status: 'integration',
-    to_status: 'membership_pending',
-    changed_by: actorId,
-  });
 }

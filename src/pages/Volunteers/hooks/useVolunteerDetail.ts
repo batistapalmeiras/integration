@@ -7,6 +7,7 @@ import { VolunteerRow } from '../types';
 
 export function useVolunteerDetail(id: string) {
   const [volunteer, setVolunteer] = useState<VolunteerRow | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +27,14 @@ export function useVolunteerDetail(id: string) {
     }
 
     setVolunteer(data as VolunteerRow);
+
+    // profiles has no email column (the login email lives in auth.users,
+    // only readable via the service role) — fetched separately here.
+    const { data: emailData, error: emailError } = await supabase.functions.invoke('get-volunteer-email', {
+      body: { id },
+    });
+    if (!emailError && !emailData?.error) setEmail(emailData?.email ?? null);
+
     setLoading(false);
   }, [id]);
 
@@ -36,6 +45,15 @@ export function useVolunteerDetail(id: string) {
   const updateVolunteer = async (name: string, role: UserRole) => {
     const { error: updateError } = await supabase.from('profiles').update({ name, role }).eq('id', id);
     if (updateError) throw updateError;
+    await load();
+  };
+
+  const updateEmail = async (newEmail: string) => {
+    const { data, error: invokeError } = await supabase.functions.invoke('update-volunteer-email', {
+      body: { id, email: newEmail },
+    });
+    if (invokeError) throw invokeError;
+    if (data?.error) throw new Error(data.error);
     await load();
   };
 
@@ -51,5 +69,5 @@ export function useVolunteerDetail(id: string) {
     if (data?.error) throw new Error(data.error);
   };
 
-  return { volunteer, loading, error, updateVolunteer, setActive, removeVolunteer };
+  return { volunteer, email, loading, error, updateVolunteer, updateEmail, setActive, removeVolunteer };
 }

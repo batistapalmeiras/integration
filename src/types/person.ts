@@ -20,8 +20,9 @@ export interface Person {
   status: PersonStatus;
   notes: string | null;
   whatsapp_opened_at: string | null;
-  small_group: string | null;
-  ministry: string | null;
+  coffee_retry_used: boolean;
+  small_group_id: string | null;
+  ministry_id: string | null;
   created_at: string;
   updated_at: string;
 }

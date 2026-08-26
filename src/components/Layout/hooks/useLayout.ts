@@ -15,6 +15,7 @@ export function useLayout() {
   const ref = useRef<HTMLDivElement>(null);
 
   const isAdmin = user?.role === UserRole.Admin;
+  const isPastor = user?.role === UserRole.Pastor;
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -46,10 +47,9 @@ export function useLayout() {
     handleLogout,
     isActive,
     showPeople: !!user,
-    showVisitors: isAdmin || user?.role === UserRole.Reception || user?.role === UserRole.IntegrationTeam,
-    showCoffee: isAdmin || user?.role === UserRole.Pastor || user?.role === UserRole.IntegrationTeam,
-    showClasses: isAdmin || user?.role === UserRole.Teacher,
-    showAdmin: isAdmin || user?.role === UserRole.Pastor,
-    showReports: isAdmin,
+    showVisitors: isAdmin || isPastor || user?.role === UserRole.IntegrationTeam,
+    showCoffee: isAdmin || isPastor || user?.role === UserRole.IntegrationTeam,
+    showClasses: isAdmin || isPastor || user?.role === UserRole.Teacher,
+    showAdmin: isAdmin || isPastor,
   };
 }

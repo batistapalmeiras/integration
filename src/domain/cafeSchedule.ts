@@ -1,35 +1,6 @@
 // Libs
 import { supabase } from '../lib/supabase';
 
-export function firstSundayOfMonth(monthValue: string): string {
-  const [year, month] = monthValue.split('-').map(Number);
-  const date = new Date(year, month - 1, 1);
-  const offset = date.getDay() === 0 ? 0 : 7 - date.getDay();
-  date.setDate(1 + offset);
-
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-export function nextWelcomeCoffeeDate(referenceDate = new Date()): string {
-  const year = referenceDate.getFullYear();
-  const month = referenceDate.getMonth();
-  const todayKey = referenceDate.toISOString().slice(0, 10);
-
-  const thisMonthValue = `${year}-${String(month + 1).padStart(2, '0')}`;
-  const thisMonthFirstSunday = firstSundayOfMonth(thisMonthValue);
-  if (thisMonthFirstSunday >= todayKey) return thisMonthFirstSunday;
-
-  const next = new Date(year, month + 1, 1);
-  const nextMonthValue = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
-  return firstSundayOfMonth(nextMonthValue);
-}
-
-// Only one upcoming café can exist at a time — this is the single source of
-// truth for "the" café that every entry point below shares, so creating or
-// attaching never accidentally produces a second future event.
 async function findFutureCoffeeEvent(): Promise<{ id: string; event_date: string } | null> {
   const todayKey = new Date().toISOString().slice(0, 10);
   const { data, error } = await supabase
@@ -49,8 +20,6 @@ async function insertCoffeeEvent(eventDate: string): Promise<string> {
   return data.id as string;
 }
 
-// Used by the Coffee page's "Novo café"/"Editar café" action: reschedules
-// the existing upcoming café if there is one, otherwise creates it.
 export async function createOrUpdateCoffeeEvent(eventDate: string): Promise<string> {
   const future = await findFutureCoffeeEvent();
   if (future) {
@@ -66,10 +35,11 @@ export async function hasUpcomingCoffeeEvent(): Promise<boolean> {
   return !!future;
 }
 
-// Most recent café the person actually attended, for display on their
-// profile — independent of their current pipeline stage, unlike
-// getCoffeeAttendanceForPerson (which only resolves against the
-// currently-relevant event).
+export async function getUpcomingCoffeeEventDate(): Promise<string | null> {
+  const future = await findFutureCoffeeEvent();
+  return future?.event_date ?? null;
+}
+
 export async function getPersonAttendedCoffeeDate(personId: string): Promise<string | null> {
   const { data, error } = await supabase
     .from('coffee_attendance')
@@ -85,10 +55,11 @@ export async function getPersonAttendedCoffeeDate(personId: string): Promise<str
 
 export async function attachToNextWelcomeCoffee(personId: string): Promise<void> {
   const future = await findFutureCoffeeEvent();
-  const eventId = future ? future.id : await insertCoffeeEvent(nextWelcomeCoffeeDate());
+  if (!future) throw new Error('Nenhum café de boas-vindas agendado.');
+
   const { error } = await supabase
     .from('coffee_attendance')
-    .upsert({ person_id: personId, coffee_event_id: eventId }, { onConflict: 'person_id,coffee_event_id' });
+    .upsert({ person_id: personId, coffee_event_id: future.id }, { onConflict: 'person_id,coffee_event_id' });
   if (error) throw error;
 }
 
@@ -120,9 +91,6 @@ export async function getCoffeeAttendanceForPerson(
   if (selectError) throw selectError;
   if (existing) return existing as { id: string; attended: boolean };
 
-  // Self-heal: same idea as the Coffee list's own self-heal — a person can
-  // reach 'welcome_coffee' without an attendance row yet if this page is
-  // opened before the Coffee list has ever run.
   const { data: created, error: insertError } = await supabase
     .from('coffee_attendance')
     .insert({ person_id: personId, coffee_event_id: eventId })
@@ -140,21 +108,19 @@ export async function markCoffeeAttended(attendanceId: string): Promise<void> {
 export async function markCoffeeNotAttended(personId: string, actorId?: string): Promise<void> {
   const { error: statusError } = await supabase
     .from('people')
-    .update({ status: 'archived', updated_at: new Date().toISOString() })
+    .update({ status: 'retry_contact', coffee_retry_used: true, whatsapp_opened_at: null, updated_at: new Date().toISOString() })
     .eq('id', personId);
   if (statusError) throw statusError;
 
   await supabase.from('status_history').insert({
     person_id: personId,
     from_status: 'welcome_coffee',
-    to_status: 'archived',
+    to_status: 'retry_contact',
     changed_by: actorId,
-    note: 'Não compareceu ao café de boas-vindas',
+    note: 'Confirmou presença mas não compareceu ao café — retomando contato para o próximo café',
   });
 }
 
-// Only logs the attempt — person stays in 'welcome_coffee' so they keep
-// showing up for a retry (unlimited retries, same rule as initial contact).
 export async function markClassInviteNoResponse(personId: string, actorId?: string): Promise<void> {
   const { error } = await supabase.from('contact_attempts').insert({
     person_id: personId,
@@ -165,8 +131,6 @@ export async function markClassInviteNoResponse(personId: string, actorId?: stri
   if (error) throw error;
 }
 
-// Attended the coffee but doesn't want to join the classes — one of the two
-// closed archived-exit points for this pipeline.
 export async function markClassInviteDeclined(personId: string, actorId?: string): Promise<void> {
   const { error: attemptError } = await supabase.from('contact_attempts').insert({
     person_id: personId,

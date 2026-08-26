@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function MembershipPendingStagePanel({ person, onConfirm }: Props) {
-  const { open, close, modal } = useModal();
+  const { open, close, modal } = useModal('drawer');
 
   const openConfirmModal = () => open(<ConfirmMemberModal person={person} close={close} onConfirm={onConfirm} />);
 

@@ -13,6 +13,7 @@ import {
   markCoffeeAttended,
   markCoffeeNotAttended,
 } from '../../../../domain/cafeSchedule';
+import { getPersonCommunityNames } from '../../../../domain/communityGroups';
 import {
   ActiveCohort,
   CohortLesson,
@@ -22,17 +23,24 @@ import {
   getPersonCohortName,
   getPersonEnrollmentId,
   hasActiveCohort,
-  promoteToMembershipPending as promoteToMembershipPendingRequest,
   toggleLessonAttendance,
 } from '../../../../domain/classesRoster';
 import { supabase } from '../../../../lib/supabase';
 import { CreateVisitorFormValues, ContactAttemptFormValues } from '../../validators';
-import { Person } from '../../types';
+import { ContactResult, Person } from '../../types';
 
 interface CoffeeAttendance {
   id: string;
   attended: boolean;
 }
+
+interface ContactAttemptRecord {
+  id: string;
+  result: ContactResult;
+  created_at: string;
+}
+
+const CONTACT_STAGES: Person['status'][] = ['initial_contact', 'retry_contact', 'archived'];
 
 interface IntegrationClassState {
   cohort: ActiveCohort;
@@ -55,6 +63,9 @@ export function useVisitorDetail(id: string) {
   const [integrationLoading, setIntegrationLoading] = useState(false);
   const [profileCoffeeDate, setProfileCoffeeDate] = useState<string | null>(null);
   const [profileCohortName, setProfileCohortName] = useState<string | null>(null);
+  const [profileMinistryName, setProfileMinistryName] = useState<string | null>(null);
+  const [profileSmallGroupName, setProfileSmallGroupName] = useState<string | null>(null);
+  const [lastAttempt, setLastAttempt] = useState<ContactAttemptRecord | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -68,12 +79,19 @@ export function useVisitorDetail(id: string) {
     load();
   }, [load]);
 
+  const loadCommunityNames = useCallback(async () => {
+    const { ministryName, smallGroupName } = await getPersonCommunityNames(id);
+    setProfileMinistryName(ministryName);
+    setProfileSmallGroupName(smallGroupName);
+  }, [id]);
+
   // Historical, independent of the person's current pipeline stage — shown
   // on the profile card regardless of whether they're still at that step.
   useEffect(() => {
     getPersonAttendedCoffeeDate(id).then(setProfileCoffeeDate);
     getPersonCohortName(id).then(setProfileCohortName);
-  }, [id]);
+    loadCommunityNames();
+  }, [id, loadCommunityNames]);
 
   const loadCoffeeAttendance = useCallback(async () => {
     setCoffeeLoading(true);
@@ -94,6 +112,22 @@ export function useVisitorDetail(id: string) {
       hasUpcomingCoffeeEvent().then(setHasCoffeeEvent);
     }
   }, [person?.status]);
+
+  const loadLastAttempt = useCallback(async () => {
+    const { data } = await supabase
+      .from('contact_attempts')
+      .select('id, result, created_at')
+      .eq('person_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setLastAttempt(data as ContactAttemptRecord | null);
+  }, [id]);
+
+  useEffect(() => {
+    if (person && CONTACT_STAGES.includes(person.status)) loadLastAttempt();
+    else setLastAttempt(null);
+  }, [person?.status, loadLastAttempt]);
 
   const loadIntegrationClass = useCallback(async () => {
     setIntegrationLoading(true);
@@ -136,11 +170,11 @@ export function useVisitorDetail(id: string) {
     await load();
   };
 
-  const changeStatus = async (toStatus: Person['status'], note?: string) => {
+  const changeStatus = async (toStatus: Person['status'], note?: string, extra: Record<string, unknown> = {}) => {
     if (!person) return;
     const { error: updateError } = await supabase
       .from('people')
-      .update({ status: toStatus, updated_at: new Date().toISOString() })
+      .update({ status: toStatus, updated_at: new Date().toISOString(), ...extra })
       .eq('id', id);
     if (updateError) throw updateError;
 
@@ -174,22 +208,58 @@ export function useVisitorDetail(id: string) {
     });
     if (attemptError) throw attemptError;
 
+    // A no-show at the café gets exactly one retry-contact round (see
+    // markCoffeeNotAttended) — "sem resposta" here archives instead of
+    // looping again, unlike the normal pre-café retry loop, which is
+    // unlimited.
+    const exhaustedCoffeeRetry = values.result === 'no_response' && !!person?.coffee_retry_used;
     const toStatus =
-      values.result === 'accepted' ? 'welcome_coffee' : values.result === 'declined' ? 'archived' : 'retry_contact';
+      values.result === 'accepted'
+        ? 'welcome_coffee'
+        : values.result === 'declined' || exhaustedCoffeeRetry
+          ? 'archived'
+          : 'retry_contact';
 
     // "Sem resposta" keeps the person in the same contact stage for another
     // round — clear the flag so they need to open WhatsApp again before
     // registering that next attempt, instead of the form staying revealed
     // from the attempt that just got a non-response.
-    if (values.result === 'no_response') {
+    if (values.result === 'no_response' && !exhaustedCoffeeRetry) {
       await supabase.from('people').update({ whatsapp_opened_at: null }).eq('id', id);
     }
 
-    await changeStatus(toStatus);
+    // The one-shot flag is consumed by this attempt either way — a fresh
+    // retry_contact loop afterwards (e.g. a later manual reactivate) is the
+    // normal unlimited kind again.
+    await changeStatus(
+      toStatus,
+      exhaustedCoffeeRetry ? 'Sem resposta na retomada de contato após o café' : undefined,
+      { coffee_retry_used: false },
+    );
 
     if (values.result === 'accepted') {
       await attachToNextWelcomeCoffee(id);
     }
+
+    await loadLastAttempt();
+  };
+
+  // Lets a volunteer correct a mis-registered contact result — re-applies
+  // the same outcome mapping registerContactAttempt uses, as an update
+  // instead of a new attempt.
+  const editLastContactAttempt = async (result: ContactResult) => {
+    if (!lastAttempt) return;
+    const { error: updateError } = await supabase.from('contact_attempts').update({ result }).eq('id', lastAttempt.id);
+    if (updateError) throw updateError;
+
+    const toStatus = result === 'accepted' ? 'welcome_coffee' : result === 'declined' ? 'archived' : 'retry_contact';
+    await changeStatus(toStatus, 'Correção do registro de contato anterior', { coffee_retry_used: false });
+
+    if (result === 'accepted') {
+      await attachToNextWelcomeCoffee(id);
+    }
+
+    await loadLastAttempt();
   };
 
   const archive = () => changeStatus('archived');
@@ -230,15 +300,10 @@ export function useVisitorDetail(id: string) {
     return getMakeupLink(integrationClass.enrollmentId, lessonId);
   };
 
-  const promoteToMembershipPending = async () => {
-    await promoteToMembershipPendingRequest(id, user?.id);
-    await load();
-  };
-
-  const confirmMember = async (smallGroup: string, ministry: string) => {
+  const confirmMember = async (smallGroupId: string, ministryId: string) => {
     const { error: updateError } = await supabase
       .from('people')
-      .update({ status: 'member', small_group: smallGroup, ministry, updated_at: new Date().toISOString() })
+      .update({ status: 'member', small_group_id: smallGroupId, ministry_id: ministryId, updated_at: new Date().toISOString() })
       .eq('id', id);
     if (updateError) throw updateError;
 
@@ -249,6 +314,20 @@ export function useVisitorDetail(id: string) {
       changed_by: user?.id,
     });
 
+    await load();
+    await loadCommunityNames();
+  };
+
+  // Same PG/Ministério fields confirmMember sets once — this lets
+  // pastor/admin revisit them any time afterwards from the Comunidade tab,
+  // without touching status.
+  const updateCommunity = async (smallGroupId: string, ministryId: string) => {
+    const { error: updateError } = await supabase
+      .from('people')
+      .update({ small_group_id: smallGroupId, ministry_id: ministryId, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (updateError) throw updateError;
+    await loadCommunityNames();
     await load();
   };
 
@@ -273,9 +352,13 @@ export function useVisitorDetail(id: string) {
     integrationLoading,
     toggleClassAttendance,
     getClassMakeupLink,
-    promoteToMembershipPending,
     confirmMember,
+    updateCommunity,
     profileCoffeeDate,
     profileCohortName,
+    profileMinistryName,
+    profileSmallGroupName,
+    lastAttempt,
+    editLastContactAttempt,
   };
 }

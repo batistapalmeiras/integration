@@ -1,11 +1,6 @@
 export { formatDate } from '../../domain/dates';
 
-export function isSunday(dateStr: string): boolean {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day).getDay() === 0;
-}
-
-export function nextSundays(firstDate: string): [string, string, string, string] {
+export function weeklyLessonDates(firstDate: string): [string, string, string, string] {
   const [year, month, day] = firstDate.split('-').map(Number);
   const base = new Date(year, month - 1, day);
 

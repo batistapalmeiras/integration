@@ -9,6 +9,12 @@ export enum AppRoute {
   Volunteers = '/voluntarios',
   Reports = '/relatorios',
   Profile = '/perfil',
+  ChangePassword = '/perfil/senha',
   IntegrationSignup = '/integracao/inscricao',
   MakeupAttendance = '/turma/reposicao',
+  MembershipInterest = '/integracao/ficha-de-interesse',
+  Members = '/membros',
+  CommunityGroups = '/comunidade',
+  Ministries = '/comunidade/ministerios',
+  SmallGroups = '/comunidade/pgs',
 }

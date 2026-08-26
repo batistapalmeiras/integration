@@ -39,13 +39,19 @@ Deno.serve(async (req) => {
   if (userError || !user) return json({ error: 'Não autenticado' }, 401);
 
   const { data: callerProfile } = await callerClient.from('profiles').select('role').eq('id', user.id).single();
-  if (callerProfile?.role !== 'admin') {
-    return json({ error: 'Apenas administradores podem cadastrar voluntários' }, 403);
+  if (!['admin', 'pastor'].includes(callerProfile?.role)) {
+    return json({ error: 'Apenas administradores ou o pastor podem cadastrar voluntários' }, 403);
   }
 
   const { email, password, name, role } = await req.json();
   if (!email || !password || !name || !role) {
     return json({ error: 'Dados incompletos' }, 400);
+  }
+
+  // Admin's own reach stops at integration_team/teacher — only Pastor
+  // manages Admin/Pastor accounts.
+  if (callerProfile.role === 'admin' && !['integration_team', 'teacher'].includes(role)) {
+    return json({ error: 'Administradores só podem cadastrar Equipe de Integração ou Professores' }, 403);
   }
 
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
@@ -59,7 +65,11 @@ Deno.serve(async (req) => {
     return json({ error: createError?.message ?? 'Erro ao criar usuário' }, 400);
   }
 
-  const { error: profileError } = await adminClient.from('profiles').insert({ id: created.user.id, name, role });
+  // Starts with the shared default password — force them to set their own
+  // on first login, cleared by ProfilePage's "Alterar senha" once they do.
+  const { error: profileError } = await adminClient
+    .from('profiles')
+    .insert({ id: created.user.id, name, role, must_change_password: true });
   if (profileError) {
     // Don't leave an orphaned auth user behind if the profile insert fails.
     await adminClient.auth.admin.deleteUser(created.user.id);

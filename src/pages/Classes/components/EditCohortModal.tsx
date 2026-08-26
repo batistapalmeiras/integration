@@ -33,10 +33,10 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      date1: lessons[0]?.date,
-      date2: lessons[1]?.date,
-      date3: lessons[2]?.date,
-      date4: lessons[3]?.date,
+      date1: lessons[0]?.date ?? '',
+      date2: lessons[1]?.date ?? '',
+      date3: lessons[2]?.date ?? '',
+      date4: lessons[3]?.date ?? '',
     },
   });
 

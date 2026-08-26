@@ -7,6 +7,7 @@ import {
   Button,
   Empty,
   Form,
+  InfoBox,
   ModalActions,
   ModalTitle,
   PageHeader,
@@ -16,18 +17,20 @@ import {
   text,
   TextInput,
   Typography,
+  useAuthCtx,
   useModal,
   useToast,
 } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { AppRoute } from '../../../routes/paths';
-import { ROLE_LABELS, UserRole } from '../../../types/enums';
-import { DangerLink } from '../../Visitors/Detail/styles';
+import { ADMIN_MANAGEABLE_ROLES, ROLE_LABELS, UserRole } from '../../../types/enums';
+import { Content, DangerLink } from '../../Visitors/Detail/styles';
 import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
 
 const schema = z.object({
   name: z.string().min(1, text.validation.required('o nome')),
+  email: z.string().email(text.validation.emailInvalid),
   role: z.nativeEnum(UserRole, { message: text.validation.selectRequired('o cargo') }),
 });
 
@@ -36,9 +39,31 @@ type FormValues = z.infer<typeof schema>;
 export function VolunteerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthCtx();
   const { show: showToast, toast } = useToast();
-  const { open, close, modal } = useModal();
-  const { volunteer, loading, error, updateVolunteer, setActive, removeVolunteer } = useVolunteerDetail(id ?? '');
+  const { open, close, modal } = useModal('drawer');
+  const { volunteer, email, loading, error, updateVolunteer, updateEmail, setActive, removeVolunteer } =
+    useVolunteerDetail(id ?? '');
+
+  const isPastor = user?.role === UserRole.Pastor;
+  // Admin can still see this volunteer's current role even if it's outside
+  // what they're allowed to set (e.g. viewing their own Admin account) —
+  // the option just won't be offered as something new to switch to.
+  const roleOptions = isPastor
+    ? Object.values(UserRole)
+    : Array.from(new Set([...ADMIN_MANAGEABLE_ROLES, ...(volunteer ? [volunteer.role] : [])]));
+
+  // Admin can see every volunteer (matches the list), but can only edit
+  // integration_team/teacher ones (or their own account) — Admin/Pastor
+  // accounts are Pastor's to manage. Enforced server-side too (RLS +
+  // Edge Functions); this just keeps the form from offering an action
+  // that would fail silently.
+  const isSelf = volunteer?.id === user?.id;
+  const isTargetPrivileged = volunteer?.role === UserRole.Admin || volunteer?.role === UserRole.Pastor;
+  const canEdit = isPastor || isSelf || !isTargetPrivileged;
+  // bp-kit's Select has no disabled prop — lock it to a single option
+  // (the current role) instead when the form is read-only.
+  const visibleRoleOptions = canEdit ? roleOptions : volunteer ? [volunteer.role] : [];
 
   const {
     control,
@@ -46,7 +71,7 @@ export function VolunteerDetailPage() {
     formState: { isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    values: volunteer ? { name: volunteer.name, role: volunteer.role } : undefined,
+    values: volunteer ? { name: volunteer.name, role: volunteer.role, email: email ?? '' } : undefined,
   });
 
   if (loading) return <Skeleton $h="320px" />;
@@ -54,6 +79,14 @@ export function VolunteerDetailPage() {
 
   const submit = handleSubmit(async (values) => {
     await updateVolunteer(values.name, values.role);
+    if (values.email !== email) {
+      try {
+        await updateEmail(values.email);
+      } catch (e) {
+        showToast(e instanceof Error ? e.message : 'Não foi possível alterar o e-mail.');
+        return;
+      }
+    }
     showToast('Dados salvos.');
   });
 
@@ -96,31 +129,53 @@ export function VolunteerDetailPage() {
     );
 
   return (
-    <div>
+    <Content>
       <PageHeader title={volunteer.name} subtitle="Editar voluntário" back />
 
+      {!canEdit && (
+        <InfoBox variant="info">Só o Pastor pode editar contas de Administrador ou Pastor.</InfoBox>
+      )}
+
       <Form onSubmit={submit}>
-        <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />
+        <TextInput
+          label={text.fields.name}
+          control={control}
+          name="name"
+          placeholder={text.fields.fullName}
+          disabled={!canEdit}
+        />
+        <TextInput
+          label={text.fields.email}
+          control={control}
+          name="email"
+          type="email"
+          placeholder={text.fields.emailPlaceholder}
+          disabled={!canEdit}
+        />
         <Select label="Cargo" control={control} name="role">
-          {Object.entries(ROLE_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
+          {visibleRoleOptions.map((role) => (
+            <option key={role} value={role}>
+              {ROLE_LABELS[role]}
             </option>
           ))}
         </Select>
-        <Switch label="Conta ativa" checked={volunteer.active} onChange={toggleActive} />
+        <Switch label="Conta ativa" checked={volunteer.active} onChange={toggleActive} disabled={!canEdit} />
 
-        <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando...' : 'Salvar'}
-        </Button>
+        {canEdit && (
+          <>
+            <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
+              {isSubmitting ? 'Salvando...' : 'Salvar'}
+            </Button>
 
-        <DangerLink type="button" onClick={confirmRemove}>
-          Remover voluntário
-        </DangerLink>
+            <DangerLink type="button" onClick={confirmRemove}>
+              Remover voluntário
+            </DangerLink>
+          </>
+        )}
       </Form>
 
       {toast}
       {modal}
-    </div>
+    </Content>
   );
 }
