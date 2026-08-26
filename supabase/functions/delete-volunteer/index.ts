@@ -34,8 +34,8 @@ Deno.serve(async (req) => {
   if (userError || !user) return json({ error: 'Não autenticado' }, 401);
 
   const { data: callerProfile } = await callerClient.from('profiles').select('role').eq('id', user.id).single();
-  if (callerProfile?.role !== 'admin') {
-    return json({ error: 'Apenas administradores podem remover voluntários' }, 403);
+  if (!['admin', 'pastor'].includes(callerProfile?.role)) {
+    return json({ error: 'Apenas administradores ou o pastor podem remover voluntários' }, 403);
   }
 
   const { id } = await req.json();
@@ -43,6 +43,17 @@ Deno.serve(async (req) => {
   if (id === user.id) return json({ error: 'Você não pode remover a própria conta' }, 400);
 
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+  // Admin's own reach stops at integration_team/teacher — only Pastor
+  // manages Admin/Pastor accounts. Looked up via the service-role client
+  // since the target may sit outside what the caller's own RLS view shows.
+  if (callerProfile.role === 'admin') {
+    const { data: targetProfile } = await adminClient.from('profiles').select('role').eq('id', id).single();
+    if (!targetProfile || !['integration_team', 'teacher'].includes(targetProfile.role)) {
+      return json({ error: 'Administradores só podem remover Equipe de Integração ou Professores' }, 403);
+    }
+  }
+
   const { error: deleteError } = await adminClient.auth.admin.deleteUser(id);
   if (deleteError) return json({ error: deleteError.message }, 400);
 

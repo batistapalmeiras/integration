@@ -12,7 +12,7 @@ import { PeopleFiltersModal } from './PeopleFiltersModal';
 
 export function PeopleSection() {
   const navigate = useNavigate();
-  const { open, close, modal } = useModal();
+  const { open, close, modal } = useModal('drawer');
   const {
     people,
     cohortNames,

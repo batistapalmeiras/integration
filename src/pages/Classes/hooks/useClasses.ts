@@ -1,8 +1,9 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
 // Local
+import { getUpcomingCoffeeEventDate } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
-import { formatDate, nextSundays } from '../domain';
+import { formatDate, weeklyLessonDates } from '../domain';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
 export function useClasses() {
@@ -11,6 +12,11 @@ export function useClasses() {
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [minCohortDate, setMinCohortDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    getUpcomingCoffeeEventDate().then(setMinCohortDate);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -97,7 +103,7 @@ export function useClasses() {
   }, [load]);
 
   const createCohort = async (firstLessonDate: string) => {
-    const lessonDates = nextSundays(firstLessonDate);
+    const lessonDates = weeklyLessonDates(firstLessonDate);
     const name = `Turma ${formatDate(firstLessonDate)}`;
 
     const { data: newCohort, error: cohortError } = await supabase
@@ -139,6 +145,7 @@ export function useClasses() {
     enrollments,
     loading,
     error,
+    minCohortDate,
     createCohort,
     updateLessonDates,
     closeCohort,

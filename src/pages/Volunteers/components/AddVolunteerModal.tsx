@@ -11,15 +11,19 @@ import { AddVolunteerFormValues, addVolunteerSchema } from '../validators';
 interface Props {
   close: () => void;
   onAdd: (email: string, name: string, role: UserRole) => Promise<void>;
+  allowedRoles: UserRole[];
 }
 
-export function AddVolunteerModal({ close, onAdd }: Props) {
+export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
   const { show: showToast, toast } = useToast();
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<AddVolunteerFormValues>({ resolver: zodResolver(addVolunteerSchema) });
+  } = useForm<AddVolunteerFormValues>({
+    resolver: zodResolver(addVolunteerSchema),
+    defaultValues: { name: '', email: '' },
+  });
 
   const submit = handleSubmit(async (values) => {
     try {
@@ -39,9 +43,9 @@ export function AddVolunteerModal({ close, onAdd }: Props) {
         <TextInput label={text.fields.email} control={control} name="email" type="email" placeholder="nome@exemplo.com" />
         <Select label="Cargo" control={control} name="role">
           <option value="">Selecione…</option>
-          {Object.entries(ROLE_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
+          {allowedRoles.map((role) => (
+            <option key={role} value={role}>
+              {ROLE_LABELS[role]}
             </option>
           ))}
         </Select>

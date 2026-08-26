@@ -1,7 +1,7 @@
 // React
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 // Libs
-import { Button, ModalActions, ModalTitle, RawSelect, text } from 'bp-kit';
+import { Button, Form, ModalActions, ModalTitle, RawSelect, text } from 'bp-kit';
 // Local
 import { PersonStatus, STATUS_META } from '../../../types/person';
 
@@ -31,32 +31,34 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
     <>
       <ModalTitle>Filtros</ModalTitle>
 
-      <RawSelect label={text.fields.status} value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
-        <option value="all">Todos</option>
-        {Object.entries(STATUS_META).map(([value, meta]) => (
-          <option key={value} value={value}>
-            {meta.label}
-          </option>
-        ))}
-      </RawSelect>
+      <Form onSubmit={(e: FormEvent) => e.preventDefault()}>
+        <RawSelect label={text.fields.status} value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
+          <option value="all">Todos</option>
+          {Object.entries(STATUS_META).map(([value, meta]) => (
+            <option key={value} value={value}>
+              {meta.label}
+            </option>
+          ))}
+        </RawSelect>
 
-      <RawSelect label="Turma" value={cohort} onChange={(e) => setCohort(e.target.value)}>
-        <option value="all">Todas</option>
-        {cohortNames.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
-      </RawSelect>
+        <RawSelect label="Turma" value={cohort} onChange={(e) => setCohort(e.target.value)}>
+          <option value="all">Todas</option>
+          {cohortNames.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </RawSelect>
 
-      <ModalActions>
-        <Button type="button" variant="secondary" onClick={clear}>
-          Limpar
-        </Button>
-        <Button type="button" variant="primary" onClick={apply}>
-          Aplicar
-        </Button>
-      </ModalActions>
+        <ModalActions>
+          <Button type="button" variant="secondary" onClick={clear}>
+            Limpar
+          </Button>
+          <Button type="button" variant="primary" onClick={apply}>
+            Aplicar
+          </Button>
+        </ModalActions>
+      </Form>
     </>
   );
 }

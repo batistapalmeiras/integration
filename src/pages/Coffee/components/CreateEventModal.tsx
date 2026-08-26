@@ -2,50 +2,49 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, Form, ModalActions, ModalTitle, MonthPicker, text } from 'bp-kit';
+import { Button, DatePicker, Form, ModalActions, ModalTitle, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
-import { firstSundayOfMonth, formatDate } from '../domain';
+import { formatDate } from '../domain';
 import { Hint } from '../styles';
 
-const schema = z.object({ month: z.string().min(1, text.validation.selectRequired('o mês')) });
+const schema = z.object({ eventDate: z.string().min(1, text.validation.required('a data')) });
 type FormValues = z.infer<typeof schema>;
 
 interface Props {
   close: () => void;
   onCreate: (eventDate: string) => Promise<void>;
-  initialMonth?: string;
+  initialDate?: string;
 }
 
-export function CreateEventModal({ close, onCreate, initialMonth }: Props) {
+export function CreateEventModal({ close, onCreate, initialDate }: Props) {
   const {
     control,
     watch,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { month: initialMonth } });
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { eventDate: initialDate ?? '' } });
 
-  const month = watch('month');
-  const previewDate = month ? firstSundayOfMonth(month) : null;
+  const eventDate = watch('eventDate');
 
   const submit = handleSubmit(async (values) => {
-    await onCreate(firstSundayOfMonth(values.month));
+    await onCreate(values.eventDate);
     close();
   });
 
   return (
     <>
-      <ModalTitle>{initialMonth ? 'Editar café de boas-vindas' : 'Novo café de boas-vindas'}</ModalTitle>
+      <ModalTitle>{initialDate ? 'Editar café de boas-vindas' : 'Novo café de boas-vindas'}</ModalTitle>
       <Form onSubmit={submit}>
-        <MonthPicker label="Mês" control={control} name="month" />
-        {previewDate && <Hint>Agendado para {formatDate(previewDate)}, 17h30 — 1º domingo do mês.</Hint>}
+        <DatePicker label="Data" control={control} name="eventDate" isDateDisabled={(date) => date.getDay() !== 0} />
+        {eventDate && <Hint>Agendado para {formatDate(eventDate)}, 17h30.</Hint>}
 
         <ModalActions>
           <Button type="button" variant="secondary" onClick={close}>
             Cancelar
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : initialMonth ? 'Salvar' : 'Criar'}
+            {isSubmitting ? 'Salvando...' : initialDate ? 'Salvar' : 'Criar'}
           </Button>
         </ModalActions>
       </Form>

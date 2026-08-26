@@ -21,6 +21,7 @@ export function NewVisitorPage() {
     formState: { isSubmitting },
   } = useForm<CreateVisitorFormValues>({
     resolver: zodResolver(createVisitorSchema),
+    defaultValues: { name: '', phone: '', age: '', email: '' },
   });
 
   const submit = handleSubmit(async (values) => {
@@ -35,18 +36,18 @@ export function NewVisitorPage() {
       <Form onSubmit={submit}>
         <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />
         <TextInput
-          label={text.fields.email}
-          control={control}
-          name="email"
-          type="email"
-          placeholder={text.fields.emailPlaceholder}
-        />
-        <TextInput
           label={text.fields.phone}
           control={control}
           name="phone"
           mask="phone"
           placeholder={PHONE_PLACEHOLDER}
+        />
+        <TextInput
+          label={text.fields.email}
+          control={control}
+          name="email"
+          type="email"
+          placeholder={text.fields.emailPlaceholder}
         />
         <TextInput label="Idade" control={control} name="age" type="text" inputMode="numeric" placeholder="Idade" />
 

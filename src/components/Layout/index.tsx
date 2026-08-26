@@ -2,7 +2,7 @@
 import React from 'react';
 // Libs
 import { Brand } from 'bp-kit';
-import { Contact, GraduationCap, LogOut, Menu as MenuIcon, User, UserCircle, Users as UsersIcon } from 'lucide-react';
+import { Contact, GraduationCap, LogOut, Menu as MenuIcon, Settings, User, UserCircle, Users as UsersIcon } from 'lucide-react';
 import { Coffee as CoffeeIcon } from 'lucide-react';
 // Components
 import icon from '../../assets/icon.png';
@@ -24,8 +24,14 @@ import {
   HeaderInner,
   Main,
   MainInner,
-  Nav,
-  NavLink,
+  SideBrand,
+  SideFooter,
+  SideMenu,
+  SideNav,
+  SideNavLink,
+  SideUserInfo,
+  SideUserName,
+  SideUserRole,
   UserArea,
   UserBtn,
 } from './styles';
@@ -50,21 +56,15 @@ export function Layout({ children }: ILayoutProps) {
     showAdmin,
   } = useLayout();
 
-  const homeRoute = showVisitors
-    ? AppRoute.Visitors
-    : showCoffee
-      ? AppRoute.Coffee
-      : showClasses
-        ? AppRoute.Classes
-        : showAdmin
-          ? AppRoute.Admin
-          : AppRoute.People;
+  const homeRoute =
+    ([
+      [showVisitors, AppRoute.Visitors],
+      [showCoffee, AppRoute.Coffee],
+      [showClasses, AppRoute.Classes],
+      [showAdmin, AppRoute.Admin],
+    ] as const).find(([visible]) => visible)?.[1] ?? AppRoute.People;
 
   const visibleTabs = [showPeople, showVisitors, showCoffee, showClasses, showAdmin].filter(Boolean).length;
-
-  // Sub-pages reached through Menu (Relatórios, Turmas, Voluntários, etc.)
-  // aren't any tab's own screen — the bar would just sit there with nothing
-  // lit up, so hide it entirely instead.
   const isOnATab =
     (showVisitors && isActive(AppRoute.Visitors)) ||
     (showCoffee && isActive(AppRoute.Coffee)) ||
@@ -76,37 +76,63 @@ export function Layout({ children }: ILayoutProps) {
 
   return (
     <>
+      <SideMenu>
+        <SideBrand>
+          <Brand to={homeRoute} icon={icon} alt="Batista Palmeiras" name="Integração" />
+        </SideBrand>
+
+        <SideNav>
+          {showAdmin && (
+            <SideNavLink to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
+              <Settings size={18} />
+              Configurações
+            </SideNavLink>
+          )}
+          {showVisitors && (
+            <SideNavLink to={AppRoute.Visitors} $active={isActive(AppRoute.Visitors)}>
+              <UsersIcon size={18} />
+              Visitantes
+            </SideNavLink>
+          )}
+          {showCoffee && (
+            <SideNavLink to={AppRoute.Coffee} $active={isActive(AppRoute.Coffee)}>
+              <CoffeeIcon size={18} />
+              Café
+            </SideNavLink>
+          )}
+          {showClasses && (
+            <SideNavLink to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
+              <GraduationCap size={18} />
+              Turma
+            </SideNavLink>
+          )}
+          {showPeople && (
+            <SideNavLink to={AppRoute.People} $active={isActive(AppRoute.People)}>
+              <Contact size={18} />
+              Pessoas
+            </SideNavLink>
+          )}
+        </SideNav>
+
+        <SideFooter>
+          <SideUserInfo>
+            <SideUserName>{user?.name}</SideUserName>
+            <SideUserRole>{user ? ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] : ''}</SideUserRole>
+          </SideUserInfo>
+          <DropdownItem onClick={() => navigate(AppRoute.Profile)}>
+            <User size={16} />
+            Meu perfil
+          </DropdownItem>
+          <DropdownItem className="danger" onClick={handleLogout}>
+            <LogOut size={16} />
+            Sair
+          </DropdownItem>
+        </SideFooter>
+      </SideMenu>
+
       <Header>
         <HeaderInner>
           <Brand to={homeRoute} icon={icon} alt="Batista Palmeiras" name="Integração" />
-
-          <Nav>
-            {showVisitors && (
-              <NavLink to={AppRoute.Visitors} $active={isActive(AppRoute.Visitors)}>
-                Visitantes
-              </NavLink>
-            )}
-            {showCoffee && (
-              <NavLink to={AppRoute.Coffee} $active={isActive(AppRoute.Coffee)}>
-                Café
-              </NavLink>
-            )}
-            {showClasses && (
-              <NavLink to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
-                Turma
-              </NavLink>
-            )}
-            {showPeople && (
-              <NavLink to={AppRoute.People} $active={isActive(AppRoute.People)}>
-                Pessoas
-              </NavLink>
-            )}
-            {showAdmin && (
-              <NavLink to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
-                Menu
-              </NavLink>
-            )}
-          </Nav>
 
           <UserArea ref={ref}>
             <UserBtn onClick={() => setOpen((v) => !v)}>

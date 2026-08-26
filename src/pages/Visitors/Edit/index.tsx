@@ -19,7 +19,8 @@ export function VisitorEditPage() {
   const { user } = useAuthCtx();
   const { person, loading, error, updatePerson, archive, reactivate } = useVisitorDetail(id ?? '');
 
-  const canManage = user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin;
+  const canManage =
+    user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
 
   const {
     control,
@@ -44,12 +45,13 @@ export function VisitorEditPage() {
 
   // Each role can only touch this person's data while they're at that
   // role's own step — integration_team owns contact/café, teacher owns the
-  // integration classes. admin is unrestricted.
+  // integration classes. admin/pastor are unrestricted.
   const inIntegrationTeamStep =
     person.status === 'initial_contact' || person.status === 'retry_contact' || person.status === 'welcome_coffee';
   const inTeacherStep = person.status === 'integration';
   const canEditFields =
     user?.role === UserRole.Admin ||
+    user?.role === UserRole.Pastor ||
     (user?.role === UserRole.IntegrationTeam && inIntegrationTeamStep) ||
     (user?.role === UserRole.Teacher && inTeacherStep);
 
@@ -91,19 +93,19 @@ export function VisitorEditPage() {
           disabled={!canEditFields}
         />
         <TextInput
-          label={text.fields.email}
-          control={control}
-          name="email"
-          type="email"
-          placeholder={text.fields.emailPlaceholder}
-          disabled={!canEditFields}
-        />
-        <TextInput
           label={text.fields.phone}
           control={control}
           name="phone"
           mask="phone"
           placeholder={PHONE_PLACEHOLDER}
+          disabled={!canEditFields}
+        />
+        <TextInput
+          label={text.fields.email}
+          control={control}
+          name="email"
+          type="email"
+          placeholder={text.fields.emailPlaceholder}
           disabled={!canEditFields}
         />
         <TextInput label="Idade" control={control} name="age" type="text" inputMode="numeric" placeholder="Idade" disabled={!canEditFields} />

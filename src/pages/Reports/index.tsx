@@ -5,7 +5,7 @@ import { AnnualReportModal } from './components/AnnualReportModal';
 import { StatusCountsTable } from './components/StatusCountsTable';
 
 export function ReportsPage() {
-  const { open, close, modal } = useModal();
+  const { open, close, modal } = useModal('drawer');
 
   return (
     <div>

@@ -5,12 +5,11 @@ export const Wrapper = styled.div`
   display: flex;
   align-items: flex-start;
   width: 100%;
-  overflow-x: auto;
 `;
 
 export const Step = styled.div<{ $state: 'done' | 'current' | 'future' }>`
   flex: 1;
-  min-width: 72px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,6 +54,10 @@ export const Circle = styled.div<{ $state: 'done' | 'current' | 'future' }>`
 
 export const Label = styled.span<{ $state: 'done' | 'current' | 'future' }>`
   margin-top: ${({ theme }) => theme.spacing.xs};
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
   font-weight: ${({ $state }) => ($state === 'current' ? 700 : 500)};

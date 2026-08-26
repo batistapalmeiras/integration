@@ -1,10 +1,13 @@
 // Libs
 import { Link } from 'lucide-react';
-import { Button, Card, Checkbox, IconButton, Skeleton, Typography, useToast } from 'bp-kit';
+import { Card, Checkbox, IconButton, Skeleton, Typography, useToast } from 'bp-kit';
 // Local
 import { CountBadge } from '../../../Classes/styles';
 import { formatDate } from '../../../../domain/dates';
+import { membershipInterestMessage } from '../../../../domain/whatsapp';
+import { Person } from '../../types';
 import { CardHeader, LessonList, LessonRow, StagePanel } from '../styles';
+import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
 interface IntegrationClassState {
   lessons: { id: string; number: number; date: string }[];
@@ -15,16 +18,15 @@ interface IntegrationClassState {
 const MEMBERSHIP_THRESHOLD = 4;
 
 interface Props {
+  person: Person;
   integrationClass: IntegrationClassState | null;
   loading: boolean;
   canRecordAttendance: boolean;
-  isAdmin: boolean;
   onToggle: (lessonId: string, attended: boolean) => Promise<void>;
   onCopyMakeupLink: (lessonId: string) => Promise<string>;
-  onPromote: () => Promise<void>;
 }
 
-export function IntegrationStagePanel({ integrationClass, loading, canRecordAttendance, isAdmin, onToggle, onCopyMakeupLink, onPromote }: Props) {
+export function IntegrationStagePanel({ person, integrationClass, loading, canRecordAttendance, onToggle, onCopyMakeupLink }: Props) {
   const { show: showToast, toast } = useToast();
 
   if (loading || !integrationClass) return <Skeleton $h="120px" />;
@@ -78,10 +80,12 @@ export function IntegrationStagePanel({ integrationClass, loading, canRecordAtte
         </LessonList>
       </Card>
 
-      {isAdmin && eligible && (
-        <Button size="sm" variant="secondary" onClick={onPromote}>
-          Marcar pendente de membresia
-        </Button>
+      {canRecordAttendance && eligible && (
+        <WhatsAppMessageBox
+          person={person}
+          defaultMessage={membershipInterestMessage(person.name)}
+          buttonLabel="Enviar Ficha de Interesse"
+        />
       )}
 
       {toast}

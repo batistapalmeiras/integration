@@ -12,8 +12,12 @@
 create table public.profiles (
   id         uuid primary key references auth.users (id) on delete cascade,
   name       text not null,
-  role       text not null check (role in ('admin', 'integration_team', 'pastor', 'reception', 'teacher')),
+  -- 'reception' removed 2026-08-25 — Equipe de Integração absorbed that job.
+  role       text not null check (role in ('admin', 'integration_team', 'pastor', 'teacher')),
   active     boolean not null default true,
+  -- Set true when create-volunteer creates a login with the shared default
+  -- password — cleared once the person sets their own via ProfilePage.
+  must_change_password boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -33,19 +37,77 @@ as $$
   select role from public.profiles where id = auth.uid() and active;
 $$;
 
+-- Pastor is a full equivalent of Admin everywhere (closed 2026-08-25). Admin
+-- can see every profile (select stays wide open), but can only create/edit/
+-- remove integration_team and teacher ones — Admin/Pastor accounts are
+-- visible to Admin, not manageable by them (only Pastor manages those).
 create policy "profiles_select_own_or_admin"
   on public.profiles for select
-  using (id = auth.uid() or public.current_role() = 'admin');
+  using (id = auth.uid() or public.current_role() in ('admin', 'pastor'));
 
 create policy "profiles_update_own_name"
   on public.profiles for update
   using (id = auth.uid())
   with check (id = auth.uid());
 
-create policy "profiles_admin_manage"
+create policy "profiles_manage_admin_pastor"
   on public.profiles for all
-  using (public.current_role() = 'admin')
-  with check (public.current_role() = 'admin');
+  using (
+    public.current_role() = 'pastor'
+    or (public.current_role() = 'admin' and role in ('integration_team', 'teacher'))
+  )
+  with check (
+    public.current_role() = 'pastor'
+    or (public.current_role() = 'admin' and role in ('integration_team', 'teacher'))
+  );
+
+-- -----------------------------------------------------------------------------
+-- ministries / small_groups ("Ministérios" / "PGs") — admin-managed lists,
+-- referenced by people.ministry_id/small_group_id below. A ministry or PG
+-- can't be deleted while someone is linked to it (plain FK, no ON DELETE
+-- clause = restrict) — the admin UI checks the linked count up front so
+-- this shows as a disabled action, not a raw DB error.
+-- -----------------------------------------------------------------------------
+create table public.ministries (
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null unique,
+  leaders    text[] not null default '{}',
+  created_at timestamptz not null default now()
+);
+
+alter table public.ministries enable row level security;
+
+create policy "ministries_select_all_authenticated"
+  on public.ministries for select
+  using (auth.uid() is not null);
+
+-- Exclusive to Pastor (not Admin) — closed 2026-08-25: PGs/Ministérios are
+-- church-wide structure, not integration-pipeline admin work.
+create policy "ministries_manage_pastor"
+  on public.ministries for all
+  using (public.current_role() = 'pastor')
+  with check (public.current_role() = 'pastor');
+
+create table public.small_groups (
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null unique,
+  leaders    text[] not null default '{}',
+  -- Only PGs have hosts (a PG meets at someone's home) — ministries don't.
+  hosts      text[] not null default '{}',
+  created_at timestamptz not null default now()
+);
+
+alter table public.small_groups enable row level security;
+
+create policy "small_groups_select_all_authenticated"
+  on public.small_groups for select
+  using (auth.uid() is not null);
+
+-- Exclusive to Pastor (not Admin) — same reasoning as ministries above.
+create policy "small_groups_manage_pastor"
+  on public.small_groups for all
+  using (public.current_role() = 'pastor')
+  with check (public.current_role() = 'pastor');
 
 -- -----------------------------------------------------------------------------
 -- people (visitors / prospective members)
@@ -68,16 +130,38 @@ create table public.people (
   baptism_info           text,
   conversion_testimony   text,
   marital_status_story   text,
-  -- Filled in by staff on the Admin page when confirming someone as a
-  -- member (see the 'member' status transition in the app) — required at
-  -- that point, not before.
+  -- Deprecated 2026-08-25 — superseded by small_group_id/ministry_id below
+  -- (PGs/Ministérios became admin-managed tables instead of free text).
+  -- Left in place, unused by the app, so no historical data is lost.
   small_group            text,
   ministry                text,
+  -- Filled in by staff on the Admin page when confirming someone as a
+  -- member (see the 'member' status transition in the app) — required at
+  -- that point, not before. Editable afterwards from the Comunidade tab.
+  small_group_id          uuid references public.small_groups (id),
+  ministry_id             uuid references public.ministries (id),
+  -- Filled in by the person themselves via the public "Ficha de Interesse
+  -- de Membresia" form (see submit_membership_interest below), sent by the
+  -- teacher once the person completes 4/4 lessons. marital_status_story
+  -- above already covers "estado civil" — deliberately not duplicated here.
+  birth_date             date,
+  entry_type             text check (entry_type in ('baptism', 'transfer_letter', 'acclamation', 'reconciliation')),
+  origin_church          text,
+  statute_agreed_at      timestamptz,
+  ministry_interests     text[],
+  secret_society         text,
+  wants_small_group      text check (wants_small_group in ('yes', 'not_now', 'already')),
+  membership_note        text,
   -- Set the first time staff opens the WhatsApp compose box for this
   -- person's current contact stage — persisted so the "Resultado" form
   -- stays visible on a later visit instead of hiding again until they
   -- click "Abrir WhatsApp" a second time.
   whatsapp_opened_at     timestamptz,
+  -- Set when a welcome-coffee no-show gets sent back to 'retry_contact' for
+  -- its one allowed retry round (see markCoffeeNotAttended) — tells
+  -- registerContactAttempt() to archive instead of looping again on a
+  -- second "sem resposta", unlike the normal unlimited pre-café retry loop.
+  coffee_retry_used     boolean not null default false,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
@@ -88,9 +172,9 @@ create policy "people_select_all_authenticated"
   on public.people for select
   using (auth.uid() is not null);
 
-create policy "people_insert_reception_team_admin"
+create policy "people_insert_team_pastor_admin"
   on public.people for insert
-  with check (public.current_role() in ('reception', 'integration_team', 'admin'));
+  with check (public.current_role() in ('integration_team', 'pastor', 'admin'));
 
 create policy "people_update_team_pastor_admin"
   on public.people for update
@@ -140,10 +224,17 @@ create policy "contact_attempts_select_all_authenticated"
 
 create policy "contact_attempts_insert_team_admin"
   on public.contact_attempts for insert
-  with check (public.current_role() in ('integration_team', 'admin'));
+  with check (public.current_role() in ('integration_team', 'pastor', 'admin'));
+
+-- Lets a volunteer correct a mis-registered result (see
+-- editLastContactAttempt) — attempts were write-once before 2026-08-24.
+create policy "contact_attempts_update_team_admin"
+  on public.contact_attempts for update
+  using (public.current_role() in ('integration_team', 'pastor', 'admin'))
+  with check (public.current_role() in ('integration_team', 'pastor', 'admin'));
 
 -- -----------------------------------------------------------------------------
--- coffee_events — the monthly welcome coffee (1st Sunday, 17:30)
+-- coffee_events — the welcome coffee (staff-picked date, Sunday only, 17:30)
 -- -----------------------------------------------------------------------------
 create table public.coffee_events (
   id         uuid primary key default gen_random_uuid(),
@@ -160,8 +251,8 @@ create policy "coffee_events_select_all_authenticated"
 
 create policy "coffee_events_manage_team_admin"
   on public.coffee_events for all
-  using (public.current_role() in ('integration_team', 'admin'))
-  with check (public.current_role() in ('integration_team', 'admin'));
+  using (public.current_role() in ('integration_team', 'pastor', 'admin'))
+  with check (public.current_role() in ('integration_team', 'pastor', 'admin'));
 
 -- -----------------------------------------------------------------------------
 -- coffee_attendance
@@ -205,8 +296,8 @@ create policy "cohorts_select_all_authenticated"
 
 create policy "cohorts_manage_admin_teacher"
   on public.cohorts for all
-  using (public.current_role() in ('admin', 'teacher'))
-  with check (public.current_role() in ('admin', 'teacher'));
+  using (public.current_role() in ('admin', 'teacher', 'pastor'))
+  with check (public.current_role() in ('admin', 'teacher', 'pastor'));
 
 -- -----------------------------------------------------------------------------
 -- lessons ("aulas") — the 4 classes of a cohort
@@ -227,8 +318,8 @@ create policy "lessons_select_all_authenticated"
 
 create policy "lessons_manage_admin_teacher"
   on public.lessons for all
-  using (public.current_role() in ('admin', 'teacher'))
-  with check (public.current_role() in ('admin', 'teacher'));
+  using (public.current_role() in ('admin', 'teacher', 'pastor'))
+  with check (public.current_role() in ('admin', 'teacher', 'pastor'));
 
 -- -----------------------------------------------------------------------------
 -- enrollments ("matrículas") — a person enrolled in a cohort
@@ -249,8 +340,8 @@ create policy "enrollments_select_all_authenticated"
 
 create policy "enrollments_manage_team_admin"
   on public.enrollments for all
-  using (public.current_role() in ('integration_team', 'admin'))
-  with check (public.current_role() in ('integration_team', 'admin'));
+  using (public.current_role() in ('integration_team', 'pastor', 'admin'))
+  with check (public.current_role() in ('integration_team', 'pastor', 'admin'));
 
 -- -----------------------------------------------------------------------------
 -- lesson_attendance — presence per lesson; membership = 3 of 4 attended = true
@@ -275,8 +366,8 @@ create policy "lesson_attendance_select_all_authenticated"
 
 create policy "lesson_attendance_manage_teacher_admin"
   on public.lesson_attendance for all
-  using (public.current_role() in ('teacher', 'admin'))
-  with check (public.current_role() in ('teacher', 'admin'));
+  using (public.current_role() in ('teacher', 'admin', 'pastor'))
+  with check (public.current_role() in ('teacher', 'admin', 'pastor'));
 
 -- -----------------------------------------------------------------------------
 -- Convenience view: attended-lesson count per enrollment, to check the 3-of-4
@@ -500,6 +591,124 @@ end;
 $$;
 
 grant execute on function public.submit_makeup_attendance(uuid, text) to anon;
+
+-- -----------------------------------------------------------------------------
+-- Public "Ficha de Interesse de Membresia" flow — same shape as the
+-- "Inscrição na Integração" flow above: one fixed public URL
+-- (/integracao/ficha-de-interesse, no per-person token), the person
+-- identifies themselves by phone. No link generation needed on the staff
+-- side anymore — find_membership_interest_person enforces eligibility
+-- (status='integration' AND 4/4 lessons attended) as part of the lookup
+-- itself, so someone who hasn't finished the classes yet just gets a clear
+-- error instead of a broken/early link. Submitting moves the person
+-- straight to 'membership_pending', replacing the old manual
+-- "Marcar pendente de membresia" staff action entirely.
+-- -----------------------------------------------------------------------------
+-- Ministry names for the "ministérios de interesse" checklist — the only
+-- piece of admin-managed data this public form needs, so it gets its own
+-- narrow read-only RPC rather than a direct RLS grant to anon.
+create or replace function public.list_ministries()
+returns table (id uuid, name text)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select id, name from public.ministries order by name;
+$$;
+
+grant execute on function public.list_ministries() to anon;
+
+create or replace function public.find_membership_interest_person(p_phone text)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_match_count int;
+  v_person_id   uuid;
+begin
+  select count(*) into v_match_count
+    from public.people p
+    join public.enrollments e on e.person_id = p.id
+    join public.enrollment_attendance_summary s on s.enrollment_id = e.id
+    where p.phone = p_phone and p.status = 'integration' and s.lessons_attended >= 4;
+
+  if v_match_count = 0 then
+    raise exception 'Não encontramos um cadastro elegível com esse telefone. Verifique se você já concluiu as 4 aulas de Integração, ou fale com a Equipe de Integração.';
+  end if;
+
+  if v_match_count > 1 then
+    raise exception 'Encontramos mais de um cadastro com esse telefone. Fale com a Equipe de Integração.';
+  end if;
+
+  select p.id into v_person_id
+    from public.people p
+    join public.enrollments e on e.person_id = p.id
+    join public.enrollment_attendance_summary s on s.enrollment_id = e.id
+    where p.phone = p_phone and p.status = 'integration' and s.lessons_attended >= 4
+    limit 1;
+
+  return v_person_id;
+end;
+$$;
+
+create or replace function public.check_membership_interest_phone(p_phone text)
+returns table (person_name text, already_submitted boolean)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_person_id uuid;
+begin
+  v_person_id := public.find_membership_interest_person(p_phone);
+  return query select name, statute_agreed_at is not null from public.people where id = v_person_id;
+end;
+$$;
+
+grant execute on function public.check_membership_interest_phone(text) to anon;
+
+create or replace function public.submit_membership_interest(
+  p_phone              text,
+  p_birth_date         date,
+  p_entry_type         text,
+  p_origin_church      text,
+  p_ministry_interests text[],
+  p_secret_society     text,
+  p_wants_small_group  text,
+  p_membership_note    text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_person_id uuid;
+begin
+  v_person_id := public.find_membership_interest_person(p_phone);
+
+  update public.people
+    set birth_date = p_birth_date,
+        entry_type = p_entry_type,
+        origin_church = p_origin_church,
+        statute_agreed_at = now(),
+        ministry_interests = p_ministry_interests,
+        secret_society = p_secret_society,
+        wants_small_group = p_wants_small_group,
+        membership_note = p_membership_note,
+        status = 'membership_pending',
+        updated_at = now()
+    where id = v_person_id;
+
+  insert into public.status_history (person_id, from_status, to_status, note)
+    values (v_person_id, 'integration', 'membership_pending', 'Ficha de Interesse de Membresia preenchida');
+end;
+$$;
+
+grant execute on function public.submit_membership_interest(text, date, text, text, text[], text, text, text) to anon;
 
 -- -----------------------------------------------------------------------------
 -- Auto-archive people who missed their welcome coffee. The coffee is a fixed

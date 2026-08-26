@@ -20,7 +20,15 @@ interface Props {
 export function SignupFormStep({ name, submitting, error, initialValues, onSubmit, onValuesChange }: Props) {
   const { control, handleSubmit, watch } = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
-    defaultValues: { name, ...initialValues },
+    defaultValues: {
+      name,
+      attendingSince: '',
+      previousChurch: '',
+      baptismInfo: '',
+      conversionTestimony: '',
+      maritalStatusStory: '',
+      ...initialValues,
+    },
   });
 
   useEffect(() => {

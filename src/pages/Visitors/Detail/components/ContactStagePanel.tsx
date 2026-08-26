@@ -1,7 +1,7 @@
 // Libs
 import { Card, InfoBox } from 'bp-kit';
 // Local
-import { coffeeInviteMessage } from '../../../../domain/whatsapp';
+import { initialContactMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../types';
 import { ContactAttemptFormValues } from '../../validators';
 import { SectionDivider, SectionStack, StagePanel } from '../styles';
@@ -10,19 +10,25 @@ import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
 interface Props {
   person: Person;
+  volunteerName: string;
   hasCoffeeEvent: boolean | null;
   onRegisterContact: (values: ContactAttemptFormValues) => Promise<void>;
   onWhatsAppOpened: () => Promise<void>;
 }
 
-export function ContactStagePanel({ person, hasCoffeeEvent, onRegisterContact, onWhatsAppOpened }: Props) {
+export function ContactStagePanel({ person, volunteerName, hasCoffeeEvent, onRegisterContact, onWhatsAppOpened }: Props) {
   const opened = !!person.whatsapp_opened_at;
 
   return (
     <StagePanel>
       <Card>
         <SectionStack>
-          <WhatsAppMessageBox person={person} defaultMessage={coffeeInviteMessage(person.name)} onOpen={onWhatsAppOpened} bare />
+          <WhatsAppMessageBox
+            person={person}
+            defaultMessage={initialContactMessage(person.name, volunteerName)}
+            onOpen={onWhatsAppOpened}
+            bare
+          />
           {opened &&
             (hasCoffeeEvent === false ? (
               <SectionDivider>

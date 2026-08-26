@@ -16,6 +16,7 @@ interface Props {
 export function PhoneStep({ onFound }: Props) {
   const { control, handleSubmit } = useForm<PhoneStepFormValues>({
     resolver: zodResolver(phoneStepSchema),
+    defaultValues: { phone: '' },
   });
   const { check, checking, error } = useCheckPhone();
 
