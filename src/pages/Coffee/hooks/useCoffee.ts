@@ -1,11 +1,14 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
+// Libs
+import { useAuthCtx } from 'bp-kit';
 // Local
-import { createOrUpdateCoffeeEvent } from '../../../domain/cafeSchedule';
+import { createOrUpdateCoffeeEvent, markCoffeeAttended, markCoffeeNotAttended } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
 export function useCoffee() {
+  const { user } = useAuthCtx();
   const [event, setEvent] = useState<CoffeeEvent | null>(null);
   const [attendees, setAttendees] = useState<AttendeeRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,11 +100,23 @@ export function useCoffee() {
     await load();
   };
 
+  const markAttended = async (attendanceId: string) => {
+    await markCoffeeAttended(attendanceId);
+    await load();
+  };
+
+  const markNotAttended = async (personId: string) => {
+    await markCoffeeNotAttended(personId, user?.id);
+    await load();
+  };
+
   return {
     event,
     attendees,
     loading,
     error,
     createEvent,
+    markAttended,
+    markNotAttended,
   };
 }

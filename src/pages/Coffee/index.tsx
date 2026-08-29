@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, PageHeader, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
 // Local
-import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { RowActions, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { CreateEventModal } from './components/CreateEventModal';
@@ -13,7 +13,7 @@ import { useCoffee } from './hooks';
 export function CoffeePage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { event, attendees, loading, error, createEvent } = useCoffee();
+  const { event, attendees, loading, error, createEvent, markAttended, markNotAttended } = useCoffee();
   const { open, close, modal } = useModal('drawer');
 
   const canPlan =
@@ -68,10 +68,21 @@ export function CoffeePage() {
                 >
                   <Td>{attendance.person.name}</Td>
                   <Td>{attendance.person.phone}</Td>
-                  <Td>
-                    <Typography type="caption">
-                      {attendance.attended ? 'Compareceu — aguardando resposta ao convite' : 'Aguardando confirmação de presença'}
-                    </Typography>
+                  <Td onClick={canPlan && !attendance.attended ? (e: React.MouseEvent) => e.stopPropagation() : undefined}>
+                    {canPlan && !attendance.attended ? (
+                      <RowActions>
+                        <Button size="sm" variant="secondary" onClick={() => markNotAttended(attendance.person.id)}>
+                          Não compareceu
+                        </Button>
+                        <Button size="sm" variant="primary" onClick={() => markAttended(attendance.id)}>
+                          Compareceu
+                        </Button>
+                      </RowActions>
+                    ) : (
+                      <Typography type="caption">
+                        {attendance.attended ? 'Compareceu — aguardando resposta ao convite' : 'Aguardando confirmação de presença'}
+                      </Typography>
+                    )}
                   </Td>
                 </Tr>
               ))}

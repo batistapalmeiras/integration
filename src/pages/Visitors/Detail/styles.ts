@@ -111,6 +111,10 @@ export const DangerLink = styled.button`
   }
 `;
 
+export const InfoBoxAction = styled.div`
+  margin-top: ${({ theme }) => theme.spacing.sm};
+`;
+
 export const Hint = styled.p`
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};

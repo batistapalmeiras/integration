@@ -1,10 +1,12 @@
 // Libs
-import { Card, InfoBox } from 'bp-kit';
+import { Button, Card, InfoBox } from 'bp-kit';
+import { useNavigate } from 'react-router-dom';
 // Local
 import { initialContactMessage } from '../../../../domain/whatsapp';
+import { AppRoute } from '../../../../routes/paths';
 import { Person } from '../../types';
 import { ContactAttemptFormValues } from '../../validators';
-import { SectionDivider, SectionStack, StagePanel } from '../styles';
+import { InfoBoxAction, SectionDivider, SectionStack, StagePanel } from '../styles';
 import { ContactTab } from './ContactTab';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
@@ -17,30 +19,36 @@ interface Props {
 }
 
 export function ContactStagePanel({ person, volunteerName, hasCoffeeEvent, onRegisterContact, onWhatsAppOpened }: Props) {
+  const navigate = useNavigate();
   const opened = !!person.whatsapp_opened_at;
+  const noCoffeeScheduled = hasCoffeeEvent === false;
 
   return (
     <StagePanel>
       <Card>
         <SectionStack>
+          {noCoffeeScheduled && (
+            <InfoBox variant="warning">
+              Ainda não há um café de boas-vindas agendado. Agende uma data na aba Café antes de entrar em contato.
+              <InfoBoxAction>
+                <Button type="button" variant="secondary" size="sm" onClick={() => navigate(AppRoute.Coffee)}>
+                  Ir para Café
+                </Button>
+              </InfoBoxAction>
+            </InfoBox>
+          )}
           <WhatsAppMessageBox
             person={person}
             defaultMessage={initialContactMessage(person.name, volunteerName)}
             onOpen={onWhatsAppOpened}
             bare
+            disabled={noCoffeeScheduled}
           />
-          {opened &&
-            (hasCoffeeEvent === false ? (
-              <SectionDivider>
-                <InfoBox variant="warning">
-                  Não há café de boas-vindas agendado. Crie o café na aba Café antes de registrar o contato.
-                </InfoBox>
-              </SectionDivider>
-            ) : (
-              <SectionDivider>
-                <ContactTab onSubmit={onRegisterContact} />
-              </SectionDivider>
-            ))}
+          {opened && !noCoffeeScheduled && (
+            <SectionDivider>
+              <ContactTab onSubmit={onRegisterContact} />
+            </SectionDivider>
+          )}
         </SectionStack>
       </Card>
     </StagePanel>
