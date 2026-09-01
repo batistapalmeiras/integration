@@ -105,6 +105,25 @@ export async function markCoffeeAttended(attendanceId: string): Promise<void> {
   if (error) throw error;
 }
 
+// Person let the volunteer know beforehand they're not coming — distinct
+// from a silent no-show (markCoffeeNotAttended), which gets one retry round
+// instead of archiving straight away.
+export async function markCoffeeCanceled(personId: string, actorId?: string): Promise<void> {
+  const { error: statusError } = await supabase
+    .from('people')
+    .update({ status: 'archived', updated_at: new Date().toISOString() })
+    .eq('id', personId);
+  if (statusError) throw statusError;
+
+  await supabase.from('status_history').insert({
+    person_id: personId,
+    from_status: 'welcome_coffee',
+    to_status: 'archived',
+    changed_by: actorId,
+    note: 'Cancelou a presença no café antes da data',
+  });
+}
+
 export async function markCoffeeNotAttended(personId: string, actorId?: string): Promise<void> {
   const { error: statusError } = await supabase
     .from('people')

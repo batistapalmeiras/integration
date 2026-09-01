@@ -1,3 +1,5 @@
+// React
+import { useState } from 'react';
 // Libs
 import { Button, Card, InfoBox } from 'bp-kit';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +22,10 @@ interface Props {
 
 export function ContactStagePanel({ person, volunteerName, hasCoffeeEvent, onRegisterContact, onWhatsAppOpened }: Props) {
   const navigate = useNavigate();
-  const opened = !!person.whatsapp_opened_at;
+
+  const [skipWhatsApp, setSkipWhatsApp] = useState(false);
+
+  const opened = !!person.whatsapp_opened_at || skipWhatsApp;
   const noCoffeeScheduled = hasCoffeeEvent === false;
 
   return (
@@ -44,6 +49,11 @@ export function ContactStagePanel({ person, volunteerName, hasCoffeeEvent, onReg
             bare
             disabled={noCoffeeScheduled}
           />
+          {!opened && !noCoffeeScheduled && (
+            <Button type="button" variant="secondary" size="sm" onClick={() => setSkipWhatsApp(true)}>
+              Já fiz contato de outra forma
+            </Button>
+          )}
           {opened && !noCoffeeScheduled && (
             <SectionDivider>
               <ContactTab onSubmit={onRegisterContact} />

@@ -5,9 +5,10 @@ import { Button, Empty, Pagination, SearchInput, Skeleton, text, useModal } from
 import { SlidersHorizontal } from 'lucide-react';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
+import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { AppRoute } from '../../../routes/paths';
 import { usePeopleReport } from '../hooks';
-import { FiltersButtonRow, PlainTable, PlainTableWrap, SearchRow } from '../styles';
+import { FiltersButtonRow, SearchRow } from '../styles';
 import { PeopleFiltersModal } from './PeopleFiltersModal';
 
 export function PeopleSection() {
@@ -30,7 +31,7 @@ export function PeopleSection() {
     hasFilter,
   } = usePeopleReport();
 
-  const activeFilterCount = (statusFilter !== 'all' ? 1 : 0) + (cohortFilter !== 'all' ? 1 : 0);
+  const activeFilterCount = (statusFilter.length > 0 ? 1 : 0) + (cohortFilter !== 'all' ? 1 : 0);
 
   const openFilters = () =>
     open(
@@ -69,26 +70,28 @@ export function PeopleSection() {
         />
       ) : (
         <>
-          <PlainTableWrap>
-            <PlainTable>
+          <TableWrapper>
+            <Table>
               <thead>
                 <tr>
-                  <th>{text.fields.name}</th>
-                  <th>{text.fields.status}</th>
+                  <Th>{text.fields.name}</Th>
+                  <Th>{text.fields.status}</Th>
                 </tr>
               </thead>
               <tbody>
                 {people.map((person) => (
-                  <tr key={person.id} onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
-                    <td>{person.name}</td>
-                    <td>
-                      <StatusPill status={person.status} />
-                    </td>
-                  </tr>
+                  <Tr key={person.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
+                    <Td $truncate title={person.name}>
+                      {person.name}
+                    </Td>
+                    <Td $shrink>
+                      <StatusPill person={person} compact />
+                    </Td>
+                  </Tr>
                 ))}
               </tbody>
-            </PlainTable>
-          </PlainTableWrap>
+            </Table>
+          </TableWrapper>
 
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </>

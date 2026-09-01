@@ -3,8 +3,14 @@ import { useCallback, useEffect, useState } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
-import { createOrUpdateCoffeeEvent, markCoffeeAttended, markCoffeeNotAttended } from '../../../domain/cafeSchedule';
+import {
+  createOrUpdateCoffeeEvent,
+  markCoffeeAttended,
+  markCoffeeCanceled,
+  markCoffeeNotAttended,
+} from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
+import { comparePeopleByPipeline } from '../../../types/person';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
 export function useCoffee() {
@@ -87,7 +93,9 @@ export function useCoffee() {
     // Once a person moves past the café stage (invited to classes, archived, etc.)
     // they're another volunteer's queue now — stop showing them here.
     const rows = (attendanceData ?? []) as unknown as AttendeeRow[];
-    setAttendees(rows.filter((a) => a.person.status === 'welcome_coffee'));
+    setAttendees(
+      rows.filter((a) => a.person.status === 'welcome_coffee').sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
+    );
     setLoading(false);
   }, []);
 
@@ -100,14 +108,29 @@ export function useCoffee() {
     await load();
   };
 
+  const deleteEvent = async () => {
+    if (!event) return;
+    const { error: deleteError } = await supabase.from('coffee_events').delete().eq('id', event.id);
+    if (deleteError) throw deleteError;
+    await load();
+  };
+
+  // These three patch `attendees` in place instead of re-running `load()` —
+  // re-fetching would flip `loading` back to true and flash/replace the
+  // whole table for a change that only ever affects a single row.
   const markAttended = async (attendanceId: string) => {
     await markCoffeeAttended(attendanceId);
-    await load();
+    setAttendees((prev) => prev.map((a) => (a.id === attendanceId ? { ...a, attended: true } : a)));
   };
 
   const markNotAttended = async (personId: string) => {
     await markCoffeeNotAttended(personId, user?.id);
-    await load();
+    setAttendees((prev) => prev.filter((a) => a.person.id !== personId));
+  };
+
+  const markCanceled = async (personId: string) => {
+    await markCoffeeCanceled(personId, user?.id);
+    setAttendees((prev) => prev.filter((a) => a.person.id !== personId));
   };
 
   return {
@@ -116,7 +139,9 @@ export function useCoffee() {
     loading,
     error,
     createEvent,
+    deleteEvent,
     markAttended,
     markNotAttended,
+    markCanceled,
   };
 }

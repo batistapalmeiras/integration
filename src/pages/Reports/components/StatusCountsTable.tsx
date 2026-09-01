@@ -1,23 +1,10 @@
 // Libs
-import styled from 'styled-components';
 import { Skeleton, text } from 'bp-kit';
 // Local
+import { Table, TableWrapper, Td, Th } from '../../../components/Table';
 import { STATUS_META } from '../../../types/person';
 import { useStatusCounts } from '../hooks';
-import { PlainTable, PlainTableWrap, SummaryLabel, SummaryStat, SummaryStrip, SummaryValue } from '../styles';
-
-// This table is informational, not a navigation list like the others built
-// on PlainTable — drop the pointer/hover affordance so it doesn't look
-// clickable.
-const StaticTable = styled(PlainTable)`
-  tbody tr {
-    cursor: default;
-
-    &:hover {
-      background: none;
-    }
-  }
-`;
+import { SummaryLabel, SummaryStat, SummaryStrip, SummaryValue } from '../styles';
 
 export function StatusCountsTable() {
   const { counts, total, totalCohorts, loading, error } = useStatusCounts();
@@ -38,24 +25,26 @@ export function StatusCountsTable() {
         </SummaryStat>
       </SummaryStrip>
 
-      <PlainTableWrap>
-        <StaticTable>
+      {/* Informational, not a navigation list — Tr has no $clickable, so it
+          naturally has no pointer/hover affordance. */}
+      <TableWrapper>
+        <Table>
           <thead>
             <tr>
-              <th>{text.fields.status}</th>
-              <th>Quantidade</th>
+              <Th>{text.fields.status}</Th>
+              <Th>Quantidade</Th>
             </tr>
           </thead>
           <tbody>
             {Object.entries(STATUS_META).map(([status, meta]) => (
               <tr key={status}>
-                <td>{meta.label}</td>
-                <td>{counts[status as keyof typeof counts] ?? 0}</td>
+                <Td>{meta.label}</Td>
+                <Td>{counts[status as keyof typeof counts] ?? 0}</Td>
               </tr>
             ))}
           </tbody>
-        </StaticTable>
-      </PlainTableWrap>
+        </Table>
+      </TableWrapper>
     </>
   );
 }

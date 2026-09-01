@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 // Local
 import { supabase } from '../../../lib/supabase';
+import { comparePeopleByPipeline } from '../../../types/person';
 import { Person } from '../types';
 
 // This page is the "contact" stage queue: once a person moves past it
@@ -17,14 +18,13 @@ export function useVisitors() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error: loadError } = await supabase
-      .from('people')
-      .select('*')
-      .in('status', VISIBLE_STATUSES)
-      .order('created_at', { ascending: false });
+    const { data, error: loadError } = await supabase.from('people').select('*').in('status', VISIBLE_STATUSES);
 
-    if (loadError) setError(loadError.message);
-    else setPeople(data as Person[]);
+    if (loadError) {
+      setError(loadError.message);
+    } else {
+      setPeople((data as Person[]).sort(comparePeopleByPipeline));
+    }
     setLoading(false);
   }, []);
 

@@ -1,11 +1,12 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
 // Local
-import { RowActions, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
+import { AttendanceControl } from './components/AttendanceControl';
 import { CreateEventModal } from './components/CreateEventModal';
 import { formatDate } from './domain';
 import { useCoffee } from './hooks';
@@ -13,7 +14,17 @@ import { useCoffee } from './hooks';
 export function CoffeePage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { event, attendees, loading, error, createEvent, markAttended, markNotAttended } = useCoffee();
+  const {
+    event,
+    attendees,
+    loading,
+    error,
+    createEvent,
+    deleteEvent,
+    markAttended,
+    markNotAttended,
+    markCanceled,
+  } = useCoffee();
   const { open, close, modal } = useModal('drawer');
 
   const canPlan =
@@ -23,7 +34,38 @@ export function CoffeePage() {
 
   const openCreateModal = () =>
     open(
-      <CreateEventModal close={close} onCreate={createEvent} initialDate={hasUpcomingEvent ? event!.event_date : undefined} />,
+      <CreateEventModal
+        close={close}
+        onCreate={createEvent}
+        onDelete={hasUpcomingEvent ? deleteEvent : undefined}
+        initialDate={hasUpcomingEvent ? event!.event_date : undefined}
+      />,
+    );
+
+  const confirmCanceled = (personId: string, personName: string) =>
+    open(
+      <>
+        <ModalTitle>Cancelar presença de {personName}?</ModalTitle>
+        <Typography type="p">
+          A pessoa avisou que não vem mais e será arquivada. Isso pode ser revertido depois, reativando o cadastro
+          dela em Visitantes.
+        </Typography>
+        <ModalActions>
+          <Button type="button" variant="secondary" onClick={close}>
+            Voltar
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            onClick={async () => {
+              await markCanceled(personId);
+              close();
+            }}
+          >
+            Cancelar presença
+          </Button>
+        </ModalActions>
+      </>,
     );
 
   return (
@@ -55,8 +97,7 @@ export function CoffeePage() {
             <thead>
               <tr>
                 <Th>{text.fields.name}</Th>
-                <Th>{text.fields.phone}</Th>
-                <Th>Situação</Th>
+                <Th $shrink>Situação</Th>
               </tr>
             </thead>
             <tbody>
@@ -66,23 +107,17 @@ export function CoffeePage() {
                   $clickable
                   onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}
                 >
-                  <Td>{attendance.person.name}</Td>
-                  <Td>{attendance.person.phone}</Td>
-                  <Td onClick={canPlan && !attendance.attended ? (e: React.MouseEvent) => e.stopPropagation() : undefined}>
-                    {canPlan && !attendance.attended ? (
-                      <RowActions>
-                        <Button size="sm" variant="secondary" onClick={() => markNotAttended(attendance.person.id)}>
-                          Não compareceu
-                        </Button>
-                        <Button size="sm" variant="primary" onClick={() => markAttended(attendance.id)}>
-                          Compareceu
-                        </Button>
-                      </RowActions>
-                    ) : (
-                      <Typography type="caption">
-                        {attendance.attended ? 'Compareceu — aguardando resposta ao convite' : 'Aguardando confirmação de presença'}
-                      </Typography>
-                    )}
+                  <Td $truncate title={attendance.person.name}>
+                    {attendance.person.name}
+                  </Td>
+                  <Td $shrink onClick={canPlan ? (e: React.MouseEvent) => e.stopPropagation() : undefined}>
+                    <AttendanceControl
+                      attended={attendance.attended}
+                      canManage={canPlan}
+                      onMarkAttended={() => markAttended(attendance.id)}
+                      onMarkNotAttended={() => markNotAttended(attendance.person.id)}
+                      onCanceledByPerson={() => confirmCanceled(attendance.person.id, attendance.person.name)}
+                    />
                   </Td>
                 </Tr>
               ))}

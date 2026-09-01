@@ -36,8 +36,10 @@ export function MembersPage() {
             <tbody>
               {members.map((member) => (
                 <Tr key={member.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${member.id}`)}>
-                  <Td data-label={text.fields.name}>{member.name}</Td>
-                  <Td data-label="Forma de entrada">{member.entry_type ? ENTRY_TYPE_LABELS[member.entry_type] : '—'}</Td>
+                  <Td $truncate title={member.name}>
+                    {member.name}
+                  </Td>
+                  <Td $shrink>{member.entry_type ? ENTRY_TYPE_LABELS[member.entry_type] : '—'}</Td>
                 </Tr>
               ))}
             </tbody>

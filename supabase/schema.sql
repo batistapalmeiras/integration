@@ -181,6 +181,15 @@ create policy "people_update_team_pastor_admin"
   using (public.current_role() in ('integration_team', 'pastor', 'admin'))
   with check (public.current_role() in ('integration_team', 'pastor', 'admin'));
 
+-- Deleting a mistaken cadastro is only allowed before any real history
+-- builds up on the person (closed 2026-09-01).
+create policy "people_delete_team_pastor_admin_initial_contact"
+  on public.people for delete
+  using (
+    public.current_role() in ('integration_team', 'pastor', 'admin')
+    and status = 'initial_contact'
+  );
+
 -- -----------------------------------------------------------------------------
 -- status_history — audit trail of status transitions for a person
 -- -----------------------------------------------------------------------------

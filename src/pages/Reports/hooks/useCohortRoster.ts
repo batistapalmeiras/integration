@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 // Local
 import { supabase } from '../../../lib/supabase';
-import { PersonStatus } from '../../../types/person';
+import { comparePeopleByPipeline, PersonStatus } from '../../../types/person';
 import { CohortRosterRow, CohortRow } from '../types';
 
 export function useCohortRoster(cohortId: string) {
@@ -65,14 +65,16 @@ export function useCohortRoster(cohortId: string) {
     });
 
     setRoster(
-      enrollments.map((enrollment) => ({
-        enrollmentId: enrollment.id,
-        personId: enrollment.person.id,
-        name: enrollment.person.name,
-        status: enrollment.person.status,
-        lessonsAttended: attendedByEnrollment.get(enrollment.id) ?? 0,
-        totalLessons,
-      })),
+      enrollments
+        .map((enrollment) => ({
+          enrollmentId: enrollment.id,
+          personId: enrollment.person.id,
+          name: enrollment.person.name,
+          status: enrollment.person.status,
+          lessonsAttended: attendedByEnrollment.get(enrollment.id) ?? 0,
+          totalLessons,
+        }))
+        .sort(comparePeopleByPipeline),
     );
     setLoading(false);
   }, [cohortId]);

@@ -111,7 +111,7 @@ export function VolunteerDetailPage() {
           </Button>
           <Button
             type="button"
-            variant="primary"
+            variant="danger"
             onClick={async () => {
               try {
                 await removeVolunteer();

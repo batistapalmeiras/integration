@@ -21,6 +21,7 @@ export interface PersonReportRow {
   id: string;
   name: string;
   status: PersonStatus;
+  whatsapp_opened_at: string | null;
 }
 
 export type StatusCounts = Partial<Record<PersonStatus, number>>;
