@@ -8,7 +8,7 @@ import { StatusPill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { AppRoute } from '../../../routes/paths';
 import { usePeopleReport } from '../hooks';
-import { FiltersButtonRow, SearchRow } from '../styles';
+import { FiltersButtonRow, PageFlexBody, PaginationWrap, SearchRow } from '../styles';
 import { PeopleFiltersModal } from './PeopleFiltersModal';
 
 export function PeopleSection() {
@@ -51,7 +51,7 @@ export function PeopleSection() {
   if (error) return <Empty title={text.feedback.loadError} description={error} />;
 
   return (
-    <div>
+    <PageFlexBody>
       <FiltersButtonRow>
         <Button variant="secondary" onClick={openFilters}>
           <SlidersHorizontal size={16} />
@@ -93,11 +93,13 @@ export function PeopleSection() {
             </Table>
           </TableWrapper>
 
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          <PaginationWrap>
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          </PaginationWrap>
         </>
       )}
 
       {modal}
-    </div>
+    </PageFlexBody>
   );
 }

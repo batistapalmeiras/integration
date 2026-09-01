@@ -26,6 +26,30 @@ export const FiltersButtonRow = styled.div`
 
 export const SearchRow = styled.div``;
 
+// Fills the remaining viewport (header/bottom-bar/page-padding subtracted)
+// so a short, paginated list still gets its pagination pinned near the
+// bottom of the screen instead of floating right under a handful of rows.
+export const PageFlexWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 64px - 56px - env(safe-area-inset-bottom) - ${({ theme }) => theme.spacing.sm} - ${({ theme }) => theme.spacing.lg});
+
+  @media (min-width: 745px) {
+    min-height: calc(100vh - ${({ theme }) => theme.spacing.xl} - ${({ theme }) => theme.spacing.xl});
+  }
+`;
+
+export const PageFlexBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+
+export const PaginationWrap = styled.div`
+  margin-top: auto;
+  padding-top: ${({ theme }) => theme.spacing.lg};
+`;
+
 export const SectionHeading = styled.div`
   margin: ${({ theme }) => theme.spacing.xl} 0 ${({ theme }) => theme.spacing.sm};
 `;
