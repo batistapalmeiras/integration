@@ -51,6 +51,7 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
           control={control}
           name="firstDate"
           isDateDisabled={minDate ? (date) => toDateKey(date) < minDate : undefined}
+          initialMonth={minDate ? parseDateKey(minDate) : undefined}
         />
 
         <ModalActions>
@@ -71,4 +72,9 @@ function toDateKey(date: Date): string {
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
+}
+
+function parseDateKey(value: string): Date {
+  const [y, m, d] = value.split('-').map(Number);
+  return new Date(y, m - 1, d);
 }
