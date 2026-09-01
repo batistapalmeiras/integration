@@ -74,8 +74,10 @@ export function ClassesPage() {
                 const eligible = row.attendedCount >= MEMBERSHIP_THRESHOLD;
                 return (
                   <Tr key={row.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${row.person.id}`)}>
-                    <Td data-label={text.fields.name}>{row.person.name}</Td>
-                    <Td data-label="Presenças">
+                    <Td $truncate title={row.person.name}>
+                      {row.person.name}
+                    </Td>
+                    <Td $shrink>
                       <CountBadge $eligible={eligible}>
                         {row.attendedCount}/{lessons.length}
                       </CountBadge>

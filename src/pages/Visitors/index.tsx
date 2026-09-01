@@ -40,9 +40,11 @@ export function VisitorsPage() {
             <tbody>
               {people.map((person) => (
                 <Tr key={person.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
-                  <Td>{person.name}</Td>
-                  <Td>
-                    <StatusPill status={person.status} />
+                  <Td $truncate title={person.name}>
+                    {person.name}
+                  </Td>
+                  <Td $shrink>
+                    <StatusPill person={person} compact />
                   </Td>
                 </Tr>
               ))}

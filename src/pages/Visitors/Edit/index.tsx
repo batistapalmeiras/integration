@@ -4,20 +4,22 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Archive } from 'lucide-react';
-import { Button, Empty, PageHeader, Skeleton, text, TextInput, useAuthCtx } from 'bp-kit';
+import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, text, TextInput, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
 // Local
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { AppRoute } from '../../../routes/paths';
 import { UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../Detail/hooks';
-import { Actions, Form } from '../Detail/styles';
+import { Actions, DangerLink, Form } from '../Detail/styles';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
 
 export function VisitorEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { person, loading, error, updatePerson, archive, reactivate } = useVisitorDetail(id ?? '');
+  const { person, loading, error, updatePerson, archive, reactivate, deletePerson } = useVisitorDetail(id ?? '');
+  const { open, close, modal } = useModal('drawer');
+  const { show: showToast, toast } = useToast();
 
   const canManage =
     user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
@@ -60,6 +62,38 @@ export function VisitorEditPage() {
     navigate(`${AppRoute.Visitors}/${id}`);
   });
 
+  const canDelete = canManage && person.status === 'initial_contact';
+
+  const confirmDelete = () =>
+    open(
+      <>
+        <ModalTitle>Excluir {person.name}?</ModalTitle>
+        <Typography type="p">
+          Só é possível excluir enquanto a pessoa ainda está no contato inicial. Essa ação não pode ser desfeita.
+        </Typography>
+        <ModalActions>
+          <Button type="button" variant="secondary" onClick={close}>
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            onClick={async () => {
+              try {
+                await deletePerson();
+                close();
+                navigate(AppRoute.Visitors);
+              } catch (e) {
+                showToast(e instanceof Error ? e.message : 'Não foi possível excluir.');
+              }
+            }}
+          >
+            Excluir
+          </Button>
+        </ModalActions>
+      </>,
+    );
+
   return (
     <div>
       <PageHeader
@@ -74,7 +108,7 @@ export function VisitorEditPage() {
               </Button>
             ) : (
               !isClosedOut && (
-                <Button variant="secondary" onClick={() => archive().then(() => navigate(AppRoute.Visitors))}>
+                <Button variant="danger" onClick={() => archive().then(() => navigate(AppRoute.Visitors))}>
                   <Archive size={16} />
                   Arquivar
                 </Button>
@@ -117,7 +151,15 @@ export function VisitorEditPage() {
             </Button>
           </Actions>
         )}
+
+        {canDelete && (
+          <DangerLink type="button" onClick={confirmDelete}>
+            Excluir cadastro
+          </DangerLink>
+        )}
       </Form>
+      {modal}
+      {toast}
     </div>
   );
 }

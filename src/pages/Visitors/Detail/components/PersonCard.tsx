@@ -19,7 +19,7 @@ export function PersonCard({ person, onClick }: Props) {
           <Typography type="h6">{person.name}</Typography>
           <Typography type="caption">{person.phone}</Typography>
         </PersonCardInfo>
-        <StatusPill status={person.status} />
+        <StatusPill person={person} />
         <ChevronRight size={18} />
       </PersonCardRow>
     </Card>

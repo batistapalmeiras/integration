@@ -1,13 +1,14 @@
 // Libs
 import styled from 'styled-components';
 // Local
-import { PersonStatus, STATUS_META } from '../../types/person';
+import { DisplayStatusInput, getDisplayStatusMeta } from '../../types/person';
 
 const Pill = styled.span<{ $tone: string }>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
+  white-space: nowrap;
   padding: 2px 10px;
   border-radius: ${({ theme }) => theme.rounded.full};
   font-family: ${({ theme }) => theme.typography.fontFamily};
@@ -30,13 +31,22 @@ const Pill = styled.span<{ $tone: string }>`
   }}
 `;
 
-export function StatusPill({ status }: { status: PersonStatus }) {
-  const meta = STATUS_META[status];
+interface Props {
+  person: DisplayStatusInput;
+  // Lists/tables pass this to use the shorter label where one exists (e.g.
+  // "Café" instead of "Café de Boas-vindas") — single-person views (the
+  // Visitor detail PersonCard) omit it and get the full label.
+  compact?: boolean;
+}
+
+export function StatusPill({ person, compact }: Props) {
+  const meta = getDisplayStatusMeta(person);
   const Icon = meta.icon;
+  const label = compact ? (meta.compactLabel ?? meta.label) : meta.label;
   return (
     <Pill $tone={meta.tone}>
       <Icon size={12} />
-      {meta.label}
+      {label}
     </Pill>
   );
 }

@@ -4,9 +4,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Empty, PageHeader, Skeleton, text } from 'bp-kit';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
+import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { AppRoute } from '../../../routes/paths';
 import { useCohortRoster } from '../hooks';
-import { CountBadge, HideOnMobile, NameCell, NameSubtitle, PlainTable, PlainTableWrap } from '../styles';
+import { CountBadge, NameCell, NamePrimary, NameSubtitle } from '../styles';
 
 export function CohortRosterPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,39 +35,39 @@ export function CohortRosterPage() {
       {roster.length === 0 ? (
         <Empty title="Ninguém matriculado" description="Essa turma não teve matrículas." />
       ) : (
-        <PlainTableWrap>
-          <PlainTable>
+        <TableWrapper>
+          <Table>
             <thead>
               <tr>
-                <th>{text.fields.name}</th>
-                <th>{text.fields.status}</th>
-                <HideOnMobile>Presenças</HideOnMobile>
+                <Th>{text.fields.name}</Th>
+                <Th>{text.fields.status}</Th>
+                <Th $hideOnMobile>Presenças</Th>
               </tr>
             </thead>
             <tbody>
               {roster.map((row) => (
-                <tr key={row.enrollmentId} onClick={() => navigate(`${AppRoute.Visitors}/${row.personId}`)}>
-                  <td>
+                <Tr key={row.enrollmentId} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${row.personId}`)}>
+                  <Td $truncate>
                     <NameCell>
-                      {row.name}
+                      <NamePrimary title={row.name}>{row.name}</NamePrimary>
                       <NameSubtitle>
                         {row.lessonsAttended}/{row.totalLessons} presenças
                       </NameSubtitle>
                     </NameCell>
-                  </td>
-                  <td>
-                    <StatusPill status={row.status} />
-                  </td>
-                  <HideOnMobile as="td">
+                  </Td>
+                  <Td $shrink>
+                    <StatusPill person={row} compact />
+                  </Td>
+                  <Td $hideOnMobile $shrink>
                     <CountBadge $eligible={row.lessonsAttended >= 3}>
                       {row.lessonsAttended}/{row.totalLessons}
                     </CountBadge>
-                  </HideOnMobile>
-                </tr>
+                  </Td>
+                </Tr>
               ))}
             </tbody>
-          </PlainTable>
-        </PlainTableWrap>
+          </Table>
+        </TableWrapper>
       )}
     </div>
   );

@@ -12,6 +12,4 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   [UserRole.Teacher]: 'Professor',
 };
 
-// Admin's own reach is scoped to the integration pipeline's day-to-day
-// staff — only Pastor (who "pode fazer tudo") manages Admin/Pastor accounts.
 export const ADMIN_MANAGEABLE_ROLES = [UserRole.IntegrationTeam, UserRole.Teacher];

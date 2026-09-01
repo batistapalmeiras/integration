@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 // Local
 import { supabase } from '../../../lib/supabase';
-import { PersonStatus } from '../../../types/person';
+import { comparePeopleByPipeline, PersonStatus } from '../../../types/person';
 import { PersonReportRow } from '../types';
 
 const PAGE_SIZE = 10;
@@ -15,7 +15,7 @@ export function usePeopleReport() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [statusFilter, setStatusFilterState] = useState<'all' | PersonStatus>('all');
+  const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>([]);
   const [cohortFilter, setCohortFilterState] = useState<string>('all');
   const [search, setSearchState] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -62,27 +62,35 @@ export function usePeopleReport() {
       }
     }
 
-    let query = supabase.from('people').select('id,name,status', { count: 'exact' });
-    if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+    // Sorting by pipeline stage isn't a plain column order Postgres can do
+    // for us via the query builder, so — this dataset being small (a single
+    // church's integration pipeline, not thousands of rows) — fetch every
+    // matching row, sort by pipeline here, then slice the page client-side.
+    // A DB-level range() before this sort would only reorder within each
+    // page instead of across the whole filtered list.
+    let query = supabase.from('people').select('id,name,status,whatsapp_opened_at');
+    if (statusFilter.length > 0) query = query.in('status', statusFilter);
     if (debouncedSearch) query = query.ilike('name', `%${debouncedSearch}%`);
     if (cohortPersonIds) query = query.in('id', cohortPersonIds);
-    query = query.order('name').range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 
-    const { data: peopleData, count, error: peopleError } = await query;
+    const { data: peopleData, error: peopleError } = await query;
     if (peopleError) {
       setError(peopleError.message);
       setLoading(false);
       return;
     }
 
-    setTotalCount(count ?? 0);
-    setPeople(
-      (peopleData ?? []).map((p) => ({
+    const sorted = (peopleData ?? [])
+      .map((p) => ({
         id: p.id as string,
         name: p.name as string,
         status: p.status as PersonStatus,
-      })),
-    );
+        whatsapp_opened_at: p.whatsapp_opened_at as string | null,
+      }))
+      .sort(comparePeopleByPipeline);
+
+    setTotalCount(sorted.length);
+    setPeople(sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE));
     setLoading(false);
   }, [statusFilter, cohortFilter, debouncedSearch, page]);
 
@@ -97,7 +105,7 @@ export function usePeopleReport() {
     setPage(1);
   };
 
-  const setStatusFilter = (value: 'all' | PersonStatus) => {
+  const setStatusFilter = (value: PersonStatus[]) => {
     setStatusFilterState(value);
     setPage(1);
   };
@@ -121,6 +129,6 @@ export function usePeopleReport() {
     page,
     totalPages,
     setPage,
-    hasFilter: !!search.trim() || statusFilter !== 'all' || cohortFilter !== 'all',
+    hasFilter: !!search.trim() || statusFilter.length > 0 || cohortFilter !== 'all',
   };
 }

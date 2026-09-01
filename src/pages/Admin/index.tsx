@@ -12,6 +12,7 @@ import { OptionsGrid } from './styles';
 export function AdminPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
+
   const isAdmin = user?.role === UserRole.Admin;
   const isPastor = user?.role === UserRole.Pastor;
   const canManageOperations = isAdmin || isPastor;

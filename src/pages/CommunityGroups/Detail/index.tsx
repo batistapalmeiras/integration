@@ -93,7 +93,7 @@ export function CommunityGroupDetailPage() {
           </Button>
           <Button
             type="button"
-            variant="primary"
+            variant="danger"
             onClick={async () => {
               try {
                 const remove = isPg ? deleteSmallGroup : deleteMinistry;
@@ -123,7 +123,7 @@ export function CommunityGroupDetailPage() {
               Editar
             </Button>
             <Button
-              variant="secondary"
+              variant="danger"
               onClick={openDelete}
               disabled={people.length > 0}
               title={people.length > 0 ? `${people.length} pessoa(s) vinculada(s)` : 'Excluir'}

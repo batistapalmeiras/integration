@@ -268,6 +268,13 @@ export function useVisitorDetail(id: string) {
     await changeStatus('retry_contact');
   };
 
+  // Only for a mistaken cadastro — RLS only allows this while the person is
+  // still at 'initial_contact', before any real history builds up on them.
+  const deletePerson = async () => {
+    const { error: deleteError } = await supabase.from('people').delete().eq('id', id);
+    if (deleteError) throw deleteError;
+  };
+
   const markAttended = async () => {
     if (!coffeeAttendance) return;
     await markCoffeeAttended(coffeeAttendance.id);
@@ -340,6 +347,7 @@ export function useVisitorDetail(id: string) {
     markWhatsAppOpened,
     archive,
     reactivate,
+    deletePerson,
     hasCoffeeEvent,
     hasCohort,
     coffeeAttendance,

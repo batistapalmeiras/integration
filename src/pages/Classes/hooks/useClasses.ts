@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 // Local
 import { getUpcomingCoffeeEventDate } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
+import { comparePeopleByPipeline } from '../../../types/person';
 import { formatDate, weeklyLessonDates } from '../domain';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
@@ -94,6 +95,7 @@ export function useClasses() {
       },
     );
 
+    rows.sort((a, b) => comparePeopleByPipeline(a.person, b.person));
     setEnrollments(rows);
     setLoading(false);
   }, []);
