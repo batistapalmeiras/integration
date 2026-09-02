@@ -21,6 +21,11 @@ import { ProfilePage } from '../pages/Profile';
 import { ReportsPage } from '../pages/Reports';
 import { CohortRosterPage } from '../pages/Reports/components/CohortRosterPage';
 import { CohortsListPage } from '../pages/Reports/components/CohortsListPage';
+import { StorePage } from '../pages/Store';
+import { EditStoreItemPage } from '../pages/Store/Edit';
+import { StoreItemsProvider } from '../pages/Store/hooks/StoreItemsProvider';
+import { NewStoreItemPage } from '../pages/Store/New';
+import { StorePublicPage } from '../pages/Store/Public';
 import { VisitorsPage } from '../pages/Visitors';
 import { VisitorDetailPage } from '../pages/Visitors/Detail';
 import { VisitorEditPage } from '../pages/Visitors/Edit';
@@ -43,6 +48,7 @@ export function AppRouter() {
           <Route path={AppRoute.IntegrationSignup} element={<IntegrationSignupPage />} />
           <Route path={`${AppRoute.MakeupAttendance}/:token`} element={<MakeupAttendancePage />} />
           <Route path={AppRoute.MembershipInterest} element={<MembershipInterestPage />} />
+          <Route path={AppRoute.StorePublic} element={<StorePublicPage />} />
 
           <Route
             path="/*"
@@ -113,14 +119,15 @@ export function AppRouter() {
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path={AppRoute.Admin}
-                      element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
-                          <AdminPage />
-                        </ProtectedRoute>
-                      }
-                    />
+                    {/* No role restriction: every role reaches this page — on
+                        mobile it's now the only way to Meu perfil/Sair (no
+                        top bar anymore), with admin shortcuts shown inside
+                        only for Admin/Pastor/Pastor-only roles. Registered
+                        under two paths: /menu is the mobile bottom-tab
+                        target, /configuracoes is what the desktop sidebar
+                        links to — same page either way. */}
+                    <Route path={AppRoute.Admin} element={<AdminPage />} />
+                    <Route path={AppRoute.Settings} element={<AdminPage />} />
                     <Route
                       path={AppRoute.Members}
                       element={
@@ -191,6 +198,20 @@ export function AppRouter() {
                       element={
                         <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
                           <VolunteerDetailPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={`${AppRoute.Store}/*`}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                          <StoreItemsProvider>
+                            <Routes>
+                              <Route index element={<StorePage />} />
+                              <Route path="novo" element={<NewStoreItemPage />} />
+                              <Route path=":id/editar" element={<EditStoreItemPage />} />
+                            </Routes>
+                          </StoreItemsProvider>
                         </ProtectedRoute>
                       }
                     />

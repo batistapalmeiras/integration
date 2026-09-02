@@ -1,25 +1,40 @@
 // Libs
 import { ChevronRight, LucideIcon } from 'lucide-react';
-import { Card, Typography } from 'bp-kit';
+import { Typography } from 'bp-kit';
 // Local
-import { OptionLabel, OptionRow } from '../styles';
+import { Chevron, ComingSoonTag, IconBadge, OptionCard, OptionLabel, OptionRow } from '../styles';
 
 interface Props {
   icon: LucideIcon;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
+  disabled?: boolean;
 }
 
-export function MenuOptionCard({ icon: Icon, label, onClick }: Props) {
+export function MenuOptionCard({ icon: Icon, label, onClick, disabled }: Props) {
   return (
-    <Card $hoverable onClick={onClick} role="button" tabIndex={0}>
+    <OptionCard
+      $hoverable={!disabled}
+      $disabled={disabled}
+      onClick={disabled ? undefined : onClick}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled}
+    >
       <OptionRow>
-        <Icon size={20} />
+        <IconBadge>
+          <Icon size={20} />
+        </IconBadge>
         <OptionLabel>
           <Typography type="h6">{label}</Typography>
+          {disabled && <ComingSoonTag>Em breve</ComingSoonTag>}
         </OptionLabel>
-        <ChevronRight size={18} />
+        {!disabled && (
+          <Chevron>
+            <ChevronRight size={18} />
+          </Chevron>
+        )}
       </OptionRow>
-    </Card>
+    </OptionCard>
   );
 }

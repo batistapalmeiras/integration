@@ -1,14 +1,14 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, Pagination, SearchInput, Skeleton, text, useModal } from 'bp-kit';
+import { Empty, Pagination, SearchInput, Skeleton, text, useModal } from 'bp-kit';
 import { SlidersHorizontal } from 'lucide-react';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { AppRoute } from '../../../routes/paths';
 import { usePeopleReport } from '../hooks';
-import { FiltersButtonRow, PageFlexBody, PaginationWrap, SearchRow } from '../styles';
+import { CompactFilterButton, PageFlexBody, PaginationWrap, SearchFiltersRow } from '../styles';
 import { PeopleFiltersModal } from './PeopleFiltersModal';
 
 export function PeopleSection() {
@@ -52,16 +52,13 @@ export function PeopleSection() {
 
   return (
     <PageFlexBody>
-      <FiltersButtonRow>
-        <Button variant="secondary" onClick={openFilters}>
+      <SearchFiltersRow>
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+        <CompactFilterButton variant="secondary" onClick={openFilters}>
           <SlidersHorizontal size={16} />
           Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
-        </Button>
-      </FiltersButtonRow>
-
-      <SearchRow>
-        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome…" />
-      </SearchRow>
+        </CompactFilterButton>
+      </SearchFiltersRow>
 
       {people.length === 0 ? (
         <Empty

@@ -1,5 +1,4 @@
 // React
-import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 // Libs
 import { useAuthCtx } from 'bp-kit';
@@ -11,22 +10,11 @@ export function useLayout() {
   const { user, logout } = useAuthCtx();
   const location = useLocation();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
   const isAdmin = user?.role === UserRole.Admin;
   const isPastor = user?.role === UserRole.Pastor;
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
   const handleLogout = async () => {
-    setOpen(false);
     await logout();
     navigate(AppRoute.Login);
   };
@@ -40,9 +28,6 @@ export function useLayout() {
   return {
     user,
     navigate,
-    open,
-    setOpen,
-    ref,
     isAdmin,
     handleLogout,
     isActive,

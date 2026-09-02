@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, PageHeader, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 // Local
+import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
@@ -44,6 +45,8 @@ export function ClassesPage() {
           ) : undefined
         }
       />
+
+      {!loading && !error && cohort && <PeopleCount count={enrollments.length} />}
 
       {loading && <Skeleton $h="240px" />}
 
