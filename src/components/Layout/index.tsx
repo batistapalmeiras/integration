@@ -2,7 +2,7 @@
 import React from 'react';
 // Libs
 import { Brand } from 'bp-kit';
-import { Contact, GraduationCap, LogOut, Menu as MenuIcon, Settings, User, UserCircle, Users as UsersIcon } from 'lucide-react';
+import { Contact, GraduationCap, LogOut, Menu as MenuIcon, Settings, User, Users as UsersIcon } from 'lucide-react';
 import { Coffee as CoffeeIcon } from 'lucide-react';
 // Components
 import icon from '../../assets/icon.png';
@@ -14,14 +14,7 @@ import {
   BottomBar,
   BottomTab,
   BottomTabLabel,
-  Dropdown,
-  DropdownDivider,
-  DropdownHeader,
   DropdownItem,
-  DropdownName,
-  DropdownRole,
-  Header,
-  HeaderInner,
   Main,
   MainInner,
   SideBrand,
@@ -32,8 +25,6 @@ import {
   SideUserInfo,
   SideUserName,
   SideUserRole,
-  UserArea,
-  UserBtn,
 } from './styles';
 
 interface ILayoutProps {
@@ -41,36 +32,30 @@ interface ILayoutProps {
 }
 
 export function Layout({ children }: ILayoutProps) {
-  const {
-    user,
-    navigate,
-    open,
-    setOpen,
-    ref,
-    handleLogout,
-    isActive,
-    showPeople,
-    showVisitors,
-    showCoffee,
-    showClasses,
-    showAdmin,
-  } = useLayout();
+  const { user, navigate, handleLogout, isActive, showPeople, showVisitors, showCoffee, showClasses, showAdmin } =
+    useLayout();
 
+  // The Brand/home link only ever renders on desktop (SideBrand), so it
+  // should match the desktop sidebar's own route for this page (/configuracoes),
+  // not the mobile bottom-tab one (/menu).
   const homeRoute =
     ([
       [showVisitors, AppRoute.Visitors],
       [showCoffee, AppRoute.Coffee],
       [showClasses, AppRoute.Classes],
-      [showAdmin, AppRoute.Admin],
+      [showAdmin, AppRoute.Settings],
     ] as const).find(([visible]) => visible)?.[1] ?? AppRoute.People;
 
-  const visibleTabs = [showPeople, showVisitors, showCoffee, showClasses, showAdmin].filter(Boolean).length;
+  // The Menu tab (profile/logout + admin shortcuts) is always available —
+  // it's every role's only way to reach "Meu perfil"/"Sair" on mobile now
+  // that there's no top bar, not just an admin shortcut.
+  const visibleTabs = [showPeople, showVisitors, showCoffee, showClasses, true].filter(Boolean).length;
   const isOnATab =
     (showVisitors && isActive(AppRoute.Visitors)) ||
     (showCoffee && isActive(AppRoute.Coffee)) ||
     (showClasses && isActive(AppRoute.Classes)) ||
     (showPeople && isActive(AppRoute.People)) ||
-    (showAdmin && isActive(AppRoute.Admin));
+    isActive(AppRoute.Admin);
 
   const shouldShowBottomBar = visibleTabs > 1 && isOnATab;
 
@@ -83,7 +68,7 @@ export function Layout({ children }: ILayoutProps) {
 
         <SideNav>
           {showAdmin && (
-            <SideNavLink to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
+            <SideNavLink to={AppRoute.Settings} $active={isActive(AppRoute.Settings)}>
               <Settings size={18} />
               Configurações
             </SideNavLink>
@@ -130,40 +115,6 @@ export function Layout({ children }: ILayoutProps) {
         </SideFooter>
       </SideMenu>
 
-      <Header>
-        <HeaderInner>
-          <Brand to={homeRoute} icon={icon} alt="Batista Palmeiras" name="Integração" />
-
-          <UserArea ref={ref}>
-            <UserBtn onClick={() => setOpen((v) => !v)}>
-              <UserCircle size={20} />
-              <span>{user?.name?.split(' ')[0]}</span>
-            </UserBtn>
-
-            <Dropdown $open={open}>
-              <DropdownHeader>
-                <DropdownName>{user?.name}</DropdownName>
-                <DropdownRole>{user ? ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] : ''}</DropdownRole>
-              </DropdownHeader>
-              <DropdownItem
-                onClick={() => {
-                  setOpen(false);
-                  navigate(AppRoute.Profile);
-                }}
-              >
-                <User size={16} />
-                Meu perfil
-              </DropdownItem>
-              <DropdownDivider />
-              <DropdownItem className="danger" onClick={handleLogout}>
-                <LogOut size={16} />
-                Sair
-              </DropdownItem>
-            </Dropdown>
-          </UserArea>
-        </HeaderInner>
-      </Header>
-
       <Main $hasBottomBar={shouldShowBottomBar}>
         <MainInner>{children}</MainInner>
       </Main>
@@ -194,12 +145,10 @@ export function Layout({ children }: ILayoutProps) {
               <BottomTabLabel $active={isActive(AppRoute.People)}>Pessoas</BottomTabLabel>
             </BottomTab>
           )}
-          {showAdmin && (
-            <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
-              <MenuIcon size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Admin)}>Menu</BottomTabLabel>
-            </BottomTab>
-          )}
+          <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
+            <MenuIcon size={22} />
+            <BottomTabLabel $active={isActive(AppRoute.Admin)}>Menu</BottomTabLabel>
+          </BottomTab>
         </BottomBar>
       )}
     </>

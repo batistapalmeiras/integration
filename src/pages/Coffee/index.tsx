@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
 // Local
+import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
@@ -75,6 +76,8 @@ export function CoffeePage() {
         subtitle={event ? `${formatDate(event.event_date)} às ${event.event_time.slice(0, 5)}` : 'Nenhum café agendado'}
         action={canPlan ? <Button onClick={openCreateModal}>{hasUpcomingEvent ? 'Editar café' : 'Novo café'}</Button> : undefined}
       />
+
+      {!loading && !error && event && <PeopleCount count={attendees.length} />}
 
       {loading && <Skeleton $h="240px" />}
 

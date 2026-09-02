@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, PageHeader, Skeleton, text } from 'bp-kit';
 // Local
+import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
@@ -19,6 +20,8 @@ export function VisitorsPage() {
         subtitle="Acompanhamento do primeiro contato até a integração"
         action={<Button onClick={() => navigate(AppRoute.NewVisitor)}>Novo visitante</Button>}
       />
+
+      {!loading && !error && <PeopleCount count={people.length} />}
 
       {loading && <Skeleton $h="240px" />}
 

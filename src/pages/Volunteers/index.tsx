@@ -62,7 +62,7 @@ export function VolunteersPage() {
         title="Voluntários"
         subtitle="Contas com acesso ao sistema"
         back
-        action={<Button onClick={openAddModal}>Adicionar voluntário</Button>}
+        action={<Button onClick={openAddModal}>Adicionar</Button>}
       />
 
       {loading && <Skeleton $h="240px" />}

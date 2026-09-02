@@ -1,33 +1,10 @@
 // React
 import { Link } from 'react-router-dom';
 // Libs
-import { fadeDown, fadeUp } from 'bp-kit';
+import { fadeUp } from 'bp-kit';
 import styled from 'styled-components';
 
 export const SIDEMENU_WIDTH = 248;
-
-export const Header = styled.header`
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: ${({ theme }) => theme.colors.canvas};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.hairline};
-  height: 64px;
-  display: flex;
-  align-items: center;
-  padding: 0 ${({ theme }) => theme.spacing.base};
-
-  @media (min-width: 745px) { display: none; }
-`;
-
-export const HeaderInner = styled.div`
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.lg};
-`;
 
 export const SideMenu = styled.aside`
   display: none;
@@ -110,62 +87,6 @@ export const SideUserRole = styled.p`
   margin-top: 2px;
 `;
 
-export const UserArea = styled.div`
-  position: relative;
-  flex-shrink: 0;
-`;
-
-export const UserBtn = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
-  height: 40px;
-  padding: 0 ${({ theme }) => theme.spacing.sm};
-  border: 1px solid ${({ theme }) => theme.colors.hairline};
-  border-radius: ${({ theme }) => theme.rounded.full};
-  background: ${({ theme }) => theme.colors.canvas};
-  color: ${({ theme }) => theme.colors.ink};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  font-weight: 500;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-
-  &:hover { box-shadow: ${({ theme }) => theme.shadows.md}; }
-`;
-
-export const Dropdown = styled.div<{ $open: boolean }>`
-  display: ${({ $open }) => ($open ? 'block' : 'none')};
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 220px;
-  background: ${({ theme }) => theme.colors.canvas};
-  border-radius: ${({ theme }) => theme.rounded.md};
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  border: 1px solid ${({ theme }) => theme.colors.hairlineSoft};
-  overflow: hidden;
-  z-index: 200;
-  animation: ${fadeDown} 0.15s ease;
-`;
-
-export const DropdownHeader = styled.div`
-  padding: ${({ theme }) => `${theme.spacing.md} ${theme.spacing.base}`};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.hairlineSoft};
-`;
-
-export const DropdownName = styled.p`
-  font-size: ${({ theme }) => theme.typography.caption.fontSize};
-  font-weight: ${({ theme }) => theme.typography.caption.fontWeight};
-  color: ${({ theme }) => theme.colors.ink};
-`;
-
-export const DropdownRole = styled.p`
-  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
-  color: ${({ theme }) => theme.colors.muted};
-  margin-top: 2px;
-`;
-
 export const DropdownItem = styled.button`
   display: flex;
   align-items: center;
@@ -237,7 +158,7 @@ export const BottomTabLabel = styled.span<{ $active: boolean }>`
 `;
 
 export const Main = styled.main<{ $hasBottomBar: boolean }>`
-  min-height: calc(100vh - 64px);
+  min-height: 100vh;
   background: ${({ theme }) => theme.colors.canvas};
 
   @media (max-width: 744px) {
@@ -245,7 +166,6 @@ export const Main = styled.main<{ $hasBottomBar: boolean }>`
   }
 
   @media (min-width: 745px) {
-    min-height: 100vh;
     margin-left: ${SIDEMENU_WIDTH}px;
   }
 `;
@@ -257,7 +177,7 @@ export const MainInner = styled.div`
   animation: ${fadeUp} 0.25s ease;
 
   @media (max-width: 744px) {
-    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.lg};
+    padding: calc(${({ theme }) => theme.spacing.lg} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.lg};
   }
 
   @media (min-width: 745px) {
