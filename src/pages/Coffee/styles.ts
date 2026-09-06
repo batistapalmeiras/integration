@@ -9,6 +9,10 @@ export const AttendanceRow = styled.div`
   gap: ${({ theme }) => theme.spacing.xs};
 `;
 
+export const PaginationWrap = styled.div`
+  margin-top: ${({ theme }) => theme.spacing.lg};
+`;
+
 export const Hint = styled.p`
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};

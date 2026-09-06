@@ -13,12 +13,15 @@ import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
+const PAGE_SIZE = 10;
+
 export function useCoffee() {
   const { user } = useAuthCtx();
   const [event, setEvent] = useState<CoffeeEvent | null>(null);
-  const [attendees, setAttendees] = useState<AttendeeRow[]>([]);
+  const [allAttendees, setAllAttendees] = useState<AttendeeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -41,7 +44,8 @@ export function useCoffee() {
     setEvent(currentEvent);
 
     if (!currentEvent) {
-      setAttendees([]);
+      setAllAttendees([]);
+      setPage(1);
       setLoading(false);
       return;
     }
@@ -93,9 +97,10 @@ export function useCoffee() {
     // Once a person moves past the café stage (invited to classes, archived, etc.)
     // they're another volunteer's queue now — stop showing them here.
     const rows = (attendanceData ?? []) as unknown as AttendeeRow[];
-    setAttendees(
+    setAllAttendees(
       rows.filter((a) => a.person.status === 'welcome_coffee').sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
     );
+    setPage(1);
     setLoading(false);
   }, []);
 
@@ -120,24 +125,32 @@ export function useCoffee() {
   // whole table for a change that only ever affects a single row.
   const markAttended = async (attendanceId: string) => {
     await markCoffeeAttended(attendanceId);
-    setAttendees((prev) => prev.map((a) => (a.id === attendanceId ? { ...a, attended: true } : a)));
+    setAllAttendees((prev) => prev.map((a) => (a.id === attendanceId ? { ...a, attended: true } : a)));
   };
 
   const markNotAttended = async (personId: string) => {
     await markCoffeeNotAttended(personId, user?.id);
-    setAttendees((prev) => prev.filter((a) => a.person.id !== personId));
+    setAllAttendees((prev) => prev.filter((a) => a.person.id !== personId));
   };
 
   const markCanceled = async (personId: string) => {
     await markCoffeeCanceled(personId, user?.id);
-    setAttendees((prev) => prev.filter((a) => a.person.id !== personId));
+    setAllAttendees((prev) => prev.filter((a) => a.person.id !== personId));
   };
+
+  const totalPages = Math.max(1, Math.ceil(allAttendees.length / PAGE_SIZE));
+  const clampedPage = Math.min(page, totalPages);
+  const attendees = allAttendees.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
 
   return {
     event,
     attendees,
+    totalCount: allAttendees.length,
     loading,
     error,
+    page: clampedPage,
+    totalPages,
+    setPage,
     createEvent,
     deleteEvent,
     markAttended,
