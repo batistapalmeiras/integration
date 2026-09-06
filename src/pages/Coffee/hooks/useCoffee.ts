@@ -11,9 +11,11 @@ import {
 } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline } from '../../../types/person';
+import { loadSavedFilters, saveFilters } from '../persistence';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function useCoffee() {
   const { user } = useAuthCtx();
@@ -22,6 +24,17 @@ export function useCoffee() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    saveFilters({ search });
+  }, [search]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -138,19 +151,31 @@ export function useCoffee() {
     setAllAttendees((prev) => prev.filter((a) => a.person.id !== personId));
   };
 
-  const totalPages = Math.max(1, Math.ceil(allAttendees.length / PAGE_SIZE));
+  const setSearch = (value: string) => {
+    setSearchState(value);
+    setPage(1);
+  };
+
+  const filtered = debouncedSearch
+    ? allAttendees.filter((a) => a.person.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
+    : allAttendees;
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
-  const attendees = allAttendees.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
+  const attendees = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
 
   return {
     event,
     attendees,
-    totalCount: allAttendees.length,
+    totalCount: filtered.length,
     loading,
     error,
     page: clampedPage,
     totalPages,
     setPage,
+    search,
+    setSearch,
+    hasFilter: !!search.trim(),
     createEvent,
     deleteEvent,
     markAttended,

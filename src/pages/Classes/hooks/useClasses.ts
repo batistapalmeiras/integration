@@ -5,9 +5,11 @@ import { getUpcomingCoffeeEventDate } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { formatDate, weeklyLessonDates } from '../domain';
+import { loadSavedFilters, saveFilters } from '../persistence';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function useClasses() {
   const [cohort, setCohort] = useState<Cohort | null>(null);
@@ -17,6 +19,17 @@ export function useClasses() {
   const [error, setError] = useState<string | null>(null);
   const [minCohortDate, setMinCohortDate] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    saveFilters({ search });
+  }, [search]);
 
   useEffect(() => {
     getUpcomingCoffeeEventDate().then(setMinCohortDate);
@@ -147,20 +160,32 @@ export function useClasses() {
     await load();
   };
 
-  const totalPages = Math.max(1, Math.ceil(allEnrollments.length / PAGE_SIZE));
-  const enrollments = allEnrollments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const setSearch = (value: string) => {
+    setSearchState(value);
+    setPage(1);
+  };
+
+  const filtered = debouncedSearch
+    ? allEnrollments.filter((e) => e.person.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
+    : allEnrollments;
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const enrollments = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return {
     cohort,
     lessons,
     enrollments,
-    totalCount: allEnrollments.length,
+    totalCount: filtered.length,
     loading,
     error,
     minCohortDate,
     page,
     totalPages,
     setPage,
+    search,
+    setSearch,
+    hasFilter: !!search.trim(),
     createCohort,
     updateLessonDates,
     closeCohort,

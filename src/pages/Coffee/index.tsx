@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, ModalActions, ModalTitle, PageHeader, Pagination, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, ModalActions, ModalTitle, PageHeader, Pagination, SearchInput, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -11,7 +11,7 @@ import { AttendanceControl } from './components/AttendanceControl';
 import { CreateEventModal } from './components/CreateEventModal';
 import { formatDate } from './domain';
 import { useCoffee } from './hooks';
-import { PaginationWrap } from './styles';
+import { PaginationWrap, SearchRow } from './styles';
 
 export function CoffeePage() {
   const navigate = useNavigate();
@@ -25,6 +25,9 @@ export function CoffeePage() {
     page,
     totalPages,
     setPage,
+    search,
+    setSearch,
+    hasFilter,
     createEvent,
     deleteEvent,
     markAttended,
@@ -95,8 +98,21 @@ export function CoffeePage() {
         />
       )}
 
+      {!loading && !error && event && (
+        <SearchRow>
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+        </SearchRow>
+      )}
+
       {!loading && !error && event && totalCount === 0 && (
-        <Empty title="Ninguém convidado ainda" description="Visitantes que aceitaram o convite aparecerão aqui." />
+        <Empty
+          title="Ninguém convidado ainda"
+          description={
+            hasFilter
+              ? 'Nenhum convidado encontrado para os filtros aplicados.'
+              : 'Visitantes que aceitaram o convite aparecerão aqui.'
+          }
+        />
       )}
 
       {!loading && !error && event && totalCount > 0 && (

@@ -1,6 +1,10 @@
 // Libs
 import styled from 'styled-components';
 
+export const SearchRow = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
+
 // Never wraps — unlike the shared RowActions, this always needs to sit
 // side by side in a $shrink table column, not stack when the column is tight.
 export const AttendanceRow = styled.div`

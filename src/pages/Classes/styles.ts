@@ -7,6 +7,10 @@ export const PaginationWrap = styled.div`
   margin-top: ${({ theme }) => theme.spacing.lg};
 `;
 
+export const SearchRow = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
+
 export const CountBadge = styled.span<{ $eligible: boolean }>`
   display: inline-flex;
   align-items: center;
