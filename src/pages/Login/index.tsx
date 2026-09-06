@@ -15,18 +15,17 @@ function resolveRoute(role: string): string {
 
 export function LoginPage() {
   return (
-    <>
-      <SharedLoginPage
-        brand={{
-          icon,
-          iconAlt: 'Batista Palmeiras',
-          name: 'Integração',
-          sub: 'Igreja Batista Palmeiras',
-          quote: 'Mais que uma Igreja, uma Família!',
-        }}
-        resolveRoute={resolveRoute}
-      />
-      <InstallPrompt />
-    </>
+    <SharedLoginPage
+      brand={{
+        icon,
+        iconAlt: 'Batista Palmeiras',
+        name: 'Integração',
+        sub: 'Igreja Batista Palmeiras',
+        quote: 'Mais que uma Igreja, uma Família!',
+      }}
+      resolveRoute={resolveRoute}
+      forgotPasswordPath={AppRoute.ForgotPassword}
+      footerSlot={<InstallPrompt />}
+    />
   );
 }

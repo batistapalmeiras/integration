@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, DatePicker, Form, ModalActions, ModalTitle, Typography, text } from 'bp-kit';
+import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { DangerLink } from '../../Visitors/Detail/styles';
@@ -57,7 +58,14 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
             Voltar
           </Button>
           <Button type="button" variant="danger" onClick={confirmDelete} disabled={deleting}>
-            {deleting ? 'Cancelando...' : 'Cancelar café'}
+            {deleting ? (
+              'Cancelando...'
+            ) : (
+              <>
+                <Trash2 size={16} />
+                Cancelar café
+              </>
+            )}
           </Button>
         </ModalActions>
       </>
@@ -76,7 +84,14 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
             Cancelar
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : initialDate ? 'Salvar' : 'Criar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Save size={16} />
+                {initialDate ? 'Salvar' : 'Criar'}
+              </>
+            )}
           </Button>
         </ModalActions>
 

@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, Form, InfoBox, ModalActions, ModalTitle, Select, text, TextInput, useToast } from 'bp-kit';
+import { UserPlus } from 'lucide-react';
 // Local
 import { UserRole, ROLE_LABELS } from '../../../types/enums';
 import { getDefaultVolunteerPassword } from '../domain';
@@ -55,7 +56,14 @@ export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
             Cancelar
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Adicionar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <UserPlus size={16} />
+                Adicionar
+              </>
+            )}
           </Button>
         </ModalActions>
       </Form>

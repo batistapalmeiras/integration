@@ -21,6 +21,7 @@ import {
   useModal,
   useToast,
 } from 'bp-kit';
+import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { AppRoute } from '../../../routes/paths';
@@ -122,6 +123,7 @@ export function VolunteerDetailPage() {
               }
             }}
           >
+            <Trash2 size={16} />
             Remover
           </Button>
         </ModalActions>
@@ -164,7 +166,14 @@ export function VolunteerDetailPage() {
         {canEdit && (
           <>
             <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
-              {isSubmitting ? 'Salvando...' : 'Salvar'}
+              {isSubmitting ? (
+                'Salvando...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Salvar
+                </>
+              )}
             </Button>
 
             <DangerLink type="button" onClick={confirmRemove}>

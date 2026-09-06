@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 // Libs
 import { Button, Empty, PageHeader, Select, Skeleton, text, useAuthCtx } from 'bp-kit';
+import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { formatDate } from '../../../domain/dates';
@@ -103,7 +104,14 @@ export function VisitorInfoPage() {
 
           <Actions>
             <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
-              {isSubmitting ? 'Salvando...' : 'Salvar'}
+              {isSubmitting ? (
+                'Salvando...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Salvar
+                </>
+              )}
             </Button>
           </Actions>
         </Form>

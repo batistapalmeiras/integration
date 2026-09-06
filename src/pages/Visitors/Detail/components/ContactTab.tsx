@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 // Libs
 import { Button, RadioGroup } from 'bp-kit';
+import { Check } from 'lucide-react';
 // Local
 import { RESULT_LABELS } from '../../types';
 import { ContactAttemptFormValues, contactAttemptSchema } from '../../validators';
@@ -38,7 +39,14 @@ export function ContactTab({ onSubmit }: Props) {
 
       <Actions>
         <Button type="submit" variant="primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando...' : 'Registrar'}
+          {isSubmitting ? (
+            'Salvando...'
+          ) : (
+            <>
+              <Check size={16} />
+              Registrar
+            </>
+          )}
         </Button>
       </Actions>
     </Form>

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, PageHeader, text, TextInput } from 'bp-kit';
+import { Save } from 'lucide-react';
 // Local
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { AppRoute } from '../../../routes/paths';
@@ -56,7 +57,14 @@ export function NewVisitorPage() {
             {text.actions.cancel}
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Save size={16} />
+                Salvar
+              </>
+            )}
           </Button>
         </Actions>
       </Form>

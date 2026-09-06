@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, DatePicker, ModalActions, ModalTitle, text } from 'bp-kit';
+import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { DangerLink } from '../../Visitors/Detail/styles';
@@ -59,7 +60,14 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
             Cancelar
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Save size={16} />
+                Salvar
+              </>
+            )}
           </Button>
         </ModalActions>
 

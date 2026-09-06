@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, Textarea, TextInput } from 'bp-kit';
+import { Check } from 'lucide-react';
 // Local
 import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
 import { SignupFormValues, signupFormSchema } from '../validators/schema';
@@ -63,7 +64,14 @@ export function SignupFormStep({ name, submitting, error, initialValues, onSubmi
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
       <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
-        {submitting ? 'Enviando...' : 'Confirmar inscrição'}
+        {submitting ? (
+          'Enviando...'
+        ) : (
+          <>
+            <Check size={16} />
+            Confirmar inscrição
+          </>
+        )}
       </Button>
     </Form>
   );

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, DatePicker, Form, ImageUpload, ImageUploadItem, MultiSelect, PageHeader, Switch, text, TextInput } from 'bp-kit';
+import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { AppRoute } from '../../../routes/paths';
@@ -69,7 +70,14 @@ export function NewStoreItemPage() {
 
         <FormActions>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Save size={16} />
+                Salvar
+              </>
+            )}
           </Button>
         </FormActions>
       </Form>

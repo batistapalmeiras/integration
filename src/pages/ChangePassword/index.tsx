@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, Form, PageHeader, TextInput, text, useAuthCtx, useToast } from 'bp-kit';
+import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { Content } from '../Visitors/Detail/styles';
@@ -60,7 +61,14 @@ export function ForcedChangePasswordPage({ onDone }: Props) {
           placeholder="Repita a nova senha"
         />
         <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando...' : 'Salvar e continuar'}
+          {isSubmitting ? (
+            'Salvando...'
+          ) : (
+            <>
+              <Save size={16} />
+              Salvar e continuar
+            </>
+          )}
         </Button>
       </Form>
       {toast}
