@@ -2,6 +2,7 @@
 import { LoginPage as SharedLoginPage } from 'bp-kit';
 // Local
 import icon from '../../assets/icon.png';
+import { InstallPrompt } from '../../components/InstallPrompt';
 import { UserRole } from '../../types/enums';
 import { AppRoute } from '../../routes/paths';
 
@@ -14,15 +15,18 @@ function resolveRoute(role: string): string {
 
 export function LoginPage() {
   return (
-    <SharedLoginPage
-      brand={{
-        icon,
-        iconAlt: 'Batista Palmeiras',
-        name: 'Integração',
-        sub: 'Igreja Batista Palmeiras',
-        quote: 'Mais que uma Igreja, uma Família!',
-      }}
-      resolveRoute={resolveRoute}
-    />
+    <>
+      <SharedLoginPage
+        brand={{
+          icon,
+          iconAlt: 'Batista Palmeiras',
+          name: 'Integração',
+          sub: 'Igreja Batista Palmeiras',
+          quote: 'Mais que uma Igreja, uma Família!',
+        }}
+        resolveRoute={resolveRoute}
+      />
+      <InstallPrompt />
+    </>
   );
 }

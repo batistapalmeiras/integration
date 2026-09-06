@@ -13,7 +13,7 @@ export default defineConfig({
       devOptions: { enabled: true },
       manifest: {
         name: 'Integração — Batista Palmeiras',
-        short_name: 'BP Integração',
+        short_name: 'Integração',
         description: 'Sistema de integração de novos membros da Igreja Batista Palmeiras',
         lang: 'pt-BR',
         start_url: '/',
