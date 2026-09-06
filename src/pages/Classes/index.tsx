@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, PageHeader, Pagination, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -10,15 +10,28 @@ import { UserRole } from '../../types/enums';
 import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
 import { useClasses } from './hooks';
-import { CountBadge } from './styles';
+import { CountBadge, PaginationWrap } from './styles';
 
 const MEMBERSHIP_THRESHOLD = 4;
 
 export function ClassesPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { cohort, lessons, enrollments, loading, error, minCohortDate, createCohort, updateLessonDates, closeCohort } =
-    useClasses();
+  const {
+    cohort,
+    lessons,
+    enrollments,
+    totalCount,
+    loading,
+    error,
+    minCohortDate,
+    page,
+    totalPages,
+    setPage,
+    createCohort,
+    updateLessonDates,
+    closeCohort,
+  } = useClasses();
   const { open, close, modal } = useModal('drawer');
 
   const isAdmin = user?.role === UserRole.Admin;
@@ -46,7 +59,7 @@ export function ClassesPage() {
         }
       />
 
-      {!loading && !error && cohort && <PeopleCount count={enrollments.length} />}
+      {!loading && !error && cohort && <PeopleCount count={totalCount} />}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -59,11 +72,11 @@ export function ClassesPage() {
         />
       )}
 
-      {!loading && !error && cohort && enrollments.length === 0 && (
+      {!loading && !error && cohort && totalCount === 0 && (
         <Empty title="Ninguém matriculado ainda" description="Pessoas convidadas na tela de Café aparecerão aqui." />
       )}
 
-      {!loading && !error && cohort && enrollments.length > 0 && (
+      {!loading && !error && cohort && totalCount > 0 && (
         <TableWrapper>
           <Table>
             <thead>
@@ -91,6 +104,12 @@ export function ClassesPage() {
             </tbody>
           </Table>
         </TableWrapper>
+      )}
+
+      {!loading && !error && cohort && totalPages > 1 && (
+        <PaginationWrap>
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        </PaginationWrap>
       )}
 
       {modal}

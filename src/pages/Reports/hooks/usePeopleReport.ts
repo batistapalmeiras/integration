@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline, PersonStatus } from '../../../types/person';
 import { PersonReportRow } from '../types';
+import { loadSavedFilters, saveFilters } from './persistence';
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -15,9 +16,9 @@ export function usePeopleReport() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>([]);
-  const [cohortFilter, setCohortFilterState] = useState<string>('all');
-  const [search, setSearchState] = useState('');
+  const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>(() => loadSavedFilters()?.statusFilter ?? []);
+  const [cohortFilter, setCohortFilterState] = useState<string>(() => loadSavedFilters()?.cohortFilter ?? 'all');
+  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
 
@@ -25,6 +26,10 @@ export function usePeopleReport() {
     const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timeout);
   }, [search]);
+
+  useEffect(() => {
+    saveFilters({ statusFilter, cohortFilter, search });
+  }, [statusFilter, cohortFilter, search]);
 
   useEffect(() => {
     supabase

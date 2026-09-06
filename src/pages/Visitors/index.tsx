@@ -1,17 +1,18 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Skeleton, text } from 'bp-kit';
+import { Button, Empty, PageHeader, Pagination, Skeleton, text } from 'bp-kit';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { useVisitors } from './hooks';
+import { PaginationWrap } from './styles';
 
 export function VisitorsPage() {
   const navigate = useNavigate();
-  const { people, loading, error } = useVisitors();
+  const { people, totalCount, loading, error, page, totalPages, setPage } = useVisitors();
 
   return (
     <div>
@@ -21,7 +22,7 @@ export function VisitorsPage() {
         action={<Button onClick={() => navigate(AppRoute.NewVisitor)}>Novo visitante</Button>}
       />
 
-      {!loading && !error && <PeopleCount count={people.length} />}
+      {!loading && !error && <PeopleCount count={totalCount} />}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -54,6 +55,12 @@ export function VisitorsPage() {
             </tbody>
           </Table>
         </TableWrapper>
+      )}
+
+      {!loading && !error && people.length > 0 && totalPages > 1 && (
+        <PaginationWrap>
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        </PaginationWrap>
       )}
     </div>
   );

@@ -7,13 +7,16 @@ import { comparePeopleByPipeline } from '../../../types/person';
 import { formatDate, weeklyLessonDates } from '../domain';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
+const PAGE_SIZE = 10;
+
 export function useClasses() {
   const [cohort, setCohort] = useState<Cohort | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
+  const [allEnrollments, setAllEnrollments] = useState<EnrollmentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [minCohortDate, setMinCohortDate] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     getUpcomingCoffeeEventDate().then(setMinCohortDate);
@@ -39,7 +42,8 @@ export function useClasses() {
 
     if (!cohortData) {
       setLessons([]);
-      setEnrollments([]);
+      setAllEnrollments([]);
+      setPage(1);
       setLoading(false);
       return;
     }
@@ -82,8 +86,9 @@ export function useClasses() {
 
     const attendanceRows = (attendanceData ?? []) as LessonAttendance[];
 
-    const rows: EnrollmentRow[] = ((enrollmentData ?? []) as unknown as { id: string; person: EnrollmentRow['person'] }[]).map(
-      (enrollment) => {
+    const rows: EnrollmentRow[] = ((enrollmentData ?? []) as unknown as { id: string; person: EnrollmentRow['person'] }[])
+      .filter((enrollment) => enrollment.person.status !== 'archived')
+      .map((enrollment) => {
         const own = attendanceRows.filter((a) => a.enrollment_id === enrollment.id);
         const attendanceByLesson = Object.fromEntries(own.map((a) => [a.lesson_id, a]));
         return {
@@ -96,7 +101,8 @@ export function useClasses() {
     );
 
     rows.sort((a, b) => comparePeopleByPipeline(a.person, b.person));
-    setEnrollments(rows);
+    setAllEnrollments(rows);
+    setPage(1);
     setLoading(false);
   }, []);
 
@@ -141,13 +147,20 @@ export function useClasses() {
     await load();
   };
 
+  const totalPages = Math.max(1, Math.ceil(allEnrollments.length / PAGE_SIZE));
+  const enrollments = allEnrollments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return {
     cohort,
     lessons,
     enrollments,
+    totalCount: allEnrollments.length,
     loading,
     error,
     minCohortDate,
+    page,
+    totalPages,
+    setPage,
     createCohort,
     updateLessonDates,
     closeCohort,

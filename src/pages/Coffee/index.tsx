@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, ModalActions, ModalTitle, PageHeader, Pagination, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -11,6 +11,7 @@ import { AttendanceControl } from './components/AttendanceControl';
 import { CreateEventModal } from './components/CreateEventModal';
 import { formatDate } from './domain';
 import { useCoffee } from './hooks';
+import { PaginationWrap } from './styles';
 
 export function CoffeePage() {
   const navigate = useNavigate();
@@ -18,8 +19,12 @@ export function CoffeePage() {
   const {
     event,
     attendees,
+    totalCount,
     loading,
     error,
+    page,
+    totalPages,
+    setPage,
     createEvent,
     deleteEvent,
     markAttended,
@@ -77,7 +82,7 @@ export function CoffeePage() {
         action={canPlan ? <Button onClick={openCreateModal}>{hasUpcomingEvent ? 'Editar café' : 'Novo café'}</Button> : undefined}
       />
 
-      {!loading && !error && event && <PeopleCount count={attendees.length} />}
+      {!loading && !error && event && <PeopleCount count={totalCount} />}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -90,11 +95,11 @@ export function CoffeePage() {
         />
       )}
 
-      {!loading && !error && event && attendees.length === 0 && (
+      {!loading && !error && event && totalCount === 0 && (
         <Empty title="Ninguém convidado ainda" description="Visitantes que aceitaram o convite aparecerão aqui." />
       )}
 
-      {!loading && !error && event && attendees.length > 0 && (
+      {!loading && !error && event && totalCount > 0 && (
         <TableWrapper>
           <Table>
             <thead>
@@ -127,6 +132,12 @@ export function CoffeePage() {
             </tbody>
           </Table>
         </TableWrapper>
+      )}
+
+      {!loading && !error && event && totalPages > 1 && (
+        <PaginationWrap>
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        </PaginationWrap>
       )}
 
       {modal}
