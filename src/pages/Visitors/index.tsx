@@ -1,18 +1,37 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Pagination, Skeleton, text } from 'bp-kit';
+import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useModal } from 'bp-kit';
+import { SlidersHorizontal } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
+import { VisitorFiltersModal } from './components/VisitorFiltersModal';
 import { useVisitors } from './hooks';
-import { PaginationWrap } from './styles';
+import { CompactFilterButton, PaginationWrap, SearchFiltersRow } from './styles';
 
 export function VisitorsPage() {
   const navigate = useNavigate();
-  const { people, totalCount, loading, error, page, totalPages, setPage } = useVisitors();
+  const { open, close, modal } = useModal('drawer');
+  const {
+    people,
+    totalCount,
+    loading,
+    error,
+    page,
+    totalPages,
+    setPage,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    hasFilter,
+  } = useVisitors();
+
+  const openFilters = () =>
+    open(<VisitorFiltersModal close={close} statusFilter={statusFilter} onApply={setStatusFilter} />);
 
   return (
     <div>
@@ -28,8 +47,25 @@ export function VisitorsPage() {
 
       {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
 
+      {!loading && !error && (
+        <SearchFiltersRow>
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+          <CompactFilterButton variant="secondary" onClick={openFilters}>
+            <SlidersHorizontal size={16} />
+            Filtros{statusFilter.length > 0 ? ` (${statusFilter.length})` : ''}
+          </CompactFilterButton>
+        </SearchFiltersRow>
+      )}
+
       {!loading && !error && people.length === 0 && (
-        <Empty title="Nenhum visitante cadastrado" description="Cadastre o primeiro visitante pelo botão acima." />
+        <Empty
+          title="Nenhum visitante encontrado"
+          description={
+            hasFilter
+              ? 'Nenhum visitante encontrado para os filtros aplicados.'
+              : 'Cadastre o primeiro visitante pelo botão acima.'
+          }
+        />
       )}
 
       {!loading && !error && people.length > 0 && (
@@ -62,6 +98,8 @@ export function VisitorsPage() {
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </PaginationWrap>
       )}
+
+      {modal}
     </div>
   );
 }

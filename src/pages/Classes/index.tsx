@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Pagination, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -10,7 +10,7 @@ import { UserRole } from '../../types/enums';
 import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
 import { useClasses } from './hooks';
-import { CountBadge, PaginationWrap } from './styles';
+import { CountBadge, PaginationWrap, SearchRow } from './styles';
 
 const MEMBERSHIP_THRESHOLD = 4;
 
@@ -28,6 +28,9 @@ export function ClassesPage() {
     page,
     totalPages,
     setPage,
+    search,
+    setSearch,
+    hasFilter,
     createCohort,
     updateLessonDates,
     closeCohort,
@@ -72,8 +75,21 @@ export function ClassesPage() {
         />
       )}
 
+      {!loading && !error && cohort && (
+        <SearchRow>
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+        </SearchRow>
+      )}
+
       {!loading && !error && cohort && totalCount === 0 && (
-        <Empty title="Ninguém matriculado ainda" description="Pessoas convidadas na tela de Café aparecerão aqui." />
+        <Empty
+          title="Ninguém matriculado ainda"
+          description={
+            hasFilter
+              ? 'Nenhuma pessoa encontrada para os filtros aplicados.'
+              : 'Pessoas convidadas na tela de Café aparecerão aqui.'
+          }
+        />
       )}
 
       {!loading && !error && cohort && totalCount > 0 && (
