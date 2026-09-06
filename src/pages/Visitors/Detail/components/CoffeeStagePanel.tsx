@@ -1,5 +1,6 @@
 // Libs
 import { Button, InfoBox, Skeleton, Typography } from 'bp-kit';
+import { Check, Clock, X } from 'lucide-react';
 // Local
 import { RowActions } from '../../../../components/Table';
 import { classInviteMessage } from '../../../../domain/whatsapp';
@@ -43,9 +44,11 @@ export function CoffeeStagePanel({
         </CardHeader>
         <RowActions>
           <Button size="sm" variant="secondary" onClick={onMarkNotAttended}>
+            <X size={16} />
             Não compareceu
           </Button>
           <Button size="sm" variant="primary" onClick={onMarkAttended}>
+            <Check size={16} />
             Compareceu
           </Button>
         </RowActions>
@@ -71,9 +74,11 @@ export function CoffeeStagePanel({
       </CardHeader>
       <RowActions>
         <Button size="sm" variant="secondary" onClick={onNoResponse}>
+          <Clock size={16} />
           Não respondeu
         </Button>
         <Button size="sm" variant="secondary" onClick={onDeclined}>
+          <X size={16} />
           Recusou
         </Button>
       </RowActions>

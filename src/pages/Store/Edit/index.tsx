@@ -21,7 +21,7 @@ import {
   Typography,
   useModal,
 } from 'bp-kit';
-import { Trash2 } from 'lucide-react';
+import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { AppRoute } from '../../../routes/paths';
@@ -132,7 +132,14 @@ export function EditStoreItemPage() {
 
         <FormActions>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Save size={16} />
+                Salvar
+              </>
+            )}
           </Button>
         </FormActions>
       </Form>

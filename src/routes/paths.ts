@@ -1,5 +1,7 @@
 export enum AppRoute {
   Login = '/entrar',
+  ForgotPassword = '/entrar/recuperar',
+  ResetPassword = '/entrar/nova-senha',
   Visitors = '/visitantes',
   NewVisitor = '/visitantes/novo',
   People = '/pessoas',

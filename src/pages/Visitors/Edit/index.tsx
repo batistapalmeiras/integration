@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Archive } from 'lucide-react';
+import { Archive, RotateCcw, Save, Trash2 } from 'lucide-react';
 import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, text, TextInput, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
 // Local
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
@@ -88,6 +88,7 @@ export function VisitorEditPage() {
               }
             }}
           >
+            <Trash2 size={16} />
             Excluir
           </Button>
         </ModalActions>
@@ -104,6 +105,7 @@ export function VisitorEditPage() {
           canManage ? (
             person.status === 'archived' ? (
               <Button variant="secondary" onClick={() => reactivate()}>
+                <RotateCcw size={16} />
                 Reativar
               </Button>
             ) : (
@@ -147,7 +149,14 @@ export function VisitorEditPage() {
         {canEditFields && (
           <Actions>
             <Button type="submit" variant="primary" disabled={isSubmitting || person.status === 'archived'}>
-              {isSubmitting ? 'Salvando...' : 'Salvar alterações'}
+              {isSubmitting ? (
+                'Salvando...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Salvar alterações
+                </>
+              )}
             </Button>
           </Actions>
         )}

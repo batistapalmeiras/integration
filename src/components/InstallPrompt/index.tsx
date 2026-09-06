@@ -1,9 +1,7 @@
 // React
 import { useEffect, useState } from 'react';
-// Libs
-import { Download, Share, X } from 'lucide-react';
 // Local
-import { Banner, DismissButton, Icon, InstallButton, Text } from './styles';
+import { InstallAction, Prompt } from './styles';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -21,14 +19,13 @@ function isIos(): boolean {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
-// Shown on Login so volunteers see the "add to home screen" offer every
-// time they aren't already using the installed app — Chrome fires its own
-// event we can prompt from, but Safari (iOS) never exposes an install API
-// at all, so there we just show the manual steps instead.
+// Rendered as the Login page's footerSlot, right under the "Entrar" button
+// — Chrome fires its own install event we can prompt from, but Safari
+// (iOS) never exposes an install API at all, so there we just show the
+// manual steps as text instead.
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(isStandalone());
-  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const onBeforeInstallPrompt = (e: Event) => {
@@ -47,7 +44,7 @@ export function InstallPrompt() {
 
   const ios = isIos();
 
-  if (installed || dismissed || (!ios && !deferredPrompt)) return null;
+  if (installed || (!ios && !deferredPrompt)) return null;
 
   const install = async () => {
     if (!deferredPrompt) return;
@@ -58,21 +55,17 @@ export function InstallPrompt() {
   };
 
   return (
-    <Banner>
-      <Icon>{ios ? <Share size={18} /> : <Download size={18} />}</Icon>
-      <Text>
-        {ios
-          ? 'Instale o app: toque em Compartilhar e depois em "Adicionar à Tela de Início".'
-          : 'Instale o app na tela inicial do seu celular para acesso rápido.'}
-      </Text>
-      {!ios && (
-        <InstallButton type="button" variant="primary" onClick={install}>
-          Instalar
-        </InstallButton>
+    <Prompt>
+      {ios ? (
+        'Instale o app: toque em Compartilhar e depois em "Adicionar à Tela de Início".'
+      ) : (
+        <>
+          Instale o app na tela inicial do seu celular para acesso rápido.{' '}
+          <InstallAction type="button" onClick={install}>
+            Instalar
+          </InstallAction>
+        </>
       )}
-      <DismissButton type="button" onClick={() => setDismissed(true)} aria-label="Fechar">
-        <X size={16} />
-      </DismissButton>
-    </Banner>
+    </Prompt>
   );
 }

@@ -2,6 +2,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Button, Empty, PageHeader, Skeleton, text } from 'bp-kit';
+import { Lock } from 'lucide-react';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
@@ -26,6 +27,7 @@ export function CohortRosterPage() {
         action={
           cohort.status === 'active' ? (
             <Button variant="secondary" onClick={closeCohort}>
+              <Lock size={16} />
               Encerrar turma
             </Button>
           ) : undefined

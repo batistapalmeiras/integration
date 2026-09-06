@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, Typography, text, useModal, useToast } from 'bp-kit';
+import { Trash2 } from 'lucide-react';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import {
@@ -105,6 +106,7 @@ export function CommunityGroupDetailPage() {
               }
             }}
           >
+            <Trash2 size={16} />
             Excluir
           </Button>
         </ModalActions>
@@ -128,6 +130,7 @@ export function CommunityGroupDetailPage() {
               disabled={people.length > 0}
               title={people.length > 0 ? `${people.length} pessoa(s) vinculada(s)` : 'Excluir'}
             >
+              <Trash2 size={16} />
               Excluir
             </Button>
           </HeaderActions>

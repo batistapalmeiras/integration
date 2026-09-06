@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, ModalActions, ModalTitle, PageHeader, Pagination, SearchInput, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
+import { XCircle } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -71,6 +72,7 @@ export function CoffeePage() {
               close();
             }}
           >
+            <XCircle size={16} />
             Cancelar presença
           </Button>
         </ModalActions>

@@ -2,7 +2,7 @@
 
 ## Login
 - [ ] Opção de deslogar a qualquer momento
-- [ ] Fluxo de "esqueci minha senha" — **adiado a pedido do Iago, deixar para depois**
+- [x] Fluxo de "esqueci minha senha"
 
 ## Acessos
 - [ ] Tela de Loja só pode ser vista pelo Pastor

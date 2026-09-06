@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, Form, ModalActions, ModalTitle, TextInput, Typography, text } from 'bp-kit';
-import { X } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { FieldGroup, LeaderList, LeaderRow, RemoveTagButton } from '../styles';
@@ -140,7 +140,14 @@ export function GroupModal({
             {text.actions.cancel}
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Save size={16} />
+                Salvar
+              </>
+            )}
           </Button>
         </ModalActions>
       </Form>

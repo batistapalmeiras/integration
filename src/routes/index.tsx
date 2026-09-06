@@ -11,6 +11,7 @@ import { CoffeePage } from '../pages/Coffee';
 import { CommunityGroupDetailPage } from '../pages/CommunityGroups/Detail';
 import { MinistriesPage } from '../pages/CommunityGroups/Ministries';
 import { SmallGroupsPage } from '../pages/CommunityGroups/SmallGroups';
+import { ForgotPasswordPage } from '../pages/ForgotPassword';
 import { IntegrationSignupPage } from '../pages/IntegrationSignup';
 import { LoginPage } from '../pages/Login';
 import { MakeupAttendancePage } from '../pages/MakeupAttendance';
@@ -21,6 +22,7 @@ import { ProfilePage } from '../pages/Profile';
 import { ReportsPage } from '../pages/Reports';
 import { CohortRosterPage } from '../pages/Reports/components/CohortRosterPage';
 import { CohortsListPage } from '../pages/Reports/components/CohortsListPage';
+import { ResetPasswordPage } from '../pages/ResetPassword';
 import { StorePage } from '../pages/Store';
 import { EditStoreItemPage } from '../pages/Store/Edit';
 import { StoreItemsProvider } from '../pages/Store/hooks/StoreItemsProvider';
@@ -45,6 +47,8 @@ export function AppRouter() {
       <AuthProvider client={supabase}>
         <Routes>
           <Route path={AppRoute.Login} element={<LoginPage />} />
+          <Route path={AppRoute.ForgotPassword} element={<ForgotPasswordPage />} />
+          <Route path={AppRoute.ResetPassword} element={<ResetPasswordPage />} />
           <Route path={AppRoute.IntegrationSignup} element={<IntegrationSignupPage />} />
           <Route path={`${AppRoute.MakeupAttendance}/:token`} element={<MakeupAttendancePage />} />
           <Route path={AppRoute.MembershipInterest} element={<MembershipInterestPage />} />

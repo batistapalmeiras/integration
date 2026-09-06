@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, Form, ModalActions, ModalTitle, Select, text } from 'bp-kit';
+import { Check } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { CommunityGroup, listMinistries, listSmallGroups } from '../../../../domain/communityGroups';
@@ -68,7 +69,14 @@ export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
             {text.actions.cancel}
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Confirmar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Check size={16} />
+                Confirmar
+              </>
+            )}
           </Button>
         </ModalActions>
       </Form>

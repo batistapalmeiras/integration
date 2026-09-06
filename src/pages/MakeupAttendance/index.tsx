@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 // Libs
 import { Button, Checkbox, InfoBox, Skeleton, Textarea, Typography } from 'bp-kit';
+import { Check } from 'lucide-react';
 // Local
 import { getMakeupVideoId } from '../../domain/makeupVideos';
 import { ErrorMsg, Form } from '../../components/PublicPage/styles';
@@ -79,7 +80,14 @@ export function MakeupAttendancePage() {
           {submitError && <ErrorMsg>{submitError}</ErrorMsg>}
 
           <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
-            {submitting ? 'Enviando...' : 'Confirmar presença'}
+            {submitting ? (
+              'Enviando...'
+            ) : (
+              <>
+                <Check size={16} />
+                Confirmar presença
+              </>
+            )}
           </Button>
         </Form>
       )}

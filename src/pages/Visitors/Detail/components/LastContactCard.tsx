@@ -2,6 +2,7 @@
 import { useState } from 'react';
 // Libs
 import { Button, Card, RadioGroup, Typography } from 'bp-kit';
+import { Save } from 'lucide-react';
 // Local
 import { ContactResult, RESULT_LABELS } from '../../types';
 import { Actions, CardHeader } from '../styles';
@@ -51,7 +52,14 @@ export function LastContactCard({ result, onSave }: Props) {
               Cancelar
             </Button>
             <Button size="sm" variant="primary" type="button" onClick={save} disabled={saving}>
-              {saving ? 'Salvando...' : 'Salvar correção'}
+              {saving ? (
+                'Salvando...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Salvar correção
+                </>
+              )}
             </Button>
           </Actions>
         </>

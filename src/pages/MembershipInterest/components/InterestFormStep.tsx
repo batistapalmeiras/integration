@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 // Libs
 import { Button, Checkbox, DatePicker, MultiSelectOption, MultiSelect, RadioGroup, Textarea, TextInput, Typography } from 'bp-kit';
+import { Send } from 'lucide-react';
 // Local
 import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
 import { supabase } from '../../../lib/supabase';
@@ -155,7 +156,14 @@ export function InterestFormStep({ name, submitting, submitError, onSubmit }: Pr
       {submitError && <ErrorMsg>{submitError}</ErrorMsg>}
 
       <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
-        {submitting ? 'Enviando...' : 'Enviar ficha'}
+        {submitting ? (
+          'Enviando...'
+        ) : (
+          <>
+            <Send size={16} />
+            Enviar ficha
+          </>
+        )}
       </Button>
     </Form>
   );

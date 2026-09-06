@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, DatePicker, Form, InfoBox, ModalActions, ModalTitle, text } from 'bp-kit';
+import { Plus } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { formatDate } from '../domain';
@@ -59,7 +60,14 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
             Cancelar
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Criar'}
+            {isSubmitting ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Plus size={16} />
+                Criar
+              </>
+            )}
           </Button>
         </ModalActions>
       </Form>
