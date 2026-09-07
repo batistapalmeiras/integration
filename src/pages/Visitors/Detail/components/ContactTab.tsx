@@ -5,7 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Button, RadioGroup } from 'bp-kit';
 import { Check } from 'lucide-react';
 // Local
-import { RESULT_LABELS } from '../../types';
+import { RESULT_LABELS } from '../../../../features/visitors';
 import { ContactAttemptFormValues, contactAttemptSchema } from '../../validators';
 import { Actions, Form } from '../styles';
 

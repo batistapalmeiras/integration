@@ -208,7 +208,7 @@ export function AppRouter() {
                     <Route
                       path={`${AppRoute.Store}/*`}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={[UserRole.Pastor]}>
                           <StoreItemsProvider>
                             <Routes>
                               <Route index element={<StorePage />} />

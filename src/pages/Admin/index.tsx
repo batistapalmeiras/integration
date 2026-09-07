@@ -58,12 +58,13 @@ export function AdminPage() {
             <MenuOptionCard icon={Users} label="Membros" onClick={() => navigate(AppRoute.Members)} />
             <MenuOptionCard icon={GraduationCap} label="Turmas" onClick={() => navigate(`${AppRoute.Reports}/turmas`)} />
             <MenuOptionCard icon={FileBarChart} label="Relatórios" onClick={() => navigate(AppRoute.Reports)} />
-            <MenuOptionCard icon={Store} label="Loja" disabled />
           </>
         )}
-        {/* Ministérios/PGs são exclusivos do Pastor — estrutura da igreja, não do pipeline de integração. */}
+        {/* Loja/Ministérios/PGs são exclusivos do Pastor — Loja por decisão de acesso,
+            Ministérios/PGs por serem estrutura da igreja, não do pipeline de integração. */}
         {isPastor && (
           <>
+            <MenuOptionCard icon={Store} label="Loja" disabled />
             <MenuOptionCard icon={HeartHandshake} label="Ministérios" onClick={() => navigate(AppRoute.Ministries)} />
             <MenuOptionCard icon={UsersRound} label="Pequenos Grupos" onClick={() => navigate(AppRoute.SmallGroups)} />
           </>

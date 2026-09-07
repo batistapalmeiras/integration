@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { Card, Typography } from 'bp-kit';
 // Local
 import { StatusPill } from '../../../../components/StatusPill';
-import { Person } from '../../types';
+import { Person } from '../../../../features/visitors';
 import { PersonCardRow, PersonCardInfo } from '../styles';
 
 interface Props {

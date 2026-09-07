@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { loadSavedFilters, saveFilters } from '../persistence';
-import { Person } from '../types';
+import { Person } from '../../../features/visitors';
 
 // This page is the "contact" stage queue: once a person moves past it
 // (welcome_coffee onward) they belong to the next volunteer's stage and

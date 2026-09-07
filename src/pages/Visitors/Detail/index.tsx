@@ -13,7 +13,7 @@ import { MembershipPendingStagePanel } from './components/MembershipPendingStage
 import { PersonCard } from './components/PersonCard';
 import { PersonDetailsCard } from './components/PersonDetailsCard';
 import { ProgressStepper } from './components/ProgressStepper';
-import { useVisitorDetail } from './hooks';
+import { useVisitorDetail } from '../../../features/visitors';
 import { Content } from './styles';
 import { ContactAttemptFormValues } from '../validators';
 

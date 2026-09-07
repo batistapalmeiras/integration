@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { UserPlus } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -9,8 +10,9 @@ import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
+import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { useClasses } from './hooks';
-import { CountBadge, PaginationWrap, SearchRow } from './styles';
+import { CountBadge, HeaderActions, PaginationWrap, SearchRow } from './styles';
 
 const MEMBERSHIP_THRESHOLD = 4;
 
@@ -34,15 +36,22 @@ export function ClassesPage() {
     createCohort,
     updateLessonDates,
     closeCohort,
+    enrollPerson,
   } = useClasses();
   const { open, close, modal } = useModal('drawer');
 
   const isAdmin = user?.role === UserRole.Admin;
-  const canManageCohort = isAdmin || user?.role === UserRole.Teacher || user?.role === UserRole.Pastor;
+  const isPastor = user?.role === UserRole.Pastor;
+  const canManageCohort = isAdmin || user?.role === UserRole.Teacher || isPastor;
+  // Só Pastor e Admin podem matricular pessoas na turma — o professor
+  // acompanha a turma, mas não decide quem entra nela.
+  const canEnroll = isAdmin || isPastor;
 
   const openCreateModal = () => open(<CreateCohortModal close={close} onCreate={createCohort} minDate={minCohortDate} />);
   const openEditModal = () =>
     open(<EditCohortModal lessons={lessons} close={close} onSave={updateLessonDates} onCloseCohort={closeCohort} />);
+  const openEnrollModal = () =>
+    cohort && open(<EnrollPersonModal cohortId={cohort.id} close={close} onEnroll={enrollPerson} />);
 
   return (
     <div>
@@ -50,15 +59,23 @@ export function ClassesPage() {
         title="Turma de Integração"
         subtitle={cohort ? cohort.name : 'Nenhuma turma ativa'}
         action={
-          canManageCohort ? (
-            cohort ? (
-              <Button variant="secondary" onClick={openEditModal}>
-                Editar aulas
-              </Button>
-            ) : (
-              <Button onClick={openCreateModal}>Nova turma</Button>
-            )
-          ) : undefined
+          cohort ? (
+            <HeaderActions>
+              {canEnroll && (
+                <Button variant="secondary" onClick={openEnrollModal}>
+                  <UserPlus size={16} />
+                  Adicionar
+                </Button>
+              )}
+              {canManageCohort && (
+                <Button variant="secondary" onClick={openEditModal}>
+                  Editar aulas
+                </Button>
+              )}
+            </HeaderActions>
+          ) : (
+            canManageCohort && <Button onClick={openCreateModal}>Nova turma</Button>
+          )
         }
       />
 

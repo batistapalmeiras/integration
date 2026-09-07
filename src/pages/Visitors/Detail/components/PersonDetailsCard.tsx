@@ -2,7 +2,7 @@
 import { ChevronRight } from 'lucide-react';
 import { Card, Typography } from 'bp-kit';
 // Local
-import { Person } from '../../types';
+import { Person } from '../../../../features/visitors';
 import { PersonCardInfo, PersonCardRow } from '../styles';
 
 interface Props {

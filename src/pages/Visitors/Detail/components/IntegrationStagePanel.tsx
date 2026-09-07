@@ -5,7 +5,7 @@ import { Card, Checkbox, IconButton, Skeleton, Typography, useToast } from 'bp-k
 import { CountBadge } from '../../../Classes/styles';
 import { formatDate } from '../../../../domain/dates';
 import { membershipInterestMessage } from '../../../../domain/whatsapp';
-import { Person } from '../../types';
+import { Person } from '../../../../features/visitors';
 import { CardHeader, LessonList, LessonRow, StagePanel } from '../styles';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 

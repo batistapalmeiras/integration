@@ -133,3 +133,42 @@ nunca misturado com componente.
 Botão de ação (salvar, excluir, logout, copiar link) sempre com ícone
 antes do texto: `<Save size={16}/> Salvar`. Botão de navegação pura
 (Cancelar, Entrar, voltar) só texto, sem ícone.
+
+## 12. Quando uma feature ganha `src/features/<nome>/`
+
+A maioria das telas é CRUD (listar/criar/editar/excluir sem regra de
+transição) e fica só em `pages/<Nome>/` como descrito no ponto 1 —
+aplicar camadas extras nelas é cerimônia. Uma feature só migra pra
+`src/features/<nome>/` quando ela acumula **regra de negócio real**:
+uma máquina de estados com transições/guards (não só "salvar o que o
+usuário digitou"), um invariante que pode ser testado isoladamente, ou
+lógica que hoje está espalhada/duplicada entre hook e componente.
+Exemplo: `src/features/visitors/` (pipeline de status do visitante:
+contato → café → turma → membro, com um flag de retry de uso único).
+
+Quando migrar, a forma é:
+
+```
+src/features/<nome>/
+  domain/     # puro — zero import de React/Supabase. A regra em si.
+  infra/      # as chamadas supabase.from(...) que hoje ficam inline no hook
+  services/   # um arquivo por caso de uso: chama domain (decide) + infra (grava)
+  hooks/      # o hook de sempre — chama services pras mutações com regra,
+              # chama infra/domain diretamente pra leituras simples e ações
+              # sem regra (não força um "service" artificial)
+  index.ts    # porta pública — só o que pages/ pode importar
+```
+
+Sem `container.ts` nem interface de repositório: só existe uma infra
+real (Supabase) e o projeto ainda não tem teste nenhum cobrindo isso —
+introduzir a abstração de troca de implementação agora seria pra um
+cenário que não existe. Se um dia isso mudar (segunda infra, ou testes
+de verdade mockando repositório), esse é o gatilho pra adicionar a
+interface — não antes.
+
+Um tipo/arquivo só sai de onde está pra dentro da feature se for
+**exclusivo** dela. Algo usado por mais de uma feature (ex.
+`src/domain/cafeSchedule.ts`, usado por Café/Turmas/Visitantes, ou
+`src/types/person.ts`, usado por Relatórios/Café/Turmas/`StatusPill`)
+continua compartilhado onde já está — nunca vira "interior" de uma
+feature só porque ela também usa.

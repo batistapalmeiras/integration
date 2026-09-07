@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 // Local
 import { initialContactMessage } from '../../../../domain/whatsapp';
 import { AppRoute } from '../../../../routes/paths';
-import { Person } from '../../types';
+import { Person } from '../../../../features/visitors';
 import { ContactAttemptFormValues } from '../../validators';
 import { InfoBoxAction, SectionDivider, SectionStack, StagePanel } from '../styles';
 import { ContactTab } from './ContactTab';
