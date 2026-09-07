@@ -4,7 +4,7 @@ import { Check, Clock, X } from 'lucide-react';
 // Local
 import { RowActions } from '../../../../components/Table';
 import { classInviteMessage } from '../../../../domain/whatsapp';
-import { Person } from '../../types';
+import { Person } from '../../../../features/visitors';
 import { CardHeader, StagePanel } from '../styles';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 

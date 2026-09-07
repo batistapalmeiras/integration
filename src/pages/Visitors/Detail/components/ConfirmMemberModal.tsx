@@ -8,7 +8,7 @@ import { Check } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { CommunityGroup, listMinistries, listSmallGroups } from '../../../../domain/communityGroups';
-import { Person } from '../../types';
+import { Person } from '../../../../features/visitors';
 
 const schema = z.object({
   smallGroupId: z.string().min(1, text.validation.selectRequired('o Pequeno Grupo')),

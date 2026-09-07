@@ -1,7 +1,7 @@
 // Libs
 import { Check } from 'lucide-react';
 // Local
-import { PersonStatus } from '../../../types';
+import { PersonStatus } from '../../../../../features/visitors';
 import { Circle, Label, Step, Wrapper } from './styles';
 
 const STAGES: { statuses: PersonStatus[]; label: string }[] = [

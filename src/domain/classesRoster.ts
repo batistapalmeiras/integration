@@ -1,6 +1,7 @@
 // Libs
 import { supabase } from '../lib/supabase';
 import { AppRoute } from '../routes/paths';
+import { PersonStatus } from '../types/person';
 
 export interface ActiveCohort {
   id: string;
@@ -78,6 +79,32 @@ export async function toggleLessonAttendance(enrollmentId: string, lessonId: str
   const { error } = await supabase
     .from('lesson_attendance')
     .upsert({ enrollment_id: enrollmentId, lesson_id: lessonId, attended }, { onConflict: 'enrollment_id,lesson_id' });
+  if (error) throw error;
+}
+
+export interface EnrollablePerson {
+  id: string;
+  name: string;
+  status: PersonStatus;
+}
+
+// People eligible to be added to a cohort by hand — anyone not already
+// enrolled in it and not archived.
+export async function listEnrollablePeople(cohortId: string): Promise<EnrollablePerson[]> {
+  const { data: enrolled, error: enrolledError } = await supabase
+    .from('enrollments')
+    .select('person_id')
+    .eq('cohort_id', cohortId);
+  if (enrolledError) throw enrolledError;
+  const enrolledIds = new Set((enrolled ?? []).map((e) => e.person_id as string));
+
+  const { data, error } = await supabase.from('people').select('id, name, status').neq('status', 'archived').order('name');
+  if (error) throw error;
+  return (data ?? []).filter((p) => !enrolledIds.has(p.id as string)) as EnrollablePerson[];
+}
+
+export async function enrollPerson(personId: string, cohortId: string): Promise<void> {
+  const { error } = await supabase.from('enrollments').insert({ person_id: personId, cohort_id: cohortId });
   if (error) throw error;
 }
 

@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { formatDate } from '../../../domain/dates';
 import { CommunityGroup, listMinistries, listSmallGroups } from '../../../domain/communityGroups';
 import { UserRole } from '../../../types/enums';
-import { useVisitorDetail } from '../Detail/hooks';
+import { useVisitorDetail } from '../../../features/visitors';
 import { Actions, Content, DetailLabel, DetailRow, DetailsList, DetailValue, Form } from '../Detail/styles';
 
 const communitySchema = z.object({

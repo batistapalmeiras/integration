@@ -2,7 +2,7 @@
 import { Button, Card, Typography, useModal } from 'bp-kit';
 // Local
 import { RowActions } from '../../../../components/Table';
-import { Person } from '../../types';
+import { Person } from '../../../../features/visitors';
 import { CardHeader, StagePanel } from '../styles';
 import { ConfirmMemberModal } from './ConfirmMemberModal';
 

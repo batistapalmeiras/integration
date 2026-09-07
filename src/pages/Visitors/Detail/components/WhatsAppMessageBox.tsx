@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button, Card, RawTextarea } from 'bp-kit';
 // Local
 import { buildWhatsAppLink } from '../../../../domain/whatsapp';
-import { Person } from '../../types';
+import { Person } from '../../../../features/visitors';
 import { Actions } from '../styles';
 
 interface Props {

@@ -1,7 +1,11 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
+// Libs
+import { useAuthCtx } from 'bp-kit';
 // Local
 import { getUpcomingCoffeeEventDate } from '../../../domain/cafeSchedule';
+import { EnrollablePerson, enrollPerson as enrollPersonRow } from '../../../domain/classesRoster';
+import { enrollInIntegrationClass } from '../../../features/visitors';
 import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { formatDate, weeklyLessonDates } from '../domain';
@@ -12,6 +16,7 @@ const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export function useClasses() {
+  const { user } = useAuthCtx();
   const [cohort, setCohort] = useState<Cohort | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [allEnrollments, setAllEnrollments] = useState<EnrollmentRow[]>([]);
@@ -160,6 +165,13 @@ export function useClasses() {
     await load();
   };
 
+  const enrollPerson = async (person: EnrollablePerson) => {
+    if (!cohort) return;
+    await enrollPersonRow(person.id, cohort.id);
+    await enrollInIntegrationClass(person, user?.id);
+    await load();
+  };
+
   const setSearch = (value: string) => {
     setSearchState(value);
     setPage(1);
@@ -189,5 +201,6 @@ export function useClasses() {
     createCohort,
     updateLessonDates,
     closeCohort,
+    enrollPerson,
   };
 }

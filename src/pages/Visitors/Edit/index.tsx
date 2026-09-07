@@ -9,7 +9,7 @@ import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, text, Te
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { AppRoute } from '../../../routes/paths';
 import { UserRole } from '../../../types/enums';
-import { useVisitorDetail } from '../Detail/hooks';
+import { useVisitorDetail } from '../../../features/visitors';
 import { Actions, DangerLink, Form } from '../Detail/styles';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
 

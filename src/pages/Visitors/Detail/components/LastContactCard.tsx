@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button, Card, RadioGroup, Typography } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Local
-import { ContactResult, RESULT_LABELS } from '../../types';
+import { ContactResult, RESULT_LABELS } from '../../../../features/visitors';
 import { Actions, CardHeader } from '../styles';
 
 const RESULT_OPTIONS = Object.entries(RESULT_LABELS).map(([value, label]) => ({ value, label }));
