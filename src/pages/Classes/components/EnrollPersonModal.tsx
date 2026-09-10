@@ -41,7 +41,7 @@ export function EnrollPersonModal({ cohortId, close, onEnroll }: Props) {
 
   return (
     <>
-      <ModalTitle>Adicionar pessoa à turma</ModalTitle>
+      <ModalTitle onClose={close}>Adicionar pessoa à turma</ModalTitle>
       <Form onSubmit={submit}>
         <Select label="Pessoa" control={control} name="personId">
           <option value="">Selecione…</option>
@@ -53,9 +53,6 @@ export function EnrollPersonModal({ cohortId, close, onEnroll }: Props) {
         </Select>
 
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            {text.actions.cancel}
-          </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Adicionando...'

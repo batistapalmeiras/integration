@@ -74,12 +74,9 @@ export function EditStoreItemPage() {
   const confirmRemove = () =>
     open(
       <>
-        <ModalTitle>Remover {item.name}?</ModalTitle>
+        <ModalTitle onClose={close}>Remover {item.name}?</ModalTitle>
         <Typography type="p">Essa ação não pode ser desfeita.</Typography>
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            Cancelar
-          </Button>
           <Button
             type="button"
             variant="danger"
@@ -89,6 +86,7 @@ export function EditStoreItemPage() {
               navigate(AppRoute.Store);
             }}
           >
+            <Trash2 size={16} />
             Remover
           </Button>
         </ModalActions>

@@ -45,7 +45,7 @@ export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
 
   return (
     <>
-      <ModalTitle>Confirmar {person.name} como membro</ModalTitle>
+      <ModalTitle onClose={close}>Confirmar {person.name} como membro</ModalTitle>
       <Form onSubmit={submit}>
         <Select label="Pequeno Grupo" control={control} name="smallGroupId">
           <option value="">Selecione…</option>
@@ -65,9 +65,6 @@ export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
         </Select>
 
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            {text.actions.cancel}
-          </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Salvando...'

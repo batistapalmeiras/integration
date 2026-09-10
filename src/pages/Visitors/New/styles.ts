@@ -8,7 +8,11 @@ export const Form = styled(BaseForm)`
 
 export const Actions = styled.div`
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
   gap: ${({ theme }) => theme.spacing.sm};
   margin-top: ${({ theme }) => theme.spacing.lg};
+
+  & > button {
+    width: 100%;
+  }
 `;

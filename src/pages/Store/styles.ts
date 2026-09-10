@@ -3,9 +3,13 @@ import styled from 'styled-components';
 
 export const FormActions = styled.div`
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
   gap: ${({ theme }) => theme.spacing.sm};
   margin-top: ${({ theme }) => theme.spacing.lg};
+
+  & > button {
+    width: 100%;
+  }
 `;
 
 // The shared RowActions wraps (flex-wrap: wrap), which stacks icons

@@ -91,7 +91,7 @@ export function GroupModal({
 
   return (
     <>
-      <ModalTitle>{title}</ModalTitle>
+      <ModalTitle onClose={close}>{title}</ModalTitle>
       <Form onSubmit={submit}>
         <TextInput label={fieldLabel} control={control} name="name" placeholder={fieldLabel} />
 
@@ -136,9 +136,6 @@ export function GroupModal({
         )}
 
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            {text.actions.cancel}
-          </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Salvando...'

@@ -41,7 +41,7 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
 
   return (
     <>
-      <ModalTitle>Nova turma de integração</ModalTitle>
+      <ModalTitle onClose={close}>Nova turma de integração</ModalTitle>
       <Form onSubmit={submit}>
         {minDate && (
           <InfoBox variant="info">A 1ª aula precisa ser em ou depois de {formatDate(minDate)}, data do café agendado.</InfoBox>
@@ -56,9 +56,6 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
         />
 
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            Cancelar
-          </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Salvando...'
