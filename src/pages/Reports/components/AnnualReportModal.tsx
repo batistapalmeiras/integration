@@ -1,5 +1,5 @@
 // Libs
-import { Button, ModalActions, ModalTitle, RawSelect, Skeleton, StatCard, StatLabel, StatsGrid, StatValue } from 'bp-kit';
+import { ModalTitle, RawSelect, Skeleton, StatCard, StatLabel, StatsGrid, StatValue } from 'bp-kit';
 // Local
 import { useAnnualReport } from '../hooks';
 import { FiltersRow } from '../styles';
@@ -13,7 +13,7 @@ export function AnnualReportModal({ close }: Props) {
 
   return (
     <>
-      <ModalTitle>Relatório anual</ModalTitle>
+      <ModalTitle onClose={close}>Relatório anual</ModalTitle>
 
       <FiltersRow>
         <RawSelect label="Ano" value={year} onChange={(e) => setYear(Number(e.target.value))}>
@@ -52,12 +52,6 @@ export function AnnualReportModal({ close }: Props) {
           </StatCard>
         </StatsGrid>
       )}
-
-      <ModalActions>
-        <Button type="button" variant="secondary" onClick={close}>
-          Fechar
-        </Button>
-      </ModalActions>
     </>
   );
 }

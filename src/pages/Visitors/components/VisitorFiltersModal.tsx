@@ -1,7 +1,8 @@
 // React
 import { FormEvent, useState } from 'react';
 // Libs
-import { Button, Form, ModalActions, ModalTitle, MultiSelect, text } from 'bp-kit';
+import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect, text } from 'bp-kit';
+import { FilterX } from 'lucide-react';
 // Local
 import { PersonStatus, STATUS_META } from '../../../types/person';
 
@@ -41,12 +42,12 @@ export function VisitorFiltersModal({ close, statusFilter, onApply }: Props) {
         />
 
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={clear} disabled={status.length === 0}>
-            Limpar
-          </Button>
           <Button type="button" variant="primary" onClick={apply}>
             Aplicar
           </Button>
+          <LinkButton icon={<FilterX size={16} />} onClick={clear} disabled={status.length === 0}>
+            Limpar
+          </LinkButton>
         </ModalActions>
       </Form>
     </>

@@ -10,7 +10,7 @@ import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { AppRoute } from '../../../routes/paths';
 import { UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
-import { Actions, DangerLink, Form } from '../Detail/styles';
+import { Actions, Form } from '../Detail/styles';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
 
 export function VisitorEditPage() {
@@ -67,14 +67,11 @@ export function VisitorEditPage() {
   const confirmDelete = () =>
     open(
       <>
-        <ModalTitle>Excluir {person.name}?</ModalTitle>
+        <ModalTitle onClose={close}>Excluir {person.name}?</ModalTitle>
         <Typography type="p">
           Só é possível excluir enquanto a pessoa ainda está no contato inicial. Essa ação não pode ser desfeita.
         </Typography>
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            Cancelar
-          </Button>
           <Button
             type="button"
             variant="danger"
@@ -162,9 +159,10 @@ export function VisitorEditPage() {
         )}
 
         {canDelete && (
-          <DangerLink type="button" onClick={confirmDelete}>
+          <Button type="button" variant="danger" fullWidth onClick={confirmDelete}>
+            <Trash2 size={16} />
             Excluir cadastro
-          </DangerLink>
+          </Button>
         )}
       </Form>
       {modal}

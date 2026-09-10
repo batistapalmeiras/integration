@@ -86,12 +86,9 @@ export function CommunityGroupDetailPage() {
   const openDelete = () =>
     open(
       <>
-        <ModalTitle>Excluir {group.name}?</ModalTitle>
+        <ModalTitle onClose={close}>Excluir {group.name}?</ModalTitle>
         <Typography type="p">Essa ação não pode ser desfeita.</Typography>
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            Cancelar
-          </Button>
           <Button
             type="button"
             variant="danger"

@@ -55,15 +55,12 @@ export function CoffeePage() {
   const confirmCanceled = (personId: string, personName: string) =>
     open(
       <>
-        <ModalTitle>Cancelar presença de {personName}?</ModalTitle>
+        <ModalTitle onClose={close}>Cancelar presença de {personName}?</ModalTitle>
         <Typography type="p">
           A pessoa avisou que não vem mais e será arquivada. Isso pode ser revertido depois, reativando o cadastro
           dela em Visitantes.
         </Typography>
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            Voltar
-          </Button>
           <Button
             type="button"
             variant="danger"

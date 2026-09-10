@@ -1,7 +1,8 @@
 // React
 import { FormEvent, useState } from 'react';
 // Libs
-import { Button, Form, ModalActions, ModalTitle, MultiSelect, RawSelect, text } from 'bp-kit';
+import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect, RawSelect, text } from 'bp-kit';
+import { FilterX } from 'lucide-react';
 // Local
 import { PersonStatus, STATUS_META } from '../../../types/person';
 
@@ -63,12 +64,12 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
         </RawSelect>
 
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={clear} disabled={noFilters}>
-            Limpar
-          </Button>
           <Button type="button" variant="primary" onClick={apply}>
             Aplicar
           </Button>
+          <LinkButton icon={<FilterX size={16} />} onClick={clear} disabled={noFilters}>
+            Limpar
+          </LinkButton>
         </ModalActions>
       </Form>
     </>

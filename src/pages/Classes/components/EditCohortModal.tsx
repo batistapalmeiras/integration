@@ -3,10 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, DatePicker, ModalActions, ModalTitle, text } from 'bp-kit';
-import { Save } from 'lucide-react';
+import { Lock, Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
-import { DangerLink } from '../../Visitors/Detail/styles';
 import { Form } from '../styles';
 import { Lesson } from '../types';
 
@@ -48,7 +47,7 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
 
   return (
     <>
-      <ModalTitle>Editar datas das aulas</ModalTitle>
+      <ModalTitle onClose={close}>Editar datas das aulas</ModalTitle>
       <Form onSubmit={submit}>
         <DatePicker label="Aula 1" control={control} name="date1" />
         <DatePicker label="Aula 2" control={control} name="date2" />
@@ -56,9 +55,6 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
         <DatePicker label="Aula 4" control={control} name="date4" />
 
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            Cancelar
-          </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Salvando...'
@@ -71,15 +67,18 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
           </Button>
         </ModalActions>
 
-        <DangerLink
+        <Button
           type="button"
+          variant="danger"
+          fullWidth
           onClick={async () => {
             await onCloseCohort();
             close();
           }}
         >
+          <Lock size={16} />
           Encerrar turma
-        </DangerLink>
+        </Button>
       </Form>
     </>
   );

@@ -32,8 +32,18 @@ interface ILayoutProps {
 }
 
 export function Layout({ children }: ILayoutProps) {
-  const { user, navigate, handleLogout, isActive, showPeople, showVisitors, showCoffee, showClasses, showAdmin } =
-    useLayout();
+  const {
+    user,
+    navigate,
+    handleLogout,
+    isActive,
+    isExactTab,
+    showPeople,
+    showVisitors,
+    showCoffee,
+    showClasses,
+    showAdmin,
+  } = useLayout();
 
   // The Brand/home link only ever renders on desktop (SideBrand), so it
   // should match the desktop sidebar's own route for this page (/configuracoes),
@@ -51,11 +61,11 @@ export function Layout({ children }: ILayoutProps) {
   // that there's no top bar, not just an admin shortcut.
   const visibleTabs = [showPeople, showVisitors, showCoffee, showClasses, true].filter(Boolean).length;
   const isOnATab =
-    (showVisitors && isActive(AppRoute.Visitors)) ||
-    (showCoffee && isActive(AppRoute.Coffee)) ||
-    (showClasses && isActive(AppRoute.Classes)) ||
-    (showPeople && isActive(AppRoute.People)) ||
-    isActive(AppRoute.Admin);
+    (showVisitors && isExactTab(AppRoute.Visitors)) ||
+    (showCoffee && isExactTab(AppRoute.Coffee)) ||
+    (showClasses && isExactTab(AppRoute.Classes)) ||
+    (showPeople && isExactTab(AppRoute.People)) ||
+    isExactTab(AppRoute.Admin);
 
   const shouldShowBottomBar = visibleTabs > 1 && isOnATab;
 

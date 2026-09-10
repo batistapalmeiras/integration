@@ -26,7 +26,7 @@ import { z } from 'zod';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { ADMIN_MANAGEABLE_ROLES, ROLE_LABELS, UserRole } from '../../../types/enums';
-import { Content, DangerLink } from '../../Visitors/Detail/styles';
+import { Content } from '../../Visitors/Detail/styles';
 import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
 
 const schema = z.object({
@@ -102,14 +102,11 @@ export function VolunteerDetailPage() {
   const confirmRemove = () =>
     open(
       <>
-        <ModalTitle>Remover {volunteer.name}?</ModalTitle>
+        <ModalTitle onClose={close}>Remover {volunteer.name}?</ModalTitle>
         <Typography type="p">
           Isso apaga o login dessa pessoa por completo — ela não conseguirá mais entrar no sistema.
         </Typography>
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            Cancelar
-          </Button>
           <Button
             type="button"
             variant="danger"
@@ -176,9 +173,10 @@ export function VolunteerDetailPage() {
               )}
             </Button>
 
-            <DangerLink type="button" onClick={confirmRemove}>
+            <Button type="button" variant="danger" fullWidth onClick={confirmRemove}>
+              <Trash2 size={16} />
               Remover voluntário
-            </DangerLink>
+            </Button>
           </>
         )}
       </Form>

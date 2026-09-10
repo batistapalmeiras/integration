@@ -37,7 +37,7 @@ export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
 
   return (
     <>
-      <ModalTitle>Adicionar voluntário</ModalTitle>
+      <ModalTitle onClose={close}>Adicionar voluntário</ModalTitle>
       <Form onSubmit={submit}>
         <InfoBox variant="info">A senha inicial será {getDefaultVolunteerPassword()} — repasse ao voluntário.</InfoBox>
         <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />
@@ -52,9 +52,6 @@ export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
         </Select>
 
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={close}>
-            Cancelar
-          </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Salvando...'

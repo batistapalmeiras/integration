@@ -5,9 +5,13 @@ export { Form } from 'bp-kit';
 
 export const Actions = styled.div`
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
   gap: ${({ theme }) => theme.spacing.sm};
   margin-top: ${({ theme }) => theme.spacing.md};
+
+  & > button {
+    width: 100%;
+  }
 `;
 
 export const Content = styled.div`
@@ -93,23 +97,6 @@ export const DetailValue = styled.span`
   text-align: right;
 `;
 
-export const DangerLink = styled.button`
-  display: block;
-  width: 100%;
-  text-align: center;
-  border: none;
-  background: none;
-  padding: ${({ theme }) => theme.spacing.sm} 0;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  color: ${({ theme }) => theme.colors.primaryErrorText};
-  text-decoration: underline;
-  cursor: pointer;
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.primaryErrorTextHover};
-  }
-`;
 
 export const InfoBoxAction = styled.div`
   margin-top: ${({ theme }) => theme.spacing.sm};

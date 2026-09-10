@@ -47,9 +47,6 @@ export function PeopleSection() {
       />,
     );
 
-  if (loading) return <Skeleton $h="240px" />;
-  if (error) return <Empty title={text.feedback.loadError} description={error} />;
-
   return (
     <PageFlexBody>
       <SearchFiltersRow>
@@ -60,12 +57,18 @@ export function PeopleSection() {
         </CompactFilterButton>
       </SearchFiltersRow>
 
-      {people.length === 0 ? (
+      {loading && <Skeleton $h="240px" />}
+
+      {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
+
+      {!loading && !error && people.length === 0 && (
         <Empty
           title="Nenhuma pessoa encontrada"
           description={hasFilter ? 'Nenhuma pessoa encontrada para os filtros aplicados.' : 'Nenhuma pessoa cadastrada ainda.'}
         />
-      ) : (
+      )}
+
+      {!loading && !error && people.length > 0 && (
         <>
           <TableWrapper>
             <Table>

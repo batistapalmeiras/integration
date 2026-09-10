@@ -53,9 +53,6 @@ export function NewVisitorPage() {
         <TextInput label="Idade" control={control} name="age" type="text" inputMode="numeric" placeholder="Idade" />
 
         <Actions>
-          <Button type="button" variant="secondary" onClick={() => navigate(AppRoute.Visitors)}>
-            {text.actions.cancel}
-          </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Salvando...'
