@@ -26,7 +26,7 @@ export function IntroStep({ onContinue }: Props) {
         <strong>Pré-requisito:</strong> o participante deve ser frequentador regular dos nossos cultos.
       </Typography>
       <Typography type="p">
-        <strong>Duração:</strong> o curso é composto por 4 encontros presenciais.
+        <strong>Duração:</strong> O curso é composto por 4 encontros presenciais. É permitido no máximo 1 falta, sendo necessário reposição.
       </Typography>
 
       {loading && <Skeleton $h="80px" />}
