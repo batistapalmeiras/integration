@@ -1,8 +1,22 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, ModalActions, ModalTitle, PageHeader, Pagination, SearchInput, Skeleton, text, Typography, useAuthCtx, useModal } from 'bp-kit';
-import { XCircle } from 'lucide-react';
+import {
+  Button,
+  Empty,
+  ModalActions,
+  ModalTitle,
+  PageHeader,
+  Pagination,
+  RawSelect,
+  SearchInput,
+  Skeleton,
+  text,
+  Typography,
+  useAuthCtx,
+  useModal,
+} from 'bp-kit';
+import { UserPlus, XCircle } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -10,15 +24,19 @@ import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { AttendanceControl } from './components/AttendanceControl';
 import { CreateEventModal } from './components/CreateEventModal';
+import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { formatDate } from './domain';
 import { useCoffee } from './hooks';
-import { PaginationWrap, SearchRow } from './styles';
+import { HeaderActions, PaginationWrap, SearchRow, SelectorRow } from './styles';
 
 export function CoffeePage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const {
+    events,
     event,
+    selectedEventId,
+    selectEvent,
     attendees,
     totalCount,
     loading,
@@ -30,7 +48,9 @@ export function CoffeePage() {
     setSearch,
     hasFilter,
     createEvent,
-    deleteEvent,
+    updateEvent,
+    deleteSelectedEvent,
+    enrollPerson,
     markAttended,
     markNotAttended,
     markCanceled,
@@ -39,18 +59,12 @@ export function CoffeePage() {
 
   const canPlan =
     user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const hasUpcomingEvent = !!event && event.event_date >= todayKey;
 
-  const openCreateModal = () =>
-    open(
-      <CreateEventModal
-        close={close}
-        onCreate={createEvent}
-        onDelete={hasUpcomingEvent ? deleteEvent : undefined}
-        initialDate={hasUpcomingEvent ? event!.event_date : undefined}
-      />,
-    );
+  const openCreateModal = () => open(<CreateEventModal close={close} onCreate={createEvent} />);
+  const openEditModal = () =>
+    event && open(<CreateEventModal close={close} onCreate={updateEvent} onDelete={deleteSelectedEvent} initialDate={event.event_date} />);
+  const openEnrollModal = () =>
+    selectedEventId && open(<EnrollPersonModal eventId={selectedEventId} close={close} onEnroll={enrollPerson} />);
 
   const confirmCanceled = (personId: string, personName: string) =>
     open(
@@ -81,7 +95,24 @@ export function CoffeePage() {
       <PageHeader
         title="Café de Boas-vindas"
         subtitle={event ? `${formatDate(event.event_date)} às ${event.event_time.slice(0, 5)}` : 'Nenhum café agendado'}
-        action={canPlan ? <Button onClick={openCreateModal}>{hasUpcomingEvent ? 'Editar café' : 'Novo café'}</Button> : undefined}
+        action={
+          canPlan ? (
+            <HeaderActions>
+              {event && (
+                <Button variant="secondary" onClick={openEnrollModal}>
+                  <UserPlus size={16} />
+                  Adicionar
+                </Button>
+              )}
+              {event && (
+                <Button variant="secondary" onClick={openEditModal}>
+                  Editar café
+                </Button>
+              )}
+              <Button onClick={openCreateModal}>Novo café</Button>
+            </HeaderActions>
+          ) : undefined
+        }
       />
 
       {!loading && !error && event && <PeopleCount count={totalCount} />}
@@ -95,6 +126,18 @@ export function CoffeePage() {
           title="Nenhum café agendado"
           description={canPlan ? 'Crie o próximo café pelo botão acima.' : 'Aguarde a Equipe de Integração agendar o próximo café.'}
         />
+      )}
+
+      {!loading && !error && event && events.length > 1 && (
+        <SelectorRow>
+          <RawSelect label="Café" value={selectedEventId ?? ''} onChange={(e) => selectEvent(e.target.value)}>
+            {events.map((e) => (
+              <option key={e.id} value={e.id}>
+                {formatDate(e.event_date)} às {e.event_time.slice(0, 5)}
+              </option>
+            ))}
+          </RawSelect>
+        </SelectorRow>
       )}
 
       {!loading && !error && event && (

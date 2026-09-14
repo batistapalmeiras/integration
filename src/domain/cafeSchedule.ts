@@ -14,20 +14,15 @@ async function findFutureCoffeeEvent(): Promise<{ id: string; event_date: string
   return data;
 }
 
-async function insertCoffeeEvent(eventDate: string): Promise<string> {
+export async function insertCoffeeEvent(eventDate: string): Promise<string> {
   const { data, error } = await supabase.from('coffee_events').insert({ event_date: eventDate }).select('id').single();
   if (error) throw error;
   return data.id as string;
 }
 
-export async function createOrUpdateCoffeeEvent(eventDate: string): Promise<string> {
-  const future = await findFutureCoffeeEvent();
-  if (future) {
-    const { error } = await supabase.from('coffee_events').update({ event_date: eventDate }).eq('id', future.id);
-    if (error) throw error;
-    return future.id;
-  }
-  return insertCoffeeEvent(eventDate);
+export async function updateCoffeeEventDate(id: string, eventDate: string): Promise<void> {
+  const { error } = await supabase.from('coffee_events').update({ event_date: eventDate }).eq('id', id);
+  if (error) throw error;
 }
 
 export async function hasUpcomingCoffeeEvent(): Promise<boolean> {
@@ -98,6 +93,33 @@ export async function getCoffeeAttendanceForPerson(
     .single();
   if (insertError) throw insertError;
   return created as { id: string; attended: boolean };
+}
+
+export interface EnrollableCoffeePerson {
+  id: string;
+  name: string;
+}
+
+// People eligible to be added to a café by hand — anyone not already
+// attending it and not archived. Used by the manual "Adicionar" action, for
+// cases like attaching someone who already went to a past café directly to
+// a specific café cycle without going through the normal invite flow.
+export async function listEnrollableCoffeePeople(eventId: string): Promise<EnrollableCoffeePerson[]> {
+  const { data: attending, error: attendingError } = await supabase
+    .from('coffee_attendance')
+    .select('person_id')
+    .eq('coffee_event_id', eventId);
+  if (attendingError) throw attendingError;
+  const attendingIds = new Set((attending ?? []).map((a) => a.person_id as string));
+
+  const { data, error } = await supabase.from('people').select('id, name').neq('status', 'archived').order('name');
+  if (error) throw error;
+  return (data ?? []).filter((p) => !attendingIds.has(p.id as string)) as EnrollableCoffeePerson[];
+}
+
+export async function enrollInCoffee(personId: string, eventId: string): Promise<void> {
+  const { error } = await supabase.from('coffee_attendance').insert({ person_id: personId, coffee_event_id: eventId });
+  if (error) throw error;
 }
 
 export async function markCoffeeAttended(attendanceId: string): Promise<void> {

@@ -4,10 +4,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuthCtx } from 'bp-kit';
 // Local
 import {
-  createOrUpdateCoffeeEvent,
+  EnrollableCoffeePerson,
+  enrollInCoffee,
+  insertCoffeeEvent,
   markCoffeeAttended,
   markCoffeeCanceled,
   markCoffeeNotAttended,
+  updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
 import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline } from '../../../types/person';
@@ -17,9 +20,15 @@ import { AttendeeRow, CoffeeEvent } from '../types';
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
+function resolveDefaultId(list: CoffeeEvent[]): string | null {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  return (list.find((e) => e.event_date >= todayKey) ?? list[list.length - 1])?.id ?? null;
+}
+
 export function useCoffee() {
   const { user } = useAuthCtx();
-  const [event, setEvent] = useState<CoffeeEvent | null>(null);
+  const [events, setEvents] = useState<CoffeeEvent[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [allAttendees, setAllAttendees] = useState<AttendeeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,74 +45,63 @@ export function useCoffee() {
     saveFilters({ search });
   }, [search]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    const { data: events, error: eventsError } = await supabase
+  const fetchEvents = useCallback(async (): Promise<CoffeeEvent[] | null> => {
+    const { data, error: eventsError } = await supabase
       .from('coffee_events')
       .select('*')
       .order('event_date', { ascending: true });
-
     if (eventsError) {
       setError(eventsError.message);
-      setLoading(false);
-      return;
+      return null;
     }
+    const list = (data ?? []) as CoffeeEvent[];
+    setEvents(list);
+    return list;
+  }, []);
 
+  // Self-heal: a person can reach 'welcome_coffee' status without ANY
+  // attendance row at all (e.g. legacy data from before auto-attach
+  // existed) — attach them to the next upcoming café. Runs independently of
+  // whichever café is selected in the dropdown, since an orphaned person
+  // should always land on the real next café, not wherever staff happens
+  // to be looking at the moment.
+  const healOrphans = useCallback(async (list: CoffeeEvent[]) => {
     const todayKey = new Date().toISOString().slice(0, 10);
-    const list = (events ?? []) as CoffeeEvent[];
-    const currentEvent = list.find((e) => e.event_date >= todayKey) ?? list[list.length - 1] ?? null;
-    setEvent(currentEvent);
+    const upcomingId = list.find((e) => e.event_date >= todayKey)?.id;
+    if (!upcomingId) return;
 
-    if (!currentEvent) {
-      setAllAttendees([]);
-      setPage(1);
-      setLoading(false);
-      return;
-    }
-
-    // Self-heal: a person can reach 'welcome_coffee' status without an
-    // attendance row (e.g. legacy data from before auto-attach existed) —
-    // attach them here so nothing needs a separate "pending" list/step.
     const { data: welcomePeople, error: peopleError } = await supabase
       .from('people')
       .select('id')
       .eq('status', 'welcome_coffee');
-
     if (peopleError) {
       setError(peopleError.message);
-      setLoading(false);
       return;
     }
 
-    const { data: existingAttendance, error: existingError } = await supabase
-      .from('coffee_attendance')
-      .select('person_id')
-      .eq('coffee_event_id', currentEvent.id);
-
-    if (existingError) {
-      setError(existingError.message);
-      setLoading(false);
+    const { data: everAttended, error: everAttendedError } = await supabase.from('coffee_attendance').select('person_id');
+    if (everAttendedError) {
+      setError(everAttendedError.message);
       return;
     }
 
-    const attachedIds = new Set((existingAttendance ?? []).map((a) => a.person_id as string));
-    const missing = (welcomePeople ?? []).filter((p) => !attachedIds.has(p.id));
+    const everAttachedIds = new Set((everAttended ?? []).map((a) => a.person_id as string));
+    const missing = (welcomePeople ?? []).filter((p) => !everAttachedIds.has(p.id));
     if (missing.length > 0) {
       await supabase
         .from('coffee_attendance')
-        .insert(missing.map((p) => ({ person_id: p.id, coffee_event_id: currentEvent.id })));
+        .insert(missing.map((p) => ({ person_id: p.id, coffee_event_id: upcomingId })));
     }
+  }, []);
 
+  const loadAttendeesFor = useCallback(async (eventId: string) => {
     const { data: attendanceData, error: attendanceError } = await supabase
       .from('coffee_attendance')
       .select('*, person:people(id,name,phone,status)')
-      .eq('coffee_event_id', currentEvent.id);
+      .eq('coffee_event_id', eventId);
 
     if (attendanceError) {
       setError(attendanceError.message);
-      setLoading(false);
       return;
     }
 
@@ -114,23 +112,69 @@ export function useCoffee() {
       rows.filter((a) => a.person.status === 'welcome_coffee').sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
     );
     setPage(1);
-    setLoading(false);
   }, []);
+
+  const selectEvent = useCallback(
+    async (eventId: string) => {
+      setLoading(true);
+      setSelectedEventId(eventId);
+      await loadAttendeesFor(eventId);
+      setLoading(false);
+    },
+    [loadAttendeesFor],
+  );
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    const list = await fetchEvents();
+    if (!list) {
+      setLoading(false);
+      return;
+    }
+    if (list.length === 0) {
+      setSelectedEventId(null);
+      setAllAttendees([]);
+      setLoading(false);
+      return;
+    }
+
+    await healOrphans(list);
+    const eventId = resolveDefaultId(list)!;
+    setSelectedEventId(eventId);
+    await loadAttendeesFor(eventId);
+    setLoading(false);
+  }, [fetchEvents, healOrphans, loadAttendeesFor]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   const createEvent = async (eventDate: string) => {
-    await createOrUpdateCoffeeEvent(eventDate);
+    const newId = await insertCoffeeEvent(eventDate);
+    await fetchEvents();
+    await selectEvent(newId);
+  };
+
+  const updateEvent = async (eventDate: string) => {
+    if (!selectedEventId) return;
+    await updateCoffeeEventDate(selectedEventId, eventDate);
+    await fetchEvents();
+    await loadAttendeesFor(selectedEventId);
+  };
+
+  const deleteSelectedEvent = async () => {
+    if (!selectedEventId) return;
+    const { error: deleteError } = await supabase.from('coffee_events').delete().eq('id', selectedEventId);
+    if (deleteError) throw deleteError;
     await load();
   };
 
-  const deleteEvent = async () => {
-    if (!event) return;
-    const { error: deleteError } = await supabase.from('coffee_events').delete().eq('id', event.id);
-    if (deleteError) throw deleteError;
-    await load();
+  const enrollPerson = async (person: EnrollableCoffeePerson) => {
+    if (!selectedEventId) return;
+    await enrollInCoffee(person.id, selectedEventId);
+    await loadAttendeesFor(selectedEventId);
   };
 
   // These three patch `attendees` in place instead of re-running `load()` —
@@ -156,6 +200,8 @@ export function useCoffee() {
     setPage(1);
   };
 
+  const event = events.find((e) => e.id === selectedEventId) ?? null;
+
   const filtered = debouncedSearch
     ? allAttendees.filter((a) => a.person.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
     : allAttendees;
@@ -165,7 +211,10 @@ export function useCoffee() {
   const attendees = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
 
   return {
+    events,
     event,
+    selectedEventId,
+    selectEvent,
     attendees,
     totalCount: filtered.length,
     loading,
@@ -177,7 +226,9 @@ export function useCoffee() {
     setSearch,
     hasFilter: !!search.trim(),
     createEvent,
-    deleteEvent,
+    updateEvent,
+    deleteSelectedEvent,
+    enrollPerson,
     markAttended,
     markNotAttended,
     markCanceled,
