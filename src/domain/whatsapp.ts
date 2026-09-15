@@ -14,7 +14,19 @@ export function initialContactMessage(personName: string, volunteerName: string)
 export function classInviteMessage(name: string): string {
   const firstName = name.split(' ')[0];
   const signupUrl = `${window.location.origin}${AppRoute.IntegrationSignup}`;
-  return `Olá, ${firstName}! Foi muito bom te ter no nosso Café de Boas-vindas 😊 Agora é hora de participar das nossas aulas de Integração! Preencha sua inscrição por este link: ${signupUrl}`;
+  return [
+    `Olá, ${firstName}!`,
+    '',
+    'Foi muito bom ter você conosco no nosso Café de Boas-vindas!',
+    '',
+    'Agora, se você tiver interesse, é hora de dar o próximo passo e participar das nossas aulas de Integração. Para que possamos nos organizar, pedimos que faça sua inscrição o quanto antes.',
+    '',
+    'No link você encontra os dias das nossas aulas.',
+    '',
+    'Preencha sua inscrição por este link:',
+    '',
+    signupUrl,
+  ].join('\n');
 }
 
 // Same public link for everyone (no per-person token) — the form identifies

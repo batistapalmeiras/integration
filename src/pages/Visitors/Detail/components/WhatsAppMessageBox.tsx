@@ -14,9 +14,10 @@ interface Props {
   onOpen?: () => void;
   bare?: boolean;
   disabled?: boolean;
+  rows?: number;
 }
 
-export function WhatsAppMessageBox({ person, defaultMessage, buttonLabel = 'Abrir WhatsApp', onOpen, bare, disabled }: Props) {
+export function WhatsAppMessageBox({ person, defaultMessage, buttonLabel = 'Abrir WhatsApp', onOpen, bare, disabled, rows = 6 }: Props) {
   const [message, setMessage] = useState(defaultMessage);
 
   const openWhatsApp = () => {
@@ -26,7 +27,7 @@ export function WhatsAppMessageBox({ person, defaultMessage, buttonLabel = 'Abri
 
   const content = (
     <>
-      <RawTextarea label="Mensagem" value={message} onChange={(e) => setMessage(e.target.value)} rows={6} disabled={disabled} />
+      <RawTextarea label="Mensagem" value={message} onChange={(e) => setMessage(e.target.value)} rows={rows} disabled={disabled} />
       <Actions>
         <Button type="button" variant="primary" onClick={openWhatsApp} disabled={disabled}>
           {buttonLabel}
