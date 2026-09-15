@@ -22,6 +22,7 @@ interface Props {
   onMarkNotAttended: () => Promise<void>;
   onDeclined: () => Promise<void>;
   onNoResponse: () => Promise<void>;
+  onClassInviteSent: () => Promise<void>;
 }
 
 export function CoffeeStagePanel({
@@ -33,6 +34,7 @@ export function CoffeeStagePanel({
   onMarkNotAttended,
   onDeclined,
   onNoResponse,
+  onClassInviteSent,
 }: Props) {
   if (loading || !attendance) return <Skeleton $h="80px" />;
 
@@ -68,7 +70,12 @@ export function CoffeeStagePanel({
 
   return (
     <StagePanel>
-      <WhatsAppMessageBox person={person} defaultMessage={classInviteMessage(person.name)} buttonLabel="Convidar p/ turma" />
+      <WhatsAppMessageBox
+        person={person}
+        defaultMessage={classInviteMessage(person.name)}
+        buttonLabel="Convidar p/ turma"
+        onOpen={onClassInviteSent}
+      />
       <CardHeader>
         <Typography type="label">Resposta ao convite</Typography>
       </CardHeader>

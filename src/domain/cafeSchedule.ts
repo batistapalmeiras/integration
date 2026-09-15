@@ -142,27 +142,19 @@ export async function enrollInCoffee(personId: string, eventId: string): Promise
 // Attending moves the person into a sub-stage of their own — status alone
 // now says whether they've been to the café yet, instead of that only being
 // knowable by also checking the attendance row's `attended` flag.
+//
+// This is a single RPC (not separate .update() calls) so the attendance
+// flip, status change and history log all commit together in one DB
+// transaction — a failure partway through (constraint, network drop,
+// whatever) leaves nothing changed instead of a half-done state that used
+// to need a manual SQL fix (see the 2026-09-15 café incident).
 export async function markCoffeeAttended(attendanceId: string, personId: string, actorId?: string): Promise<void> {
-  // Status first: it's the update guarded by the DB check constraint, so if
-  // it's rejected, the attendance row is never touched and the person stays
-  // in a consistent, retryable state instead of "presença marcada mas status
-  // preso" (see the 2026-09-15 café incident).
-  const { error: statusError } = await supabase
-    .from('people')
-    .update({ status: 'pending_signup', updated_at: new Date().toISOString() })
-    .eq('id', personId);
-  if (statusError) throw statusError;
-
-  const { error: attendanceError } = await supabase.from('coffee_attendance').update({ attended: true }).eq('id', attendanceId);
-  if (attendanceError) throw attendanceError;
-
-  await supabase.from('status_history').insert({
-    person_id: personId,
-    from_status: 'welcome_coffee',
-    to_status: 'pending_signup',
-    changed_by: actorId,
-    note: 'Compareceu ao café de boas-vindas',
+  const { error } = await supabase.rpc('mark_coffee_attended', {
+    p_attendance_id: attendanceId,
+    p_person_id: personId,
+    p_actor_id: actorId ?? null,
   });
+  if (error) throw error;
 }
 
 // Person let the volunteer know beforehand they're not coming — distinct

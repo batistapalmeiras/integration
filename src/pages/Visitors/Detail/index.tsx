@@ -27,6 +27,7 @@ export function VisitorDetailPage() {
     error,
     registerContactAttempt,
     markWhatsAppOpened,
+    markClassInviteSent,
     hasCoffeeEvent,
     hasCohort,
     coffeeAttendance,
@@ -97,6 +98,7 @@ export function VisitorDetailPage() {
           onMarkNotAttended={markNotAttended}
           onDeclined={markInviteDeclined}
           onNoResponse={markInviteNoResponse}
+          onClassInviteSent={markClassInviteSent}
         />
       )}
 

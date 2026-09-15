@@ -1,5 +1,5 @@
 // Libs
-import { Archive, ClipboardList, Clock, Coffee, GraduationCap, PhoneCall, RotateCcw, UserCheck } from 'lucide-react';
+import { Archive, ClipboardList, Clock, Coffee, GraduationCap, PhoneCall, RotateCcw, Send, UserCheck } from 'lucide-react';
 import type { ComponentType } from 'react';
 
 export type PersonStatus =
@@ -21,6 +21,7 @@ export interface Person {
   status: PersonStatus;
   notes: string | null;
   whatsapp_opened_at: string | null;
+  class_invite_sent_at: string | null;
   coffee_retry_used: boolean;
   small_group_id: string | null;
   ministry_id: string | null;
@@ -59,17 +60,35 @@ export const AWAITING_REPLY_META = {
   icon: Clock,
 };
 
+// Same idea as "Aguardando Retorno" above, but for the turma-signup
+// invite sent once someone reaches pending_signup: distinguishes "just
+// attended the café, nobody's invited them to the turma yet" from
+// "already sent the link, waiting on them to fill it out".
+export const AWAITING_CLASS_SIGNUP_META = {
+  label: 'Convite Enviado',
+  compactLabel: 'Convite enviado',
+  tone: 'info' as StatusTone,
+  icon: Send,
+};
+
 export interface DisplayStatusInput {
   status: PersonStatus;
   whatsapp_opened_at?: string | null;
+  class_invite_sent_at?: string | null;
 }
 
 export function isAwaitingReply(person: DisplayStatusInput): boolean {
   return (person.status === 'initial_contact' || person.status === 'retry_contact') && !!person.whatsapp_opened_at;
 }
 
+export function isAwaitingClassSignup(person: DisplayStatusInput): boolean {
+  return person.status === 'pending_signup' && !!person.class_invite_sent_at;
+}
+
 export function getDisplayStatusMeta(person: DisplayStatusInput) {
-  return isAwaitingReply(person) ? AWAITING_REPLY_META : STATUS_META[person.status];
+  if (isAwaitingReply(person)) return AWAITING_REPLY_META;
+  if (isAwaitingClassSignup(person)) return AWAITING_CLASS_SIGNUP_META;
+  return STATUS_META[person.status];
 }
 
 // Shared ordering for every list of people in the app: real pipeline stage
@@ -88,6 +107,7 @@ export function comparePeopleByPipeline(a: PipelineSortInput, b: PipelineSortInp
   return (
     PIPELINE_ORDER.get(a.status)! - PIPELINE_ORDER.get(b.status)! ||
     Number(isAwaitingReply(a)) - Number(isAwaitingReply(b)) ||
+    Number(isAwaitingClassSignup(a)) - Number(isAwaitingClassSignup(b)) ||
     a.name.localeCompare(b.name, 'pt-BR')
   );
 }

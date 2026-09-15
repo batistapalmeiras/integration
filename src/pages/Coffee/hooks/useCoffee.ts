@@ -103,7 +103,7 @@ export function useCoffee() {
   const loadAttendeesFor = useCallback(async (eventId: string) => {
     const { data: attendanceData, error: attendanceError } = await supabase
       .from('coffee_attendance')
-      .select('*, person:people(id,name,phone,status)')
+      .select('*, person:people(id,name,phone,status,class_invite_sent_at)')
       .eq('coffee_event_id', eventId);
 
     if (attendanceError) {
