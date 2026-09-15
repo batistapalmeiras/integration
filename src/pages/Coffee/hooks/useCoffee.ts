@@ -19,10 +19,16 @@ import { AttendeeRow, CoffeeEvent } from '../types';
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
+// Enough room to close out the café that just happened while the next one
+// is already scheduled — a 3rd one piling up means the previous cycle
+// wasn't wrapped up yet, which is its own problem to fix first.
+const MAX_EVENTS = 2;
 
+// Always the oldest café (list is sorted ascending by date) — staff should
+// land on whichever one is most likely to still need attention, never
+// jump straight to a newer one just because it exists.
 function resolveDefaultId(list: CoffeeEvent[]): string | null {
-  const todayKey = new Date().toISOString().slice(0, 10);
-  return (list.find((e) => e.event_date >= todayKey) ?? list[list.length - 1])?.id ?? null;
+  return list[0]?.id ?? null;
 }
 
 export function useCoffee() {
@@ -105,11 +111,15 @@ export function useCoffee() {
       return;
     }
 
-    // Once a person moves past the café stage (invited to classes, archived, etc.)
-    // they're another volunteer's queue now — stop showing them here.
+    // welcome_coffee (not yet attended) and pending_signup (attended,
+    // waiting on the turma form) are both still this café's queue. Once a
+    // person moves past that (invited to classes, archived, etc.) they're
+    // another volunteer's queue now — stop showing them here.
     const rows = (attendanceData ?? []) as unknown as AttendeeRow[];
     setAllAttendees(
-      rows.filter((a) => a.person.status === 'welcome_coffee').sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
+      rows
+        .filter((a) => a.person.status === 'welcome_coffee' || a.person.status === 'pending_signup')
+        .sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
     );
     setPage(1);
   }, []);
@@ -152,6 +162,9 @@ export function useCoffee() {
   }, [load]);
 
   const createEvent = async (eventDate: string) => {
+    if (events.length >= MAX_EVENTS) {
+      throw new Error(`Só é possível ter ${MAX_EVENTS} cafés ao mesmo tempo — encerre um antes de criar outro.`);
+    }
     const newId = await insertCoffeeEvent(eventDate);
     await fetchEvents();
     await selectEvent(newId);
@@ -180,9 +193,13 @@ export function useCoffee() {
   // These three patch `attendees` in place instead of re-running `load()` —
   // re-fetching would flip `loading` back to true and flash/replace the
   // whole table for a change that only ever affects a single row.
-  const markAttended = async (attendanceId: string) => {
-    await markCoffeeAttended(attendanceId);
-    setAllAttendees((prev) => prev.map((a) => (a.id === attendanceId ? { ...a, attended: true } : a)));
+  const markAttended = async (attendanceId: string, personId: string) => {
+    await markCoffeeAttended(attendanceId, personId, user?.id);
+    setAllAttendees((prev) =>
+      prev.map((a) =>
+        a.id === attendanceId ? { ...a, attended: true, person: { ...a.person, status: 'pending_signup' } } : a,
+      ),
+    );
   };
 
   const markNotAttended = async (personId: string) => {
@@ -212,6 +229,7 @@ export function useCoffee() {
 
   return {
     events,
+    canCreateEvent: events.length < MAX_EVENTS,
     event,
     selectedEventId,
     selectEvent,

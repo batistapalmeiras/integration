@@ -16,7 +16,7 @@ import {
   useAuthCtx,
   useModal,
 } from 'bp-kit';
-import { UserPlus, XCircle } from 'lucide-react';
+import { Pencil, UserPlus, XCircle } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -27,13 +27,14 @@ import { CreateEventModal } from './components/CreateEventModal';
 import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { formatDate } from './domain';
 import { useCoffee } from './hooks';
-import { HeaderActions, PaginationWrap, SearchRow, SelectorRow } from './styles';
+import { CountRow, PaginationWrap, SearchRow, SelectorRow } from './styles';
 
 export function CoffeePage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const {
     events,
+    canCreateEvent,
     event,
     selectedEventId,
     selectEvent,
@@ -95,22 +96,18 @@ export function CoffeePage() {
       <PageHeader
         title="Café de Boas-vindas"
         subtitle={event ? `${formatDate(event.event_date)} às ${event.event_time.slice(0, 5)}` : 'Nenhum café agendado'}
-        action={canPlan ? <Button onClick={openCreateModal}>Novo café</Button> : undefined}
+        action={
+          canPlan ? (
+            <Button
+              onClick={openCreateModal}
+              disabled={!canCreateEvent}
+              title={canCreateEvent ? undefined : 'Encerre um café antes de criar outro — só é possível ter 2 ao mesmo tempo.'}
+            >
+              Novo café
+            </Button>
+          ) : undefined
+        }
       />
-
-      {!loading && !error && event && canPlan && (
-        <HeaderActions>
-          <Button variant="secondary" onClick={openEnrollModal}>
-            <UserPlus size={16} />
-            Adicionar
-          </Button>
-          <Button variant="secondary" onClick={openEditModal}>
-            Editar café
-          </Button>
-        </HeaderActions>
-      )}
-
-      {!loading && !error && event && <PeopleCount count={totalCount} />}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -123,16 +120,41 @@ export function CoffeePage() {
         />
       )}
 
-      {!loading && !error && event && events.length > 1 && (
+      {!loading && !error && event && (events.length > 1 || canPlan) && (
         <SelectorRow>
-          <RawSelect label="Café" value={selectedEventId ?? ''} onChange={(e) => selectEvent(e.target.value)}>
-            {events.map((e) => (
-              <option key={e.id} value={e.id}>
-                {formatDate(e.event_date)} às {e.event_time.slice(0, 5)}
-              </option>
-            ))}
-          </RawSelect>
+          {events.length > 1 && (
+            <RawSelect
+              size="sm"
+              wrapperStyle={{ flex: 1 }}
+              value={selectedEventId ?? ''}
+              onChange={(e) => selectEvent(e.target.value)}
+            >
+              {events.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {formatDate(e.event_date)} às {e.event_time.slice(0, 5)}
+                </option>
+              ))}
+            </RawSelect>
+          )}
+          {canPlan && (
+            <Button variant="secondary" size="sm" onClick={openEditModal}>
+              <Pencil size={16} />
+              Editar café
+            </Button>
+          )}
         </SelectorRow>
+      )}
+
+      {!loading && !error && event && (
+        <CountRow>
+          <PeopleCount count={totalCount} />
+          {canPlan && (
+            <Button variant="secondary" size="sm" onClick={openEnrollModal}>
+              <UserPlus size={16} />
+              Adicionar
+            </Button>
+          )}
+        </CountRow>
       )}
 
       {!loading && !error && event && (
@@ -174,8 +196,9 @@ export function CoffeePage() {
                   <Td $shrink onClick={canPlan ? (e: React.MouseEvent) => e.stopPropagation() : undefined}>
                     <AttendanceControl
                       attended={attendance.attended}
+                      person={attendance.person}
                       canManage={canPlan}
-                      onMarkAttended={() => markAttended(attendance.id)}
+                      onMarkAttended={() => markAttended(attendance.id, attendance.person.id)}
                       onMarkNotAttended={() => markNotAttended(attendance.person.id)}
                       onCanceledByPerson={() => confirmCanceled(attendance.person.id, attendance.person.name)}
                     />

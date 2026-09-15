@@ -10,7 +10,7 @@ import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { VisitorFiltersModal } from './components/VisitorFiltersModal';
 import { useVisitors } from './hooks';
-import { CompactFilterButton, PaginationWrap, SearchFiltersRow } from './styles';
+import { PaginationWrap, SearchFiltersRow } from './styles';
 
 export function VisitorsPage() {
   const navigate = useNavigate();
@@ -49,11 +49,11 @@ export function VisitorsPage() {
 
       {!loading && !error && (
         <SearchFiltersRow>
-          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome…" />
-          <CompactFilterButton variant="secondary" onClick={openFilters}>
+          <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+          <Button variant="secondary" size="sm" onClick={openFilters}>
             <SlidersHorizontal size={16} />
             Filtros{statusFilter.length > 0 ? ` (${statusFilter.length})` : ''}
-          </CompactFilterButton>
+          </Button>
         </SearchFiltersRow>
       )}
 

@@ -87,7 +87,7 @@ export function VisitorDetailPage() {
         />
       )}
 
-      {canManage && person.status === 'welcome_coffee' && (
+      {canManage && (person.status === 'welcome_coffee' || person.status === 'pending_signup') && (
         <CoffeeStagePanel
           person={person}
           attendance={coffeeAttendance}

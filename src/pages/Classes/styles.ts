@@ -11,10 +11,12 @@ export const SearchRow = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
-export const HeaderActions = styled.div`
+export const CountRow = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 export const CountBadge = styled.span<{ $eligible: boolean }>`

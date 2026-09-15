@@ -1,5 +1,4 @@
 // Libs
-import { Button } from 'bp-kit';
 import styled from 'styled-components';
 
 export const ActionsRow = styled.div`
@@ -19,9 +18,8 @@ export const FiltersRow = styled.div`
   }
 `;
 
-// Search input and Filtros button share one row — the button is capped to
-// the search field's own height/radius (40px, rounded.md) instead of the
-// taller default Button size, so they read as one compact control cluster.
+// Search input and Filtros button share one row — both pass size="sm" so
+// they line up at the same 36px height.
 export const SearchFiltersRow = styled.div`
   display: flex;
   align-items: flex-start;
@@ -30,19 +28,6 @@ export const SearchFiltersRow = styled.div`
   > *:first-child {
     flex: 1;
   }
-`;
-
-export const CompactFilterButton = styled(Button)`
-  // Button sets its own height/padding/radius from the $size prop at the
-  // same specificity — && doubles this selector so the override actually
-  // wins regardless of which stylesheet rule got inserted first.
-  && {
-    height: 40px;
-    padding: 0 ${({ theme }) => theme.spacing.base};
-    border-radius: ${({ theme }) => theme.rounded.md};
-  }
-  flex-shrink: 0;
-  white-space: nowrap;
 `;
 
 // Fills the remaining viewport (header/bottom-bar/page-padding subtracted)

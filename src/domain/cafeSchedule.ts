@@ -110,10 +110,13 @@ export interface EnrollableCoffeePerson {
   name: string;
 }
 
-// People eligible to be added to a café by hand — anyone not already
-// attending it and not archived. Used by the manual "Adicionar" action, for
-// cases like attaching someone who already went to a past café directly to
-// a specific café cycle without going through the normal invite flow.
+// People eligible to be added to a café by hand. Excludes archived people
+// and anyone already at 'welcome_coffee' — that status means they're
+// already tracked at some café (their own, possibly a different one); the
+// automatic self-heal (see the Café page hook) is what handles a genuinely
+// orphaned welcome_coffee person with no attendance row anywhere, so manual
+// "Adicionar" never needs to (and must not) touch that group — that's
+// exactly the loophole that kept duplicating people across cafés.
 export async function listEnrollableCoffeePeople(eventId: string): Promise<EnrollableCoffeePerson[]> {
   const { data: attending, error: attendingError } = await supabase
     .from('coffee_attendance')
@@ -122,7 +125,11 @@ export async function listEnrollableCoffeePeople(eventId: string): Promise<Enrol
   if (attendingError) throw attendingError;
   const attendingIds = new Set((attending ?? []).map((a) => a.person_id as string));
 
-  const { data, error } = await supabase.from('people').select('id, name').neq('status', 'archived').order('name');
+  const { data, error } = await supabase
+    .from('people')
+    .select('id, name')
+    .not('status', 'in', '(archived,welcome_coffee)')
+    .order('name');
   if (error) throw error;
   return (data ?? []).filter((p) => !attendingIds.has(p.id as string)) as EnrollableCoffeePerson[];
 }
@@ -132,9 +139,30 @@ export async function enrollInCoffee(personId: string, eventId: string): Promise
   if (error) throw error;
 }
 
-export async function markCoffeeAttended(attendanceId: string): Promise<void> {
-  const { error } = await supabase.from('coffee_attendance').update({ attended: true }).eq('id', attendanceId);
-  if (error) throw error;
+// Attending moves the person into a sub-stage of their own — status alone
+// now says whether they've been to the café yet, instead of that only being
+// knowable by also checking the attendance row's `attended` flag.
+export async function markCoffeeAttended(attendanceId: string, personId: string, actorId?: string): Promise<void> {
+  // Status first: it's the update guarded by the DB check constraint, so if
+  // it's rejected, the attendance row is never touched and the person stays
+  // in a consistent, retryable state instead of "presença marcada mas status
+  // preso" (see the 2026-09-15 café incident).
+  const { error: statusError } = await supabase
+    .from('people')
+    .update({ status: 'pending_signup', updated_at: new Date().toISOString() })
+    .eq('id', personId);
+  if (statusError) throw statusError;
+
+  const { error: attendanceError } = await supabase.from('coffee_attendance').update({ attended: true }).eq('id', attendanceId);
+  if (attendanceError) throw attendanceError;
+
+  await supabase.from('status_history').insert({
+    person_id: personId,
+    from_status: 'welcome_coffee',
+    to_status: 'pending_signup',
+    changed_by: actorId,
+    note: 'Compareceu ao café de boas-vindas',
+  });
 }
 
 // Person let the volunteer know beforehand they're not coming — distinct
@@ -199,7 +227,7 @@ export async function markClassInviteDeclined(personId: string, actorId?: string
 
   await supabase.from('status_history').insert({
     person_id: personId,
-    from_status: 'welcome_coffee',
+    from_status: 'pending_signup',
     to_status: 'archived',
     changed_by: actorId,
     note: 'Recusou o convite para as aulas de Integração',
