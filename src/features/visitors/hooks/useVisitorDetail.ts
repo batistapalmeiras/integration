@@ -184,6 +184,11 @@ export function useVisitorDetail(id: string) {
     await load();
   };
 
+  const markClassInviteSent = async () => {
+    await updatePersonFields(id, { class_invite_sent_at: new Date().toISOString() });
+    await load();
+  };
+
   const registerContactAttempt = async (values: { result: ContactResult }) => {
     if (!person) return;
     await registerContactAttemptUseCase(person, values.result, user?.id);
@@ -268,6 +273,7 @@ export function useVisitorDetail(id: string) {
     updatePerson,
     registerContactAttempt,
     markWhatsAppOpened,
+    markClassInviteSent,
     archive,
     reactivate,
     deletePerson,

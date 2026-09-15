@@ -14,5 +14,5 @@ export interface CoffeeAttendance {
 }
 
 export interface AttendeeRow extends CoffeeAttendance {
-  person: Pick<Person, 'id' | 'name' | 'phone' | 'status'>;
+  person: Pick<Person, 'id' | 'name' | 'phone' | 'status' | 'class_invite_sent_at'>;
 }
