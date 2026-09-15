@@ -123,6 +123,7 @@ export function usePeopleReport() {
   return {
     people,
     cohortNames,
+    totalCount,
     loading,
     error,
     statusFilter,

@@ -6,16 +6,18 @@ export const SearchRow = styled.div`
 `;
 
 export const SelectorRow = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const HeaderActions = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
-  margin-top: ${({ theme }) => theme.spacing.base};
   margin-bottom: ${({ theme }) => theme.spacing.lg};
-  flex-wrap: wrap;
+`;
+
+export const CountRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 // Never wraps — unlike the shared RowActions, this always needs to sit

@@ -1,14 +1,12 @@
 // Libs
-import { Button } from 'bp-kit';
 import styled from 'styled-components';
 
 export const PaginationWrap = styled.div`
   margin-top: ${({ theme }) => theme.spacing.lg};
 `;
 
-// Search input and Filtros button share one row — the button is capped to
-// the search field's own height/radius (40px, rounded.md) instead of the
-// taller default Button size, so they read as one compact control cluster.
+// Search input and Filtros button share one row — both pass size="sm" so
+// they line up at the same 36px height.
 export const SearchFiltersRow = styled.div`
   display: flex;
   align-items: flex-start;
@@ -18,14 +16,4 @@ export const SearchFiltersRow = styled.div`
   > *:first-child {
     flex: 1;
   }
-`;
-
-export const CompactFilterButton = styled(Button)`
-  && {
-    height: 40px;
-    padding: 0 ${({ theme }) => theme.spacing.base};
-    border-radius: ${({ theme }) => theme.rounded.md};
-  }
-  flex-shrink: 0;
-  white-space: nowrap;
 `;

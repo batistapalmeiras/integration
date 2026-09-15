@@ -49,7 +49,10 @@ export function VisitorEditPage() {
   // role's own step — integration_team owns contact/café, teacher owns the
   // integration classes. admin/pastor are unrestricted.
   const inIntegrationTeamStep =
-    person.status === 'initial_contact' || person.status === 'retry_contact' || person.status === 'welcome_coffee';
+    person.status === 'initial_contact' ||
+    person.status === 'retry_contact' ||
+    person.status === 'welcome_coffee' ||
+    person.status === 'pending_signup';
   const inTeacherStep = person.status === 'integration';
   const canEditFields =
     user?.role === UserRole.Admin ||

@@ -1,11 +1,12 @@
 // Libs
-import { Archive, Clock, Coffee, GraduationCap, PhoneCall, RotateCcw, UserCheck } from 'lucide-react';
+import { Archive, ClipboardList, Clock, Coffee, GraduationCap, PhoneCall, RotateCcw, UserCheck } from 'lucide-react';
 import type { ComponentType } from 'react';
 
 export type PersonStatus =
   | 'initial_contact'
   | 'retry_contact'
   | 'welcome_coffee'
+  | 'pending_signup'
   | 'integration'
   | 'membership_pending'
   | 'member'
@@ -40,6 +41,7 @@ export const STATUS_META: Record<
   initial_contact: { label: 'Contato Inicial', tone: 'info', icon: PhoneCall },
   retry_contact: { label: 'Retomar Contato', tone: 'warning', icon: RotateCcw },
   welcome_coffee: { label: 'Café de Boas-vindas', compactLabel: 'Café', tone: 'info', icon: Coffee },
+  pending_signup: { label: 'Aguardando inscrição', compactLabel: 'Inscrição', tone: 'warning', icon: ClipboardList },
   integration: { label: 'Integração', tone: 'info', icon: GraduationCap },
   membership_pending: { label: 'Membresia', tone: 'warning', icon: Clock },
   member: { label: 'Membro', tone: 'success', icon: UserCheck },

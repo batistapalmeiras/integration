@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
-import { UserPlus } from 'lucide-react';
+import { Pencil, UserPlus } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -12,7 +12,7 @@ import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
 import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { useClasses } from './hooks';
-import { CountBadge, HeaderActions, PaginationWrap, SearchRow } from './styles';
+import { CountBadge, CountRow, PaginationWrap, SearchRow } from './styles';
 
 const MEMBERSHIP_THRESHOLD = 4;
 
@@ -60,26 +60,29 @@ export function ClassesPage() {
         subtitle={cohort ? cohort.name : 'Nenhuma turma ativa'}
         action={
           cohort ? (
-            <HeaderActions>
-              {canEnroll && (
-                <Button variant="secondary" onClick={openEnrollModal}>
-                  <UserPlus size={16} />
-                  Adicionar
-                </Button>
-              )}
-              {canManageCohort && (
-                <Button variant="secondary" onClick={openEditModal}>
-                  Editar aulas
-                </Button>
-              )}
-            </HeaderActions>
+            canManageCohort && (
+              <Button variant="secondary" onClick={openEditModal}>
+                <Pencil size={16} />
+                Editar aulas
+              </Button>
+            )
           ) : (
             canManageCohort && <Button onClick={openCreateModal}>Nova turma</Button>
           )
         }
       />
 
-      {!loading && !error && cohort && <PeopleCount count={totalCount} />}
+      {!loading && !error && cohort && (
+        <CountRow>
+          <PeopleCount count={totalCount} />
+          {canEnroll && (
+            <Button variant="secondary" size="sm" onClick={openEnrollModal}>
+              <UserPlus size={16} />
+              Adicionar
+            </Button>
+          )}
+        </CountRow>
+      )}
 
       {loading && <Skeleton $h="240px" />}
 

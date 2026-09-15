@@ -112,7 +112,7 @@ export function useVisitorDetail(id: string) {
   }, [id]);
 
   useEffect(() => {
-    if (person?.status === 'welcome_coffee') {
+    if (person?.status === 'welcome_coffee' || person?.status === 'pending_signup') {
       loadCoffeeAttendance();
       hasActiveCohort().then(setHasCohort);
     }
@@ -210,7 +210,8 @@ export function useVisitorDetail(id: string) {
 
   const markAttended = async () => {
     if (!coffeeAttendance) return;
-    await markCoffeeAttended(coffeeAttendance.id);
+    await markCoffeeAttended(coffeeAttendance.id, id, user?.id);
+    await load();
     await loadCoffeeAttendance();
   };
 
