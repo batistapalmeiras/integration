@@ -24,9 +24,18 @@ interface Props {
   canRecordAttendance: boolean;
   onToggle: (lessonId: string, attended: boolean) => Promise<void>;
   onCopyMakeupLink: (lessonId: string) => Promise<string>;
+  onMembershipInterestSent: () => Promise<void>;
 }
 
-export function IntegrationStagePanel({ person, integrationClass, loading, canRecordAttendance, onToggle, onCopyMakeupLink }: Props) {
+export function IntegrationStagePanel({
+  person,
+  integrationClass,
+  loading,
+  canRecordAttendance,
+  onToggle,
+  onCopyMakeupLink,
+  onMembershipInterestSent,
+}: Props) {
   const { show: showToast, toast } = useToast();
 
   if (loading || !integrationClass) return <Skeleton $h="120px" />;
@@ -85,6 +94,7 @@ export function IntegrationStagePanel({ person, integrationClass, loading, canRe
           person={person}
           defaultMessage={membershipInterestMessage(person.name)}
           buttonLabel="Enviar Ficha de Interesse"
+          onOpen={onMembershipInterestSent}
         />
       )}
 

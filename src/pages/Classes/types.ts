@@ -22,7 +22,7 @@ export interface LessonAttendance {
 
 export interface EnrollmentRow {
   id: string;
-  person: Pick<Person, 'id' | 'name' | 'status'>;
+  person: Pick<Person, 'id' | 'name' | 'status' | 'membership_interest_sent_at'>;
   attendanceByLesson: Record<string, LessonAttendance | undefined>;
   attendedCount: number;
 }

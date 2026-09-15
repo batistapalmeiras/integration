@@ -5,6 +5,7 @@ import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, use
 import { Pencil, UserPlus } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
+import { StatusPill } from '../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
@@ -119,6 +120,7 @@ export function ClassesPage() {
               <tr>
                 <Th>{text.fields.name}</Th>
                 <Th>Presenças</Th>
+                <Th $shrink>Situação</Th>
               </tr>
             </thead>
             <tbody>
@@ -133,6 +135,9 @@ export function ClassesPage() {
                       <CountBadge $eligible={eligible}>
                         {row.attendedCount}/{lessons.length}
                       </CountBadge>
+                    </Td>
+                    <Td $shrink>
+                      <StatusPill person={row.person} compact />
                     </Td>
                   </Tr>
                 );
