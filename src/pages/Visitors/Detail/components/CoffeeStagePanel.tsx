@@ -74,6 +74,7 @@ export function CoffeeStagePanel({
         person={person}
         defaultMessage={classInviteMessage(person.name)}
         buttonLabel="Convidar p/ turma"
+        rows={12}
         onOpen={onClassInviteSent}
       />
       <CardHeader>
