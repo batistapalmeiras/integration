@@ -13,6 +13,9 @@ export const HeaderActions = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
+  margin-top: ${({ theme }) => theme.spacing.base};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  flex-wrap: wrap;
 `;
 
 // Never wraps — unlike the shared RowActions, this always needs to sit

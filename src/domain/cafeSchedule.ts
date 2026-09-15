@@ -74,17 +74,27 @@ export async function resolveCurrentCoffeeEventId(): Promise<string | null> {
 export async function getCoffeeAttendanceForPerson(
   personId: string,
 ): Promise<{ id: string; attended: boolean } | null> {
-  const eventId = await resolveCurrentCoffeeEventId();
-  if (!eventId) return null;
-
+  // Check for ANY existing attendance row first (not just one for whatever
+  // café currently resolves as "next/current") — a person invited to an
+  // earlier café must not get a second, duplicate row created here just
+  // because a newer café has since been scheduled. Same rule as the Café
+  // page's self-heal.
   const { data: existing, error: selectError } = await supabase
     .from('coffee_attendance')
-    .select('id, attended')
-    .eq('person_id', personId)
-    .eq('coffee_event_id', eventId)
-    .maybeSingle();
+    .select('id, attended, coffee_event:coffee_events(event_date)')
+    .eq('person_id', personId);
   if (selectError) throw selectError;
-  if (existing) return existing as { id: string; attended: boolean };
+
+  const rows = (existing ?? []) as unknown as { id: string; attended: boolean; coffee_event: { event_date: string } }[];
+  if (rows.length > 0) {
+    const latest = rows.sort((a, b) => b.coffee_event.event_date.localeCompare(a.coffee_event.event_date))[0];
+    return { id: latest.id, attended: latest.attended };
+  }
+
+  // Truly orphaned (no attendance row anywhere) — attach to the next
+  // upcoming café, same fallback the self-heal uses.
+  const eventId = await resolveCurrentCoffeeEventId();
+  if (!eventId) return null;
 
   const { data: created, error: insertError } = await supabase
     .from('coffee_attendance')
