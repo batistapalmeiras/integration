@@ -28,6 +28,7 @@ export function VisitorDetailPage() {
     registerContactAttempt,
     markWhatsAppOpened,
     markClassInviteSent,
+    markMembershipInterestSent,
     hasCoffeeEvent,
     hasCohort,
     coffeeAttendance,
@@ -110,6 +111,7 @@ export function VisitorDetailPage() {
           canRecordAttendance={canRecordAttendance}
           onToggle={toggleClassAttendance}
           onCopyMakeupLink={getClassMakeupLink}
+          onMembershipInterestSent={markMembershipInterestSent}
         />
       )}
 

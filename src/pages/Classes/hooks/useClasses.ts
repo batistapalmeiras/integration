@@ -82,7 +82,7 @@ export function useClasses() {
 
     const { data: enrollmentData, error: enrollmentError } = await supabase
       .from('enrollments')
-      .select('id, person:people(id,name,status)')
+      .select('id, person:people(id,name,status,membership_interest_sent_at)')
       .eq('cohort_id', cohortData.id);
 
     if (enrollmentError) {

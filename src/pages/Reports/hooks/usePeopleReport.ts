@@ -73,7 +73,9 @@ export function usePeopleReport() {
     // matching row, sort by pipeline here, then slice the page client-side.
     // A DB-level range() before this sort would only reorder within each
     // page instead of across the whole filtered list.
-    let query = supabase.from('people').select('id,name,status,whatsapp_opened_at');
+    let query = supabase
+      .from('people')
+      .select('id,name,status,whatsapp_opened_at,class_invite_sent_at,membership_interest_sent_at');
     if (statusFilter.length > 0) query = query.in('status', statusFilter);
     if (debouncedSearch) query = query.ilike('name', `%${debouncedSearch}%`);
     if (cohortPersonIds) query = query.in('id', cohortPersonIds);
@@ -91,6 +93,8 @@ export function usePeopleReport() {
         name: p.name as string,
         status: p.status as PersonStatus,
         whatsapp_opened_at: p.whatsapp_opened_at as string | null,
+        class_invite_sent_at: p.class_invite_sent_at as string | null,
+        membership_interest_sent_at: p.membership_interest_sent_at as string | null,
       }))
       .sort(comparePeopleByPipeline);
 

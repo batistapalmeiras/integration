@@ -22,6 +22,7 @@ export interface Person {
   notes: string | null;
   whatsapp_opened_at: string | null;
   class_invite_sent_at: string | null;
+  membership_interest_sent_at: string | null;
   coffee_retry_used: boolean;
   small_group_id: string | null;
   ministry_id: string | null;
@@ -71,10 +72,21 @@ export const AWAITING_CLASS_SIGNUP_META = {
   icon: Send,
 };
 
+// Same idea again, for the membership-interest link sent once someone
+// finishes the 4 integration classes: "done with the classes, nobody's
+// sent the ficha yet" vs. "already sent, waiting on them to fill it out".
+export const AWAITING_MEMBERSHIP_INTEREST_META = {
+  label: 'Ficha Enviada',
+  compactLabel: 'Ficha enviada',
+  tone: 'info' as StatusTone,
+  icon: Send,
+};
+
 export interface DisplayStatusInput {
   status: PersonStatus;
   whatsapp_opened_at?: string | null;
   class_invite_sent_at?: string | null;
+  membership_interest_sent_at?: string | null;
 }
 
 export function isAwaitingReply(person: DisplayStatusInput): boolean {
@@ -85,9 +97,14 @@ export function isAwaitingClassSignup(person: DisplayStatusInput): boolean {
   return person.status === 'pending_signup' && !!person.class_invite_sent_at;
 }
 
+export function isAwaitingMembershipInterest(person: DisplayStatusInput): boolean {
+  return person.status === 'integration' && !!person.membership_interest_sent_at;
+}
+
 export function getDisplayStatusMeta(person: DisplayStatusInput) {
   if (isAwaitingReply(person)) return AWAITING_REPLY_META;
   if (isAwaitingClassSignup(person)) return AWAITING_CLASS_SIGNUP_META;
+  if (isAwaitingMembershipInterest(person)) return AWAITING_MEMBERSHIP_INTEREST_META;
   return STATUS_META[person.status];
 }
 
@@ -108,6 +125,7 @@ export function comparePeopleByPipeline(a: PipelineSortInput, b: PipelineSortInp
     PIPELINE_ORDER.get(a.status)! - PIPELINE_ORDER.get(b.status)! ||
     Number(isAwaitingReply(a)) - Number(isAwaitingReply(b)) ||
     Number(isAwaitingClassSignup(a)) - Number(isAwaitingClassSignup(b)) ||
+    Number(isAwaitingMembershipInterest(a)) - Number(isAwaitingMembershipInterest(b)) ||
     a.name.localeCompare(b.name, 'pt-BR')
   );
 }
