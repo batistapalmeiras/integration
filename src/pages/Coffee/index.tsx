@@ -95,25 +95,20 @@ export function CoffeePage() {
       <PageHeader
         title="Café de Boas-vindas"
         subtitle={event ? `${formatDate(event.event_date)} às ${event.event_time.slice(0, 5)}` : 'Nenhum café agendado'}
-        action={
-          canPlan ? (
-            <HeaderActions>
-              {event && (
-                <Button variant="secondary" onClick={openEnrollModal}>
-                  <UserPlus size={16} />
-                  Adicionar
-                </Button>
-              )}
-              {event && (
-                <Button variant="secondary" onClick={openEditModal}>
-                  Editar café
-                </Button>
-              )}
-              <Button onClick={openCreateModal}>Novo café</Button>
-            </HeaderActions>
-          ) : undefined
-        }
+        action={canPlan ? <Button onClick={openCreateModal}>Novo café</Button> : undefined}
       />
+
+      {!loading && !error && event && canPlan && (
+        <HeaderActions>
+          <Button variant="secondary" onClick={openEnrollModal}>
+            <UserPlus size={16} />
+            Adicionar
+          </Button>
+          <Button variant="secondary" onClick={openEditModal}>
+            Editar café
+          </Button>
+        </HeaderActions>
+      )}
 
       {!loading && !error && event && <PeopleCount count={totalCount} />}
 
