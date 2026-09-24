@@ -5,14 +5,18 @@ import { useAuthCtx } from 'bp-kit';
 // Local
 import {
   EnrollableCoffeePerson,
+  countQueuedByCoffeeEvent,
   enrollInCoffee,
   insertCoffeeEvent,
   markCoffeeAttended,
   markCoffeeCanceled,
   markCoffeeNotAttended,
+  selectOpenCoffeeEvents,
   updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
+import { archiveMissedSignups } from '../../../domain/signupDeadline';
 import { supabase } from '../../../lib/supabase';
+import { UserRole } from '../../../types/enums';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { loadSavedFilters, saveFilters } from '../persistence';
 import { AttendeeRow, CoffeeEvent } from '../types';
@@ -33,6 +37,8 @@ function resolveDefaultId(list: CoffeeEvent[]): string | null {
 
 export function useCoffee() {
   const { user } = useAuthCtx();
+  const canSweep =
+    user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Pastor || user?.role === UserRole.Admin;
   const [events, setEvents] = useState<CoffeeEvent[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [allAttendees, setAllAttendees] = useState<AttendeeRow[]>([]);
@@ -51,6 +57,10 @@ export function useCoffee() {
     saveFilters({ search });
   }, [search]);
 
+  // Only the cafés still open: one whose date has passed and whose queue is
+  // empty closed itself (see selectOpenCoffeeEvents) — it drops out of the
+  // selector and frees up its slot for the next café, exactly as if someone
+  // had encerrado it by hand.
   const fetchEvents = useCallback(async (): Promise<CoffeeEvent[] | null> => {
     const { data, error: eventsError } = await supabase
       .from('coffee_events')
@@ -60,9 +70,12 @@ export function useCoffee() {
       setError(eventsError.message);
       return null;
     }
-    const list = (data ?? []) as CoffeeEvent[];
-    setEvents(list);
-    return list;
+
+    const all = (data ?? []) as CoffeeEvent[];
+    const queued = await countQueuedByCoffeeEvent();
+    const open = selectOpenCoffeeEvents(all, queued, new Date().toISOString().slice(0, 10));
+    setEvents(open);
+    return open;
   }, []);
 
   // Self-heal: a person can reach 'welcome_coffee' status without ANY
@@ -138,6 +151,19 @@ export function useCoffee() {
     setLoading(true);
     setError(null);
 
+    // Runs before anything is counted or listed so a café whose last
+    // pending person just got archived closes in this same pass, instead of
+    // lingering until the next time someone opens the page. Only the roles
+    // RLS lets write people rows attempt it — for anyone else the sweep
+    // would just fail and blank the page with an error.
+    if (canSweep) {
+      try {
+        await archiveMissedSignups(user?.id);
+      } catch (sweepError) {
+        setError((sweepError as Error).message);
+      }
+    }
+
     const list = await fetchEvents();
     if (!list) {
       setLoading(false);
@@ -155,7 +181,7 @@ export function useCoffee() {
     setSelectedEventId(eventId);
     await loadAttendeesFor(eventId);
     setLoading(false);
-  }, [fetchEvents, healOrphans, loadAttendeesFor]);
+  }, [canSweep, fetchEvents, healOrphans, loadAttendeesFor, user?.id]);
 
   useEffect(() => {
     load();
