@@ -14,6 +14,40 @@ async function findFutureCoffeeEvent(): Promise<{ id: string; event_date: string
   return data;
 }
 
+export interface CoffeeEventRef {
+  id: string;
+  event_date: string;
+}
+
+// A café closes itself once its date has passed and nobody from it is left
+// in the café queue — everyone either moved on to the turma, was archived,
+// or went back to retry contact. Derived instead of a stored `closed_at`
+// flag so it can never drift from the roster it describes, and so nothing
+// has to be deleted: the attendance rows stay, which is what a person's
+// profile reads to show which café they went to.
+export function selectOpenCoffeeEvents<T extends CoffeeEventRef>(
+  events: T[],
+  queuedByEventId: Record<string, number>,
+  todayKey: string,
+): T[] {
+  return events.filter((e) => e.event_date >= todayKey || (queuedByEventId[e.id] ?? 0) > 0);
+}
+
+// How many people each café still has waiting on it — same two statuses the
+// Café page lists (not yet attended, and attended but not signed up yet).
+export async function countQueuedByCoffeeEvent(): Promise<Record<string, number>> {
+  const { data, error } = await supabase.from('coffee_attendance').select('coffee_event_id, person:people(status)');
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as { coffee_event_id: string; person: { status: string } | null }[];
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    if (row.person?.status !== 'welcome_coffee' && row.person?.status !== 'pending_signup') continue;
+    counts[row.coffee_event_id] = (counts[row.coffee_event_id] ?? 0) + 1;
+  }
+  return counts;
+}
+
 export async function insertCoffeeEvent(eventDate: string): Promise<string> {
   const { data, error } = await supabase.from('coffee_events').insert({ event_date: eventDate }).select('id').single();
   if (error) throw error;
