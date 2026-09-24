@@ -14,7 +14,7 @@ export function MembersPage() {
 
   return (
     <div>
-      <PageHeader title="Membros" subtitle="Nome completo e forma de entrada" back />
+      <PageHeader title="Membros" back />
 
       {loading && <Skeleton $h="240px" />}
 

@@ -7,7 +7,7 @@ import { PeopleSection } from '../Reports/components/PeopleSection';
 export function PeoplePage() {
   return (
     <PageFlexWrap>
-      <PageHeader title="Pessoas" subtitle="Todas as pessoas do processo de integração" />
+      <PageHeader title="Pessoas" />
       <PeopleSection />
     </PageFlexWrap>
   );

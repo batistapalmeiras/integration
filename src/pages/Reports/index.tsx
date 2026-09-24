@@ -11,7 +11,6 @@ export function ReportsPage() {
     <div>
       <PageHeader
         title="Relatórios"
-        subtitle="Visão geral do processo de integração"
         back
         action={<Button onClick={() => open(<AnnualReportModal close={close} />)}>Gerar relatório</Button>}
       />
