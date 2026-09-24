@@ -32,7 +32,7 @@ export function NewVisitorPage() {
 
   return (
     <div>
-      <PageHeader title="Novo visitante" subtitle="Dados coletados no cartão de visitante" back />
+      <PageHeader title="Novo visitante" back />
 
       <Form onSubmit={submit}>
         <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />

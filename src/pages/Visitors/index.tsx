@@ -37,7 +37,6 @@ export function VisitorsPage() {
     <div>
       <PageHeader
         title="Visitantes"
-        subtitle="Acompanhamento do primeiro contato até a integração"
         action={<Button onClick={() => navigate(AppRoute.NewVisitor)}>Novo visitante</Button>}
       />
 

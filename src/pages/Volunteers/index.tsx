@@ -60,7 +60,6 @@ export function VolunteersPage() {
     <div>
       <PageHeader
         title="Voluntários"
-        subtitle="Contas com acesso ao sistema"
         back
         action={<Button onClick={openAddModal}>Adicionar</Button>}
       />

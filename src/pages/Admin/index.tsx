@@ -49,7 +49,7 @@ export function AdminPage() {
         </ProfileCard>
       </MobileMenu>
 
-      <PageHeader title="Configurações" subtitle="Opções administrativas" />
+      <PageHeader title="Configurações" />
 
       <OptionsGrid>
         {canManageOperations && (
