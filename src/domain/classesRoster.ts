@@ -75,11 +75,21 @@ export async function getLessonAttendanceMap(
   return map;
 }
 
-export async function toggleLessonAttendance(enrollmentId: string, lessonId: string, attended: boolean): Promise<void> {
-  const { error } = await supabase
+// Returns the saved row so callers can patch their local state with it —
+// the first tick of a lesson creates the row, and its id only exists after
+// the write.
+export async function toggleLessonAttendance(
+  enrollmentId: string,
+  lessonId: string,
+  attended: boolean,
+): Promise<{ id: string; attended: boolean }> {
+  const { data, error } = await supabase
     .from('lesson_attendance')
-    .upsert({ enrollment_id: enrollmentId, lesson_id: lessonId, attended }, { onConflict: 'enrollment_id,lesson_id' });
+    .upsert({ enrollment_id: enrollmentId, lesson_id: lessonId, attended }, { onConflict: 'enrollment_id,lesson_id' })
+    .select('id, attended')
+    .single();
   if (error) throw error;
+  return data as { id: string; attended: boolean };
 }
 
 export interface EnrollablePerson {

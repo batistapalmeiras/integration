@@ -240,10 +240,23 @@ export function useVisitorDetail(id: string) {
     await loadCoffeeAttendance();
   };
 
+  // Patches the one lesson in place instead of re-running
+  // loadIntegrationClass() — that flips integrationLoading back on, which
+  // swaps the whole attendance card for a skeleton and flashes it on every
+  // tick, for a change that only ever affects a single checkbox. Same
+  // reason the Café page patches its attendee rows by hand.
   const toggleClassAttendance = async (lessonId: string, attended: boolean) => {
     if (!integrationClass) return;
-    await toggleLessonAttendance(integrationClass.enrollmentId, lessonId, attended);
-    await loadIntegrationClass();
+    const saved = await toggleLessonAttendance(integrationClass.enrollmentId, lessonId, attended);
+    setIntegrationClass((prev) => {
+      if (!prev) return prev;
+      const attendanceByLesson = { ...prev.attendanceByLesson, [lessonId]: saved };
+      return {
+        ...prev,
+        attendanceByLesson,
+        attendedCount: Object.values(attendanceByLesson).filter((a) => a.attended).length,
+      };
+    });
   };
 
   const getClassMakeupLink = async (lessonId: string): Promise<string> => {
