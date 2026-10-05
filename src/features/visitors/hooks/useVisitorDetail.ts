@@ -16,12 +16,12 @@ import { getPersonCommunityNames } from '../../../domain/communityGroups';
 import {
   ActiveCohort,
   CohortLesson,
-  getActiveCohortWithLessons,
+  getPersonCohortWithLessons,
   getLessonAttendanceMap,
   getMakeupLink,
   getPersonCohortName,
   getPersonEnrollmentId,
-  hasActiveCohort,
+  hasUpcomingCohort,
   toggleLessonAttendance,
 } from '../../../domain/classesRoster';
 import { confirmMember as confirmMemberUseCase } from '../services/confirmMember';
@@ -114,7 +114,7 @@ export function useVisitorDetail(id: string) {
   useEffect(() => {
     if (person?.status === 'welcome_coffee' || person?.status === 'pending_signup') {
       loadCoffeeAttendance();
-      hasActiveCohort().then(setHasCohort);
+      hasUpcomingCohort().then(setHasCohort);
     }
   }, [person?.status, loadCoffeeAttendance]);
 
@@ -133,16 +133,18 @@ export function useVisitorDetail(id: string) {
     else setLastAttempt(null);
   }, [person?.status, loadLastAttempt]);
 
+  // Their own turma, read from their enrollment — not "the active one",
+  // which now stops being theirs the moment the pastor opens the next one.
   const loadIntegrationClass = useCallback(async () => {
     setIntegrationLoading(true);
-    const active = await getActiveCohortWithLessons();
-    if (!active) {
+    const own = await getPersonCohortWithLessons(id);
+    if (!own) {
       setIntegrationClass(null);
       setIntegrationLoading(false);
       return;
     }
 
-    const enrollmentId = await getPersonEnrollmentId(id, active.cohort.id);
+    const enrollmentId = await getPersonEnrollmentId(id, own.cohort.id);
     if (!enrollmentId) {
       setIntegrationClass(null);
       setIntegrationLoading(false);
@@ -151,7 +153,7 @@ export function useVisitorDetail(id: string) {
 
     const attendanceByLesson = await getLessonAttendanceMap(enrollmentId);
     const attendedCount = Object.values(attendanceByLesson).filter((a) => a.attended).length;
-    setIntegrationClass({ cohort: active.cohort, lessons: active.lessons, enrollmentId, attendanceByLesson, attendedCount });
+    setIntegrationClass({ cohort: own.cohort, lessons: own.lessons, enrollmentId, attendanceByLesson, attendedCount });
     setIntegrationLoading(false);
   }, [id]);
 

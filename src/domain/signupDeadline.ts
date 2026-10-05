@@ -1,43 +1,11 @@
 // Local
-import { getActiveCohortWithLessons } from './classesRoster';
+import { listAllCohorts } from './classesRoster';
+import { selectMissedSignups } from './cohortSchedule';
 import { supabase } from '../lib/supabase';
 
-// `lessons` only stores a date, and every class has always started at the
-// same time, so the cutoff lives here instead of as a column nobody would
-// ever fill in differently.
-export const FIRST_LESSON_TIME = '17:30';
-
-export function signupDeadlineFor(firstLessonDate: string): Date {
-  return new Date(`${firstLessonDate}T${FIRST_LESSON_TIME}:00`);
-}
-
-export function isSignupDeadlinePast(firstLessonDate: string, now: Date = new Date()): boolean {
-  return now.getTime() >= signupDeadlineFor(firstLessonDate).getTime();
-}
-
-export interface PendingSignupCandidate {
-  personId: string;
-  // Latest café the person actually attended, or null when no attendance
-  // row survives for them at all.
-  coffeeDate: string | null;
-}
-
-// Only people whose café happened BEFORE the first class had a chance to
-// sign up for this turma — someone who attended a café *after* it already
-// belongs to the next cycle, and archiving them would delete a brand new
-// visitor the moment they got marked as present. A missing café date can't
-// be placed in either cycle, so it falls to the deadline like everyone else.
-export function selectMissedSignups(candidates: PendingSignupCandidate[], firstLessonDate: string): string[] {
-  return candidates.filter((c) => c.coffeeDate === null || c.coffeeDate < firstLessonDate).map((c) => c.personId);
-}
-
-// Archives whoever attended the café, got the turma link and never filled it
-// in by the time the first class started. Returns how many were archived.
+// Archives whoever attended a café, got the turma link and never filled it
+// in before the turma open to them started. Returns how many were archived.
 export async function archiveMissedSignups(actorId?: string): Promise<number> {
-  const active = await getActiveCohortWithLessons();
-  const firstLesson = active?.lessons.find((l) => l.number === 1) ?? active?.lessons[0];
-  if (!firstLesson || !isSignupDeadlinePast(firstLesson.date)) return 0;
-
   const { data: pending, error: pendingError } = await supabase
     .from('people')
     .select('id')
@@ -65,9 +33,11 @@ export async function archiveMissedSignups(actorId?: string): Promise<number> {
     if (!current || row.coffee_event.event_date > current) latestCoffee.set(row.person_id, row.coffee_event.event_date);
   }
 
+  // Closed turmas count too: one that already ran is the clearest proof
+  // that whoever was waiting on it missed their window.
   const missed = selectMissedSignups(
     pendingIds.map((id) => ({ personId: id, coffeeDate: latestCoffee.get(id) ?? null })),
-    firstLesson.date,
+    await listAllCohorts(),
   );
   if (missed.length === 0) return 0;
 

@@ -62,7 +62,7 @@ export function CoffeeStagePanel({
     return (
       <StagePanel>
         <InfoBox variant="warning">
-          Não há turma de Integração ativa no momento. Peça para um professor abrir a turma antes de convidar.
+          A próxima turma de Integração ainda não foi aberta. Peça ao pastor ou ao administrador para abrir antes de convidar.
         </InfoBox>
       </StagePanel>
     );

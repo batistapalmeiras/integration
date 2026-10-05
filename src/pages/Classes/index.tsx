@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, PageHeader, Pagination, RawSelect, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 import { Pencil, UserPlus } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
@@ -13,7 +13,7 @@ import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
 import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { useClasses } from './hooks';
-import { CountBadge, CountRow, PaginationWrap, SearchRow } from './styles';
+import { CountBadge, CountRow, PaginationWrap, SearchRow, SelectorRow } from './styles';
 
 const MEMBERSHIP_THRESHOLD = 4;
 
@@ -21,7 +21,11 @@ export function ClassesPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const {
+    cohorts,
     cohort,
+    selectedCohortId,
+    selectCohort,
+    canCreateCohort,
     lessons,
     enrollments,
     totalCount,
@@ -43,7 +47,9 @@ export function ClassesPage() {
 
   const isAdmin = user?.role === UserRole.Admin;
   const isPastor = user?.role === UserRole.Pastor;
-  const canManageCohort = isAdmin || user?.role === UserRole.Teacher || isPastor;
+  // Abrir, editar e encerrar turma é do Pastor e do Admin — o professor
+  // registra presença, mas não mexe no calendário da turma.
+  const canManageCohort = isAdmin || isPastor;
   // Só Pastor e Admin podem matricular pessoas na turma — o professor
   // acompanha a turma, mas não decide quem entra nela.
   const canEnroll = isAdmin || isPastor;
@@ -60,18 +66,42 @@ export function ClassesPage() {
         title="Turma de Integração"
         subtitle={cohort ? cohort.name : 'Nenhuma turma ativa'}
         action={
-          cohort ? (
-            canManageCohort && (
-              <Button variant="secondary" onClick={openEditModal}>
-                <Pencil size={16} />
-                Editar aulas
-              </Button>
-            )
-          ) : (
-            canManageCohort && <Button onClick={openCreateModal}>Nova turma</Button>
-          )
+          canManageCohort ? (
+            <Button
+              onClick={openCreateModal}
+              disabled={!canCreateCohort}
+              title={canCreateCohort ? undefined : 'Encerre uma turma antes de abrir outra — só é possível ter 2 ao mesmo tempo.'}
+            >
+              Nova turma
+            </Button>
+          ) : undefined
         }
       />
+
+      {!loading && !error && cohort && (cohorts.length > 1 || canManageCohort) && (
+        <SelectorRow>
+          {cohorts.length > 1 && (
+            <RawSelect
+              size="sm"
+              wrapperStyle={{ flex: 1 }}
+              value={selectedCohortId ?? ''}
+              onChange={(e) => selectCohort(e.target.value)}
+            >
+              {cohorts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </RawSelect>
+          )}
+          {canManageCohort && (
+            <Button variant="secondary" size="sm" onClick={openEditModal}>
+              <Pencil size={16} />
+              Editar aulas
+            </Button>
+          )}
+        </SelectorRow>
+      )}
 
       {!loading && !error && cohort && (
         <CountRow>

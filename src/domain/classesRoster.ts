@@ -1,4 +1,5 @@
 // Libs
+import { isCohortFinished, selectUpcomingCohort } from './cohortSchedule';
 import { supabase } from '../lib/supabase';
 import { AppRoute } from '../routes/paths';
 import { PersonStatus } from '../types/person';
@@ -16,25 +17,62 @@ export interface CohortLesson {
   date: string;
 }
 
-export async function getActiveCohortWithLessons(): Promise<{ cohort: ActiveCohort; lessons: CohortLesson[] } | null> {
-  const { data: cohort, error: cohortError } = await supabase.from('cohorts').select('*').eq('status', 'active').maybeSingle();
-  if (cohortError) throw cohortError;
-  if (!cohort) return null;
-
-  const { data: lessons, error: lessonsError } = await supabase
-    .from('lessons')
-    .select('*')
-    .eq('cohort_id', cohort.id)
-    .order('number', { ascending: true });
-  if (lessonsError) throw lessonsError;
-
-  return { cohort: cohort as ActiveCohort, lessons: (lessons ?? []) as CohortLesson[] };
+export interface CohortWithLessons {
+  cohort: ActiveCohort;
+  lessons: CohortLesson[];
 }
 
-export async function hasActiveCohort(): Promise<boolean> {
-  const { data, error } = await supabase.from('cohorts').select('id').eq('status', 'active').maybeSingle();
+const COHORT_WITH_LESSONS = 'id, name, status, lessons(id, cohort_id, number, date)';
+
+interface CohortRow extends ActiveCohort {
+  lessons: CohortLesson[];
+}
+
+function toCohortWithLessons(row: CohortRow): CohortWithLessons {
+  const { lessons, ...cohort } = row;
+  return { cohort, lessons: [...(lessons ?? [])].sort((a, b) => a.number - b.number) };
+}
+
+// Every turma that hasn't been encerrada — there can be two at once now
+// (the one under way and the next one the pastor already opened), the same
+// way the Café page holds the current café and the next.
+export async function listOpenCohorts(): Promise<CohortWithLessons[]> {
+  const { data, error } = await supabase.from('cohorts').select(COHORT_WITH_LESSONS).eq('status', 'active');
   if (error) throw error;
-  return !!data;
+  return ((data ?? []) as unknown as CohortRow[]).map(toCohortWithLessons);
+}
+
+export async function listAllCohorts(): Promise<CohortWithLessons[]> {
+  const { data, error } = await supabase.from('cohorts').select(COHORT_WITH_LESSONS);
+  if (error) throw error;
+  return ((data ?? []) as unknown as CohortRow[]).map(toCohortWithLessons);
+}
+
+// The turma a new signup belongs to: the next one whose first class hasn't
+// started. Replaces the old "the active cohort", which happily enrolled
+// people into a turma already on its third class.
+export async function getUpcomingCohortWithLessons(): Promise<CohortWithLessons | null> {
+  return selectUpcomingCohort(await listOpenCohorts());
+}
+
+export async function hasUpcomingCohort(): Promise<boolean> {
+  return !!(await getUpcomingCohortWithLessons());
+}
+
+// The turma this person is actually enrolled in — their own stage panel has
+// to follow their turma, not whichever one happens to be open now.
+export async function getPersonCohortWithLessons(personId: string): Promise<CohortWithLessons | null> {
+  const { data, error } = await supabase
+    .from('enrollments')
+    .select(`cohort:cohorts(${COHORT_WITH_LESSONS})`)
+    .eq('person_id', personId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+
+  const row = data as unknown as { cohort: CohortRow } | null;
+  return row ? toCohortWithLessons(row.cohort) : null;
 }
 
 export async function getPersonCohortName(personId: string): Promise<string | null> {
@@ -139,4 +177,39 @@ export async function getMakeupLink(enrollmentId: string, lessonId: string): Pro
   }
 
   return `${window.location.origin}${AppRoute.MakeupAttendance}/${id}`;
+}
+
+// A turma closes itself once its last class is past and nobody on its
+// roster is still going through it — mirrors the café, which now steps
+// aside on its own instead of waiting for someone to click "Encerrar".
+export async function closeFinishedCohorts(): Promise<number> {
+  const open = await listOpenCohorts();
+  if (open.length === 0) return 0;
+
+  const { data, error } = await supabase
+    .from('enrollments')
+    .select('cohort_id, person:people(status)')
+    .in('cohort_id', open.map((c) => c.cohort.id));
+  if (error) throw error;
+
+  const stillGoing = new Map<string, number>();
+  for (const row of (data ?? []) as unknown as { cohort_id: string; person: { status: string } | null }[]) {
+    if (row.person?.status !== 'integration') continue;
+    stillGoing.set(row.cohort_id, (stillGoing.get(row.cohort_id) ?? 0) + 1);
+  }
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const finished = open
+    .filter((c) => isCohortFinished(c.lessons, stillGoing.get(c.cohort.id) ?? 0, todayKey))
+    .map((c) => c.cohort.id);
+  if (finished.length === 0) return 0;
+
+  const { data: closed, error: closeError } = await supabase
+    .from('cohorts')
+    .update({ status: 'closed' })
+    .in('id', finished)
+    .eq('status', 'active')
+    .select('id');
+  if (closeError) throw closeError;
+  return (closed ?? []).length;
 }
