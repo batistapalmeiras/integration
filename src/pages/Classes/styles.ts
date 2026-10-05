@@ -11,6 +11,13 @@ export const SearchRow = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
+export const SelectorRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
+
 export const CountRow = styled.div`
   display: flex;
   align-items: center;

@@ -4,21 +4,42 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuthCtx } from 'bp-kit';
 // Local
 import { getUpcomingCoffeeEventDate } from '../../../domain/cafeSchedule';
-import { EnrollablePerson, enrollPerson as enrollPersonRow } from '../../../domain/classesRoster';
+import {
+  CohortWithLessons,
+  EnrollablePerson,
+  closeFinishedCohorts,
+  enrollPerson as enrollPersonRow,
+  listOpenCohorts,
+} from '../../../domain/classesRoster';
 import { enrollInIntegrationClass } from '../../../features/visitors';
 import { supabase } from '../../../lib/supabase';
+import { UserRole } from '../../../types/enums';
 import { comparePeopleByPipeline } from '../../../types/person';
+import { firstLessonDate } from '../../../domain/cohortSchedule';
 import { formatDate, weeklyLessonDates } from '../domain';
 import { loadSavedFilters, saveFilters } from '../persistence';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
+// The turma under way plus the next one the pastor already opened — same
+// headroom the Café page gives itself, and for the same reason: a third one
+// piling up means an earlier cycle was never wrapped up.
+const MAX_COHORTS = 2;
+
+// Oldest first (by 1st class), so staff lands on the turma that still needs
+// attention instead of jumping to one that hasn't started.
+function sortByFirstLesson(list: CohortWithLessons[]): CohortWithLessons[] {
+  return [...list].sort((a, b) =>
+    (firstLessonDate(a.lessons) ?? '').localeCompare(firstLessonDate(b.lessons) ?? ''),
+  );
+}
 
 export function useClasses() {
   const { user } = useAuthCtx();
-  const [cohort, setCohort] = useState<Cohort | null>(null);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const canManage = user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
+  const [cohorts, setCohorts] = useState<CohortWithLessons[]>([]);
+  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
   const [allEnrollments, setAllEnrollments] = useState<EnrollmentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,70 +61,28 @@ export function useClasses() {
     getUpcomingCoffeeEventDate().then(setMinCohortDate);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    const { data: cohortData, error: cohortError } = await supabase
-      .from('cohorts')
-      .select('*')
-      .eq('status', 'active')
-      .maybeSingle();
-
-    if (cohortError) {
-      setError(cohortError.message);
-      setLoading(false);
-      return;
-    }
-
-    setCohort((cohortData as Cohort | null) ?? null);
-
-    if (!cohortData) {
-      setLessons([]);
-      setAllEnrollments([]);
-      setPage(1);
-      setLoading(false);
-      return;
-    }
-
-    const { data: lessonData, error: lessonError } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('cohort_id', cohortData.id)
-      .order('number', { ascending: true });
-
-    if (lessonError) {
-      setError(lessonError.message);
-      setLoading(false);
-      return;
-    }
-
-    setLessons((lessonData ?? []) as Lesson[]);
-
+  const loadRosterFor = useCallback(async (cohortId: string, lessons: Lesson[]) => {
     const { data: enrollmentData, error: enrollmentError } = await supabase
       .from('enrollments')
       .select('id, person:people(id,name,status,membership_interest_sent_at)')
-      .eq('cohort_id', cohortData.id);
+      .eq('cohort_id', cohortId);
 
     if (enrollmentError) {
       setError(enrollmentError.message);
-      setLoading(false);
       return;
     }
 
-    const lessonIds = (lessonData ?? []).map((l) => l.id);
+    const lessonIds = lessons.map((l) => l.id);
     const { data: attendanceData, error: attendanceError } = lessonIds.length
       ? await supabase.from('lesson_attendance').select('*').in('lesson_id', lessonIds)
       : { data: [], error: null };
 
     if (attendanceError) {
       setError(attendanceError.message);
-      setLoading(false);
       return;
     }
 
     const attendanceRows = (attendanceData ?? []) as LessonAttendance[];
-
     const rows: EnrollmentRow[] = ((enrollmentData ?? []) as unknown as { id: string; person: EnrollmentRow['person'] }[])
       .filter((enrollment) => enrollment.person.status !== 'archived')
       .map((enrollment) => {
@@ -115,22 +94,79 @@ export function useClasses() {
           attendanceByLesson,
           attendedCount: own.filter((a) => a.attended).length,
         };
-      },
-    );
+      });
 
     rows.sort((a, b) => comparePeopleByPipeline(a.person, b.person));
     setAllEnrollments(rows);
     setPage(1);
-    setLoading(false);
   }, []);
+
+  const load = useCallback(
+    async (keepSelectionId?: string) => {
+      setLoading(true);
+      setError(null);
+
+      // Before anything is listed, so a turma that just finished steps out
+      // of the selector in this same pass. Only the roles RLS lets write
+      // cohorts attempt it — for anyone else it would just fail.
+      if (canManage) {
+        try {
+          await closeFinishedCohorts();
+        } catch (sweepError) {
+          setError((sweepError as Error).message);
+        }
+      }
+
+      let open: CohortWithLessons[];
+      try {
+        open = sortByFirstLesson(await listOpenCohorts());
+      } catch (loadError) {
+        setError((loadError as Error).message);
+        setLoading(false);
+        return;
+      }
+
+      setCohorts(open);
+      if (open.length === 0) {
+        setSelectedCohortId(null);
+        setAllEnrollments([]);
+        setLoading(false);
+        return;
+      }
+
+      const selected = open.find((c) => c.cohort.id === keepSelectionId) ?? open[0];
+      setSelectedCohortId(selected.cohort.id);
+      await loadRosterFor(selected.cohort.id, selected.lessons);
+      setLoading(false);
+    },
+    [canManage, loadRosterFor],
+  );
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load]);
 
-  const createCohort = async (firstLessonDate: string) => {
-    const lessonDates = weeklyLessonDates(firstLessonDate);
-    const name = `Turma ${formatDate(firstLessonDate)}`;
+  const selected = cohorts.find((c) => c.cohort.id === selectedCohortId) ?? null;
+  const cohort = (selected?.cohort as Cohort | undefined) ?? null;
+  const lessons = (selected?.lessons as Lesson[] | undefined) ?? [];
+
+  const selectCohort = async (cohortId: string) => {
+    const target = cohorts.find((c) => c.cohort.id === cohortId);
+    if (!target) return;
+    setLoading(true);
+    setSelectedCohortId(cohortId);
+    await loadRosterFor(target.cohort.id, target.lessons);
+    setLoading(false);
+  };
+
+  const createCohort = async (firstDate: string) => {
+    if (cohorts.length >= MAX_COHORTS) {
+      throw new Error(`Só é possível ter ${MAX_COHORTS} turmas ao mesmo tempo — encerre uma antes de abrir outra.`);
+    }
+
+    const lessonDates = weeklyLessonDates(firstDate);
+    const name = `Turma ${formatDate(firstDate)}`;
 
     const { data: newCohort, error: cohortError } = await supabase
       .from('cohorts')
@@ -144,7 +180,7 @@ export function useClasses() {
     );
     if (lessonsError) throw lessonsError;
 
-    await load();
+    await load(newCohort.id as string);
   };
 
   const updateLessonDates = async (lessonDates: [string, string, string, string]) => {
@@ -155,7 +191,7 @@ export function useClasses() {
     );
     const failed = results.find((r) => r.error);
     if (failed?.error) throw failed.error;
-    await load();
+    await load(selectedCohortId ?? undefined);
   };
 
   const closeCohort = async () => {
@@ -169,7 +205,7 @@ export function useClasses() {
     if (!cohort) return;
     await enrollPersonRow(person.id, cohort.id);
     await enrollInIntegrationClass(person, user?.id);
-    await load();
+    await load(cohort.id);
   };
 
   const setSearch = (value: string) => {
@@ -185,7 +221,11 @@ export function useClasses() {
   const enrollments = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return {
+    cohorts: cohorts.map((c) => c.cohort as Cohort),
     cohort,
+    selectedCohortId,
+    selectCohort,
+    canCreateCohort: cohorts.length < MAX_COHORTS,
     lessons,
     enrollments,
     totalCount: filtered.length,
