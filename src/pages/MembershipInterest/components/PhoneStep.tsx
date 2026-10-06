@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
 import { useCheckPhone } from '../hooks/useCheckPhone';
+import { MembershipEligibility } from '../types';
 
 const phoneStepSchema = z.object({
   phone: z.string().min(8, text.validation.required('um WhatsApp válido')),
@@ -15,7 +16,7 @@ const phoneStepSchema = z.object({
 type PhoneStepFormValues = z.infer<typeof phoneStepSchema>;
 
 interface Props {
-  onFound: (phone: string, name: string, alreadySubmitted: boolean) => void;
+  onFound: (phone: string, name: string, alreadySubmitted: boolean, eligibility: MembershipEligibility) => void;
 }
 
 export function PhoneStep({ onFound }: Props) {
@@ -27,14 +28,14 @@ export function PhoneStep({ onFound }: Props) {
 
   const onSubmit = handleSubmit(async ({ phone }) => {
     const result = await check(phone);
-    if (result) onFound(phone, result.name, result.alreadySubmitted);
+    if (result) onFound(phone, result.name, result.alreadySubmitted, { lessonsAttended: result.lessonsAttended, lessonsTotal: result.lessonsTotal });
   });
 
   return (
     <Form onSubmit={onSubmit}>
       <Typography type="p">
-        Para começar, digite o número de WhatsApp que você usou no cadastro — usamos ele pra confirmar que você já
-        concluiu as 4 aulas de Integração.
+        Para começar, digite o número de WhatsApp que você usou na inscrição da Integração — é por ele que a gente
+        encontra o seu cadastro.
       </Typography>
 
       <TextInput

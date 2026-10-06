@@ -3,4 +3,4 @@ export interface CohortSchedule {
   lesson_dates: string[];
 }
 
-export type SignupStep = 'intro' | 'phone' | 'form' | 'confirmation';
+export type SignupStep = 'intro' | 'phone' | 'ineligible' | 'form' | 'confirmation';

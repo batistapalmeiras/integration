@@ -89,10 +89,12 @@ export function IntegrationStagePanel({
         </LessonList>
       </Card>
 
-      {canRecordAttendance && eligible && (
+      {/* Sent at any point now: the ficha can be filled before the classes
+          are over, and only the membership decision waits for 4/4. */}
+      {canRecordAttendance && (
         <WhatsAppMessageBox
           person={person}
-          defaultMessage={membershipInterestMessage(person.name)}
+          defaultMessage={membershipInterestMessage(person.name, eligible)}
           buttonLabel="Enviar Ficha de Interesse"
           onOpen={onMembershipInterestSent}
         />
