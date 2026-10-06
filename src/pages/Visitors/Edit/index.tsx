@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Archive, RotateCcw, Save, Trash2 } from 'lucide-react';
-import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, text, TextInput, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
+import { Button, Empty, maskPhone, ModalActions, ModalTitle, PageHeader, Skeleton, text, TextInput, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
 // Local
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { AppRoute } from '../../../routes/paths';
@@ -33,7 +33,10 @@ export function VisitorEditPage() {
     values: person
       ? {
           name: person.name,
-          phone: person.phone,
+          // bp-kit só aplica a máscara ao digitar, então um telefone salvo
+          // sem formatação (importação, cadastro antigo) apareceria cru até
+          // alguém tocar no campo.
+          phone: maskPhone(person.phone),
           age: person.age ? String(person.age) : '',
           email: person.email ?? '',
         }
