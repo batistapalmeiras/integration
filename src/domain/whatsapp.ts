@@ -32,8 +32,14 @@ export function classInviteMessage(name: string): string {
 // Same public link for everyone (no per-person token) — the form identifies
 // the person by phone and checks eligibility itself, so there's nothing to
 // generate here besides the message text.
-export function membershipInterestMessage(name: string): string {
+// Two wordings because the ficha can now be sent at any point in the
+// integração: congratulating someone on finishing the classes when they
+// still have two to go would read as a mistake on their side.
+export function membershipInterestMessage(name: string, completedClasses: boolean): string {
   const firstName = name.split(' ')[0];
   const formUrl = `${window.location.origin}${AppRoute.MembershipInterest}`;
-  return `Olá, ${firstName}! Você concluiu as 4 aulas de Integração 🎉 Agora é hora de preencher sua Ficha de Interesse de Membresia. Preencha por este link: ${formUrl}`;
+  const opening = completedClasses
+    ? `Olá, ${firstName}! Você concluiu as 4 aulas de Integração 🎉 Agora é hora de preencher sua Ficha de Interesse de Membresia.`
+    : `Olá, ${firstName}! Se você tem interesse em se tornar membro da nossa igreja, já pode preencher a Ficha de Interesse de Membresia — ela fica guardada e será analisada quando você concluir as aulas de Integração.`;
+  return `${opening} Preencha por este link: ${formUrl}`;
 }

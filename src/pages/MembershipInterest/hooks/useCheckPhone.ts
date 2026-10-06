@@ -2,8 +2,9 @@
 import { useState } from 'react';
 // Local
 import { supabase } from '../../../lib/supabase';
+import { MembershipEligibility } from '../types';
 
-interface CheckResult {
+export interface CheckResult extends MembershipEligibility {
   name: string;
   alreadySubmitted: boolean;
 }
@@ -27,8 +28,18 @@ export function useCheckPhone() {
       return null;
     }
 
-    const row = data as { person_name: string; already_submitted: boolean };
-    return { name: row.person_name, alreadySubmitted: row.already_submitted };
+    const row = data as {
+      person_name: string;
+      already_submitted: boolean;
+      lessons_attended: number;
+      lessons_total: number;
+    };
+    return {
+      name: row.person_name,
+      alreadySubmitted: row.already_submitted,
+      lessonsAttended: row.lessons_attended,
+      lessonsTotal: row.lessons_total,
+    };
   };
 
   return { check, checking, error };
