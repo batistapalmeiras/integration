@@ -4,38 +4,37 @@ import { InfoBox, Typography } from 'bp-kit';
 import { MembershipEligibility, isEligibleForMembership } from '../types';
 
 interface Props {
-  name: string;
   eligibility: MembershipEligibility | null;
 }
 
-export function ConfirmationStep({ name, eligibility }: Props) {
-  const firstName = name.split(' ')[0];
-
-  if (!eligibility || isEligibleForMembership(eligibility)) {
-    return (
-      <InfoBox variant="info">
-        Recebemos sua ficha, {firstName}! Ela será analisada pelo nosso conselho administrativo — em breve alguém
-        entrará em contato.
-      </InfoBox>
-    );
-  }
-
-  const missing = eligibility.lessonsTotal - eligibility.lessonsAttended;
+export function ConfirmationStep({ eligibility }: Props) {
+  const pending = !!eligibility && !isEligibleForMembership(eligibility);
+  const missingCount = eligibility ? eligibility.lessonsTotal - eligibility.lessonsAttended : 0;
 
   return (
     <>
       <InfoBox variant="info">
-        Recebemos sua ficha, {firstName}! Ela fica guardada com a gente e será analisada assim que você concluir a
-        Integração.
+        Olá! Recebemos sua ficha de interesse em se tornar membro da nossa igreja.
       </InfoBox>
-      <Typography type="p">
-        <strong>O que ainda falta:</strong>
-      </Typography>
-      <Typography type="p">
-        Concluir as aulas de Integração — você tem {eligibility.lessonsAttended} de {eligibility.lessonsTotal}{' '}
-        {eligibility.lessonsTotal === 1 ? 'aula' : 'aulas'}, {missing === 1 ? 'falta 1' : `faltam ${missing}`}. Se você
-        perdeu alguma, dá para repor assistindo ao vídeo que a Equipe de Integração envia.
-      </Typography>
+
+      <Typography type="p">Agora, é necessário aguardar a próxima reunião do Conselho Administrativo.</Typography>
+
+      {pending && (
+        <>
+          <Typography type="p">
+            <strong>O que falta:</strong>
+          </Typography>
+          <Typography type="p">Você precisa concluir todas as aulas da Classe de Integração.</Typography>
+          <Typography type="p">
+            Você participou de {eligibility!.lessonsAttended} das {eligibility!.lessonsTotal} aulas.{' '}
+            {missingCount === 1 ? 'A aula que perdeu deverá ser reposta' : 'As aulas que perdeu deverão ser repostas'},
+            e nossa equipe entrará em contato para orientar você.
+          </Typography>
+          <Typography type="p">A reposição é obrigatória para a conclusão do processo de membresia.</Typography>
+        </>
+      )}
+
+      <Typography type="p">Deus te abençoe</Typography>
     </>
   );
 }

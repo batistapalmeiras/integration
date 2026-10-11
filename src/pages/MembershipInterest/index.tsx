@@ -88,7 +88,7 @@ export function MembershipInterestPage() {
         <InterestFormStep name={name} submitting={submitting} submitError={submitError} onSubmit={handleSubmit} />
       )}
 
-      {!autoChecking && step === 'confirmation' && <ConfirmationStep name={name} eligibility={eligibility} />}
+      {!autoChecking && step === 'confirmation' && <ConfirmationStep eligibility={eligibility} />}
     </PublicPage>
   );
 }
