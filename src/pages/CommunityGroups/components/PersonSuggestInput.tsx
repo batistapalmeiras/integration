@@ -19,9 +19,6 @@ interface Props {
 
 export function PersonSuggestInput({ label, value, onChange, onSelect, options, placeholder, onKeyDown }: Props) {
   const [open, setOpen] = useState(false);
-  // A blur can fire (e.g. tapping a suggestion on mobile) right before the
-  // input regains focus. Without cancelling the pending close, that stale
-  // timeout fires after the reopen and closes the panel that just opened.
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const matches = useMemo(() => {

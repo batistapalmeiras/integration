@@ -29,9 +29,6 @@ export function useStatusCounts() {
     }
     setCounts(nextCounts);
 
-    // How many turmas have ever existed, active or closed — there's only
-    // ever one active at a time by design, so splitting this by status
-    // wouldn't say much (it'd always read 0 or 1).
     const { count: cohortsCount, error: cohortsError } = await supabase
       .from('cohorts')
       .select('id', { count: 'exact', head: true });

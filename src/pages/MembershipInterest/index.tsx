@@ -24,10 +24,6 @@ export function MembershipInterestPage() {
   const { check, error: autoCheckError } = useCheckPhone();
   const { submit, submitting, submitError } = useMembershipInterest();
 
-  // Identificar-se uma vez vale para sempre: quem já disse quem é em
-  // qualquer página pública não digita o número de novo. Se esse número não
-  // estiver elegível, a resposta é o próprio aviso — pedir o telefone outra
-  // vez só faria a pessoa redigitar o mesmo número para ler o mesmo erro.
   useEffect(() => {
     if (!identity) {
       setAutoChecking(false);

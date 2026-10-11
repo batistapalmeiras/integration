@@ -1,9 +1,6 @@
 // Libs
 import { supabase } from '../lib/supabase';
 
-// hosts ("anfitriões") only exists on small_groups — a PG meets at someone's
-// home, a ministry has no such role. Kept on the shared shape (always []
-// for ministries) so GroupTable/GroupModal can stay one component for both.
 export interface CommunityGroup {
   id: string;
   name: string;
@@ -88,8 +85,6 @@ export const countPeopleInSmallGroup = (id: string) => countPeople('small_group_
 export const listPeopleInSmallGroup = (id: string) => listPeople('small_group_id', id);
 export const getSmallGroup = (id: string) => getGroup('small_groups', id);
 
-// For display only (e.g. the visitor's Detalhes page) — resolves both
-// names in one round trip instead of the caller joining client-side.
 export async function getPersonCommunityNames(
   personId: string,
 ): Promise<{ ministryName: string | null; smallGroupName: string | null }> {

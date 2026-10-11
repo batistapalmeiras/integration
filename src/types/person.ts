@@ -32,10 +32,6 @@ export interface Person {
 
 export type StatusTone = 'success' | 'warning' | 'info' | 'danger' | 'muted';
 
-// compactLabel is only set where it actually differs from the full label —
-// used in lists/tables where a long label wraps or crowds an action column.
-// Single-person views (e.g. the Visitor detail PersonCard) show the full
-// label; only pass `compact` to StatusPill in list contexts.
 export const STATUS_META: Record<
   PersonStatus,
   { label: string; compactLabel?: string; tone: StatusTone; icon: ComponentType<{ size?: number }> }
@@ -50,10 +46,6 @@ export const STATUS_META: Record<
   archived: { label: 'Arquivado', tone: 'danger', icon: Archive },
 };
 
-// "Aguardando retorno" isn't a real pipeline status (initial_contact and
-// retry_contact still drive every RLS/filter/transition) — it's a display-only
-// distinction for a person who already got a WhatsApp message and hasn't had
-// an outcome registered yet, vs. one nobody has messaged at all.
 export const AWAITING_REPLY_META = {
   label: 'Aguardando Retorno',
   compactLabel: 'Aguardando',
@@ -61,10 +53,6 @@ export const AWAITING_REPLY_META = {
   icon: Clock,
 };
 
-// Same idea as "Aguardando Retorno" above, but for the turma-signup
-// invite sent once someone reaches pending_signup: distinguishes "just
-// attended the café, nobody's invited them to the turma yet" from
-// "already sent the link, waiting on them to fill it out".
 export const AWAITING_CLASS_SIGNUP_META = {
   label: 'Convite Enviado',
   compactLabel: 'Convite enviado',
@@ -72,9 +60,6 @@ export const AWAITING_CLASS_SIGNUP_META = {
   icon: Send,
 };
 
-// Same idea again, for the membership-interest link sent once someone
-// finishes the 4 integration classes: "done with the classes, nobody's
-// sent the ficha yet" vs. "already sent, waiting on them to fill it out".
 export const AWAITING_MEMBERSHIP_INTEREST_META = {
   label: 'Ficha Enviada',
   compactLabel: 'Ficha enviada',
@@ -108,12 +93,6 @@ export function getDisplayStatusMeta(person: DisplayStatusInput) {
   return STATUS_META[person.status];
 }
 
-// Shared ordering for every list of people in the app: real pipeline stage
-// first (STATUS_META's own declaration order, which is the pipeline
-// sequence), then whoever still needs a first message before whoever's
-// already been messaged and is awaiting a reply, then alphabetically. Lists
-// that only ever show one status (e.g. Turma, Membros) just fall through to
-// the alphabetical tiebreaker — safe to use everywhere for consistency.
 const PIPELINE_ORDER = new Map(Object.keys(STATUS_META).map((status, index) => [status as PersonStatus, index]));
 
 export interface PipelineSortInput extends DisplayStatusInput {

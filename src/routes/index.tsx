@@ -123,13 +123,6 @@ export function AppRouter() {
                         </ProtectedRoute>
                       }
                     />
-                    {/* No role restriction: every role reaches this page — on
-                        mobile it's now the only way to Meu perfil/Sair (no
-                        top bar anymore), with admin shortcuts shown inside
-                        only for Admin/Pastor/Pastor-only roles. Registered
-                        under two paths: /menu is the mobile bottom-tab
-                        target, /configuracoes is what the desktop sidebar
-                        links to — same page either way. */}
                     <Route path={AppRoute.Admin} element={<AdminPage />} />
                     <Route path={AppRoute.Settings} element={<AdminPage />} />
                     <Route
@@ -140,7 +133,6 @@ export function AppRouter() {
                         </ProtectedRoute>
                       }
                     />
-                    {/* Ministérios/PGs are exclusive to Pastor (not Admin) — closed 2026-08-25. */}
                     <Route
                       path={AppRoute.Ministries}
                       element={

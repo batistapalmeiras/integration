@@ -60,8 +60,6 @@ export function AdminPage() {
             <MenuOptionCard icon={FileBarChart} label="Relatórios" onClick={() => navigate(AppRoute.Reports)} />
           </>
         )}
-        {/* Loja/Ministérios/PGs são exclusivos do Pastor — Loja por decisão de acesso,
-            Ministérios/PGs por serem estrutura da igreja, não do pipeline de integração. */}
         {isPastor && (
           <>
             <MenuOptionCard icon={Store} label="Loja" disabled />

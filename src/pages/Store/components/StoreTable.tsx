@@ -18,8 +18,6 @@ export function StoreTable({ items }: Props) {
   const navigate = useNavigate();
   const { show: showToast, toast } = useToast();
 
-  // One link for the whole catalog, not per item — the public page lists
-  // every active item, so there's nothing to copy per row.
   const copyStoreLink = async () => {
     await navigator.clipboard.writeText(getStorePublicLink());
     showToast('Link copiado!');

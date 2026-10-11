@@ -33,9 +33,6 @@ function toCohortWithLessons(row: CohortRow): CohortWithLessons {
   return { cohort, lessons: [...(lessons ?? [])].sort((a, b) => a.number - b.number) };
 }
 
-// Every turma that hasn't been encerrada — there can be two at once now
-// (the one under way and the next one the pastor already opened), the same
-// way the Café page holds the current café and the next.
 export async function listOpenCohorts(): Promise<CohortWithLessons[]> {
   const { data, error } = await supabase.from('cohorts').select(COHORT_WITH_LESSONS).eq('status', 'active');
   if (error) throw error;
@@ -48,9 +45,6 @@ export async function listAllCohorts(): Promise<CohortWithLessons[]> {
   return ((data ?? []) as unknown as CohortRow[]).map(toCohortWithLessons);
 }
 
-// The turma a new signup belongs to: the next one whose first class hasn't
-// started. Replaces the old "the active cohort", which happily enrolled
-// people into a turma already on its third class.
 export async function getUpcomingCohortWithLessons(): Promise<CohortWithLessons | null> {
   return selectUpcomingCohort(await listOpenCohorts());
 }
@@ -59,8 +53,6 @@ export async function hasUpcomingCohort(): Promise<boolean> {
   return !!(await getUpcomingCohortWithLessons());
 }
 
-// The turma this person is actually enrolled in — their own stage panel has
-// to follow their turma, not whichever one happens to be open now.
 export async function getPersonCohortWithLessons(personId: string): Promise<CohortWithLessons | null> {
   const { data, error } = await supabase
     .from('enrollments')
@@ -113,9 +105,6 @@ export async function getLessonAttendanceMap(
   return map;
 }
 
-// Returns the saved row so callers can patch their local state with it —
-// the first tick of a lesson creates the row, and its id only exists after
-// the write.
 export async function toggleLessonAttendance(
   enrollmentId: string,
   lessonId: string,
@@ -136,8 +125,6 @@ export interface EnrollablePerson {
   status: PersonStatus;
 }
 
-// People eligible to be added to a cohort by hand — anyone not already
-// enrolled in it and not archived.
 export async function listEnrollablePeople(cohortId: string): Promise<EnrollablePerson[]> {
   const { data: enrolled, error: enrolledError } = await supabase
     .from('enrollments')
@@ -179,9 +166,6 @@ export async function getMakeupLink(enrollmentId: string, lessonId: string): Pro
   return `${window.location.origin}${AppRoute.MakeupAttendance}/${id}`;
 }
 
-// A turma closes itself once its last class is past and nobody on its
-// roster is still going through it — mirrors the café, which now steps
-// aside on its own instead of waiting for someone to click "Encerrar".
 export async function closeFinishedCohorts(): Promise<number> {
   const open = await listOpenCohorts();
   if (open.length === 0) return 0;

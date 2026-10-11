@@ -25,8 +25,6 @@ export function StatusCountsTable() {
         </SummaryStat>
       </SummaryStrip>
 
-      {/* Informational, not a navigation list — Tr has no $clickable, so it
-          naturally has no pointer/hover affordance. */}
       <TableWrapper>
         <Table>
           <thead>

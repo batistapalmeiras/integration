@@ -9,9 +9,6 @@ export async function fetchPerson(id: string): Promise<Person> {
   return data as Person;
 }
 
-// Doesn't stamp updated_at itself — callers pass it explicitly when they
-// want it, matching each call site's pre-existing behavior exactly (e.g.
-// markWhatsAppOpened deliberately never touched updated_at).
 export async function updatePersonFields(id: string, fields: Record<string, unknown>): Promise<void> {
   const { error } = await supabase.from('people').update(fields).eq('id', id);
   if (error) throw error;

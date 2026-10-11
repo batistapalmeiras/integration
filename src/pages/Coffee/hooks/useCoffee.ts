@@ -23,14 +23,8 @@ import { AttendeeRow, CoffeeEvent } from '../types';
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
-// Enough room to close out the café that just happened while the next one
-// is already scheduled — a 3rd one piling up means the previous cycle
-// wasn't wrapped up yet, which is its own problem to fix first.
 const MAX_EVENTS = 2;
 
-// Always the oldest café (list is sorted ascending by date) — staff should
-// land on whichever one is most likely to still need attention, never
-// jump straight to a newer one just because it exists.
 function resolveDefaultId(list: CoffeeEvent[]): string | null {
   return list[0]?.id ?? null;
 }
@@ -57,10 +51,6 @@ export function useCoffee() {
     saveFilters({ search });
   }, [search]);
 
-  // Only the cafés still open: one whose date has passed and whose queue is
-  // empty closed itself (see selectOpenCoffeeEvents) — it drops out of the
-  // selector and frees up its slot for the next café, exactly as if someone
-  // had encerrado it by hand.
   const fetchEvents = useCallback(async (): Promise<CoffeeEvent[] | null> => {
     const { data, error: eventsError } = await supabase
       .from('coffee_events')
@@ -78,12 +68,6 @@ export function useCoffee() {
     return open;
   }, []);
 
-  // Self-heal: a person can reach 'welcome_coffee' status without ANY
-  // attendance row at all (e.g. legacy data from before auto-attach
-  // existed) — attach them to the next upcoming café. Runs independently of
-  // whichever café is selected in the dropdown, since an orphaned person
-  // should always land on the real next café, not wherever staff happens
-  // to be looking at the moment.
   const healOrphans = useCallback(async (list: CoffeeEvent[]) => {
     const todayKey = new Date().toISOString().slice(0, 10);
     const upcomingId = list.find((e) => e.event_date >= todayKey)?.id;
@@ -124,10 +108,6 @@ export function useCoffee() {
       return;
     }
 
-    // welcome_coffee (not yet attended) and pending_signup (attended,
-    // waiting on the turma form) are both still this café's queue. Once a
-    // person moves past that (invited to classes, archived, etc.) they're
-    // another volunteer's queue now — stop showing them here.
     const rows = (attendanceData ?? []) as unknown as AttendeeRow[];
     setAllAttendees(
       rows
@@ -151,11 +131,6 @@ export function useCoffee() {
     setLoading(true);
     setError(null);
 
-    // Runs before anything is counted or listed so a café whose last
-    // pending person just got archived closes in this same pass, instead of
-    // lingering until the next time someone opens the page. Only the roles
-    // RLS lets write people rows attempt it — for anyone else the sweep
-    // would just fail and blank the page with an error.
     if (canSweep) {
       try {
         await archiveMissedSignups(user?.id);
@@ -216,9 +191,6 @@ export function useCoffee() {
     await loadAttendeesFor(selectedEventId);
   };
 
-  // These three patch `attendees` in place instead of re-running `load()` —
-  // re-fetching would flip `loading` back to true and flash/replace the
-  // whole table for a change that only ever affects a single row.
   const markAttended = async (attendanceId: string, personId: string) => {
     await markCoffeeAttended(attendanceId, personId, user?.id);
     setAllAttendees((prev) =>

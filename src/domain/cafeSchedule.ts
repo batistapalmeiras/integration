@@ -19,12 +19,6 @@ export interface CoffeeEventRef {
   event_date: string;
 }
 
-// A café closes itself once its date has passed and nobody from it is left
-// in the café queue — everyone either moved on to the turma, was archived,
-// or went back to retry contact. Derived instead of a stored `closed_at`
-// flag so it can never drift from the roster it describes, and so nothing
-// has to be deleted: the attendance rows stay, which is what a person's
-// profile reads to show which café they went to.
 export function selectOpenCoffeeEvents<T extends CoffeeEventRef>(
   events: T[],
   queuedByEventId: Record<string, number>,
@@ -33,8 +27,6 @@ export function selectOpenCoffeeEvents<T extends CoffeeEventRef>(
   return events.filter((e) => e.event_date >= todayKey || (queuedByEventId[e.id] ?? 0) > 0);
 }
 
-// How many people each café still has waiting on it — same two statuses the
-// Café page lists (not yet attended, and attended but not signed up yet).
 export async function countQueuedByCoffeeEvent(): Promise<Record<string, number>> {
   const { data, error } = await supabase.from('coffee_attendance').select('coffee_event_id, person:people(status)');
   if (error) throw error;
@@ -108,11 +100,6 @@ export async function resolveCurrentCoffeeEventId(): Promise<string | null> {
 export async function getCoffeeAttendanceForPerson(
   personId: string,
 ): Promise<{ id: string; attended: boolean } | null> {
-  // Check for ANY existing attendance row first (not just one for whatever
-  // café currently resolves as "next/current") — a person invited to an
-  // earlier café must not get a second, duplicate row created here just
-  // because a newer café has since been scheduled. Same rule as the Café
-  // page's self-heal.
   const { data: existing, error: selectError } = await supabase
     .from('coffee_attendance')
     .select('id, attended, coffee_event:coffee_events(event_date)')
@@ -125,8 +112,6 @@ export async function getCoffeeAttendanceForPerson(
     return { id: latest.id, attended: latest.attended };
   }
 
-  // Truly orphaned (no attendance row anywhere) — attach to the next
-  // upcoming café, same fallback the self-heal uses.
   const eventId = await resolveCurrentCoffeeEventId();
   if (!eventId) return null;
 
@@ -144,13 +129,6 @@ export interface EnrollableCoffeePerson {
   name: string;
 }
 
-// People eligible to be added to a café by hand. Excludes archived people
-// and anyone already at 'welcome_coffee' — that status means they're
-// already tracked at some café (their own, possibly a different one); the
-// automatic self-heal (see the Café page hook) is what handles a genuinely
-// orphaned welcome_coffee person with no attendance row anywhere, so manual
-// "Adicionar" never needs to (and must not) touch that group — that's
-// exactly the loophole that kept duplicating people across cafés.
 export async function listEnrollableCoffeePeople(eventId: string): Promise<EnrollableCoffeePerson[]> {
   const { data: attending, error: attendingError } = await supabase
     .from('coffee_attendance')
@@ -173,15 +151,6 @@ export async function enrollInCoffee(personId: string, eventId: string): Promise
   if (error) throw error;
 }
 
-// Attending moves the person into a sub-stage of their own — status alone
-// now says whether they've been to the café yet, instead of that only being
-// knowable by also checking the attendance row's `attended` flag.
-//
-// This is a single RPC (not separate .update() calls) so the attendance
-// flip, status change and history log all commit together in one DB
-// transaction — a failure partway through (constraint, network drop,
-// whatever) leaves nothing changed instead of a half-done state that used
-// to need a manual SQL fix (see the 2026-09-15 café incident).
 export async function markCoffeeAttended(attendanceId: string, personId: string, actorId?: string): Promise<void> {
   const { error } = await supabase.rpc('mark_coffee_attended', {
     p_attendance_id: attendanceId,
@@ -191,9 +160,6 @@ export async function markCoffeeAttended(attendanceId: string, personId: string,
   if (error) throw error;
 }
 
-// Person let the volunteer know beforehand they're not coming — distinct
-// from a silent no-show (markCoffeeNotAttended), which gets one retry round
-// instead of archiving straight away.
 export async function markCoffeeCanceled(personId: string, actorId?: string): Promise<void> {
   const { error: statusError } = await supabase
     .from('people')

@@ -8,10 +8,6 @@ export const RESULT_LABELS: Record<ContactResult, string> = {
   no_response: 'Sem resposta',
 };
 
-// Structural shape only — deliberately not importing pages/Visitors's
-// zod-inferred form types here (a feature must not depend on a page), but
-// every call site passes an RHF-inferred object that already matches this
-// shape, so no call site needs to change.
 export interface UpdatePersonInput {
   name: string;
   phone: string;

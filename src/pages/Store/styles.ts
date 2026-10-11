@@ -12,9 +12,6 @@ export const FormActions = styled.div`
   }
 `;
 
-// The shared RowActions wraps (flex-wrap: wrap), which stacks icons
-// vertically once the $shrink column shrinks the cell to content width —
-// same issue fixed for Café's AttendanceRow. These rows never need to wrap.
 export const ActionsRow = styled.div`
   display: flex;
   align-items: center;

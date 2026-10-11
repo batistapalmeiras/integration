@@ -1,10 +1,6 @@
 // Libs
 import styled from 'styled-components';
 
-// Sits under the login form as plain text (not a floating card), but with
-// enough visual weight — soft tint background, bolder text — that it reads
-// as a real hint rather than fine print. Mobile/tablet only, desktop users
-// aren't installing a home-screen app.
 export const Prompt = styled.p`
   margin: ${({ theme }) => theme.spacing.md} 0 0;
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};

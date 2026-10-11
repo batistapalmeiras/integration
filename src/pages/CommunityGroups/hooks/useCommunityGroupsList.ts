@@ -53,8 +53,6 @@ export function useMinistriesList() {
     await load();
   };
 
-  // No hosts param — ministries have no anfitriões, only PGs do. A 2-arg
-  // function is still assignable to GroupTable's 3-arg onAdd/onEdit shape.
   const edit = async (id: string, name: string, leaders: string[]) => {
     await updateMinistry(id, name, leaders);
     await load();

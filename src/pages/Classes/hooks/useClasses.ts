@@ -22,13 +22,8 @@ import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
-// The turma under way plus the next one the pastor already opened — same
-// headroom the Café page gives itself, and for the same reason: a third one
-// piling up means an earlier cycle was never wrapped up.
 const MAX_COHORTS = 2;
 
-// Oldest first (by 1st class), so staff lands on the turma that still needs
-// attention instead of jumping to one that hasn't started.
 function sortByFirstLesson(list: CohortWithLessons[]): CohortWithLessons[] {
   return [...list].sort((a, b) =>
     (firstLessonDate(a.lessons) ?? '').localeCompare(firstLessonDate(b.lessons) ?? ''),
@@ -106,9 +101,6 @@ export function useClasses() {
       setLoading(true);
       setError(null);
 
-      // Before anything is listed, so a turma that just finished steps out
-      // of the selector in this same pass. Only the roles RLS lets write
-      // cohorts attempt it — for anyone else it would just fail.
       if (canManage) {
         try {
           await closeFinishedCohorts();

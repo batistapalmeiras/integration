@@ -45,9 +45,6 @@ export function Layout({ children }: ILayoutProps) {
     showAdmin,
   } = useLayout();
 
-  // The Brand/home link only ever renders on desktop (SideBrand), so it
-  // should match the desktop sidebar's own route for this page (/configuracoes),
-  // not the mobile bottom-tab one (/menu).
   const homeRoute =
     ([
       [showVisitors, AppRoute.Visitors],
@@ -56,9 +53,6 @@ export function Layout({ children }: ILayoutProps) {
       [showAdmin, AppRoute.Settings],
     ] as const).find(([visible]) => visible)?.[1] ?? AppRoute.People;
 
-  // The Menu tab (profile/logout + admin shortcuts) is always available —
-  // it's every role's only way to reach "Meu perfil"/"Sair" on mobile now
-  // that there's no top bar, not just an admin shortcut.
   const visibleTabs = [showPeople, showVisitors, showCoffee, showClasses, true].filter(Boolean).length;
   const isOnATab =
     (showVisitors && isExactTab(AppRoute.Visitors)) ||

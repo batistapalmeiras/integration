@@ -19,10 +19,6 @@ function isIos(): boolean {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
-// Rendered as the Login page's footerSlot, right under the "Entrar" button
-// — Chrome fires its own install event we can prompt from, but Safari
-// (iOS) never exposes an install API at all, so there we just show the
-// manual steps as text instead.
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(isStandalone());

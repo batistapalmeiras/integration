@@ -28,8 +28,6 @@ export function useVolunteerDetail(id: string) {
 
     setVolunteer(data as VolunteerRow);
 
-    // profiles has no email column (the login email lives in auth.users,
-    // only readable via the service role) — fetched separately here.
     const { data: emailData, error: emailError } = await supabase.functions.invoke('get-volunteer-email', {
       body: { id },
     });

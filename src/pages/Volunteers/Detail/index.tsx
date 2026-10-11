@@ -47,23 +47,13 @@ export function VolunteerDetailPage() {
     useVolunteerDetail(id ?? '');
 
   const isPastor = user?.role === UserRole.Pastor;
-  // Admin can still see this volunteer's current role even if it's outside
-  // what they're allowed to set (e.g. viewing their own Admin account) —
-  // the option just won't be offered as something new to switch to.
   const roleOptions = isPastor
     ? Object.values(UserRole)
     : Array.from(new Set([...ADMIN_MANAGEABLE_ROLES, ...(volunteer ? [volunteer.role] : [])]));
 
-  // Admin can see every volunteer (matches the list), but can only edit
-  // integration_team/teacher ones (or their own account) — Admin/Pastor
-  // accounts are Pastor's to manage. Enforced server-side too (RLS +
-  // Edge Functions); this just keeps the form from offering an action
-  // that would fail silently.
   const isSelf = volunteer?.id === user?.id;
   const isTargetPrivileged = volunteer?.role === UserRole.Admin || volunteer?.role === UserRole.Pastor;
   const canEdit = isPastor || isSelf || !isTargetPrivileged;
-  // bp-kit's Select has no disabled prop — lock it to a single option
-  // (the current role) instead when the form is read-only.
   const visibleRoleOptions = canEdit ? roleOptions : volunteer ? [volunteer.role] : [];
 
   const {

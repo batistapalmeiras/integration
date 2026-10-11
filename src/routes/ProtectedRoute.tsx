@@ -16,7 +16,6 @@ export function ProtectedRoute({ children, roles }: Props) {
 
   if (loading) return null;
   if (!user) return <Navigate to={AppRoute.Login} replace />;
-  // user.role is a plain string (bp-kit doesn't know about this app's UserRole enum)
   if (roles && !(roles as string[]).includes(user.role)) return <Navigate to={AppRoute.Login} replace />;
 
   return <>{children}</>;

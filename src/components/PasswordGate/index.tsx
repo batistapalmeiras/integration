@@ -9,12 +9,6 @@ interface Props {
   children: React.ReactNode;
 }
 
-// Wraps the whole authenticated app (mounted once per session, above the
-// inner per-route ProtectedRoutes) — blocks every screen behind a forced
-// password change for a volunteer still on the shared default password.
-// Keeps the normal logged-in Layout (nav, user menu) around the forced
-// screen instead of a bare public-looking page — the gate holds regardless
-// of which nav link gets clicked, since it renders above route matching.
 export function PasswordGate({ children }: Props) {
   const { mustChange, loading, recheck } = useMustChangePassword();
 

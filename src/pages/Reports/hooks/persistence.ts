@@ -23,6 +23,5 @@ export function saveFilters(filters: PeopleFilters) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
   } catch {
-    // localStorage unavailable (e.g. private mode) — persistence is best-effort
   }
 }

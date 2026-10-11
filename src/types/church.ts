@@ -1,7 +1,3 @@
-// Ministérios/PGs used to be fixed lists here — became admin-managed
-// database tables 2026-08-25 (see src/domain/communityGroups.ts) so they
-// can be created/renamed/deleted from Configurações.
-
 export type EntryType = 'baptism' | 'transfer_letter' | 'acclamation' | 'reconciliation';
 
 export const ENTRY_TYPE_LABELS: Record<EntryType, string> = {

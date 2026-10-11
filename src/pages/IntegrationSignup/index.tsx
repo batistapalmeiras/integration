@@ -30,10 +30,6 @@ export function IntegrationSignupPage() {
     saveSignupProgress({ step, phone, name, formValues, result: result ?? undefined });
   }, [step, phone, name, formValues, result]);
 
-  // Quem já se identificou em qualquer página pública não digita o número de
-  // novo. Se esse número não estiver elegível, a resposta é o próprio aviso
-  // — pedir o telefone outra vez só faria a pessoa redigitar o mesmo número
-  // para ler o mesmo erro.
   const continueFromIntro = async () => {
     const identity = loadVisitorIdentity();
     if (!identity) {

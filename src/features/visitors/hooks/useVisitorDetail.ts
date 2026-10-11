@@ -96,8 +96,6 @@ export function useVisitorDetail(id: string) {
     setProfileSmallGroupName(smallGroupName);
   }, [id]);
 
-  // Historical, independent of the person's current pipeline stage — shown
-  // on the profile card regardless of whether they're still at that step.
   useEffect(() => {
     getPersonAttendedCoffeeDate(id).then(setProfileCoffeeDate);
     getPersonCohortName(id).then(setProfileCohortName);
@@ -133,8 +131,6 @@ export function useVisitorDetail(id: string) {
     else setLastAttempt(null);
   }, [person?.status, loadLastAttempt]);
 
-  // Their own turma, read from their enrollment — not "the active one",
-  // which now stops being theirs the moment the pastor opens the next one.
   const loadIntegrationClass = useCallback(async () => {
     setIntegrationLoading(true);
     const own = await getPersonCohortWithLessons(id);
@@ -172,8 +168,6 @@ export function useVisitorDetail(id: string) {
     await load();
   };
 
-  // Simple, rule-free status setters — archive/reactivate don't branch on
-  // anything, so they stay a thin local helper instead of a service.
   const changeStatus = async (toStatus: PersonStatus, note?: string, extra: Record<string, unknown> = {}) => {
     if (!person) return;
     await updatePersonStatus(id, toStatus, extra);
@@ -216,8 +210,6 @@ export function useVisitorDetail(id: string) {
     await changeStatus('retry_contact');
   };
 
-  // Only for a mistaken cadastro — RLS only allows this while the person is
-  // still at 'initial_contact', before any real history builds up on them.
   const deletePerson = () => deletePersonRow(id);
 
   const markAttended = async () => {
@@ -242,11 +234,6 @@ export function useVisitorDetail(id: string) {
     await loadCoffeeAttendance();
   };
 
-  // Patches the one lesson in place instead of re-running
-  // loadIntegrationClass() — that flips integrationLoading back on, which
-  // swaps the whole attendance card for a skeleton and flashes it on every
-  // tick, for a change that only ever affects a single checkbox. Same
-  // reason the Café page patches its attendee rows by hand.
   const toggleClassAttendance = async (lessonId: string, attended: boolean) => {
     if (!integrationClass) return;
     const saved = await toggleLessonAttendance(integrationClass.enrollmentId, lessonId, attended);
@@ -273,9 +260,6 @@ export function useVisitorDetail(id: string) {
     await loadCommunityNames();
   };
 
-  // Same PG/Ministério fields confirmMember sets once — this lets
-  // pastor/admin revisit them any time afterwards from the Comunidade tab,
-  // without touching status.
   const updateCommunity = async (smallGroupId: string, ministryId: string) => {
     await updatePersonFields(id, {
       small_group_id: smallGroupId,

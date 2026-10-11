@@ -8,8 +8,6 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      // Registrado à mão em src/pwa.ts, que acrescenta a verificação de
-      // nova versão ao voltar para o app — veja o comentário de lá.
       injectRegister: null,
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'robots.txt'],
       devOptions: { enabled: true },

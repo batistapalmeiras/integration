@@ -89,8 +89,6 @@ export function IntegrationStagePanel({
         </LessonList>
       </Card>
 
-      {/* Sent at any point now: the ficha can be filled before the classes
-          are over, and only the membership decision waits for 4/4. */}
       {canRecordAttendance && (
         <WhatsAppMessageBox
           person={person}

@@ -12,9 +12,6 @@ export const Hint = styled.p`
   color: ${({ theme }) => theme.colors.muted};
 `;
 
-// Mobile keeps the settings-list look (full-width rows). From tablet up,
-// the same cards become a tile grid — a flat list reads as sparse/stretched
-// once there's room for more than one column.
 export const OptionsGrid = styled.div`
   display: flex;
   flex-direction: column;
@@ -96,9 +93,6 @@ export const Chevron = styled.span`
   }
 `;
 
-// Mobile-only: with no top bar anymore, this is every role's way to reach
-// Meu perfil/Sair, so it replaces what used to live in the header dropdown.
-// Desktop already has the same actions in the sidebar footer.
 export const MobileMenu = styled.div`
   display: flex;
   flex-direction: column;
@@ -110,10 +104,6 @@ export const MobileMenu = styled.div`
   }
 `;
 
-// A local stand-in for bp-kit's Brand — Brand hides the wordmark below
-// 480px (meant for other, larger uses), which is exactly this phone-width
-// context, leaving only the icon. This keeps the same icon+name look the
-// sidebar has regardless of screen width.
 export const MobileBrand = styled.div`
   display: flex;
   align-items: center;
@@ -133,8 +123,6 @@ export const MobileBrandName = styled.span`
   color: ${({ theme }) => theme.colors.primary};
 `;
 
-// Tappable profile row (avatar + name + chevron) — the chevron is the same
-// "this leads somewhere" affordance MenuOptionCard already uses elsewhere.
 export const ProfileCard = styled(Card)`
   display: flex;
   align-items: center;

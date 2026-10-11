@@ -38,9 +38,6 @@ export function useAnnualReport() {
     const start = `${year}-01-01`;
     const end = `${year + 1}-01-01`;
 
-    // 'initial_contact' is only ever the DB default status set at row
-    // creation — no status_history row is ever written for entering it —
-    // so this count has to come from people.created_at, not status_history.
     const { count: initialContactCount, error: peopleError } = await supabase
       .from('people')
       .select('id', { count: 'exact', head: true })

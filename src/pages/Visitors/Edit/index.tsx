@@ -33,9 +33,6 @@ export function VisitorEditPage() {
     values: person
       ? {
           name: person.name,
-          // bp-kit só aplica a máscara ao digitar, então um telefone salvo
-          // sem formatação (importação, cadastro antigo) apareceria cru até
-          // alguém tocar no campo.
           phone: maskPhone(person.phone),
           age: person.age ? String(person.age) : '',
           email: person.email ?? '',
@@ -48,9 +45,6 @@ export function VisitorEditPage() {
 
   const isClosedOut = person.status === 'archived' || person.status === 'member';
 
-  // Each role can only touch this person's data while they're at that
-  // role's own step — integration_team owns contact/café, teacher owns the
-  // integration classes. admin/pastor are unrestricted.
   const inIntegrationTeamStep =
     person.status === 'initial_contact' ||
     person.status === 'retry_contact' ||

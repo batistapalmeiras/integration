@@ -6,10 +6,6 @@ import { comparePeopleByPipeline } from '../../../types/person';
 import { loadSavedFilters, saveFilters } from '../persistence';
 import { Person } from '../../../features/visitors';
 
-// This page is the "contact" stage queue: once a person moves past it
-// (welcome_coffee onward) they belong to the next volunteer's stage and
-// stop showing up here. Archived people stay visible since reactivating
-// always sends them back into this same contact queue.
 const VISIBLE_STATUSES: Person['status'][] = ['initial_contact', 'retry_contact', 'archived'];
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;

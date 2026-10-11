@@ -30,9 +30,6 @@ export function useVolunteers() {
     load();
   }, [load]);
 
-  // Creates both the login (Supabase Auth) and the profiles row via the
-  // create-volunteer Edge Function — entirely in-app, no Supabase dashboard
-  // step for the admin.
   const addVolunteer = async (email: string, name: string, role: UserRole) => {
     const { data, error: invokeError } = await supabase.functions.invoke(CREATE_VOLUNTEER_FUNCTION, {
       body: { email, password: getDefaultVolunteerPassword(), name, role },

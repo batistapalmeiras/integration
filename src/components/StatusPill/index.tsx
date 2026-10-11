@@ -33,9 +33,6 @@ const Pill = styled.span<{ $tone: string }>`
 
 interface Props {
   person: DisplayStatusInput;
-  // Lists/tables pass this to use the shorter label where one exists (e.g.
-  // "Café" instead of "Café de Boas-vindas") — single-person views (the
-  // Visitor detail PersonCard) omit it and get the full label.
   compact?: boolean;
 }
 

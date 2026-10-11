@@ -1,8 +1,6 @@
 // Libs
 import styled from 'styled-components';
 
-// Bordered box on tablet/desktop (matches the Pessoas list); on mobile the
-// border comes off so it reads the same as a full-bleed list, not a card.
 export const TableWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
@@ -34,9 +32,6 @@ export const Tr = styled.tr<{ $clickable?: boolean }>`
     `}
 `;
 
-// $hideOnMobile: drop a column below the mobile breakpoint instead of
-// letting the table scroll horizontally — for a column that's a nice-to-have
-// on wider screens (e.g. a secondary count) but not worth the width on a phone.
 export const Th = styled.th<{ $hideOnMobile?: boolean; $shrink?: boolean }>`
   text-align: left;
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
@@ -56,10 +51,6 @@ export const Th = styled.th<{ $hideOnMobile?: boolean; $shrink?: boolean }>`
   ${({ $shrink }) => $shrink && `width: 1%;`}
 `;
 
-// $truncate: for a Nome column sitting next to a status pill/badge column —
-// clips a long name with "…" instead of wrapping and blowing up the row
-// height. Pair with $shrink on the other column so it hugs its own content
-// and leaves the rest of the row's width to the truncating one.
 export const Td = styled.td<{ $hideOnMobile?: boolean; $truncate?: boolean; $shrink?: boolean }>`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};

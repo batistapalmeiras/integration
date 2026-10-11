@@ -25,6 +25,5 @@ export function saveSignupProgress(progress: SignupProgress) {
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   } catch {
-    // sessionStorage unavailable (e.g. private mode) — persistence is best-effort
   }
 }

@@ -43,10 +43,6 @@ export function usePeopleReport() {
     setLoading(true);
     setError(null);
 
-    // Cohort filter is a many-to-many relation (enrollments), so it's
-    // resolved to a set of person ids first, then applied as an `.in()` on
-    // the main query below — keeps every filter (status, cohort, search)
-    // and the pagination itself running in the database, not in the browser.
     let cohortPersonIds: string[] | null = null;
     if (cohortFilter !== 'all') {
       const { data, error: enrollError } = await supabase
@@ -67,12 +63,6 @@ export function usePeopleReport() {
       }
     }
 
-    // Sorting by pipeline stage isn't a plain column order Postgres can do
-    // for us via the query builder, so — this dataset being small (a single
-    // church's integration pipeline, not thousands of rows) — fetch every
-    // matching row, sort by pipeline here, then slice the page client-side.
-    // A DB-level range() before this sort would only reorder within each
-    // page instead of across the whole filtered list.
     let query = supabase
       .from('people')
       .select('id,name,status,whatsapp_opened_at,class_invite_sent_at,membership_interest_sent_at');

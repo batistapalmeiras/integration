@@ -47,11 +47,7 @@ export function ClassesPage() {
 
   const isAdmin = user?.role === UserRole.Admin;
   const isPastor = user?.role === UserRole.Pastor;
-  // Abrir, editar e encerrar turma é do Pastor e do Admin — o professor
-  // registra presença, mas não mexe no calendário da turma.
   const canManageCohort = isAdmin || isPastor;
-  // Só Pastor e Admin podem matricular pessoas na turma — o professor
-  // acompanha a turma, mas não decide quem entra nela.
   const canEnroll = isAdmin || isPastor;
 
   const openCreateModal = () => open(<CreateCohortModal close={close} onCreate={createCohort} minDate={minCohortDate} />);

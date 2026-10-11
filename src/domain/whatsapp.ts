@@ -29,12 +29,6 @@ export function classInviteMessage(name: string): string {
   ].join('\n');
 }
 
-// Same public link for everyone (no per-person token) — the form identifies
-// the person by phone and checks eligibility itself, so there's nothing to
-// generate here besides the message text.
-// Two wordings because the ficha can now be sent at any point in the
-// integração: congratulating someone on finishing the classes when they
-// still have two to go would read as a mistake on their side.
 export function membershipInterestMessage(name: string, completedClasses: boolean): string {
   const firstName = name.split(' ')[0];
   const formUrl = `${window.location.origin}${AppRoute.MembershipInterest}`;

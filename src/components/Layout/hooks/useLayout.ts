@@ -25,10 +25,6 @@ export function useLayout() {
     return currentTop === targetTop;
   };
 
-  // Stricter than isActive (which matches the whole /visitantes/* section,
-  // used for sidebar highlighting) — this only matches the tab's own list
-  // route exactly, so a drill-down page (e.g. /visitantes/:id, with its own
-  // back arrow) doesn't count as "on that tab" for bottom-bar visibility.
   const isExactTab = (path: string) => location.pathname === path;
 
   return {

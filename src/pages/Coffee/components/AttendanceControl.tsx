@@ -15,9 +15,6 @@ interface Props {
   onCanceledByPerson: () => void;
 }
 
-// Compact icon toggle instead of full labeled buttons — reads the same on
-// mobile, tablet and desktop instead of needing a wide column just for two
-// buttons side by side.
 export function AttendanceControl({ attended, person, canManage, onMarkAttended, onMarkNotAttended, onCanceledByPerson }: Props) {
   if (!canManage) {
     return (
@@ -27,9 +24,6 @@ export function AttendanceControl({ attended, person, canManage, onMarkAttended,
     );
   }
 
-  // Once attended, the person's own status (pending_signup) already says
-  // where they are — canceling from here doesn't apply anymore; that lives
-  // on the Visitor detail page (Recusou/Não respondeu) instead.
   if (attended) {
     return (
       <AttendanceRow>

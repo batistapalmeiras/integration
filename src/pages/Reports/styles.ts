@@ -18,8 +18,6 @@ export const FiltersRow = styled.div`
   }
 `;
 
-// Search input and Filtros button share one row — both pass size="sm" so
-// they line up at the same 36px height.
 export const SearchFiltersRow = styled.div`
   display: flex;
   align-items: flex-start;
@@ -31,9 +29,6 @@ export const SearchFiltersRow = styled.div`
   }
 `;
 
-// Fills the remaining viewport (header/bottom-bar/page-padding subtracted)
-// so a short, paginated list still gets its pagination pinned near the
-// bottom of the screen instead of floating right under a handful of rows.
 export const PageFlexWrap = styled.div`
   display: flex;
   flex-direction: column;
@@ -71,8 +66,6 @@ export const NamePrimary = styled.span`
   white-space: nowrap;
 `;
 
-// Mirrors Th/Td's $hideOnMobile breakpoint — when the Presenças column hides
-// on mobile, this subtitle line under Nome is what shows that count instead.
 export const NameSubtitle = styled.span`
   display: none;
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
