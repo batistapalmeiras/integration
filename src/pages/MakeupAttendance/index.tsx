@@ -1,5 +1,5 @@
 // React
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -19,7 +19,6 @@ export function MakeupAttendancePage() {
   const navigate = useNavigate();
   const { token = '' } = useParams<{ token: string }>();
   const [showForm, setShowForm] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
   const { context, loadError, loading, submit, submitting, submitError, confirmed } = useMakeupAttendance(token);
   const {
     control,
@@ -31,11 +30,6 @@ export function MakeupAttendancePage() {
   });
 
   const onSubmit = handleSubmit((values) => submit(values.notes));
-
-  const revealForm = () => {
-    setShowForm(true);
-    requestAnimationFrame(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-  };
 
   return (
     <PublicPage title="Reposição de aula">
@@ -73,24 +67,26 @@ export function MakeupAttendancePage() {
             confirme ao final.
           </Typography>
 
-          {getMakeupVideoId(context.lesson_number) && (
-            <VideoWrapper>
-              <iframe
-                src={`https://www.youtube.com/embed/${getMakeupVideoId(context.lesson_number)}`}
-                title={`Aula ${context.lesson_number}`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </VideoWrapper>
-          )}
-
           {!showForm && (
-            <Button type="button" variant="primary" size="lg" fullWidth onClick={revealForm}>
-              Próximo
-            </Button>
+            <>
+              {getMakeupVideoId(context.lesson_number) && (
+                <VideoWrapper>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getMakeupVideoId(context.lesson_number)}`}
+                    title={`Aula ${context.lesson_number}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </VideoWrapper>
+              )}
+
+              <Button type="button" variant="primary" size="lg" fullWidth onClick={() => setShowForm(true)}>
+                Próximo
+              </Button>
+            </>
           )}
 
-          <ConfirmBlock ref={formRef} hidden={!showForm}>
+          <ConfirmBlock hidden={!showForm}>
             <Controller
               control={control}
               name="declaration"
@@ -122,6 +118,17 @@ export function MakeupAttendancePage() {
                   Confirmar presença
                 </>
               )}
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="lg"
+              fullWidth
+              disabled={submitting}
+              onClick={() => setShowForm(false)}
+            >
+              Voltar
             </Button>
           </ConfirmBlock>
         </Form>

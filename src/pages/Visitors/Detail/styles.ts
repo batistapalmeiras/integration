@@ -113,3 +113,23 @@ export const Hint = styled.p`
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
   color: ${({ theme }) => theme.colors.muted};
 `;
+
+export const SensitiveBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xxs};
+  padding-top: ${({ theme }) => theme.spacing.sm};
+  border-top: 1px solid ${({ theme }) => theme.colors.hairlineSoft};
+
+  &:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+`;
+
+export const SensitiveValue = styled.span`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  color: ${({ theme }) => theme.colors.ink};
+  white-space: pre-wrap;
+`;

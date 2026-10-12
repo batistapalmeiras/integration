@@ -4,15 +4,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Select, Skeleton, text, useAuthCtx } from 'bp-kit';
+import { Button, Card, Empty, PageHeader, Select, Skeleton, text, Typography, useAuthCtx } from 'bp-kit';
 import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { formatDate } from '../../../domain/dates';
 import { CommunityGroup, listMinistries, listSmallGroups } from '../../../domain/communityGroups';
+import { PersonSensitive, getPersonSensitive } from '../../../domain/personSensitive';
 import { UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
-import { Actions, Content, DetailLabel, DetailRow, DetailsList, DetailValue, Form } from '../Detail/styles';
+import { Actions, CardHeader, Content, DetailLabel, DetailRow, DetailsList, DetailValue, Form, SensitiveBlock, SensitiveValue } from '../Detail/styles';
+import { sensitiveEntries } from './sensitive';
 
 const communitySchema = z.object({
   smallGroupId: z.string().min(1, text.validation.selectRequired('o Pequeno Grupo')),
@@ -38,6 +40,12 @@ export function VisitorInfoPage() {
   const [ministries, setMinistries] = useState<CommunityGroup[]>([]);
 
   const canConfirmMembership = user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
+  const canSeeSensitive = canConfirmMembership || user?.role === UserRole.Teacher;
+  const [sensitive, setSensitive] = useState<PersonSensitive | null>(null);
+
+  useEffect(() => {
+    if (canSeeSensitive && id) getPersonSensitive(id).then(setSensitive);
+  }, [canSeeSensitive, id]);
   const canEditCommunity = canConfirmMembership && person?.status === 'member';
 
   useEffect(() => {
@@ -81,6 +89,20 @@ export function VisitorInfoPage() {
             </DetailRow>
           ))}
         </DetailsList>
+      )}
+
+      {canSeeSensitive && sensitiveEntries(sensitive).length > 0 && (
+        <Card>
+          <CardHeader>
+            <Typography type="label">Dados da inscrição e da ficha</Typography>
+          </CardHeader>
+          {sensitiveEntries(sensitive).map((entry) => (
+            <SensitiveBlock key={entry.label}>
+              <DetailLabel>{entry.label}</DetailLabel>
+              <SensitiveValue>{entry.value}</SensitiveValue>
+            </SensitiveBlock>
+          ))}
+        </Card>
       )}
 
       {canEditCommunity && (
