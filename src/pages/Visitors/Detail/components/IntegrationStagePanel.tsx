@@ -1,6 +1,6 @@
 // Libs
 import { Send } from 'lucide-react';
-import { Card, Checkbox, IconButton, ModalTitle, Skeleton, Typography, useModal } from 'bp-kit';
+import { Card, Checkbox, LinkButton, ModalTitle, Skeleton, Typography, useModal } from 'bp-kit';
 // Local
 import { CountBadge } from '../../../Classes/styles';
 import { formatDate } from '../../../../domain/dates';
@@ -76,6 +76,7 @@ export function IntegrationStagePanel({
         <LessonList>
           {lessons.map((lesson) => {
             const attended = attendanceByLesson[lesson.id]?.attended ?? false;
+            const needsMakeup = !attended && canRecordAttendance && makeupUnlocked;
             return (
               <LessonRow key={lesson.id}>
                 <Checkbox
@@ -84,15 +85,11 @@ export function IntegrationStagePanel({
                   disabled={!canRecordAttendance}
                   onChange={(e) => onToggle(lesson.id, e.target.checked)}
                 />
-                {!attended && canRecordAttendance && makeupUnlocked && (
-                  <IconButton
-                    icon={<Send size={14} />}
-                    iconPosition="center"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => openMakeupMessage(lesson.id, lesson.number)}
-                    title="Enviar link de reposição"
-                  />
+                {needsMakeup && (
+                  <LinkButton type="button" onClick={() => openMakeupMessage(lesson.id, lesson.number)}>
+                    <Send size={14} />
+                    Link de reposição
+                  </LinkButton>
                 )}
               </LessonRow>
             );

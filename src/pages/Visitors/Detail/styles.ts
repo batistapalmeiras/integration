@@ -56,6 +56,7 @@ export const LessonList = styled.div`
 export const LessonRow = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.sm};
 `;
 
