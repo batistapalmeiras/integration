@@ -118,13 +118,7 @@ export const SensitiveBlock = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.xxs};
-  padding-top: ${({ theme }) => theme.spacing.sm};
-  border-top: 1px solid ${({ theme }) => theme.colors.hairlineSoft};
-
-  &:first-of-type {
-    border-top: none;
-    padding-top: 0;
-  }
+  margin-top: ${({ theme }) => theme.spacing.base};
 `;
 
 export const SensitiveValue = styled.span`

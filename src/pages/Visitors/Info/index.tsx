@@ -13,8 +13,21 @@ import { CommunityGroup, listMinistries, listSmallGroups } from '../../../domain
 import { PersonSensitive, getPersonSensitive } from '../../../domain/personSensitive';
 import { UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
-import { Actions, CardHeader, Content, DetailLabel, DetailRow, DetailsList, DetailValue, Form, SensitiveBlock, SensitiveValue } from '../Detail/styles';
-import { sensitiveEntries } from './sensitive';
+import {
+  Actions,
+  CardHeader,
+  Content,
+  DetailLabel,
+  DetailRow,
+  DetailsList,
+  DetailValue,
+  Form,
+  SectionDivider,
+  SectionStack,
+  SensitiveBlock,
+  SensitiveValue,
+} from '../Detail/styles';
+import { sensitiveSections } from './sensitive';
 
 const communitySchema = z.object({
   smallGroupId: z.string().min(1, text.validation.selectRequired('o Pequeno Grupo')),
@@ -67,6 +80,8 @@ export function VisitorInfoPage() {
   if (loading) return <Skeleton $h="240px" />;
   if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
 
+  const sections = sensitiveSections(sensitive);
+
   const rows = [
     profileCohortName && { label: 'Turma', value: profileCohortName },
     profileCoffeeDate && { label: 'Café', value: formatDate(profileCoffeeDate) },
@@ -91,17 +106,31 @@ export function VisitorInfoPage() {
         </DetailsList>
       )}
 
-      {canSeeSensitive && sensitiveEntries(sensitive).length > 0 && (
+      {canSeeSensitive && sections.length > 0 && (
         <Card>
-          <CardHeader>
-            <Typography type="label">Dados da inscrição e da ficha</Typography>
-          </CardHeader>
-          {sensitiveEntries(sensitive).map((entry) => (
-            <SensitiveBlock key={entry.label}>
-              <DetailLabel>{entry.label}</DetailLabel>
-              <SensitiveValue>{entry.value}</SensitiveValue>
-            </SensitiveBlock>
-          ))}
+          <SectionStack>
+            {sections.map((section, index) => {
+              const body = (
+                <>
+                  <CardHeader>
+                    <Typography type="label">{section.title}</Typography>
+                  </CardHeader>
+                  {section.entries.map((entry) => (
+                    <SensitiveBlock key={entry.label}>
+                      <DetailLabel>{entry.label}</DetailLabel>
+                      <SensitiveValue>{entry.value}</SensitiveValue>
+                    </SensitiveBlock>
+                  ))}
+                </>
+              );
+
+              return index === 0 ? (
+                <div key={section.title}>{body}</div>
+              ) : (
+                <SectionDivider key={section.title}>{body}</SectionDivider>
+              );
+            })}
+          </SectionStack>
         </Card>
       )}
 
