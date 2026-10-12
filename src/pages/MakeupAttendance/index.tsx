@@ -5,7 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Button, Checkbox, InfoBox, Skeleton, Textarea, Typography } from 'bp-kit';
-import { Check, PlayCircle } from 'lucide-react';
+import { Check } from 'lucide-react';
 // Local
 import { getMakeupVideoId } from '../../domain/makeupVideos';
 import { AppRoute } from '../../routes/paths';
@@ -69,8 +69,8 @@ export function MakeupAttendancePage() {
       {!loading && context && !confirmed && !context.already_confirmed && (
         <Form onSubmit={onSubmit}>
           <Typography type="p">
-            Olá, {context.person_name}! Assista abaixo à <strong>Aula {context.lesson_number}</strong> da{' '}
-            {context.cohort_name} e confirme ao final.
+            Olá, {context.person_name}! Assista abaixo à <strong>Aula {context.lesson_number}</strong> e
+            confirme ao final.
           </Typography>
 
           {getMakeupVideoId(context.lesson_number) && (
@@ -86,8 +86,7 @@ export function MakeupAttendancePage() {
 
           {!showForm && (
             <Button type="button" variant="primary" size="lg" fullWidth onClick={revealForm}>
-              <PlayCircle size={16} />
-              Já assisti, confirmar presença
+              Próximo
             </Button>
           )}
 

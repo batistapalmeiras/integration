@@ -22,4 +22,8 @@ export const ConfirmBlock = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.md};
+
+  &[hidden] {
+    display: none;
+  }
 `;
