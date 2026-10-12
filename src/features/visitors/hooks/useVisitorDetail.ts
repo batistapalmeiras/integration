@@ -1,7 +1,7 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
 // Libs
-import { useAuthCtx } from 'bp-kit';
+import { parsePhone, useAuthCtx } from 'bp-kit';
 // Local
 import {
   getCoffeeAttendanceForPerson,
@@ -160,7 +160,7 @@ export function useVisitorDetail(id: string) {
   const updatePerson = async (values: UpdatePersonInput) => {
     await updatePersonFields(id, {
       name: values.name.trim(),
-      phone: values.phone,
+      phone: parsePhone(values.phone),
       age: values.age ? Number(values.age) : null,
       email: values.email || null,
       updated_at: new Date().toISOString(),
