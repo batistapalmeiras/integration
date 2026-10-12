@@ -1,15 +1,17 @@
 // React
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
 import { getUpcomingCoffeeEventDate } from '../../../domain/cafeSchedule';
 import {
+  CohortBoard,
   CohortWithLessons,
   EnrollablePerson,
-  closeFinishedCohorts,
+  closeCohorts,
   enrollPerson as enrollPersonRow,
-  listOpenCohorts,
+  fetchCohortBoard,
+  finishedCohortIds,
 } from '../../../domain/classesRoster';
 import { enrollInIntegrationClass } from '../../../features/visitors';
 import { supabase } from '../../../lib/supabase';
@@ -42,6 +44,7 @@ export function useClasses() {
   const [page, setPage] = useState(1);
   const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const boardRef = useRef<CohortBoard | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
@@ -56,37 +59,29 @@ export function useClasses() {
     getUpcomingCoffeeEventDate().then(setMinCohortDate);
   }, []);
 
-  const loadRosterFor = useCallback(async (cohortId: string, lessons: Lesson[]) => {
-    const { data: enrollmentData, error: enrollmentError } = await supabase
-      .from('enrollments')
-      .select('id, person:people(id,name,status,membership_interest_sent_at)')
-      .eq('cohort_id', cohortId);
+  const applyBoard = useCallback((board: CohortBoard, keepSelectionId?: string) => {
+    boardRef.current = board;
+    const open = sortByFirstLesson(board.cohorts);
+    setCohorts(open);
 
-    if (enrollmentError) {
-      setError(enrollmentError.message);
+    if (open.length === 0) {
+      setSelectedCohortId(null);
+      setAllEnrollments([]);
       return;
     }
 
-    const lessonIds = lessons.map((l) => l.id);
-    const { data: attendanceData, error: attendanceError } = lessonIds.length
-      ? await supabase.from('lesson_attendance').select('*').in('lesson_id', lessonIds)
-      : { data: [], error: null };
+    const selected = open.find((c) => c.cohort.id === keepSelectionId) ?? open[0];
+    setSelectedCohortId(selected.cohort.id);
 
-    if (attendanceError) {
-      setError(attendanceError.message);
-      return;
-    }
-
-    const attendanceRows = (attendanceData ?? []) as LessonAttendance[];
-    const rows: EnrollmentRow[] = ((enrollmentData ?? []) as unknown as { id: string; person: EnrollmentRow['person'] }[])
-      .filter((enrollment) => enrollment.person.status !== 'archived')
+    const rows: EnrollmentRow[] = board.enrollments
+      .filter((e) => e.cohort_id === selected.cohort.id)
+      .filter((e) => e.person.status !== 'archived')
       .map((enrollment) => {
-        const own = attendanceRows.filter((a) => a.enrollment_id === enrollment.id);
-        const attendanceByLesson = Object.fromEntries(own.map((a) => [a.lesson_id, a]));
+        const own = board.attendance.filter((a) => a.enrollment_id === enrollment.id);
         return {
           id: enrollment.id,
-          person: enrollment.person,
-          attendanceByLesson,
+          person: enrollment.person as EnrollmentRow['person'],
+          attendanceByLesson: Object.fromEntries(own.map((a) => [a.lesson_id, a as LessonAttendance])),
           attendedCount: own.filter((a) => a.attended).length,
         };
       });
@@ -101,37 +96,30 @@ export function useClasses() {
       setLoading(true);
       setError(null);
 
-      if (canManage) {
-        try {
-          await closeFinishedCohorts();
-        } catch (sweepError) {
-          setError((sweepError as Error).message);
-        }
-      }
-
-      let open: CohortWithLessons[];
       try {
-        open = sortByFirstLesson(await listOpenCohorts());
+        const board = await fetchCohortBoard();
+
+        if (canManage) {
+          const finished = finishedCohortIds(board, new Date().toISOString().slice(0, 10));
+          if (finished.length > 0) {
+            await closeCohorts(finished);
+            applyBoard(
+              { ...board, cohorts: board.cohorts.filter((c) => !finished.includes(c.cohort.id)) },
+              keepSelectionId,
+            );
+            setLoading(false);
+            return;
+          }
+        }
+
+        applyBoard(board, keepSelectionId);
       } catch (loadError) {
         setError((loadError as Error).message);
-        setLoading(false);
-        return;
       }
 
-      setCohorts(open);
-      if (open.length === 0) {
-        setSelectedCohortId(null);
-        setAllEnrollments([]);
-        setLoading(false);
-        return;
-      }
-
-      const selected = open.find((c) => c.cohort.id === keepSelectionId) ?? open[0];
-      setSelectedCohortId(selected.cohort.id);
-      await loadRosterFor(selected.cohort.id, selected.lessons);
       setLoading(false);
     },
-    [canManage, loadRosterFor],
+    [applyBoard, canManage],
   );
 
   useEffect(() => {
@@ -144,12 +132,8 @@ export function useClasses() {
   const lessons = (selected?.lessons as Lesson[] | undefined) ?? [];
 
   const selectCohort = async (cohortId: string) => {
-    const target = cohorts.find((c) => c.cohort.id === cohortId);
-    if (!target) return;
-    setLoading(true);
-    setSelectedCohortId(cohortId);
-    await loadRosterFor(target.cohort.id, target.lessons);
-    setLoading(false);
+    if (boardRef.current) applyBoard(boardRef.current, cohortId);
+    else await load(cohortId);
   };
 
   const createCohort = async (firstDate: string) => {

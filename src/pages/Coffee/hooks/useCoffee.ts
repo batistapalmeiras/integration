@@ -1,20 +1,25 @@
 // React
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
 import {
+  CoffeeBoard,
   EnrollableCoffeePerson,
-  countQueuedByCoffeeEvent,
+  attachPeopleToCoffee,
+  countQueuedFrom,
   enrollInCoffee,
+  fetchCoffeeBoard,
   insertCoffeeEvent,
   markCoffeeAttended,
   markCoffeeCanceled,
   markCoffeeNotAttended,
   selectOpenCoffeeEvents,
+  selectOrphanPeople,
   updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
-import { archiveMissedSignups } from '../../../domain/signupDeadline';
+import { listAllCohorts } from '../../../domain/classesRoster';
+import { archivePeople, missedSignupIds } from '../../../domain/signupDeadline';
 import { supabase } from '../../../lib/supabase';
 import { UserRole } from '../../../types/enums';
 import { comparePeopleByPipeline } from '../../../types/person';
@@ -24,10 +29,6 @@ import { AttendeeRow, CoffeeEvent } from '../types';
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 const MAX_EVENTS = 2;
-
-function resolveDefaultId(list: CoffeeEvent[]): string | null {
-  return list[0]?.id ?? null;
-}
 
 export function useCoffee() {
   const { user } = useAuthCtx();
@@ -41,6 +42,7 @@ export function useCoffee() {
   const [page, setPage] = useState(1);
   const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const boardRef = useRef<CoffeeBoard | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
@@ -51,112 +53,70 @@ export function useCoffee() {
     saveFilters({ search });
   }, [search]);
 
-  const fetchEvents = useCallback(async (): Promise<CoffeeEvent[] | null> => {
-    const { data, error: eventsError } = await supabase
-      .from('coffee_events')
-      .select('*')
-      .order('event_date', { ascending: true });
-    if (eventsError) {
-      setError(eventsError.message);
-      return null;
-    }
+  const applyBoard = useCallback(
+    (board: CoffeeBoard, keepSelectionId?: string) => {
+      boardRef.current = board;
+      const open = selectOpenCoffeeEvents(
+        board.events as CoffeeEvent[],
+        countQueuedFrom(board.attendance),
+        new Date().toISOString().slice(0, 10),
+      );
+      setEvents(open);
 
-    const all = (data ?? []) as CoffeeEvent[];
-    const queued = await countQueuedByCoffeeEvent();
-    const open = selectOpenCoffeeEvents(all, queued, new Date().toISOString().slice(0, 10));
-    setEvents(open);
-    return open;
-  }, []);
+      if (open.length === 0) {
+        setSelectedEventId(null);
+        setAllAttendees([]);
+        return null;
+      }
 
-  const healOrphans = useCallback(async (list: CoffeeEvent[]) => {
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const upcomingId = list.find((e) => e.event_date >= todayKey)?.id;
-    if (!upcomingId) return;
-
-    const { data: welcomePeople, error: peopleError } = await supabase
-      .from('people')
-      .select('id')
-      .eq('status', 'welcome_coffee');
-    if (peopleError) {
-      setError(peopleError.message);
-      return;
-    }
-
-    const { data: everAttended, error: everAttendedError } = await supabase.from('coffee_attendance').select('person_id');
-    if (everAttendedError) {
-      setError(everAttendedError.message);
-      return;
-    }
-
-    const everAttachedIds = new Set((everAttended ?? []).map((a) => a.person_id as string));
-    const missing = (welcomePeople ?? []).filter((p) => !everAttachedIds.has(p.id));
-    if (missing.length > 0) {
-      await supabase
-        .from('coffee_attendance')
-        .insert(missing.map((p) => ({ person_id: p.id, coffee_event_id: upcomingId })));
-    }
-  }, []);
-
-  const loadAttendeesFor = useCallback(async (eventId: string) => {
-    const { data: attendanceData, error: attendanceError } = await supabase
-      .from('coffee_attendance')
-      .select('*, person:people(id,name,phone,status,class_invite_sent_at)')
-      .eq('coffee_event_id', eventId);
-
-    if (attendanceError) {
-      setError(attendanceError.message);
-      return;
-    }
-
-    const rows = (attendanceData ?? []) as unknown as AttendeeRow[];
-    setAllAttendees(
-      rows
-        .filter((a) => a.person.status === 'welcome_coffee' || a.person.status === 'pending_signup')
-        .sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
-    );
-    setPage(1);
-  }, []);
-
-  const selectEvent = useCallback(
-    async (eventId: string) => {
-      setLoading(true);
-      setSelectedEventId(eventId);
-      await loadAttendeesFor(eventId);
-      setLoading(false);
+      const selected = open.find((e) => e.id === keepSelectionId) ?? open[0];
+      setSelectedEventId(selected.id);
+      setAllAttendees(
+        board.attendance
+          .filter((a) => a.coffee_event_id === selected.id)
+          .filter((a) => a.person?.status === 'welcome_coffee' || a.person?.status === 'pending_signup')
+          .map((a) => a as unknown as AttendeeRow)
+          .sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
+      );
+      setPage(1);
+      return selected.id;
     },
-    [loadAttendeesFor],
+    [],
   );
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const load = useCallback(
+    async (keepSelectionId?: string) => {
+      setLoading(true);
+      setError(null);
 
-    if (canSweep) {
       try {
-        await archiveMissedSignups(user?.id);
-      } catch (sweepError) {
-        setError((sweepError as Error).message);
+        const [board, cohorts] = await Promise.all([fetchCoffeeBoard(), listAllCohorts()]);
+
+        let healed = false;
+        if (canSweep) {
+          const archived = await archivePeople(missedSignupIds(board.people, board.attendance, cohorts), user?.id);
+
+          const todayKey = new Date().toISOString().slice(0, 10);
+          const upcomingId = board.events.find((e) => e.event_date >= todayKey)?.id;
+          const orphans = upcomingId ? selectOrphanPeople(board.people, board.attendance) : [];
+          if (orphans.length > 0 && upcomingId) await attachPeopleToCoffee(orphans, upcomingId);
+
+          healed = archived > 0 || orphans.length > 0;
+        }
+
+        if (healed) {
+          applyBoard(await fetchCoffeeBoard(), keepSelectionId);
+        } else {
+          applyBoard(board, keepSelectionId);
+        }
+      } catch (loadError) {
+        setError((loadError as Error).message);
       }
-    }
 
-    const list = await fetchEvents();
-    if (!list) {
       setLoading(false);
-      return;
-    }
-    if (list.length === 0) {
-      setSelectedEventId(null);
-      setAllAttendees([]);
-      setLoading(false);
-      return;
-    }
-
-    await healOrphans(list);
-    const eventId = resolveDefaultId(list)!;
-    setSelectedEventId(eventId);
-    await loadAttendeesFor(eventId);
-    setLoading(false);
-  }, [canSweep, fetchEvents, healOrphans, loadAttendeesFor, user?.id]);
+    },
+    [applyBoard, canSweep, user?.id],
+  );
 
   useEffect(() => {
     load();
@@ -167,15 +127,13 @@ export function useCoffee() {
       throw new Error(`Só é possível ter ${MAX_EVENTS} cafés ao mesmo tempo — encerre um antes de criar outro.`);
     }
     const newId = await insertCoffeeEvent(eventDate);
-    await fetchEvents();
-    await selectEvent(newId);
+    await load(newId);
   };
 
   const updateEvent = async (eventDate: string) => {
     if (!selectedEventId) return;
     await updateCoffeeEventDate(selectedEventId, eventDate);
-    await fetchEvents();
-    await loadAttendeesFor(selectedEventId);
+    await load(selectedEventId);
   };
 
   const deleteSelectedEvent = async () => {
@@ -188,7 +146,7 @@ export function useCoffee() {
   const enrollPerson = async (person: EnrollableCoffeePerson) => {
     if (!selectedEventId) return;
     await enrollInCoffee(person.id, selectedEventId);
-    await loadAttendeesFor(selectedEventId);
+    await load(selectedEventId);
   };
 
   const markAttended = async (attendanceId: string, personId: string) => {
@@ -230,7 +188,7 @@ export function useCoffee() {
     canCreateEvent: events.length < MAX_EVENTS,
     event,
     selectedEventId,
-    selectEvent,
+    selectEvent: (eventId: string) => (boardRef.current ? applyBoard(boardRef.current, eventId) : load(eventId)),
     attendees,
     totalCount: filtered.length,
     loading,

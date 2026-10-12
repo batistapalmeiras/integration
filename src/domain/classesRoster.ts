@@ -197,3 +197,73 @@ export async function closeFinishedCohorts(): Promise<number> {
   if (closeError) throw closeError;
   return (closed ?? []).length;
 }
+
+export interface CohortBoardEnrollment {
+  id: string;
+  cohort_id: string;
+  person: { id: string; name: string; status: string; membership_interest_sent_at: string | null };
+}
+
+export interface CohortBoardAttendance {
+  id: string;
+  enrollment_id: string;
+  lesson_id: string;
+  attended: boolean;
+}
+
+export interface CohortBoard {
+  cohorts: CohortWithLessons[];
+  enrollments: CohortBoardEnrollment[];
+  attendance: CohortBoardAttendance[];
+}
+
+export async function fetchCohortBoard(): Promise<CohortBoard> {
+  const cohorts = await listOpenCohorts();
+  const cohortIds = cohorts.map((c) => c.cohort.id);
+  const lessonIds = cohorts.flatMap((c) => c.lessons.map((l) => l.id));
+
+  if (cohortIds.length === 0) return { cohorts, enrollments: [], attendance: [] };
+
+  const [enrollments, attendance] = await Promise.all([
+    supabase
+      .from('enrollments')
+      .select('id, cohort_id, person:people(id,name,status,membership_interest_sent_at)')
+      .in('cohort_id', cohortIds),
+    lessonIds.length
+      ? supabase.from('lesson_attendance').select('id, enrollment_id, lesson_id, attended').in('lesson_id', lessonIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  const failure = enrollments.error ?? attendance.error;
+  if (failure) throw failure;
+
+  return {
+    cohorts,
+    enrollments: (enrollments.data ?? []) as unknown as CohortBoardEnrollment[],
+    attendance: (attendance.data ?? []) as unknown as CohortBoardAttendance[],
+  };
+}
+
+export function finishedCohortIds(board: CohortBoard, todayKey: string): string[] {
+  return board.cohorts
+    .filter((c) => {
+      const stillGoing = board.enrollments.filter(
+        (e) => e.cohort_id === c.cohort.id && e.person?.status === 'integration',
+      ).length;
+      return isCohortFinished(c.lessons, stillGoing, todayKey);
+    })
+    .map((c) => c.cohort.id);
+}
+
+export async function closeCohorts(cohortIds: string[]): Promise<number> {
+  if (cohortIds.length === 0) return 0;
+
+  const { data, error } = await supabase
+    .from('cohorts')
+    .update({ status: 'closed' })
+    .in('id', cohortIds)
+    .eq('status', 'active')
+    .select('id');
+  if (error) throw error;
+  return (data ?? []).length;
+}

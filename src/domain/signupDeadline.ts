@@ -1,49 +1,34 @@
 // Local
-import { listAllCohorts } from './classesRoster';
+import { CoffeeBoardAttendance, CoffeeBoardPerson, latestAttendedCoffeeByPerson } from './cafeSchedule';
+import { CohortWithLessons } from './classesRoster';
 import { selectMissedSignups } from './cohortSchedule';
 import { supabase } from '../lib/supabase';
 
-export async function archiveMissedSignups(actorId?: string): Promise<number> {
-  const { data: pending, error: pendingError } = await supabase
-    .from('people')
-    .select('id')
-    .eq('status', 'pending_signup');
-  if (pendingError) throw pendingError;
+export function missedSignupIds(
+  people: CoffeeBoardPerson[],
+  attendance: CoffeeBoardAttendance[],
+  cohorts: CohortWithLessons[],
+): string[] {
+  const pending = people.filter((p) => p.status === 'pending_signup');
+  if (pending.length === 0) return [];
 
-  const pendingIds = (pending ?? []).map((p) => p.id as string);
-  if (pendingIds.length === 0) return 0;
-
-  const { data: attendance, error: attendanceError } = await supabase
-    .from('coffee_attendance')
-    .select('person_id, attended, coffee_event:coffee_events(event_date)')
-    .in('person_id', pendingIds);
-  if (attendanceError) throw attendanceError;
-
-  const rows = (attendance ?? []) as unknown as {
-    person_id: string;
-    attended: boolean;
-    coffee_event: { event_date: string };
-  }[];
-  const latestCoffee = new Map<string, string>();
-  for (const row of rows) {
-    if (!row.attended) continue;
-    const current = latestCoffee.get(row.person_id);
-    if (!current || row.coffee_event.event_date > current) latestCoffee.set(row.person_id, row.coffee_event.event_date);
-  }
-
-  const missed = selectMissedSignups(
-    pendingIds.map((id) => ({ personId: id, coffeeDate: latestCoffee.get(id) ?? null })),
-    await listAllCohorts(),
+  const latestCoffee = latestAttendedCoffeeByPerson(attendance);
+  return selectMissedSignups(
+    pending.map((p) => ({ personId: p.id, coffeeDate: latestCoffee.get(p.id) ?? null })),
+    cohorts,
   );
-  if (missed.length === 0) return 0;
+}
 
-  const { data: archived, error: archiveError } = await supabase
+export async function archivePeople(personIds: string[], actorId?: string): Promise<number> {
+  if (personIds.length === 0) return 0;
+
+  const { data: archived, error } = await supabase
     .from('people')
     .update({ status: 'archived', updated_at: new Date().toISOString() })
-    .in('id', missed)
+    .in('id', personIds)
     .eq('status', 'pending_signup')
     .select('id');
-  if (archiveError) throw archiveError;
+  if (error) throw error;
 
   const archivedIds = (archived ?? []).map((p) => p.id as string);
   if (archivedIds.length === 0) return 0;
