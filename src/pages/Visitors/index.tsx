@@ -5,6 +5,7 @@ import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, use
 import { SlidersHorizontal } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
+import { ActionButton } from '../../components/ActionButton';
 import { StatusPill } from '../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
@@ -37,7 +38,7 @@ export function VisitorsPage() {
     <div>
       <PageHeader
         title="Visitantes"
-        action={<Button onClick={() => navigate(AppRoute.NewVisitor)}>Novo visitante</Button>}
+        action={<ActionButton onClick={() => navigate(AppRoute.NewVisitor)}>Novo visitante</ActionButton>}
       />
 
       {!loading && !error && <PeopleCount count={totalCount} />}

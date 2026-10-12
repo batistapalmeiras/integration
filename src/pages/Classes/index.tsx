@@ -1,10 +1,11 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Pagination, RawSelect, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Empty, PageHeader, Pagination, RawSelect, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 import { Pencil, UserPlus } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
+import { ActionButton } from '../../components/ActionButton';
 import { StatusPill } from '../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
@@ -63,13 +64,13 @@ export function ClassesPage() {
         subtitle={cohort ? cohort.name : 'Nenhuma turma ativa'}
         action={
           canManageCohort ? (
-            <Button
+            <ActionButton
               onClick={openCreateModal}
               disabled={!canCreateCohort}
               title={canCreateCohort ? undefined : 'Encerre uma turma antes de abrir outra — só é possível ter 2 ao mesmo tempo.'}
             >
               Nova turma
-            </Button>
+            </ActionButton>
           ) : undefined
         }
       />
@@ -91,10 +92,10 @@ export function ClassesPage() {
             </RawSelect>
           )}
           {canManageCohort && (
-            <Button variant="secondary" size="sm" onClick={openEditModal}>
+            <ActionButton variant="secondary" size="sm" onClick={openEditModal}>
               <Pencil size={16} />
               Editar aulas
-            </Button>
+            </ActionButton>
           )}
         </SelectorRow>
       )}
@@ -103,10 +104,10 @@ export function ClassesPage() {
         <CountRow>
           <PeopleCount count={totalCount} />
           {canEnroll && (
-            <Button variant="secondary" size="sm" onClick={openEnrollModal}>
+            <ActionButton variant="secondary" size="sm" onClick={openEnrollModal}>
               <UserPlus size={16} />
               Adicionar
-            </Button>
+            </ActionButton>
           )}
         </CountRow>
       )}

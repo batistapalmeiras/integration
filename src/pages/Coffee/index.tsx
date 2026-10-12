@@ -19,6 +19,7 @@ import {
 import { Pencil, UserPlus, XCircle } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
+import { ActionButton } from '../../components/ActionButton';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
@@ -98,13 +99,13 @@ export function CoffeePage() {
         subtitle={event ? `${formatDate(event.event_date)} às ${event.event_time.slice(0, 5)}` : 'Nenhum café agendado'}
         action={
           canPlan ? (
-            <Button
+            <ActionButton
               onClick={openCreateModal}
               disabled={!canCreateEvent}
               title={canCreateEvent ? undefined : 'Encerre um café antes de criar outro — só é possível ter 2 ao mesmo tempo.'}
             >
               Novo café
-            </Button>
+            </ActionButton>
           ) : undefined
         }
       />
@@ -137,10 +138,10 @@ export function CoffeePage() {
             </RawSelect>
           )}
           {canPlan && (
-            <Button variant="secondary" size="sm" onClick={openEditModal}>
+            <ActionButton variant="secondary" size="sm" onClick={openEditModal}>
               <Pencil size={16} />
               Editar café
-            </Button>
+            </ActionButton>
           )}
         </SelectorRow>
       )}
@@ -149,10 +150,10 @@ export function CoffeePage() {
         <CountRow>
           <PeopleCount count={totalCount} />
           {canPlan && (
-            <Button variant="secondary" size="sm" onClick={openEnrollModal}>
+            <ActionButton variant="secondary" size="sm" onClick={openEnrollModal}>
               <UserPlus size={16} />
               Adicionar
-            </Button>
+            </ActionButton>
           )}
         </CountRow>
       )}
