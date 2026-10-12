@@ -99,13 +99,13 @@ export function CoffeePage() {
         subtitle={event ? `${formatDate(event.event_date)} às ${event.event_time.slice(0, 5)}` : 'Nenhum café agendado'}
         action={
           canPlan ? (
-            <ActionButton
+            <Button
               onClick={openCreateModal}
               disabled={!canCreateEvent}
               title={canCreateEvent ? undefined : 'Encerre um café antes de criar outro — só é possível ter 2 ao mesmo tempo.'}
             >
               Novo café
-            </ActionButton>
+            </Button>
           ) : undefined
         }
       />

@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Empty, PageHeader, Pagination, RawSelect, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, PageHeader, Pagination, RawSelect, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 import { Pencil, UserPlus } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
@@ -64,13 +64,13 @@ export function ClassesPage() {
         subtitle={cohort ? cohort.name : 'Nenhuma turma ativa'}
         action={
           canManageCohort ? (
-            <ActionButton
+            <Button
               onClick={openCreateModal}
               disabled={!canCreateCohort}
               title={canCreateCohort ? undefined : 'Encerre uma turma antes de abrir outra — só é possível ter 2 ao mesmo tempo.'}
             >
               Nova turma
-            </ActionButton>
+            </Button>
           ) : undefined
         }
       />
