@@ -2,6 +2,7 @@
 import { useState } from 'react';
 // Libs
 import { Button, Card, RawTextarea } from 'bp-kit';
+import { Send } from 'lucide-react';
 // Local
 import { buildWhatsAppLink } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
@@ -30,6 +31,7 @@ export function WhatsAppMessageBox({ person, defaultMessage, buttonLabel = 'Abri
       <RawTextarea label="Mensagem" value={message} onChange={(e) => setMessage(e.target.value)} rows={rows} disabled={disabled} />
       <Actions>
         <Button type="button" variant="primary" onClick={openWhatsApp} disabled={disabled}>
+          <Send size={16} />
           {buttonLabel}
         </Button>
       </Actions>

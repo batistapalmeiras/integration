@@ -56,8 +56,13 @@ export const LessonList = styled.div`
 export const LessonRow = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.sm};
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+  white-space: nowrap;
+`;
+
+export const LessonMakeupAction = styled.span`
+  margin-left: auto;
 `;
 
 export const SectionStack = styled.div`

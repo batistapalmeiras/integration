@@ -6,7 +6,7 @@ import { CountBadge } from '../../../Classes/styles';
 import { formatDate } from '../../../../domain/dates';
 import { makeupLessonMessage, membershipInterestMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
-import { CardHeader, LessonList, LessonRow, StagePanel } from '../styles';
+import { CardHeader, LessonList, LessonMakeupAction, LessonRow, StagePanel } from '../styles';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
 interface IntegrationClassState {
@@ -55,7 +55,7 @@ export function IntegrationStagePanel({
           person={person}
           defaultMessage={makeupLessonMessage(person.name, lessonNumber, link)}
           buttonLabel="Enviar pelo WhatsApp"
-          rows={12}
+          rows={16}
           bare
           onOpen={close}
         />
@@ -86,10 +86,12 @@ export function IntegrationStagePanel({
                   onChange={(e) => onToggle(lesson.id, e.target.checked)}
                 />
                 {needsMakeup && (
-                  <LinkButton type="button" onClick={() => openMakeupMessage(lesson.id, lesson.number)}>
-                    <Send size={14} />
-                    Link de reposição
-                  </LinkButton>
+                  <LessonMakeupAction>
+                    <LinkButton type="button" onClick={() => openMakeupMessage(lesson.id, lesson.number)}>
+                      <Send size={14} />
+                      Link de reposição
+                    </LinkButton>
+                  </LessonMakeupAction>
                 )}
               </LessonRow>
             );

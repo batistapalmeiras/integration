@@ -1,20 +1,25 @@
 // React
+import { useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Button, Checkbox, InfoBox, Skeleton, Textarea, Typography } from 'bp-kit';
-import { Check } from 'lucide-react';
+import { Check, PlayCircle } from 'lucide-react';
 // Local
 import { getMakeupVideoId } from '../../domain/makeupVideos';
+import { AppRoute } from '../../routes/paths';
 import { ErrorMsg, Form } from '../../components/PublicPage/styles';
 import { PublicPage } from '../../components/PublicPage';
 import { useMakeupAttendance } from './hooks/useMakeupAttendance';
-import { VideoWrapper } from './styles';
+import { ConfirmBlock, VideoWrapper } from './styles';
 import { makeupAttendanceSchema, MakeupAttendanceFormValues } from './validators/schema';
 
 export function MakeupAttendancePage() {
+  const navigate = useNavigate();
   const { token = '' } = useParams<{ token: string }>();
+  const [showForm, setShowForm] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
   const { context, loadError, loading, submit, submitting, submitError, confirmed } = useMakeupAttendance(token);
   const {
     control,
@@ -27,6 +32,11 @@ export function MakeupAttendancePage() {
 
   const onSubmit = handleSubmit((values) => submit(values.notes));
 
+  const revealForm = () => {
+    setShowForm(true);
+    requestAnimationFrame(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  };
+
   return (
     <PublicPage title="Reposição de aula">
       {loading && <Skeleton $h="120px" />}
@@ -34,9 +44,26 @@ export function MakeupAttendancePage() {
       {!loading && loadError && <ErrorMsg>{loadError}</ErrorMsg>}
 
       {!loading && context && (confirmed || context.already_confirmed) && (
-        <InfoBox variant="info">
-          Presença confirmada na Aula {context.lesson_number} — {context.cohort_name}. Obrigado por assistir!
-        </InfoBox>
+        <>
+          <InfoBox variant="info">
+            Presença confirmada na Aula {context.lesson_number} — {context.cohort_name}. Obrigado por assistir!
+          </InfoBox>
+
+          <Typography type="p">
+            Se você tem interesse em se tornar membro da nossa igreja, já pode preencher a Ficha de Interesse de
+            Membresia.
+          </Typography>
+
+          <Button
+            type="button"
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={() => navigate(AppRoute.MembershipInterest)}
+          >
+            Preencher Ficha de Interesse
+          </Button>
+        </>
       )}
 
       {!loading && context && !confirmed && !context.already_confirmed && (
@@ -57,38 +84,47 @@ export function MakeupAttendancePage() {
             </VideoWrapper>
           )}
 
-          <Controller
-            control={control}
-            name="declaration"
-            render={({ field }) => (
-              <Checkbox
-                label={`Declaro que assisti a Aula ${context.lesson_number} até o final.`}
-                checked={field.value ?? false}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-            )}
-          />
-          {errors.declaration && <ErrorMsg>{errors.declaration.message}</ErrorMsg>}
+          {!showForm && (
+            <Button type="button" variant="primary" size="lg" fullWidth onClick={revealForm}>
+              <PlayCircle size={16} />
+              Já assisti, confirmar presença
+            </Button>
+          )}
 
-          <Textarea
-            label="Teve alguma dúvida ou algo te chamou a atenção? (opcional)"
-            control={control}
-            name="notes"
-            rows={4}
-          />
+          <ConfirmBlock ref={formRef} hidden={!showForm}>
+            <Controller
+              control={control}
+              name="declaration"
+              render={({ field }) => (
+                <Checkbox
+                  label={`Declaro que assisti a Aula ${context.lesson_number} até o final.`}
+                  checked={field.value ?? false}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                />
+              )}
+            />
+            {errors.declaration && <ErrorMsg>{errors.declaration.message}</ErrorMsg>}
 
-          {submitError && <ErrorMsg>{submitError}</ErrorMsg>}
+            <Textarea
+              label="Teve alguma dúvida ou algo te chamou a atenção? (opcional)"
+              control={control}
+              name="notes"
+              rows={4}
+            />
 
-          <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
-            {submitting ? (
-              'Enviando...'
-            ) : (
-              <>
-                <Check size={16} />
-                Confirmar presença
-              </>
-            )}
-          </Button>
+            {submitError && <ErrorMsg>{submitError}</ErrorMsg>}
+
+            <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
+              {submitting ? (
+                'Enviando...'
+              ) : (
+                <>
+                  <Check size={16} />
+                  Confirmar presença
+                </>
+              )}
+            </Button>
+          </ConfirmBlock>
         </Form>
       )}
     </PublicPage>
