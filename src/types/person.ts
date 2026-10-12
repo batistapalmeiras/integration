@@ -23,6 +23,8 @@ export interface Person {
   whatsapp_opened_at: string | null;
   class_invite_sent_at: string | null;
   membership_interest_sent_at: string | null;
+  entry_type: string | null;
+  statute_agreed_at: string | null;
   coffee_retry_used: boolean;
   small_group_id: string | null;
   ministry_id: string | null;

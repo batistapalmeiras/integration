@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 // Libs
-import { Button, Card, Empty, PageHeader, Select, Skeleton, text, Typography, useAuthCtx } from 'bp-kit';
+import { Button, Empty, PageHeader, Select, Skeleton, Tab, TabBar, text, useAuthCtx } from 'bp-kit';
 import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
@@ -15,19 +15,18 @@ import { UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
 import {
   Actions,
-  CardHeader,
   Content,
   DetailLabel,
   DetailRow,
   DetailsList,
   DetailValue,
   Form,
-  SectionDivider,
-  SectionStack,
   SensitiveBlock,
   SensitiveValue,
 } from '../Detail/styles';
-import { sensitiveSections } from './sensitive';
+import { InfoEntry, integrationEntries, membershipEntries } from './sensitive';
+
+type InfoTab = 'geral' | 'integracao' | 'membresia';
 
 const communitySchema = z.object({
   smallGroupId: z.string().min(1, text.validation.selectRequired('o Pequeno Grupo')),
@@ -49,6 +48,7 @@ export function VisitorInfoPage() {
     updateCommunity,
   } = useVisitorDetail(id ?? '');
 
+  const [tab, setTab] = useState<InfoTab>('geral');
   const [smallGroups, setSmallGroups] = useState<CommunityGroup[]>([]);
   const [ministries, setMinistries] = useState<CommunityGroup[]>([]);
 
@@ -80,7 +80,19 @@ export function VisitorInfoPage() {
   if (loading) return <Skeleton $h="240px" />;
   if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
 
-  const sections = sensitiveSections(sensitive);
+  const reachedIntegration = ['integration', 'membership_pending', 'member'].includes(person.status);
+  const reachedMembership = ['membership_pending', 'member'].includes(person.status);
+
+  const tabs: { key: InfoTab; label: string }[] = [
+    { key: 'geral', label: 'Geral' },
+    ...(canSeeSensitive && reachedIntegration ? [{ key: 'integracao' as InfoTab, label: 'Integração' }] : []),
+    ...(canSeeSensitive && reachedMembership ? [{ key: 'membresia' as InfoTab, label: 'Membresia' }] : []),
+  ];
+
+  const current = tabs.some((t) => t.key === tab) ? tab : 'geral';
+
+  const entriesFor = (key: InfoTab): InfoEntry[] =>
+    key === 'integracao' ? integrationEntries(sensitive) : key === 'membresia' ? membershipEntries(person, sensitive) : [];
 
   const rows = [
     profileCohortName && { label: 'Turma', value: profileCohortName },
@@ -95,7 +107,17 @@ export function VisitorInfoPage() {
     <Content>
       <PageHeader title="Detalhes" subtitle={person.name} back />
 
-      {rows.length > 0 && (
+      {tabs.length > 1 && (
+        <TabBar>
+          {tabs.map((item) => (
+            <Tab key={item.key} $active={current === item.key} onClick={() => setTab(item.key)}>
+              {item.label}
+            </Tab>
+          ))}
+        </TabBar>
+      )}
+
+      {current === 'geral' && rows.length > 0 && (
         <DetailsList>
           {rows.map((row) => (
             <DetailRow key={row.label}>
@@ -106,35 +128,18 @@ export function VisitorInfoPage() {
         </DetailsList>
       )}
 
-      {canSeeSensitive && sections.length > 0 && (
-        <Card>
-          <SectionStack>
-            {sections.map((section, index) => {
-              const body = (
-                <>
-                  <CardHeader>
-                    <Typography type="label">{section.title}</Typography>
-                  </CardHeader>
-                  {section.entries.map((entry) => (
-                    <SensitiveBlock key={entry.label}>
-                      <DetailLabel>{entry.label}</DetailLabel>
-                      <SensitiveValue>{entry.value}</SensitiveValue>
-                    </SensitiveBlock>
-                  ))}
-                </>
-              );
-
-              return index === 0 ? (
-                <div key={section.title}>{body}</div>
-              ) : (
-                <SectionDivider key={section.title}>{body}</SectionDivider>
-              );
-            })}
-          </SectionStack>
-        </Card>
+      {current !== 'geral' && (
+        <DetailsList>
+          {entriesFor(current).map((item) => (
+            <SensitiveBlock key={item.label}>
+              <DetailLabel>{item.label}</DetailLabel>
+              <SensitiveValue>{item.value}</SensitiveValue>
+            </SensitiveBlock>
+          ))}
+        </DetailsList>
       )}
 
-      {canEditCommunity && (
+      {current === 'geral' && canEditCommunity && (
         <Form onSubmit={submit}>
           <Select label="Pequeno Grupo" control={control} name="smallGroupId">
             <option value="">Selecione…</option>
