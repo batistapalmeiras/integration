@@ -110,7 +110,7 @@ export function VisitorDetailPage() {
           loading={integrationLoading}
           canRecordAttendance={canRecordAttendance}
           onToggle={toggleClassAttendance}
-          onCopyMakeupLink={getClassMakeupLink}
+          onGetMakeupLink={getClassMakeupLink}
           onMembershipInterestSent={markMembershipInterestSent}
         />
       )}

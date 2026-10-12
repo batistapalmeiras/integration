@@ -1,10 +1,10 @@
 // Libs
-import { Link } from 'lucide-react';
-import { Card, Checkbox, IconButton, Skeleton, Typography, useToast } from 'bp-kit';
+import { Send } from 'lucide-react';
+import { Card, Checkbox, IconButton, ModalTitle, Skeleton, Typography, useModal } from 'bp-kit';
 // Local
 import { CountBadge } from '../../../Classes/styles';
 import { formatDate } from '../../../../domain/dates';
-import { membershipInterestMessage } from '../../../../domain/whatsapp';
+import { makeupLessonMessage, membershipInterestMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
 import { CardHeader, LessonList, LessonRow, StagePanel } from '../styles';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
@@ -23,7 +23,7 @@ interface Props {
   loading: boolean;
   canRecordAttendance: boolean;
   onToggle: (lessonId: string, attended: boolean) => Promise<void>;
-  onCopyMakeupLink: (lessonId: string) => Promise<string>;
+  onGetMakeupLink: (lessonId: string) => Promise<string>;
   onMembershipInterestSent: () => Promise<void>;
 }
 
@@ -33,10 +33,10 @@ export function IntegrationStagePanel({
   loading,
   canRecordAttendance,
   onToggle,
-  onCopyMakeupLink,
+  onGetMakeupLink,
   onMembershipInterestSent,
 }: Props) {
-  const { show: showToast, toast } = useToast();
+  const { open, close, modal } = useModal('drawer');
 
   if (loading || !integrationClass) return <Skeleton $h="120px" />;
 
@@ -46,10 +46,21 @@ export function IntegrationStagePanel({
   const makeupUnlocked = !!lastLesson && lastLesson.date < todayKey;
   const eligible = attendedCount >= MEMBERSHIP_THRESHOLD;
 
-  const copyMakeupLink = async (lessonId: string) => {
-    const link = await onCopyMakeupLink(lessonId);
-    await navigator.clipboard.writeText(link);
-    showToast('Link de reposição copiado!');
+  const openMakeupMessage = async (lessonId: string, lessonNumber: number) => {
+    const link = await onGetMakeupLink(lessonId);
+    open(
+      <>
+        <ModalTitle onClose={close}>Reposição da Aula {lessonNumber}</ModalTitle>
+        <WhatsAppMessageBox
+          person={person}
+          defaultMessage={makeupLessonMessage(person.name, lessonNumber, link)}
+          buttonLabel="Enviar pelo WhatsApp"
+          rows={12}
+          bare
+          onOpen={close}
+        />
+      </>,
+    );
   };
 
   return (
@@ -75,12 +86,12 @@ export function IntegrationStagePanel({
                 />
                 {!attended && canRecordAttendance && makeupUnlocked && (
                   <IconButton
-                    icon={<Link size={14} />}
+                    icon={<Send size={14} />}
                     iconPosition="center"
                     variant="secondary"
                     size="sm"
-                    onClick={() => copyMakeupLink(lesson.id)}
-                    title="Copiar link de reposição"
+                    onClick={() => openMakeupMessage(lesson.id, lesson.number)}
+                    title="Enviar link de reposição"
                   />
                 )}
               </LessonRow>
@@ -98,7 +109,7 @@ export function IntegrationStagePanel({
         />
       )}
 
-      {toast}
+      {modal}
     </StagePanel>
   );
 }

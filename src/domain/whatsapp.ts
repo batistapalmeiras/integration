@@ -37,3 +37,18 @@ export function membershipInterestMessage(name: string, completedClasses: boolea
     : `Olá, ${firstName}! Se você tem interesse em se tornar membro da nossa igreja, já pode preencher a Ficha de Interesse de Membresia — ela fica guardada e será analisada quando você concluir as aulas de Integração.`;
   return `${opening} Preencha por este link: ${formUrl}`;
 }
+
+export function makeupLessonMessage(name: string, lessonNumber: number, link: string): string {
+  const firstName = name.split(' ')[0];
+  return [
+    `Olá, ${firstName}!`,
+    '',
+    `Notamos que você não pôde participar da Aula ${lessonNumber} da Integração.`,
+    '',
+    'Para repor, é só assistir ao vídeo da aula e confirmar sua presença por este link:',
+    '',
+    link,
+    '',
+    'A reposição é necessária para concluir o processo de membresia.',
+  ].join('\n');
+}
