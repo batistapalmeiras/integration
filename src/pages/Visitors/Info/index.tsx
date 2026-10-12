@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Select, Skeleton, Tab, TabBar, text, useAuthCtx } from 'bp-kit';
+import { Button, Empty, PageHeader, Select, Skeleton, Tab, text, useAuthCtx } from 'bp-kit';
 import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
@@ -21,6 +21,7 @@ import {
   DetailsList,
   DetailValue,
   Form,
+  InfoTabBar,
   SensitiveBlock,
   SensitiveValue,
 } from '../Detail/styles';
@@ -108,13 +109,13 @@ export function VisitorInfoPage() {
       <PageHeader title="Detalhes" subtitle={person.name} back />
 
       {tabs.length > 1 && (
-        <TabBar>
+        <InfoTabBar>
           {tabs.map((item) => (
             <Tab key={item.key} $active={current === item.key} onClick={() => setTab(item.key)}>
               {item.label}
             </Tab>
           ))}
-        </TabBar>
+        </InfoTabBar>
       )}
 
       {current === 'geral' && rows.length > 0 && (

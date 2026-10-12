@@ -1,4 +1,5 @@
 // Libs
+import { TabBar } from 'bp-kit';
 import styled from 'styled-components';
 
 export { Form } from 'bp-kit';
@@ -119,6 +120,14 @@ export const SensitiveBlock = styled.div`
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.xxs};
   margin-top: ${({ theme }) => theme.spacing.base};
+
+  &:first-child {
+    margin-top: 0;
+  }
+`;
+
+export const InfoTabBar = styled(TabBar)`
+  margin-bottom: 0;
 `;
 
 export const SensitiveValue = styled.span`
