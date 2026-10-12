@@ -134,7 +134,7 @@ export function VisitorInfoPage() {
           {entriesFor(current).map((item) => (
             <SensitiveBlock key={item.label}>
               <DetailLabel>{item.label}</DetailLabel>
-              <SensitiveValue>{item.value}</SensitiveValue>
+              <SensitiveValue $muted={!item.answered}>{item.value}</SensitiveValue>
             </SensitiveBlock>
           ))}
         </DetailsList>

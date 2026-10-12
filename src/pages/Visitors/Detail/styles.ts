@@ -130,9 +130,10 @@ export const InfoTabBar = styled(TabBar)`
   margin-bottom: 0;
 `;
 
-export const SensitiveValue = styled.span`
+export const SensitiveValue = styled.span<{ $muted?: boolean }>`
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  color: ${({ theme }) => theme.colors.ink};
+  color: ${({ theme, $muted }) => ($muted ? theme.colors.mutedSoft : theme.colors.ink)};
+  font-style: ${({ $muted }) => ($muted ? 'italic' : 'normal')};
   white-space: pre-wrap;
 `;

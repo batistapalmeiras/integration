@@ -4,32 +4,30 @@ import { PersonSensitive } from '../../../domain/personSensitive';
 import { ENTRY_TYPE_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
 import { Person } from '../../../features/visitors';
 
+const NO_ANSWER = 'Sem resposta';
+
 export interface InfoEntry {
   label: string;
   value: string;
+  answered: boolean;
 }
 
-function entry(label: string, value: string | null | undefined): InfoEntry | null {
-  return value ? { label, value } : null;
-}
-
-function compact(entries: (InfoEntry | null)[]): InfoEntry[] {
-  return entries.filter((e): e is InfoEntry => !!e);
+function entry(label: string, value: string | null | undefined): InfoEntry {
+  return { label, value: value || NO_ANSWER, answered: !!value };
 }
 
 export function integrationEntries(data: PersonSensitive | null): InfoEntry[] {
-  if (!data) return [];
-  return compact([
-    entry('Frequenta a igreja desde', data.attending_since),
-    entry('Igreja anterior', data.previous_church),
-    entry('Batismo', data.baptism_info),
-    entry('Testemunho de conversão', data.conversion_testimony),
-    entry('Estado civil', data.marital_status_story),
-  ]);
+  return [
+    entry('Frequenta a igreja desde', data?.attending_since),
+    entry('Igreja anterior', data?.previous_church),
+    entry('Batismo', data?.baptism_info),
+    entry('Testemunho de conversão', data?.conversion_testimony),
+    entry('Estado civil', data?.marital_status_story),
+  ];
 }
 
 export function membershipEntries(person: Person, data: PersonSensitive | null): InfoEntry[] {
-  return compact([
+  return [
     entry('Data de nascimento', data?.birth_date ? formatDate(data.birth_date) : null),
     entry(
       'Forma de entrada',
@@ -46,9 +44,6 @@ export function membershipEntries(person: Person, data: PersonSensitive | null):
     ),
     entry('Sociedade secreta', data?.secret_society),
     entry('Observações', data?.membership_note),
-    entry(
-      'Estatuto aceito em',
-      person.statute_agreed_at ? formatDate(person.statute_agreed_at.slice(0, 10)) : null,
-    ),
-  ]);
+    entry('Estatuto aceito em', person.statute_agreed_at ? formatDate(person.statute_agreed_at.slice(0, 10)) : null),
+  ];
 }
