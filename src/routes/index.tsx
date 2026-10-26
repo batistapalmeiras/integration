@@ -16,6 +16,7 @@ import { IntegrationSignupPage } from '../pages/IntegrationSignup';
 import { LoginPage } from '../pages/Login';
 import { MakeupAttendancePage } from '../pages/MakeupAttendance';
 import { MembersPage } from '../pages/Members';
+import { MembershipPage } from '../pages/Membership';
 import { MembershipInterestPage } from '../pages/MembershipInterest';
 import { PeoplePage } from '../pages/People';
 import { ProfilePage } from '../pages/Profile';
@@ -130,6 +131,14 @@ export function AppRouter() {
                       element={
                         <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
                           <MembersPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={AppRoute.Membership}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                          <MembershipPage />
                         </ProtectedRoute>
                       }
                     />

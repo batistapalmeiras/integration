@@ -52,7 +52,7 @@ export function VisitorDetailPage() {
   const isPastor = user?.role === UserRole.Pastor;
   const canManage = user?.role === UserRole.IntegrationTeam || isAdmin || isPastor;
   const canRecordAttendance = user?.role === UserRole.Teacher || isAdmin || isPastor;
-  const canConfirmMembership = isAdmin || isPastor;
+  const canConfirmMembership = isPastor;
 
   if (loading) return <Skeleton $h="320px" />;
   if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
