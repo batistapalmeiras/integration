@@ -19,7 +19,7 @@ export function MembershipPage() {
 
   return (
     <div>
-      <PageHeader title="Membresia" subtitle="Aulas concluídas e ficha preenchida, aguardando o Conselho" />
+      <PageHeader title="Membresia" />
 
       {loading && <Skeleton $h="240px" />}
 
