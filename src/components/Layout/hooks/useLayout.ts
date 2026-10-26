@@ -1,8 +1,10 @@
 // React
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
+import { supabase } from '../../../lib/supabase';
 import { AppRoute } from '../../../routes/paths';
 import { UserRole } from '../../../types/enums';
 
@@ -10,9 +12,20 @@ export function useLayout() {
   const { user, logout } = useAuthCtx();
   const location = useLocation();
   const navigate = useNavigate();
+  const [membershipCount, setMembershipCount] = useState(0);
 
   const isAdmin = user?.role === UserRole.Admin;
   const isPastor = user?.role === UserRole.Pastor;
+  const showMembership = isAdmin || isPastor;
+
+  useEffect(() => {
+    if (!showMembership) return;
+    supabase
+      .from('people')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'membership_pending')
+      .then(({ count }) => setMembershipCount(count ?? 0));
+  }, [showMembership, location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -34,10 +47,12 @@ export function useLayout() {
     handleLogout,
     isActive,
     isExactTab,
+    membershipCount,
     showPeople: !!user,
     showVisitors: isAdmin || isPastor || user?.role === UserRole.IntegrationTeam,
     showCoffee: isAdmin || isPastor || user?.role === UserRole.IntegrationTeam,
     showClasses: isAdmin || isPastor || user?.role === UserRole.Teacher,
+    showMembership,
     showAdmin: isAdmin || isPastor,
   };
 }

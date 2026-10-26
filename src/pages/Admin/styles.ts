@@ -12,6 +12,28 @@ export const Hint = styled.p`
   color: ${({ theme }) => theme.colors.muted};
 `;
 
+export const DesktopTitle = styled.div`
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
+  }
+`;
+
+export const MenuSection = styled.section`
+  & + & {
+    margin-top: ${({ theme }) => theme.spacing.xl};
+  }
+`;
+
+export const MenuSectionTitle = styled.h2`
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.muted};
+`;
+
 export const OptionsGrid = styled.div`
   display: flex;
   flex-direction: column;

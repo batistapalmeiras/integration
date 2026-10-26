@@ -19,6 +19,7 @@ export function ProfilePage() {
       roleLabel={user ? ROLE_LABELS[user.role as UserRole] : undefined}
       changePasswordPath={AppRoute.ChangePassword}
       onLogout={handleLogout}
+      back={user?.role === UserRole.Admin || user?.role === UserRole.Pastor}
     />
   );
 }

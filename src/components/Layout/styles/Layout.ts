@@ -117,7 +117,6 @@ export const BottomBar = styled.nav`
   @media (max-width: 744px) {
     display: flex;
     justify-content: center;
-    gap: 40px;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -132,6 +131,9 @@ export const BottomBar = styled.nav`
 `;
 
 export const BottomTab = styled(Link)<{ $active: boolean }>`
+  flex: 1;
+  max-width: 96px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -155,6 +157,41 @@ export const BottomTabLabel = styled.span<{ $active: boolean }>`
   font-weight: ${({ $active }) => ($active ? 700 : 400)};
   line-height: 1;
   letter-spacing: 0.2px;
+`;
+
+export const TabIcon = styled.span`
+  position: relative;
+  display: inline-flex;
+`;
+
+export const TabCount = styled.span`
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: ${({ theme }) => theme.rounded.full};
+  background: ${({ theme }) => theme.colors.danger};
+  color: ${({ theme }) => theme.colors.onDark};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+`;
+
+export const SideNavCount = styled.span`
+  margin-left: auto;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: ${({ theme }) => theme.rounded.full};
+  background: ${({ theme }) => theme.colors.danger};
+  color: ${({ theme }) => theme.colors.onDark};
+  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
 `;
 
 export const Main = styled.main<{ $hasBottomBar: boolean }>`

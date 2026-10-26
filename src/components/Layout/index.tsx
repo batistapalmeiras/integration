@@ -2,7 +2,16 @@
 import React from 'react';
 // Libs
 import { Brand } from 'bp-kit';
-import { Contact, GraduationCap, LogOut, Menu as MenuIcon, Settings, User, Users as UsersIcon } from 'lucide-react';
+import {
+  Contact,
+  GraduationCap,
+  LogOut,
+  Menu as MenuIcon,
+  Settings,
+  User,
+  UserCheck,
+  Users as UsersIcon,
+} from 'lucide-react';
 import { Coffee as CoffeeIcon } from 'lucide-react';
 // Components
 import icon from '../../assets/icon.png';
@@ -21,10 +30,13 @@ import {
   SideFooter,
   SideMenu,
   SideNav,
+  SideNavCount,
   SideNavLink,
   SideUserInfo,
   SideUserName,
   SideUserRole,
+  TabCount,
+  TabIcon,
 } from './styles';
 
 interface ILayoutProps {
@@ -42,7 +54,9 @@ export function Layout({ children }: ILayoutProps) {
     showVisitors,
     showCoffee,
     showClasses,
+    showMembership,
     showAdmin,
+    membershipCount,
   } = useLayout();
 
   const homeRoute =
@@ -53,13 +67,15 @@ export function Layout({ children }: ILayoutProps) {
       [showAdmin, AppRoute.Settings],
     ] as const).find(([visible]) => visible)?.[1] ?? AppRoute.People;
 
-  const visibleTabs = [showPeople, showVisitors, showCoffee, showClasses, true].filter(Boolean).length;
+  const showPeopleTab = showPeople && !showAdmin;
+  const visibleTabs = [showPeopleTab, showVisitors, showCoffee, showClasses, showMembership, true].filter(Boolean).length;
   const isOnATab =
     (showVisitors && isExactTab(AppRoute.Visitors)) ||
     (showCoffee && isExactTab(AppRoute.Coffee)) ||
     (showClasses && isExactTab(AppRoute.Classes)) ||
-    (showPeople && isExactTab(AppRoute.People)) ||
-    isExactTab(AppRoute.Admin);
+    (showMembership && isExactTab(AppRoute.Membership)) ||
+    (showPeopleTab && isExactTab(AppRoute.People)) ||
+    isExactTab(showAdmin ? AppRoute.Admin : AppRoute.Profile);
 
   const shouldShowBottomBar = visibleTabs > 1 && isOnATab;
 
@@ -93,6 +109,13 @@ export function Layout({ children }: ILayoutProps) {
             <SideNavLink to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
               <GraduationCap size={18} />
               Turma
+            </SideNavLink>
+          )}
+          {showMembership && (
+            <SideNavLink to={AppRoute.Membership} $active={isActive(AppRoute.Membership)}>
+              <UserCheck size={18} />
+              Membresia
+              {membershipCount > 0 && <SideNavCount>{membershipCount}</SideNavCount>}
             </SideNavLink>
           )}
           {showPeople && (
@@ -143,16 +166,32 @@ export function Layout({ children }: ILayoutProps) {
               <BottomTabLabel $active={isActive(AppRoute.Classes)}>Turma</BottomTabLabel>
             </BottomTab>
           )}
-          {showPeople && (
+          {showMembership && (
+            <BottomTab to={AppRoute.Membership} $active={isActive(AppRoute.Membership)}>
+              <TabIcon>
+                <UserCheck size={22} />
+                {membershipCount > 0 && <TabCount>{membershipCount}</TabCount>}
+              </TabIcon>
+              <BottomTabLabel $active={isActive(AppRoute.Membership)}>Membresia</BottomTabLabel>
+            </BottomTab>
+          )}
+          {showPeopleTab && (
             <BottomTab to={AppRoute.People} $active={isActive(AppRoute.People)}>
               <Contact size={22} />
               <BottomTabLabel $active={isActive(AppRoute.People)}>Pessoas</BottomTabLabel>
             </BottomTab>
           )}
-          <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
-            <MenuIcon size={22} />
-            <BottomTabLabel $active={isActive(AppRoute.Admin)}>Menu</BottomTabLabel>
-          </BottomTab>
+          {showAdmin ? (
+            <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
+              <MenuIcon size={22} />
+              <BottomTabLabel $active={isActive(AppRoute.Admin)}>Menu</BottomTabLabel>
+            </BottomTab>
+          ) : (
+            <BottomTab to={AppRoute.Profile} $active={isActive(AppRoute.Profile)}>
+              <User size={22} />
+              <BottomTabLabel $active={isActive(AppRoute.Profile)}>Meu perfil</BottomTabLabel>
+            </BottomTab>
+          )}
         </BottomBar>
       )}
     </>
