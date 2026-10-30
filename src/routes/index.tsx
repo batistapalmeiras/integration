@@ -129,7 +129,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Members}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={[UserRole.Pastor]}>
                           <MembersPage />
                         </ProtectedRoute>
                       }

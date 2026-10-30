@@ -66,17 +66,13 @@ export function AdminPage() {
         <PageHeader title="Configurações" />
       </DesktopTitle>
 
-      {canManageOperations && (
+      {isPastor && (
         <MenuSection>
           <MenuSectionTitle>Igreja</MenuSectionTitle>
           <OptionsGrid>
             <MenuOptionCard icon={Users} label="Membros" onClick={() => navigate(AppRoute.Members)} />
-            {isPastor && (
-              <>
-                <MenuOptionCard icon={HeartHandshake} label="Ministérios" onClick={() => navigate(AppRoute.Ministries)} />
-                <MenuOptionCard icon={UsersRound} label="Pequenos Grupos" onClick={() => navigate(AppRoute.SmallGroups)} />
-              </>
-            )}
+            <MenuOptionCard icon={HeartHandshake} label="Ministérios" onClick={() => navigate(AppRoute.Ministries)} />
+            <MenuOptionCard icon={UsersRound} label="Pequenos Grupos" onClick={() => navigate(AppRoute.SmallGroups)} />
           </OptionsGrid>
         </MenuSection>
       )}
