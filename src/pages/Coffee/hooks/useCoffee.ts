@@ -8,7 +8,8 @@ import {
   EnrollableCoffeePerson,
   attachPeopleToCoffee,
   countQueuedFrom,
-  enrollInCoffee,
+  currentCoffeeAttendance,
+  placeInCoffee,
   fetchCoffeeBoard,
   insertCoffeeEvent,
   markCoffeeAttended,
@@ -56,9 +57,10 @@ export function useCoffee() {
   const applyBoard = useCallback(
     (board: CoffeeBoard, keepSelectionId?: string) => {
       boardRef.current = board;
+      const current = currentCoffeeAttendance(board.attendance);
       const open = selectOpenCoffeeEvents(
         board.events as CoffeeEvent[],
-        countQueuedFrom(board.attendance),
+        countQueuedFrom(current),
         new Date().toISOString().slice(0, 10),
       );
       setEvents(open);
@@ -72,7 +74,7 @@ export function useCoffee() {
       const selected = open.find((e) => e.id === keepSelectionId) ?? open[0];
       setSelectedEventId(selected.id);
       setAllAttendees(
-        board.attendance
+        current
           .filter((a) => a.coffee_event_id === selected.id)
           .filter((a) => a.person?.status === 'welcome_coffee' || a.person?.status === 'pending_signup')
           .map((a) => a as unknown as AttendeeRow)
@@ -145,7 +147,7 @@ export function useCoffee() {
 
   const enrollPerson = async (person: EnrollableCoffeePerson) => {
     if (!selectedEventId) return;
-    await enrollInCoffee(person.id, selectedEventId);
+    await placeInCoffee(person.id, selectedEventId);
     await load(selectedEventId);
   };
 

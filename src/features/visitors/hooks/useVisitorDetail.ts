@@ -5,6 +5,7 @@ import { parsePhone, useAuthCtx } from 'bp-kit';
 // Local
 import {
   getCoffeeAttendanceForPerson,
+  PersonCoffeeAttendance,
   getPersonAttendedCoffeeDate,
   hasUpcomingCoffeeEvent,
   markClassInviteDeclined,
@@ -38,11 +39,6 @@ import {
 } from '../infra/peopleRepository';
 import { ContactResult, Person, PersonStatus, UpdatePersonInput } from '../domain/types';
 
-interface CoffeeAttendance {
-  id: string;
-  attended: boolean;
-}
-
 interface ContactAttemptRecord {
   id: string;
   result: ContactResult;
@@ -64,7 +60,7 @@ export function useVisitorDetail(id: string) {
   const [person, setPerson] = useState<Person | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [coffeeAttendance, setCoffeeAttendance] = useState<CoffeeAttendance | null>(null);
+  const [coffeeAttendance, setCoffeeAttendance] = useState<PersonCoffeeAttendance | null>(null);
   const [coffeeLoading, setCoffeeLoading] = useState(false);
   const [hasCoffeeEvent, setHasCoffeeEvent] = useState<boolean | null>(null);
   const [hasCohort, setHasCohort] = useState<boolean | null>(null);
@@ -253,14 +249,14 @@ export function useVisitorDetail(id: string) {
     return getMakeupLink(integrationClass.enrollmentId, lessonId);
   };
 
-  const confirmMember = async (smallGroupId: string, ministryId: string) => {
+  const confirmMember = async (smallGroupId: string | null, ministryId: string | null) => {
     if (!person) return;
     await confirmMemberUseCase(person, smallGroupId, ministryId, user?.id);
     await load();
     await loadCommunityNames();
   };
 
-  const updateCommunity = async (smallGroupId: string, ministryId: string) => {
+  const updateCommunity = async (smallGroupId: string | null, ministryId: string | null) => {
     await updatePersonFields(id, {
       small_group_id: smallGroupId,
       ministry_id: ministryId,

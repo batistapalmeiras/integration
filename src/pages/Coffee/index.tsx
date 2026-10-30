@@ -21,6 +21,8 @@ import { Pencil, UserPlus, XCircle } from 'lucide-react';
 import { PeopleCount } from '../../components/PeopleCount';
 import { ActionButton } from '../../components/ActionButton';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
+import { todayKey } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { AttendanceControl } from './components/AttendanceControl';
@@ -199,6 +201,7 @@ export function CoffeePage() {
                       attended={attendance.attended}
                       person={attendance.person}
                       canManage={canPlan}
+                      canMark={canMarkCoffeeAttendance(event.event_date, todayKey())}
                       onMarkAttended={() => markAttended(attendance.id, attendance.person.id)}
                       onMarkNotAttended={() => markNotAttended(attendance.person.id)}
                       onCanceledByPerson={() => confirmCanceled(attendance.person.id, attendance.person.name)}

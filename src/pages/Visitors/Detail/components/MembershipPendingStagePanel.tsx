@@ -8,7 +8,7 @@ import { ConfirmMemberModal } from './ConfirmMemberModal';
 
 interface Props {
   person: Person;
-  onConfirm: (smallGroup: string, ministry: string) => Promise<void>;
+  onConfirm: (smallGroup: string | null, ministry: string | null) => Promise<void>;
 }
 
 export function MembershipPendingStagePanel({ person, onConfirm }: Props) {

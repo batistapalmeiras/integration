@@ -10,12 +10,13 @@ interface Props {
   attended: boolean;
   person: DisplayStatusInput;
   canManage: boolean;
+  canMark: boolean;
   onMarkAttended: () => void;
   onMarkNotAttended: () => void;
   onCanceledByPerson: () => void;
 }
 
-export function AttendanceControl({ attended, person, canManage, onMarkAttended, onMarkNotAttended, onCanceledByPerson }: Props) {
+export function AttendanceControl({ attended, person, canManage, canMark, onMarkAttended, onMarkNotAttended, onCanceledByPerson }: Props) {
   if (!canManage) {
     return (
       <Typography type="caption">
@@ -43,24 +44,28 @@ export function AttendanceControl({ attended, person, canManage, onMarkAttended,
         onClick={onCanceledByPerson}
         title="Cancelou (avisou que não vem)"
       />
-      <IconButton
-        type="button"
-        icon={<X size={16} />}
-        iconPosition="center"
-        variant="secondary"
-        size="sm"
-        onClick={onMarkNotAttended}
-        title="Não compareceu"
-      />
-      <IconButton
-        type="button"
-        icon={<Check size={16} />}
-        iconPosition="center"
-        variant="secondary"
-        size="sm"
-        onClick={onMarkAttended}
-        title="Compareceu"
-      />
+      {canMark && (
+        <>
+          <IconButton
+            type="button"
+            icon={<X size={16} />}
+            iconPosition="center"
+            variant="secondary"
+            size="sm"
+            onClick={onMarkNotAttended}
+            title="Não compareceu"
+          />
+          <IconButton
+            type="button"
+            icon={<Check size={16} />}
+            iconPosition="center"
+            variant="secondary"
+            size="sm"
+            onClick={onMarkAttended}
+            title="Compareceu"
+          />
+        </>
+      )}
     </AttendanceRow>
   );
 }

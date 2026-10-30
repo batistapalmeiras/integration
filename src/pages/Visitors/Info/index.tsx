@@ -1,21 +1,22 @@
 // React
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, LinkButton, PageHeader, Select, Skeleton, Tab, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, LinkButton, PageHeader, Select, Skeleton, Tab, useAuthCtx, useModal } from 'bp-kit';
 import { Check, Save, UserRound } from 'lucide-react';
-import { z } from 'zod';
 // Local
 import { formatDate } from '../../../domain/dates';
 import { CommunityGroup, listMinistries, listSmallGroups } from '../../../domain/communityGroups';
 import { LessonMakeup, getPersonLessonMakeups } from '../../../domain/lessonMakeups';
+import { communityRequirements } from '../../../domain/membershipCommunity';
 import { PersonSensitive, getPersonSensitive } from '../../../domain/personSensitive';
 import { AppRoute } from '../../../routes/paths';
 import { UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
 import { ConfirmMemberModal } from '../Detail/components/ConfirmMemberModal';
+import { CommunityFormValues, buildCommunitySchema } from '../validators';
 import {
   Actions,
   Content,
@@ -33,12 +34,6 @@ import {
 import { InfoEntry, integrationEntries, makeupEntries, membershipEntries } from './sensitive';
 
 type InfoTab = 'general' | 'integration' | 'membership' | 'makeup';
-
-const communitySchema = z.object({
-  smallGroupId: z.string().min(1, text.validation.selectRequired('o Pequeno Grupo')),
-  ministryId: z.string().min(1, text.validation.selectRequired('o ministério')),
-});
-type CommunityFormValues = z.infer<typeof communitySchema>;
 
 export function VisitorInfoPage() {
   const { id } = useParams<{ id: string }>();
@@ -67,6 +62,9 @@ export function VisitorInfoPage() {
   const canSeeSensitive = canConfirmMembership || user?.role === UserRole.Teacher;
   const [sensitive, setSensitive] = useState<PersonSensitive | null>(null);
   const [makeups, setMakeups] = useState<LessonMakeup[]>([]);
+  const requirements = communityRequirements(sensitive);
+  const requirementsRef = useRef(requirements);
+  requirementsRef.current = requirements;
 
   useEffect(() => {
     if (canSeeSensitive && id) {
@@ -88,7 +86,8 @@ export function VisitorInfoPage() {
     handleSubmit,
     formState: { isSubmitting, isDirty },
   } = useForm<CommunityFormValues>({
-    resolver: zodResolver(communitySchema),
+    resolver: (values, context, options) =>
+      zodResolver(buildCommunitySchema(requirementsRef.current))(values, context, options),
     values: { smallGroupId: person?.small_group_id ?? '', ministryId: person?.ministry_id ?? '' },
   });
 
@@ -117,7 +116,7 @@ export function VisitorInfoPage() {
     !canEditCommunity && profileMinistryName && { label: 'Ministério', value: profileMinistryName },
   ].filter((row): row is { label: string; value: string } => !!row);
 
-  const submit = handleSubmit((values) => updateCommunity(values.smallGroupId, values.ministryId));
+  const submit = handleSubmit((values) => updateCommunity(values.smallGroupId || null, values.ministryId || null));
 
   const showConfirmMember =
     fromMembershipQueue && user?.role === UserRole.Pastor && person.status === 'membership_pending';
@@ -197,16 +196,24 @@ export function VisitorInfoPage() {
 
       {current === 'general' && canEditCommunity && (
         <Form onSubmit={submit}>
-          <Select label="Pequeno Grupo" control={control} name="smallGroupId">
-            <option value="">Selecione…</option>
+          <Select
+            label={requirements.smallGroupRequired ? 'Pequeno Grupo' : 'Pequeno Grupo (opcional)'}
+            control={control}
+            name="smallGroupId"
+          >
+            <option value="">{requirements.smallGroupRequired ? 'Selecione…' : 'Nenhum por enquanto'}</option>
             {smallGroups.map((group) => (
               <option key={group.id} value={group.id}>
                 {group.name}
               </option>
             ))}
           </Select>
-          <Select label="Ministério" control={control} name="ministryId">
-            <option value="">Selecione…</option>
+          <Select
+            label={requirements.ministryRequired ? 'Ministério' : 'Ministério (opcional)'}
+            control={control}
+            name="ministryId"
+          >
+            <option value="">{requirements.ministryRequired ? 'Selecione…' : 'Nenhum por enquanto'}</option>
             {ministries.map((ministry) => (
               <option key={ministry.id} value={ministry.id}>
                 {ministry.name}

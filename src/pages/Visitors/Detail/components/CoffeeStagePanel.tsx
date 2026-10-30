@@ -3,19 +3,16 @@ import { Button, InfoBox, Skeleton, Typography } from 'bp-kit';
 import { Check, Clock, X } from 'lucide-react';
 // Local
 import { RowActions } from '../../../../components/Table';
+import { PersonCoffeeAttendance, canMarkCoffeeAttendance } from '../../../../domain/cafeSchedule';
+import { formatDate, todayKey } from '../../../../domain/dates';
 import { classInviteMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
 import { CardHeader, StagePanel } from '../styles';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
-interface CoffeeAttendance {
-  id: string;
-  attended: boolean;
-}
-
 interface Props {
   person: Person;
-  attendance: CoffeeAttendance | null;
+  attendance: PersonCoffeeAttendance | null;
   loading: boolean;
   hasCohort: boolean | null;
   onMarkAttended: () => Promise<void>;
@@ -37,6 +34,19 @@ export function CoffeeStagePanel({
   onClassInviteSent,
 }: Props) {
   if (loading || !attendance) return <Skeleton $h="80px" />;
+
+  if (!attendance.attended && !canMarkCoffeeAttendance(attendance.eventDate, todayKey())) {
+    return (
+      <StagePanel>
+        <CardHeader>
+          <Typography type="label">Presença no café</Typography>
+        </CardHeader>
+        <Typography type="p">
+          Inscrita no café de {formatDate(attendance.eventDate)}. A presença só pode ser marcada a partir do dia do café.
+        </Typography>
+      </StagePanel>
+    );
+  }
 
   if (!attendance.attended) {
     return (

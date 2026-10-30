@@ -4,8 +4,8 @@ import { insertStatusHistory, updatePersonStatus } from '../infra/peopleReposito
 
 export async function confirmMember(
   person: Person,
-  smallGroupId: string,
-  ministryId: string,
+  smallGroupId: string | null,
+  ministryId: string | null,
   actorId?: string,
 ): Promise<void> {
   await updatePersonStatus(person.id, 'member', { small_group_id: smallGroupId, ministry_id: ministryId });
