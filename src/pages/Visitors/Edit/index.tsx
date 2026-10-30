@@ -52,7 +52,7 @@ export function VisitorEditPage() {
     person.status === 'pending_signup';
   const inTeacherStep = person.status === 'integration';
   const canEditFields =
-    user?.role === UserRole.Admin ||
+    (user?.role === UserRole.Admin && person.status !== 'member') ||
     user?.role === UserRole.Pastor ||
     (user?.role === UserRole.IntegrationTeam && inIntegrationTeamStep) ||
     (user?.role === UserRole.Teacher && inTeacherStep);

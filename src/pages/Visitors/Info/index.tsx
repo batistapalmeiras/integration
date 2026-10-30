@@ -72,7 +72,7 @@ export function VisitorInfoPage() {
       getPersonLessonMakeups(id).then(setMakeups);
     }
   }, [canSeeSensitive, id]);
-  const canEditCommunity = canConfirmMembership && person?.status === 'member';
+  const canEditCommunity = user?.role === UserRole.Pastor && person?.status === 'member';
 
   useEffect(() => {
     if (canEditCommunity) {
