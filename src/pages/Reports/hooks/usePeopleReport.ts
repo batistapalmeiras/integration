@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 // Local
 import { supabase } from '../../../lib/supabase';
-import { comparePeopleByPipeline, PersonStatus } from '../../../types/person';
+import { comparePeopleByPipeline, INTEGRATION_STATUSES, PersonStatus } from '../../../types/person';
 import { PersonReportRow } from '../types';
 import { loadSavedFilters, saveFilters } from './persistence';
 
@@ -16,7 +16,9 @@ export function usePeopleReport() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>(() => loadSavedFilters()?.statusFilter ?? []);
+  const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>(() =>
+    (loadSavedFilters()?.statusFilter ?? []).filter((status) => INTEGRATION_STATUSES.includes(status)),
+  );
   const [cohortFilter, setCohortFilterState] = useState<string>(() => loadSavedFilters()?.cohortFilter ?? 'all');
   const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -65,8 +67,8 @@ export function usePeopleReport() {
 
     let query = supabase
       .from('people')
-      .select('id,name,status,whatsapp_opened_at,class_invite_sent_at,membership_interest_sent_at');
-    if (statusFilter.length > 0) query = query.in('status', statusFilter);
+      .select('id,name,status,whatsapp_opened_at,class_invite_sent_at,membership_interest_sent_at')
+      .in('status', statusFilter.length > 0 ? statusFilter : INTEGRATION_STATUSES);
     if (debouncedSearch) query = query.ilike('name', `%${debouncedSearch}%`);
     if (cohortPersonIds) query = query.in('id', cohortPersonIds);
 

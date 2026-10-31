@@ -4,9 +4,9 @@ import { FormEvent, useState } from 'react';
 import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect, RawSelect, text } from 'bp-kit';
 import { FilterX } from 'lucide-react';
 // Local
-import { PersonStatus, STATUS_META } from '../../../types/person';
+import { INTEGRATION_STATUSES, PersonStatus, STATUS_META } from '../../../types/person';
 
-const STATUS_OPTIONS = Object.entries(STATUS_META).map(([value, meta]) => ({ value, label: meta.label }));
+const STATUS_OPTIONS = INTEGRATION_STATUSES.map((value) => ({ value, label: STATUS_META[value].label }));
 
 interface Props {
   close: () => void;
