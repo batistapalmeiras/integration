@@ -9,7 +9,7 @@ import { Person } from '../../../../features/visitors';
 import { Actions } from '../styles';
 
 interface Props {
-  person: Person;
+  person: Pick<Person, 'phone'>;
   defaultMessage: string;
   buttonLabel?: string;
   onOpen?: () => void;

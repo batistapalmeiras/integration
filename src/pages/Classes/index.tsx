@@ -1,22 +1,35 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Pagination, RawSelect, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import {
+  Button,
+  Empty,
+  ModalTitle,
+  PageHeader,
+  RawSelect,
+  SearchInput,
+  Skeleton,
+  text,
+  useAuthCtx,
+  useMediaQuery,
+  useModal,
+} from 'bp-kit';
 import { Pencil, UserPlus } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { ActionButton } from '../../components/ActionButton';
-import { StatusPill } from '../../components/StatusPill';
-import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { makeupLessonMessage } from '../../domain/whatsapp';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
+import { WhatsAppMessageBox } from '../Visitors/Detail/components/WhatsAppMessageBox';
+import { AttendanceGrid } from './components/AttendanceGrid';
 import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
 import { EnrollPersonModal } from './components/EnrollPersonModal';
+import { LessonAttendanceList } from './components/LessonAttendanceList';
 import { useClasses } from './hooks';
-import { CountBadge, CountRow, PaginationWrap, SearchRow, SelectorRow } from './styles';
-
-const MEMBERSHIP_THRESHOLD = 4;
+import { CountRow, SearchRow, SelectorRow } from './styles';
+import { EnrollmentRow, Lesson } from './types';
 
 export function ClassesPage() {
   const navigate = useNavigate();
@@ -33,9 +46,6 @@ export function ClassesPage() {
     loading,
     error,
     minCohortDate,
-    page,
-    totalPages,
-    setPage,
     search,
     setSearch,
     hasFilter,
@@ -43,7 +53,11 @@ export function ClassesPage() {
     updateLessonDates,
     closeCohort,
     enrollPerson,
+    toggleAttendance,
+    sendMembershipInterest,
+    makeupLink,
   } = useClasses();
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const { open, close, modal } = useModal('drawer');
 
   const isAdmin = user?.role === UserRole.Admin;
@@ -54,6 +68,22 @@ export function ClassesPage() {
   const openCreateModal = () => open(<CreateCohortModal close={close} onCreate={createCohort} minDate={minCohortDate} />);
   const openEditModal = () =>
     open(<EditCohortModal lessons={lessons} close={close} onSave={updateLessonDates} onCloseCohort={closeCohort} />);
+  const openMakeupModal = async (row: EnrollmentRow, lesson: Lesson) => {
+    const link = await makeupLink(row, lesson.id);
+    open(
+      <>
+        <ModalTitle onClose={close}>Reposição da Aula {lesson.number}</ModalTitle>
+        <WhatsAppMessageBox
+          person={row.person}
+          defaultMessage={makeupLessonMessage(row.person.name, lesson.number, link)}
+          buttonLabel="Enviar pelo WhatsApp"
+          rows={16}
+          bare
+          onOpen={close}
+        />
+      </>,
+    );
+  };
   const openEnrollModal = () =>
     cohort && open(<EnrollPersonModal cohortId={cohort.id} close={close} onEnroll={enrollPerson} />);
 
@@ -140,44 +170,19 @@ export function ClassesPage() {
         />
       )}
 
-      {!loading && !error && cohort && totalCount > 0 && (
-        <TableWrapper>
-          <Table>
-            <thead>
-              <tr>
-                <Th>{text.fields.name}</Th>
-                <Th>Presenças</Th>
-                <Th $shrink>Situação</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {enrollments.map((row) => {
-                const eligible = row.attendedCount >= MEMBERSHIP_THRESHOLD;
-                return (
-                  <Tr key={row.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${row.person.id}`)}>
-                    <Td $truncate title={row.person.name}>
-                      {row.person.name}
-                    </Td>
-                    <Td $shrink>
-                      <CountBadge $eligible={eligible}>
-                        {row.attendedCount}/{lessons.length}
-                      </CountBadge>
-                    </Td>
-                    <Td $shrink>
-                      <StatusPill person={row.person} compact />
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </TableWrapper>
+      {!loading && !error && cohort && totalCount > 0 && !isDesktop && (
+        <LessonAttendanceList key={cohort.id} lessons={lessons} rows={enrollments} onToggle={toggleAttendance} />
       )}
 
-      {!loading && !error && cohort && totalPages > 1 && (
-        <PaginationWrap>
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
-        </PaginationWrap>
+      {!loading && !error && cohort && totalCount > 0 && isDesktop && (
+        <AttendanceGrid
+          lessons={lessons}
+          rows={enrollments}
+          onToggle={toggleAttendance}
+          onOpen={(personId) => navigate(`${AppRoute.Visitors}/${personId}`)}
+          onSendInterest={sendMembershipInterest}
+          onSendMakeup={openMakeupModal}
+        />
       )}
 
       {modal}
