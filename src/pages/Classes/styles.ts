@@ -120,6 +120,8 @@ export const StudentToggle = styled.div<{ $checked: boolean }>`
 export const StudentText = styled.span`
   flex: 1;
   min-width: 0;
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  color: ${({ theme }) => theme.colors.ink};
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -158,6 +160,8 @@ export const StudentLink = styled.button`
   padding: 0;
   border: none;
   background: transparent;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
   text-align: left;
 `;

@@ -85,6 +85,8 @@ export const RowButton = styled.button`
 export const RowText = styled.span`
   flex: 1;
   min-width: 0;
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  color: ${({ theme }) => theme.colors.ink};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

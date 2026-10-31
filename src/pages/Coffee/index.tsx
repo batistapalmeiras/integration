@@ -229,7 +229,7 @@ export function CoffeePage() {
                   <PersonItem key={attendance.id}>
                     <PersonTop>
                       <PersonLink type="button" onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}>
-                        <Typography type="span">{attendance.person.name}</Typography>
+                        <span>{attendance.person.name}</span>
                         {personNote(attendance) && (
                           <Typography type="caption" as="span">
                             {personNote(attendance)}

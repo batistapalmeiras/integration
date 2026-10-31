@@ -91,7 +91,7 @@ export function AttendanceGrid({ lessons, rows, onToggle, onOpen, onSendInterest
               <tr key={row.id}>
                 <Td>
                   <StudentLink type="button" onClick={() => onOpen(row.person.id)}>
-                    <Typography type="span">{row.person.name}</Typography>
+                    <span>{row.person.name}</span>
                   </StudentLink>
                 </Td>
                 {lessons.map((l) => (

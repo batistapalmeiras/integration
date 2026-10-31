@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, Typography, useMediaQuery } from 'bp-kit';
+import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useMediaQuery } from 'bp-kit';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
@@ -109,7 +109,7 @@ export function VisitorsPage() {
                 <Row key={person.id} $selected={person.id === previewId}>
                   <RowButton type="button" onClick={() => openRow(person)}>
                     <RowText>
-                      <Typography type="span">{person.name}</Typography>
+                      {person.name}
                     </RowText>
                     <StatusPill person={person} compact />
                   </RowButton>

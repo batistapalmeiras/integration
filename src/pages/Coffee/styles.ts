@@ -96,6 +96,8 @@ export const PersonLink = styled.button`
   border: none;
   background: transparent;
   text-align: left;
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  color: ${({ theme }) => theme.colors.ink};
   cursor: pointer;
 `;
 

@@ -79,7 +79,7 @@ export function LessonAttendanceList({ lessons, rows, onToggle }: Props) {
                   onChange={(e) => onToggle(row.id, lesson.id, e.target.checked)}
                   label={
                     <StudentText>
-                      <Typography type="span">{row.person.name}</Typography>
+                      <span>{row.person.name}</span>
                       <Typography type="caption" as="span">
                         {row.attendedCount} de {lessons.length} aulas
                       </Typography>
