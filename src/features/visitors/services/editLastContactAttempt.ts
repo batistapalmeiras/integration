@@ -1,8 +1,8 @@
 // Local
-import { attachToNextWelcomeCoffee } from '../../../domain/cafeSchedule';
-import { resolveEditedContactStatus } from '../domain/contactAttempt';
+import { statusAfterContact } from '../domain/contactAttempt';
 import { ContactResult, Person } from '../domain/types';
 import { insertStatusHistory, updateContactAttemptResult, updatePersonStatus } from '../infra/peopleRepository';
+import { fieldsAfterContact, hasAttendedCoffee, placeAfterContact } from './contactFollowUp';
 
 export async function editLastContactAttempt(
   person: Person,
@@ -12,8 +12,8 @@ export async function editLastContactAttempt(
 ): Promise<void> {
   await updateContactAttemptResult(attemptId, result);
 
-  const toStatus = resolveEditedContactStatus(result);
-  await updatePersonStatus(person.id, toStatus, { coffee_retry_used: false });
+  const toStatus = statusAfterContact(result, await hasAttendedCoffee(person.id));
+  await updatePersonStatus(person.id, toStatus, { coffee_retry_used: false, ...fieldsAfterContact(toStatus) });
   await insertStatusHistory({
     personId: person.id,
     fromStatus: person.status,
@@ -22,7 +22,5 @@ export async function editLastContactAttempt(
     note: 'Correção do registro de contato anterior',
   });
 
-  if (result === 'accepted') {
-    await attachToNextWelcomeCoffee(person.id);
-  }
+  await placeAfterContact(person.id, toStatus);
 }

@@ -23,6 +23,8 @@ import { MembershipInterestPage } from '../pages/MembershipInterest';
 import { PeoplePage } from '../pages/People';
 import { ProfilePage } from '../pages/Profile';
 import { ReportsPage } from '../pages/Reports';
+import { CoffeeHistoryPage } from '../pages/Reports/components/CoffeeHistoryPage';
+import { CoffeeRosterPage } from '../pages/Reports/components/CoffeeRosterPage';
 import { CohortRosterPage } from '../pages/Reports/components/CohortRosterPage';
 import { CohortsListPage } from '../pages/Reports/components/CohortsListPage';
 import { ResetPasswordPage } from '../pages/ResetPassword';
@@ -189,6 +191,22 @@ export function AppRouter() {
                       element={
                         <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <ReportsPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={`${AppRoute.Reports}/cafes`}
+                      element={
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
+                          <CoffeeHistoryPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={`${AppRoute.Reports}/cafes/:id`}
+                      element={
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
+                          <CoffeeRosterPage />
                         </ProtectedRoute>
                       }
                     />

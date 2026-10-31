@@ -1,9 +1,9 @@
 // Local
-import { resolveContactAttemptOutcome, resolveEditedContactStatus } from './contactAttempt';
+import { resolveContactAttemptOutcome, statusAfterContact } from './contactAttempt';
 
 describe('resolveContactAttemptOutcome', () => {
   it('moves to welcome_coffee when accepted', () => {
-    expect(resolveContactAttemptOutcome('accepted', false)).toEqual({
+    expect(resolveContactAttemptOutcome('accepted', false, false)).toEqual({
       toStatus: 'welcome_coffee',
       clearWhatsAppOpened: false,
       noteOverride: undefined,
@@ -11,7 +11,7 @@ describe('resolveContactAttemptOutcome', () => {
   });
 
   it('archives when declined', () => {
-    expect(resolveContactAttemptOutcome('declined', false)).toEqual({
+    expect(resolveContactAttemptOutcome('declined', false, false)).toEqual({
       toStatus: 'archived',
       clearWhatsAppOpened: false,
       noteOverride: undefined,
@@ -19,7 +19,7 @@ describe('resolveContactAttemptOutcome', () => {
   });
 
   it('retries on the first no_response', () => {
-    expect(resolveContactAttemptOutcome('no_response', false)).toEqual({
+    expect(resolveContactAttemptOutcome('no_response', false, false)).toEqual({
       toStatus: 'retry_contact',
       clearWhatsAppOpened: true,
       noteOverride: undefined,
@@ -27,7 +27,7 @@ describe('resolveContactAttemptOutcome', () => {
   });
 
   it('archives on no_response once the post-café retry round is already used', () => {
-    expect(resolveContactAttemptOutcome('no_response', true)).toEqual({
+    expect(resolveContactAttemptOutcome('no_response', true, false)).toEqual({
       toStatus: 'archived',
       clearWhatsAppOpened: false,
       noteOverride: 'Sem resposta na retomada de contato após o café',
@@ -35,10 +35,14 @@ describe('resolveContactAttemptOutcome', () => {
   });
 });
 
-describe('resolveEditedContactStatus', () => {
-  it('maps accepted/declined/no_response without checking the retry flag', () => {
-    expect(resolveEditedContactStatus('accepted')).toBe('welcome_coffee');
-    expect(resolveEditedContactStatus('declined')).toBe('archived');
-    expect(resolveEditedContactStatus('no_response')).toBe('retry_contact');
+describe('statusAfterContact', () => {
+  it('sends someone who already came to a café straight to the class signup', () => {
+    expect(statusAfterContact('accepted', true)).toBe('pending_signup');
+    expect(statusAfterContact('accepted', false)).toBe('welcome_coffee');
+  });
+
+  it('archives a refusal and retries a missing answer, café or not', () => {
+    expect(statusAfterContact('declined', true)).toBe('archived');
+    expect(statusAfterContact('no_response', true)).toBe('retry_contact');
   });
 });

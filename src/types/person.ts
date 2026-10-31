@@ -22,6 +22,7 @@ export interface Person {
   notes: string | null;
   whatsapp_opened_at: string | null;
   class_invite_sent_at: string | null;
+  signup_window_from: string | null;
   membership_interest_sent_at: string | null;
   entry_type: string | null;
   statute_agreed_at: string | null;

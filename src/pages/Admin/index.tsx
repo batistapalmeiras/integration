@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ClipboardCheck,
   Contact,
+  Coffee,
   FileBarChart,
   GraduationCap,
   HeartHandshake,
@@ -88,6 +89,7 @@ export function AdminPage() {
           <OptionsGrid>
             <MenuOptionCard icon={Contact} label="Pessoas" onClick={() => navigate(AppRoute.People)} />
             <MenuOptionCard icon={GraduationCap} label="Histórico de turmas" onClick={() => navigate(`${AppRoute.Reports}/turmas`)} />
+            <MenuOptionCard icon={Coffee} label="Histórico de cafés" onClick={() => navigate(`${AppRoute.Reports}/cafes`)} />
             <MenuOptionCard icon={UserPlus} label="Voluntários" onClick={() => navigate(AppRoute.Volunteers)} />
             <MenuOptionCard icon={FileBarChart} label="Relatórios" onClick={() => navigate(AppRoute.Reports)} />
           </OptionsGrid>

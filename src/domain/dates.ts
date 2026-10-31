@@ -10,3 +10,8 @@ export function formatTimestampDate(timestamp: string): string {
 export function todayKey(): string {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 }
+
+export function weekdayLabel(dateKey: string): string {
+  const weekday = new Date(`${dateKey}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long' });
+  return weekday.charAt(0).toUpperCase() + weekday.slice(1).replace('-feira', '');
+}

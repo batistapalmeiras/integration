@@ -14,7 +14,7 @@ export function missedSignupIds(
 
   const latestCoffee = latestAttendedCoffeeByPerson(attendance);
   return selectMissedSignups(
-    pending.map((p) => ({ personId: p.id, coffeeDate: latestCoffee.get(p.id) ?? null })),
+    pending.map((p) => ({ personId: p.id, coffeeDate: p.signup_window_from ?? latestCoffee.get(p.id) ?? null })),
     cohorts,
   );
 }

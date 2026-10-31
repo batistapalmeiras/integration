@@ -3,7 +3,7 @@ import styled from 'styled-components';
 // Local
 import { DisplayStatusInput, getDisplayStatusMeta } from '../../types/person';
 
-const Pill = styled.span<{ $tone: string }>`
+export const TonePill = styled.span<{ $tone: string }>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -41,9 +41,9 @@ export function StatusPill({ person, compact }: Props) {
   const Icon = meta.icon;
   const label = compact ? (meta.compactLabel ?? meta.label) : meta.label;
   return (
-    <Pill $tone={meta.tone}>
+    <TonePill $tone={meta.tone}>
       <Icon size={12} />
       {label}
-    </Pill>
+    </TonePill>
   );
 }

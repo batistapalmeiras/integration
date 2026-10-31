@@ -1,7 +1,9 @@
 // Local
 import {
   canMarkCoffeeAttendance,
+  coffeeHistory,
   coffeePresence,
+  countQueuedFrom,
   currentCoffeeAttendance,
   selectOpenCoffeeEvents,
   selectOrphanPeople,
@@ -69,13 +71,13 @@ describe('canMarkCoffeeAttendance', () => {
 describe('selectOrphanPeople', () => {
   it('treats someone with only past cafés attended as needing a seat', () => {
     expect(
-      selectOrphanPeople([{ id: 'raissa', status: 'welcome_coffee' }], [{ person_id: 'raissa', attended: true }]),
+      selectOrphanPeople([{ id: 'raissa', status: 'welcome_coffee', signup_window_from: null }], [{ person_id: 'raissa', attended: true }]),
     ).toEqual(['raissa']);
   });
 
   it('leaves someone who already has an open seat alone', () => {
     expect(
-      selectOrphanPeople([{ id: 'raissa', status: 'welcome_coffee' }], [{ person_id: 'raissa', attended: false }]),
+      selectOrphanPeople([{ id: 'raissa', status: 'welcome_coffee', signup_window_from: null }], [{ person_id: 'raissa', attended: false }]),
     ).toEqual([]);
   });
 });
@@ -125,5 +127,66 @@ describe('upcomingCoffeeEvent', () => {
 
   it('returns null when every café is in the past', () => {
     expect(upcomingCoffeeEvent(events, '2026-12-01')).toBeNull();
+  });
+});
+
+describe('coffeeHistory', () => {
+  const row = (id: string, personId: string, eventId: string, eventDate: string, attended: boolean, status: string) => ({
+    id,
+    person_id: personId,
+    coffee_event_id: eventId,
+    attended,
+    person: { id: personId, name: personId, phone: '', status, class_invite_sent_at: null },
+    coffee_event: { event_date: eventDate },
+  });
+
+  it('lists cafés newest first, with who came, who missed and who is still enrolled', () => {
+    const history = coffeeHistory({
+      events: [
+        { id: 'sep', event_date: '2026-09-13', event_time: '17:30:00' },
+        { id: 'nov', event_date: '2026-11-08', event_time: '17:30:00' },
+      ],
+      attendance: [
+        row('1', 'Ana', 'sep', '2026-09-13', true, 'integration'),
+        row('2', 'Bia', 'sep', '2026-09-13', false, 'welcome_coffee'),
+        row('3', 'Bia', 'nov', '2026-11-08', false, 'welcome_coffee'),
+      ],
+    }, '2026-10-31');
+
+    expect(history.map((event) => event.id)).toEqual(['nov', 'sep']);
+    expect(history[1].people).toEqual([
+      { personId: 'Ana', name: 'Ana', presence: 'came' },
+      { personId: 'Bia', name: 'Bia', presence: 'missed' },
+    ]);
+    expect(history[0].people).toEqual([{ personId: 'Bia', name: 'Bia', presence: 'enrolled' }]);
+  });
+
+  it('tells an archived person apart from a past café nobody marked', () => {
+    const history = coffeeHistory({
+      events: [{ id: 'oct', event_date: '2026-10-04', event_time: '17:30:00' }],
+      attendance: [
+        row('1', 'Iuri', 'oct', '2026-10-04', false, 'archived'),
+        row('2', 'Lia', 'oct', '2026-10-04', false, 'welcome_coffee'),
+      ],
+    }, '2026-10-31');
+
+    expect(history[0].people.map((person) => person.presence)).toEqual(['archived', 'unmarked']);
+  });
+});
+
+describe('countQueuedFrom', () => {
+  const seat = (personId: string, status: string, signupWindowFrom: string | null) => ({
+    id: personId,
+    person_id: personId,
+    coffee_event_id: 'sep',
+    attended: true,
+    person: { id: personId, name: personId, phone: '', status, class_invite_sent_at: null, signup_window_from: signupWindowFrom },
+    coffee_event: { event_date: '2026-09-13' },
+  });
+
+  it('keeps a café open for whoever still waits on it, but not for someone who came back later', () => {
+    expect(countQueuedFrom([seat('ana', 'pending_signup', null), seat('geovane', 'pending_signup', '2026-10-31')])).toEqual({
+      sep: 1,
+    });
   });
 });

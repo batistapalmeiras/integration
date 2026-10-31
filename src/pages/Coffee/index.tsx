@@ -19,6 +19,7 @@ import { Archive, Check, Pencil, Plus, X, XCircle } from 'lucide-react';
 // Local
 import { AddButton } from '../../components/AddButton';
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';
+import { PeopleCount } from '../../components/PeopleCount';
 import {
   List,
   ListChevron,
@@ -33,7 +34,7 @@ import {
 import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { StatusPill } from '../../components/StatusPill';
 import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
-import { todayKey } from '../../domain/dates';
+import { todayKey, weekdayLabel } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES } from '../../types/enums';
 import { CreateEventModal } from './components/CreateEventModal';
@@ -42,11 +43,6 @@ import { formatDate } from './domain';
 import { useCoffee } from './hooks';
 import { AttendeeRow } from './types';
 import { IconAction, PaginationWrap, PersonLink, RowActions } from './styles';
-
-function weekdayLabel(eventDate: string): string {
-  const weekday = new Date(`${eventDate}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long' });
-  return weekday.charAt(0).toUpperCase() + weekday.slice(1).replace('-feira', '');
-}
 
 export function CoffeePage() {
   const navigate = useNavigate();
@@ -207,6 +203,8 @@ export function CoffeePage() {
             onPrevious={eventIndex > 0 ? () => selectEvent(events[eventIndex - 1].id) : undefined}
             onNext={eventIndex < events.length - 1 ? () => selectEvent(events[eventIndex + 1].id) : undefined}
           />
+
+          <PeopleCount count={totalCount} />
 
           {totalCount === 0 && (
             <Empty title="Ninguém convidado ainda" description="Visitantes que aceitaram o convite aparecerão aqui." />
