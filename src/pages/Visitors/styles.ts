@@ -85,19 +85,9 @@ export const RowButton = styled.button`
 export const RowText = styled.span`
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-`;
-
-export const RowName = styled.span`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.ink};
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const PreviewHeader = styled.div`
