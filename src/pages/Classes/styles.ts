@@ -1,5 +1,5 @@
 // Libs
-import { StatsGrid, Typography } from 'bp-kit';
+import { StatsGrid } from 'bp-kit';
 import styled from 'styled-components';
 // Local
 import { Table, Td, Th } from '../../components/Table';
@@ -96,11 +96,6 @@ export const StudentTags = styled.span`
   flex-wrap: wrap;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.xs};
-`;
-
-export const FootHint = styled(Typography)`
-  margin-top: ${({ theme }) => theme.spacing.sm};
-  text-align: center;
 `;
 
 export const Grid = styled(Table)`

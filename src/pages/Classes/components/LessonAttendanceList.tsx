@@ -10,7 +10,6 @@ import { formatDate } from '../domain';
 import { EnrollmentRow, Lesson } from '../types';
 import {
   CountBadge,
-  FootHint,
   LessonTab,
   LessonTabs,
   PresenceBar,
@@ -96,7 +95,6 @@ export function LessonAttendanceList({ lessons, rows, onToggle, onOpen }: Props)
           );
         })}
       </List>
-      <FootHint type="caption">Marque a caixa de quem veio. Salva sozinho.</FootHint>
     </>
   );
 }
