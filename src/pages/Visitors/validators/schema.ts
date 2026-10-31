@@ -21,8 +21,12 @@ export type ContactAttemptFormValues = z.infer<typeof contactAttemptSchema>;
 
 export function buildCommunitySchema({ smallGroupRequired, ministryRequired }: CommunityRequirements) {
   return z.object({
-    smallGroupId: smallGroupRequired ? z.string().min(1, text.validation.selectRequired('o Pequeno Grupo')) : z.string(),
-    ministryId: ministryRequired ? z.string().min(1, text.validation.selectRequired('o ministério')) : z.string(),
+    smallGroupIds: smallGroupRequired
+      ? z.array(z.string()).min(1, text.validation.selectRequired('o Pequeno Grupo'))
+      : z.array(z.string()),
+    ministryIds: ministryRequired
+      ? z.array(z.string()).min(1, text.validation.selectRequired('pelo menos um ministério'))
+      : z.array(z.string()),
   });
 }
 

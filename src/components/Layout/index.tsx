@@ -1,7 +1,6 @@
 // React
 import React from 'react';
 // Libs
-import { Brand } from 'bp-kit';
 import {
   Contact,
   GraduationCap,
@@ -27,6 +26,9 @@ import {
   Main,
   MainInner,
   SideBrand,
+  SideBrandLink,
+  SideBrandLogo,
+  SideBrandName,
   SideFooter,
   SideMenu,
   SideNav,
@@ -83,7 +85,10 @@ export function Layout({ children }: ILayoutProps) {
     <>
       <SideMenu>
         <SideBrand>
-          <Brand to={homeRoute} icon={icon} alt="Batista Palmeiras" name="Integração" />
+          <SideBrandLink to={homeRoute}>
+            <SideBrandLogo src={icon} alt="" />
+            <SideBrandName>Batista Palmeiras</SideBrandName>
+          </SideBrandLink>
         </SideBrand>
 
         <SideNav>
@@ -108,7 +113,7 @@ export function Layout({ children }: ILayoutProps) {
           {showClasses && (
             <SideNavLink to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
               <GraduationCap size={18} />
-              Turma
+              Turmas
             </SideNavLink>
           )}
           {showMembership && (
@@ -163,7 +168,7 @@ export function Layout({ children }: ILayoutProps) {
           {showClasses && (
             <BottomTab to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
               <GraduationCap size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Classes)}>Turma</BottomTabLabel>
+              <BottomTabLabel $active={isActive(AppRoute.Classes)}>Turmas</BottomTabLabel>
             </BottomTab>
           )}
           {showMembership && (

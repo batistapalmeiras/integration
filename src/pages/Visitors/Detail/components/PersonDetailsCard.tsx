@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function PersonDetailsCard({ person, coffeeDate, cohortName, onClick }: Props) {
-  const hasDetails = !!cohortName || !!coffeeDate || !!person.small_group_id || !!person.ministry_id;
+  const hasDetails = !!cohortName || !!coffeeDate || !!person.small_group_id || person.status === 'member';
   if (!hasDetails) return null;
 
   return (

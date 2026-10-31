@@ -77,3 +77,9 @@ export async function deletePersonRow(id: string): Promise<void> {
   const { error } = await supabase.from('people').delete().eq('id', id);
   if (error) throw error;
 }
+
+export async function findPersonByPhone(digits: string): Promise<Person | null> {
+  const { data, error } = await supabase.from('people').select('*').eq('phone', digits).limit(1).maybeSingle();
+  if (error) throw error;
+  return data as Person | null;
+}

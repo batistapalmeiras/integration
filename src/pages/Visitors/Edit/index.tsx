@@ -4,13 +4,12 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Archive, RotateCcw, Save, Trash2 } from 'lucide-react';
-import { Button, Empty, maskPhone, ModalActions, ModalTitle, PageHeader, Skeleton, text, TextInput, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
+import { Button, Empty, maskPhone, ModalActions, ModalTitle, PageHeader, Skeleton, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
 // Local
-import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { AppRoute } from '../../../routes/paths';
 import { UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
-import { Actions, Form } from '../Detail/styles';
+import { VisitorForm, VisitorFormActions } from '../components/VisitorForm';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
 
 export function VisitorEditPage() {
@@ -117,34 +116,9 @@ export function VisitorEditPage() {
         }
       />
 
-      <Form onSubmit={submit}>
-        <TextInput
-          label={text.fields.name}
-          control={control}
-          name="name"
-          placeholder={text.fields.fullName}
-          disabled={!canEditFields}
-        />
-        <TextInput
-          label={text.fields.phone}
-          control={control}
-          name="phone"
-          mask="phone"
-          placeholder={PHONE_PLACEHOLDER}
-          disabled={!canEditFields}
-        />
-        <TextInput
-          label={text.fields.email}
-          control={control}
-          name="email"
-          type="email"
-          placeholder={text.fields.emailPlaceholder}
-          disabled={!canEditFields}
-        />
-        <TextInput label="Idade" control={control} name="age" type="text" inputMode="numeric" placeholder="Idade" disabled={!canEditFields} />
-
-        {canEditFields && (
-          <Actions>
+      <VisitorForm control={control} onSubmit={submit} disabled={!canEditFields}>
+        <VisitorFormActions>
+          {canEditFields && (
             <Button type="submit" variant="primary" disabled={isSubmitting || person.status === 'archived'}>
               {isSubmitting ? (
                 'Salvando...'
@@ -155,16 +129,15 @@ export function VisitorEditPage() {
                 </>
               )}
             </Button>
-          </Actions>
-        )}
-
-        {canDelete && (
-          <Button type="button" variant="danger" fullWidth onClick={confirmDelete}>
-            <Trash2 size={16} />
-            Excluir cadastro
-          </Button>
-        )}
-      </Form>
+          )}
+          {canDelete && (
+            <Button type="button" variant="danger" onClick={confirmDelete}>
+              <Trash2 size={16} />
+              Excluir cadastro
+            </Button>
+          )}
+        </VisitorFormActions>
+      </VisitorForm>
       {modal}
       {toast}
     </div>

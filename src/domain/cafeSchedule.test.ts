@@ -1,5 +1,11 @@
 // Local
-import { canMarkCoffeeAttendance, currentCoffeeAttendance, selectOpenCoffeeEvents, selectOrphanPeople } from './cafeSchedule';
+import {
+  canMarkCoffeeAttendance,
+  coffeePresence,
+  currentCoffeeAttendance,
+  selectOpenCoffeeEvents,
+  selectOrphanPeople,
+} from './cafeSchedule';
 
 vi.mock('../lib/supabase', () => ({ supabase: {} }));
 
@@ -70,5 +76,36 @@ describe('selectOrphanPeople', () => {
     expect(
       selectOrphanPeople([{ id: 'raissa', status: 'welcome_coffee' }], [{ person_id: 'raissa', attended: false }]),
     ).toEqual([]);
+  });
+});
+
+describe('coffeePresence', () => {
+  const row = (attended: boolean, status: string, date = '2026-11-08') => ({
+    attended,
+    person: { status },
+    coffee_event: { event_date: date },
+  });
+
+  it('reads an attended seat as came', () => {
+    expect(coffeePresence(row(true, 'pending_signup'), '2026-11-08')).toEqual({ presence: 'came', editable: true });
+  });
+
+  it('reads a seat sent back to retry contact as missed', () => {
+    expect(coffeePresence(row(false, 'retry_contact'), '2026-11-08')).toEqual({ presence: 'missed', editable: true });
+  });
+
+  it('leaves a seat still waiting on the café unmarked', () => {
+    expect(coffeePresence(row(false, 'welcome_coffee'), '2026-11-08')).toEqual({ presence: null, editable: true });
+  });
+
+  it('reads an older seat as missed and locks it once the person moved to a later café', () => {
+    expect(coffeePresence(row(false, 'welcome_coffee', '2026-11-08'), '2026-11-22')).toEqual({
+      presence: 'missed',
+      editable: false,
+    });
+  });
+
+  it('locks the mark once the person moved past the café', () => {
+    expect(coffeePresence(row(true, 'integration'), '2026-11-08')).toEqual({ presence: 'came', editable: false });
   });
 });

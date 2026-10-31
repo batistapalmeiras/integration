@@ -6,12 +6,12 @@ import { comparePeopleByPipeline } from '../../../types/person';
 import { loadSavedFilters, saveFilters } from '../persistence';
 import { Person } from '../../../features/visitors';
 
-const VISIBLE_STATUSES: Person['status'][] = ['initial_contact', 'retry_contact', 'archived'];
+export const VISIBLE_STATUSES: Person['status'][] = ['initial_contact', 'retry_contact', 'archived'];
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export function useVisitors() {
-  const [allPeople, setAllPeople] = useState<Person[]>([]);
+  const [rows, setRows] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -37,10 +37,11 @@ export function useVisitors() {
 
     if (loadError) {
       setError(loadError.message);
-    } else {
-      setAllPeople((data as Person[]).sort(comparePeopleByPipeline));
-      setPage(1);
+      setLoading(false);
+      return;
     }
+
+    setRows((data as Person[]).sort(comparePeopleByPipeline));
     setLoading(false);
   }, []);
 
@@ -58,16 +59,18 @@ export function useVisitors() {
     setPage(1);
   };
 
-  const filtered = allPeople
-    .filter((p) => statusFilter.length === 0 || statusFilter.includes(p.status))
-    .filter((p) => !debouncedSearch || p.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
+  const filtered = rows.filter(
+    (person) =>
+      (!debouncedSearch || person.name.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
+      (statusFilter.length === 0 || statusFilter.includes(person.status)),
+  );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
-  const people = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
+  const pageRows = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
 
   return {
-    people,
+    rows: pageRows,
     totalCount: filtered.length,
     loading,
     error,

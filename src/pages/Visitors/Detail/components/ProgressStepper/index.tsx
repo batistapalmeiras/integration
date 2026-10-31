@@ -1,8 +1,6 @@
-// Libs
-import { Check } from 'lucide-react';
 // Local
 import { PersonStatus } from '../../../../../features/visitors';
-import { Circle, Label, Step, Wrapper } from './styles';
+import { Bar, Bars, Label, Labels, Wrapper } from './styles';
 
 const STAGES: { statuses: PersonStatus[]; label: string }[] = [
   { statuses: ['initial_contact', 'retry_contact'], label: 'Contato' },
@@ -22,16 +20,19 @@ export function ProgressStepper({ status }: Props) {
   const currentIndex = STAGES.findIndex((stage) => stage.statuses.includes(status));
 
   return (
-    <Wrapper>
-      {STAGES.map((stage, index) => {
-        const state = index < currentIndex ? 'done' : index === currentIndex ? 'current' : 'future';
-        return (
-          <Step key={stage.label} $state={state}>
-            <Circle $state={state}>{state === 'done' ? <Check /> : index + 1}</Circle>
-            <Label $state={state}>{stage.label}</Label>
-          </Step>
-        );
-      })}
+    <Wrapper aria-label={`Etapa ${currentIndex + 1} de ${STAGES.length}: ${STAGES[currentIndex].label}`}>
+      <Bars>
+        {STAGES.map((stage, index) => (
+          <Bar key={stage.label} $filled={index <= currentIndex} />
+        ))}
+      </Bars>
+      <Labels>
+        {STAGES.map((stage, index) => (
+          <Label key={stage.label} $current={index === currentIndex}>
+            {stage.label}
+          </Label>
+        ))}
+      </Labels>
     </Wrapper>
   );
 }

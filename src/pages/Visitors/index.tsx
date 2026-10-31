@@ -1,22 +1,20 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useModal } from 'bp-kit';
-import { SlidersHorizontal } from 'lucide-react';
+import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, text } from 'bp-kit';
 // Local
+import { List, ListChevron, ListGrow, ListHeader, ListItem, ListSlot, ListStatusCell } from '../../components/List';
 import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
-import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
-import { VisitorFiltersModal } from './components/VisitorFiltersModal';
-import { useVisitors } from './hooks';
-import { PaginationWrap, SearchFiltersRow } from './styles';
+import { PersonStatus, STATUS_META } from '../../types/person';
+import { useVisitors, VISIBLE_STATUSES } from './hooks/useVisitors';
+import { PaginationWrap, QueueChips, RowButton, RowText, SearchRow } from './styles';
 
 export function VisitorsPage() {
   const navigate = useNavigate();
-  const { open, close, modal } = useModal('drawer');
   const {
-    people,
+    rows,
     totalCount,
     loading,
     error,
@@ -30,8 +28,10 @@ export function VisitorsPage() {
     hasFilter,
   } = useVisitors();
 
-  const openFilters = () =>
-    open(<VisitorFiltersModal close={close} statusFilter={statusFilter} onApply={setStatusFilter} />);
+  const toggleStatus = (status: PersonStatus) =>
+    setStatusFilter(
+      statusFilter.includes(status) ? statusFilter.filter((s) => s !== status) : [...statusFilter, status],
+    );
 
   return (
     <div>
@@ -47,16 +47,27 @@ export function VisitorsPage() {
       {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
 
       {!loading && !error && (
-        <SearchFiltersRow>
-          <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
-          <Button variant="secondary" size="sm" onClick={openFilters}>
-            <SlidersHorizontal size={16} />
-            Filtros{statusFilter.length > 0 ? ` (${statusFilter.length})` : ''}
-          </Button>
-        </SearchFiltersRow>
+        <>
+          <SearchRow>
+            <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+          </SearchRow>
+          <QueueChips role="group" aria-label="Filtrar por status">
+            {VISIBLE_STATUSES.map((status) => (
+              <Chip
+                key={status}
+                type="button"
+                aria-pressed={statusFilter.includes(status)}
+                $active={statusFilter.includes(status)}
+                onClick={() => toggleStatus(status)}
+              >
+                {STATUS_META[status].label}
+              </Chip>
+            ))}
+          </QueueChips>
+        </>
       )}
 
-      {!loading && !error && people.length === 0 && (
+      {!loading && !error && rows.length === 0 && (
         <Empty
           title="Nenhum visitante encontrado"
           description={
@@ -67,38 +78,34 @@ export function VisitorsPage() {
         />
       )}
 
-      {!loading && !error && people.length > 0 && (
-        <TableWrapper>
-          <Table>
-            <thead>
-              <tr>
-                <Th>{text.fields.name}</Th>
-                <Th>{text.fields.status}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {people.map((person) => (
-                <Tr key={person.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
-                  <Td $truncate title={person.name}>
-                    {person.name}
-                  </Td>
-                  <Td $shrink>
+      {!loading && !error && rows.length > 0 && (
+        <>
+          <List>
+            <ListHeader aria-hidden="true">
+              <ListGrow>{text.fields.name}</ListGrow>
+              <ListStatusCell>{text.fields.status}</ListStatusCell>
+              <ListSlot $width={16} />
+            </ListHeader>
+            {rows.map((person) => (
+              <ListItem key={person.id}>
+                <RowButton type="button" onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
+                  <RowText>{person.name}</RowText>
+                  <ListStatusCell>
                     <StatusPill person={person} compact />
-                  </Td>
-                </Tr>
-              ))}
-            </tbody>
-          </Table>
-        </TableWrapper>
-      )}
+                  </ListStatusCell>
+                  <ListChevron />
+                </RowButton>
+              </ListItem>
+            ))}
+          </List>
 
-      {!loading && !error && people.length > 0 && totalPages > 1 && (
-        <PaginationWrap>
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
-        </PaginationWrap>
+          {totalPages > 1 && (
+            <PaginationWrap>
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+            </PaginationWrap>
+          )}
+        </>
       )}
-
-      {modal}
     </div>
   );
 }

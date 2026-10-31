@@ -12,6 +12,7 @@ import {
   enrollPerson as enrollPersonRow,
   fetchCohortBoard,
   finishedCohortIds,
+  toggleLessonAttendance,
 } from '../../../domain/classesRoster';
 import { enrollInIntegrationClass } from '../../../features/visitors';
 import { supabase } from '../../../lib/supabase';
@@ -19,11 +20,8 @@ import { UserRole } from '../../../types/enums';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { firstLessonDate } from '../../../domain/cohortSchedule';
 import { formatDate, weeklyLessonDates } from '../domain';
-import { loadSavedFilters, saveFilters } from '../persistence';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
-const PAGE_SIZE = 10;
-const SEARCH_DEBOUNCE_MS = 300;
 const MAX_COHORTS = 2;
 
 function sortByFirstLesson(list: CohortWithLessons[]): CohortWithLessons[] {
@@ -41,19 +39,7 @@ export function useClasses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [minCohortDate, setMinCohortDate] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const boardRef = useRef<CohortBoard | null>(null);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timeout);
-  }, [search]);
-
-  useEffect(() => {
-    saveFilters({ search });
-  }, [search]);
 
   useEffect(() => {
     getUpcomingCoffeeEventDate().then(setMinCohortDate);
@@ -88,7 +74,6 @@ export function useClasses() {
 
     rows.sort((a, b) => comparePeopleByPipeline(a.person, b.person));
     setAllEnrollments(rows);
-    setPage(1);
   }, []);
 
   const load = useCallback(
@@ -184,17 +169,27 @@ export function useClasses() {
     await load(cohort.id);
   };
 
-  const setSearch = (value: string) => {
-    setSearchState(value);
-    setPage(1);
+  const refresh = async () => applyBoard(await fetchCohortBoard(), selectedCohortId ?? undefined);
+
+  const toggleAttendance = async (enrollmentId: string, lessonId: string, attended: boolean) => {
+    setAllEnrollments((rows) =>
+      rows.map((row) => {
+        if (row.id !== enrollmentId) return row;
+        const previous = row.attendanceByLesson[lessonId];
+        const attendanceByLesson = {
+          ...row.attendanceByLesson,
+          [lessonId]: { ...(previous ?? { id: '', enrollment_id: enrollmentId, lesson_id: lessonId }), attended } as LessonAttendance,
+        };
+        return {
+          ...row,
+          attendanceByLesson,
+          attendedCount: Object.values(attendanceByLesson).filter((a) => a?.attended).length,
+        };
+      }),
+    );
+    await toggleLessonAttendance(enrollmentId, lessonId, attended);
+    await refresh();
   };
-
-  const filtered = debouncedSearch
-    ? allEnrollments.filter((e) => e.person.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
-    : allEnrollments;
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const enrollments = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return {
     cohorts: cohorts.map((c) => c.cohort as Cohort),
@@ -203,20 +198,15 @@ export function useClasses() {
     selectCohort,
     canCreateCohort: cohorts.length < MAX_COHORTS,
     lessons,
-    enrollments,
-    totalCount: filtered.length,
+    enrollments: allEnrollments,
+    totalCount: allEnrollments.length,
     loading,
     error,
     minCohortDate,
-    page,
-    totalPages,
-    setPage,
-    search,
-    setSearch,
-    hasFilter: !!search.trim(),
     createCohort,
     updateLessonDates,
     closeCohort,
     enrollPerson,
+    toggleAttendance,
   };
 }

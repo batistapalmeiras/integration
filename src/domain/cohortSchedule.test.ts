@@ -1,5 +1,6 @@
 // Local
 import {
+  currentLesson,
   hasFirstLessonStarted,
   isCohortFinished,
   selectCohortForCoffee,
@@ -84,5 +85,30 @@ describe('isCohortFinished', () => {
 
   it('keeps it open while classes are still to come, even with an empty roster', () => {
     expect(isCohortFinished(fourWeeks, 0, '2026-10-05')).toBe(false);
+  });
+});
+
+describe('currentLesson', () => {
+  const dates = [
+    { number: 3, date: '2026-10-04' },
+    { number: 1, date: '2026-09-20' },
+    { number: 4, date: '2026-10-11' },
+    { number: 2, date: '2026-09-27' },
+  ];
+
+  it('picks the first class before the turma starts', () => {
+    expect(currentLesson(dates, '2026-09-19')?.number).toBe(1);
+  });
+
+  it('picks the class of the day', () => {
+    expect(currentLesson(dates, '2026-09-27')?.number).toBe(2);
+  });
+
+  it('picks the latest class already held between classes', () => {
+    expect(currentLesson(dates, '2026-10-08')?.number).toBe(3);
+  });
+
+  it('stays on the last class after the turma ends', () => {
+    expect(currentLesson(dates, '2026-10-31')?.number).toBe(4);
   });
 });
