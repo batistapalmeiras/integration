@@ -14,7 +14,6 @@ import {
   LessonTabs,
   PresenceBar,
   PresenceHeader,
-  StudentTags,
   StudentText,
 } from '../styles';
 
@@ -74,7 +73,7 @@ export function LessonAttendanceList({ lessons, rows, onToggle, onOpen }: Props)
         {rows.map((row) => {
           const checked = !!row.attendanceByLesson[lesson.id]?.attended;
           return (
-            <ListItem key={row.id} $selected={checked}>
+            <ListItem key={row.id}>
               <ListItemRow>
                 <Checkbox
                   aria-label={`Presença de ${row.person.name} na aula ${lesson.number}`}
@@ -83,13 +82,11 @@ export function LessonAttendanceList({ lessons, rows, onToggle, onOpen }: Props)
                 />
                 <StudentText type="button" onClick={() => onOpen(row.person.id)}>
                   <span>{row.person.name}</span>
-                  <StudentTags>
-                    <CountBadge $eligible={row.attendedCount >= lessons.length}>
-                      {row.attendedCount}/{lessons.length}
-                    </CountBadge>
-                    <StatusPill person={row.person} compact />
-                  </StudentTags>
+                  <CountBadge $eligible={row.attendedCount >= lessons.length}>
+                    {row.attendedCount}/{lessons.length}
+                  </CountBadge>
                 </StudentText>
+                <StatusPill person={row.person} compact />
               </ListItemRow>
             </ListItem>
           );
