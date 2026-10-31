@@ -25,6 +25,7 @@ import {
   selectOrphanPeople,
   unmarkCoffeePresence,
   upcomingCoffeeEvent,
+  isReturningToSignup,
   updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
 import { listAllCohorts } from '../../../domain/classesRoster';
@@ -69,16 +70,24 @@ export function useCoffee() {
       const selected = open.find((e) => e.id === keepSelectionId) ?? open[0];
       setSelectedEventId(selected.id);
       const latest = latestCoffeeDateByPerson(board.attendance);
-      setAllAttendees(
-        current
-          .filter((a) => a.coffee_event_id === selected.id && COFFEE_LIST_STATUSES.includes(a.person?.status ?? ''))
-          .filter((a) => a.person?.status !== 'retry_contact' || selected.event_date <= todayKey())
-          .map((a) => {
-            const { presence, editable } = coffeePresence(a, latest.get(a.person_id));
-            return { ...a, presence, presenceEditable: editable } as unknown as AttendeeRow;
-          })
-          .sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
-      );
+      const isUpcoming = selected.id === upcomingCoffeeEvent(open, todayKey())?.id;
+      const seated = current
+        .filter((a) => a.coffee_event_id === selected.id && !isReturningToSignup(a.person))
+        .filter((a) => COFFEE_LIST_STATUSES.includes(a.person?.status ?? ''))
+        .filter((a) => a.person?.status !== 'retry_contact' || selected.event_date <= todayKey())
+        .map((a) => {
+          const { presence, editable } = coffeePresence(a, latest.get(a.person_id));
+          return { ...a, presence, presenceEditable: editable, returning: false } as unknown as AttendeeRow;
+        });
+      const returning = isUpcoming
+        ? current
+            .filter((a) => isReturningToSignup(a.person))
+            .map(
+              (a) =>
+                ({ ...a, coffee_event_id: selected.id, presence: null, presenceEditable: false, returning: true }) as unknown as AttendeeRow,
+            )
+        : [];
+      setAllAttendees([...seated, ...returning].sort((a, b) => comparePeopleByPipeline(a.person, b.person)));
       setPage(1);
       return selected.id;
     },

@@ -254,6 +254,10 @@ export const STATUS_AFTER_PRESENCE: Record<'came' | 'missed' | 'none', string> =
   none: 'welcome_coffee',
 };
 
+export function isReturningToSignup(person: { status: string; signup_window_from?: string | null } | null): boolean {
+  return person?.status === 'pending_signup' && !!person.signup_window_from;
+}
+
 export const COFFEE_LIST_STATUSES = ['welcome_coffee', 'pending_signup', 'retry_contact'];
 
 export function coffeePresence(
@@ -364,7 +368,7 @@ export function countQueuedFrom(attendance: CoffeeBoardAttendance[]): Record<str
   const counts: Record<string, number> = {};
   for (const row of attendance) {
     if (row.person?.status !== 'welcome_coffee' && row.person?.status !== 'pending_signup') continue;
-    if (row.person.signup_window_from) continue;
+    if (isReturningToSignup(row.person)) continue;
     counts[row.coffee_event_id] = (counts[row.coffee_event_id] ?? 0) + 1;
   }
   return counts;

@@ -168,7 +168,8 @@ export function CoffeePage() {
   const canChangePresence = (attendance: AttendeeRow) =>
     attendance.presenceEditable && !attendance.person.class_invite_sent_at;
 
-  const hasActions = (attendance: AttendeeRow) => canPlan && (!canMark || canChangePresence(attendance));
+  const hasActions = (attendance: AttendeeRow) =>
+    canPlan && !attendance.returning && (!canMark || canChangePresence(attendance));
   const showStatus = attendees.some((attendance) => !hasActions(attendance));
 
   const eventIndex = events.findIndex((e) => e.id === selectedEventId);

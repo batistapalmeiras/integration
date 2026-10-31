@@ -18,4 +18,5 @@ export interface AttendeeRow extends CoffeeAttendance {
   person: Pick<Person, 'id' | 'name' | 'phone' | 'status' | 'class_invite_sent_at'>;
   presence: CoffeePresence;
   presenceEditable: boolean;
+  returning: boolean;
 }
