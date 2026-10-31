@@ -185,8 +185,11 @@ export function useCoffee() {
   const clampedPage = Math.min(page, totalPages);
   const attendees = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
 
+  const attendedCount = allAttendees.filter((a) => a.attended).length;
+
   return {
     events,
+    stats: { total: allAttendees.length, attended: attendedCount, pending: allAttendees.length - attendedCount },
     canCreateEvent: events.length < MAX_EVENTS,
     event,
     selectedEventId,
