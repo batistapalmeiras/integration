@@ -6,6 +6,7 @@ import { Lock } from 'lucide-react';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
+import { hasCompletedLessons } from '../../../domain/membershipEligibility';
 import { AppRoute } from '../../../routes/paths';
 import { useCohortRoster } from '../hooks';
 import { CountBadge, NameCell, NamePrimary, NameSubtitle } from '../styles';
@@ -61,7 +62,7 @@ export function CohortRosterPage() {
                     <StatusPill person={row} compact />
                   </Td>
                   <Td $hideOnMobile $shrink>
-                    <CountBadge $eligible={row.lessonsAttended >= 3}>
+                    <CountBadge $eligible={hasCompletedLessons(row.lessonsAttended, row.totalLessons)}>
                       {row.lessonsAttended}/{row.totalLessons}
                     </CountBadge>
                   </Td>

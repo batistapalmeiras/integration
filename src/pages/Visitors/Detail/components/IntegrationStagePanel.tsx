@@ -4,6 +4,7 @@ import { Card, Checkbox, LinkButton, ModalTitle, Skeleton, Typography, useModal 
 // Local
 import { CountBadge } from '../../../Classes/styles';
 import { formatDate } from '../../../../domain/dates';
+import { hasCompletedLessons } from '../../../../domain/membershipEligibility';
 import { makeupLessonMessage, membershipInterestMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
 import { CardHeader, LessonList, LessonMakeupAction, LessonRow, StagePanel } from '../styles';
@@ -14,8 +15,6 @@ interface IntegrationClassState {
   attendanceByLesson: Record<string, { id: string; attended: boolean }>;
   attendedCount: number;
 }
-
-const MEMBERSHIP_THRESHOLD = 4;
 
 interface Props {
   person: Person;
@@ -44,7 +43,7 @@ export function IntegrationStagePanel({
   const lastLesson = lessons[lessons.length - 1];
   const todayKey = new Date().toISOString().slice(0, 10);
   const makeupUnlocked = !!lastLesson && lastLesson.date < todayKey;
-  const eligible = attendedCount >= MEMBERSHIP_THRESHOLD;
+  const eligible = hasCompletedLessons(attendedCount, lessons.length);
 
   const openMakeupMessage = async (lessonId: string, lessonNumber: number) => {
     const link = await onGetMakeupLink(lessonId);

@@ -1,14 +1,15 @@
 // Libs
 import { InfoBox, Typography } from 'bp-kit';
 // Local
-import { MembershipEligibility, isEligibleForMembership } from '../types';
+import { hasCompletedLessons } from '../../../domain/membershipEligibility';
+import { MembershipEligibility } from '../types';
 
 interface Props {
   eligibility: MembershipEligibility | null;
 }
 
 export function ConfirmationStep({ eligibility }: Props) {
-  const pending = !!eligibility && !isEligibleForMembership(eligibility);
+  const pending = !!eligibility && !hasCompletedLessons(eligibility.lessonsAttended, eligibility.lessonsTotal);
   const missingCount = eligibility ? eligibility.lessonsTotal - eligibility.lessonsAttended : 0;
 
   return (

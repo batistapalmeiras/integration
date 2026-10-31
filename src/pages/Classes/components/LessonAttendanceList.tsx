@@ -7,6 +7,7 @@ import { List, ListChevron, ListHeader, ListItem, ListItemRow, ListName, ListSlo
 import { StatusPill } from '../../../components/StatusPill';
 import { currentLesson } from '../../../domain/cohortSchedule';
 import { todayKey } from '../../../domain/dates';
+import { hasCompletedLessons } from '../../../domain/membershipEligibility';
 import { formatDate } from '../domain';
 import { EnrollmentRow, Lesson } from '../types';
 import { CountBadge, LessonTab, LessonTabs, NameHeading, PresenceHeading, StudentText } from '../styles';
@@ -75,7 +76,7 @@ export function LessonAttendanceList({ lessons, rows, onToggle, onOpen, summary,
                   />
                   <StudentText type="button" onClick={() => onOpen(row.person.id)}>
                     <ListName>{row.person.name}</ListName>
-                    <CountBadge $eligible={row.attendedCount >= lessons.length}>
+                    <CountBadge $eligible={hasCompletedLessons(row.attendedCount, lessons.length)}>
                       {row.attendedCount} de {lessons.length} aulas
                     </CountBadge>
                   </StudentText>
