@@ -1,20 +1,18 @@
 // Local
-import { VisitorQueue } from '../../features/visitors';
+import { PersonStatus } from '../../types/person';
 
 const STORAGE_KEY = 'visitors-filters';
 
-export type QueueFilter = 'all' | VisitorQueue;
-
 export interface VisitorFilters {
   search: string;
-  queue: QueueFilter;
+  statusFilter: PersonStatus[];
 }
 
-export function loadSavedFilters(): Partial<VisitorFilters> | null {
+export function loadSavedFilters(): VisitorFilters | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as Partial<VisitorFilters>;
+    return JSON.parse(raw) as VisitorFilters;
   } catch {
     return null;
   }

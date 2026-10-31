@@ -6,7 +6,7 @@ import { useAuthCtx } from 'bp-kit';
 import { supabase } from '../../../lib/supabase';
 import { buildWhatsAppLink, initialContactMessage } from '../../../domain/whatsapp';
 import { comparePeopleByPipeline } from '../../../types/person';
-import { loadSavedFilters, QueueFilter, saveFilters } from '../persistence';
+import { loadSavedFilters, saveFilters } from '../persistence';
 import {
   fetchContactAttemptDates,
   Person,
@@ -17,7 +17,7 @@ import {
   visitorReason,
 } from '../../../features/visitors';
 
-const VISIBLE_STATUSES: Person['status'][] = ['initial_contact', 'retry_contact', 'archived'];
+export const VISIBLE_STATUSES: Person['status'][] = ['initial_contact', 'retry_contact', 'archived'];
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -36,7 +36,9 @@ export function useVisitors() {
 
   const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [queue, setQueueState] = useState<QueueFilter>(() => loadSavedFilters()?.queue ?? 'all');
+  const [statusFilter, setStatusFilterState] = useState<Person['status'][]>(
+    () => loadSavedFilters()?.statusFilter ?? [],
+  );
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
@@ -44,8 +46,8 @@ export function useVisitors() {
   }, [search]);
 
   useEffect(() => {
-    saveFilters({ search, queue });
-  }, [search, queue]);
+    saveFilters({ search, statusFilter });
+  }, [search, statusFilter]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -83,8 +85,8 @@ export function useVisitors() {
     setPage(1);
   };
 
-  const setQueue = (value: QueueFilter) => {
-    setQueueState(value);
+  const setStatusFilter = (value: Person['status'][]) => {
+    setStatusFilterState(value);
     setPage(1);
   };
 
@@ -94,13 +96,14 @@ export function useVisitors() {
     await load();
   };
 
-  const searched = rows.filter(
-    (r) => !debouncedSearch || r.person.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
+  const filtered = rows.filter(
+    (r) =>
+      (!debouncedSearch || r.person.name.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
+      (statusFilter.length === 0 || statusFilter.includes(r.person.status)),
   );
   const counts = Object.fromEntries(
-    VISITOR_QUEUES.map((q) => [q, searched.filter((r) => r.queue === q).length]),
+    VISITOR_QUEUES.map((q) => [q, filtered.filter((r) => r.queue === q).length]),
   ) as Record<VisitorQueue, number>;
-  const filtered = queue === 'all' ? searched : searched.filter((r) => r.queue === queue);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
@@ -109,7 +112,6 @@ export function useVisitors() {
   return {
     rows: pageRows,
     totalCount: filtered.length,
-    allCount: searched.length,
     counts,
     loading,
     error,
@@ -118,10 +120,10 @@ export function useVisitors() {
     setPage,
     search,
     setSearch,
-    queue,
-    setQueue,
+    statusFilter,
+    setStatusFilter,
     openWhatsApp,
     reload: load,
-    hasFilter: !!search.trim() || queue !== 'all',
+    hasFilter: !!search.trim() || statusFilter.length > 0,
   };
 }

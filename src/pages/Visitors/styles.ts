@@ -14,6 +14,11 @@ export const QueueChips = styled.div`
   gap: ${({ theme }) => theme.spacing.sm};
   overflow-x: auto;
   margin-bottom: ${({ theme }) => theme.spacing.lg};
+
+  & > * {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
 `;
 
 export const Split = styled.div`

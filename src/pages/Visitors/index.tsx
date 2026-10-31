@@ -9,9 +9,9 @@ import { Avatar } from '../../components/Avatar';
 import { PeopleCount } from '../../components/PeopleCount';
 import { VisitorQueue } from '../../features/visitors';
 import { AppRoute } from '../../routes/paths';
+import { PersonStatus, STATUS_META } from '../../types/person';
 import { VisitorPreview } from './components/VisitorPreview';
-import { useVisitors, VisitorRow } from './hooks/useVisitors';
-import { QueueFilter } from './persistence';
+import { useVisitors, VISIBLE_STATUSES, VisitorRow } from './hooks/useVisitors';
 import {
   ListColumn,
   PaginationWrap,
@@ -38,12 +38,6 @@ const QUEUE_TITLES: Record<VisitorQueue, string> = {
   archived: 'Arquivados',
 };
 
-const QUEUE_CHIPS: { value: QueueFilter; label: string }[] = [
-  { value: 'all', label: 'Todos' },
-  { value: 'contact', label: 'Contatar' },
-  { value: 'waiting', label: 'Aguardando' },
-  { value: 'archived', label: 'Arquivados' },
-];
 
 function reasonTone(row: VisitorRow): 'info' | 'warning' | 'muted' {
   if (row.queue !== 'contact') return 'muted';
@@ -57,7 +51,6 @@ export function VisitorsPage() {
   const {
     rows,
     totalCount,
-    allCount,
     counts,
     loading,
     error,
@@ -66,8 +59,8 @@ export function VisitorsPage() {
     setPage,
     search,
     setSearch,
-    queue,
-    setQueue,
+    statusFilter,
+    setStatusFilter,
     openWhatsApp,
     reload,
     hasFilter,
@@ -84,7 +77,10 @@ export function VisitorsPage() {
     else navigate(`${AppRoute.Visitors}/${row.person.id}`);
   };
 
-  const chipCount = (value: QueueFilter) => (value === 'all' ? allCount : counts[value]);
+  const toggleStatus = (status: PersonStatus) =>
+    setStatusFilter(
+      statusFilter.includes(status) ? statusFilter.filter((s) => s !== status) : [...statusFilter, status],
+    );
 
   return (
     <div>
@@ -104,17 +100,24 @@ export function VisitorsPage() {
           <SearchRow>
             <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
           </SearchRow>
-          <QueueChips role="tablist" aria-label="Filtrar visitantes">
-            {QUEUE_CHIPS.map((chip) => (
+          <QueueChips role="group" aria-label="Filtrar por status">
+            <Chip
+              type="button"
+              aria-pressed={statusFilter.length === 0}
+              $active={statusFilter.length === 0}
+              onClick={() => setStatusFilter([])}
+            >
+              Todos
+            </Chip>
+            {VISIBLE_STATUSES.map((status) => (
               <Chip
-                key={chip.value}
+                key={status}
                 type="button"
-                role="tab"
-                aria-selected={queue === chip.value}
-                $active={queue === chip.value}
-                onClick={() => setQueue(chip.value)}
+                aria-pressed={statusFilter.includes(status)}
+                $active={statusFilter.includes(status)}
+                onClick={() => toggleStatus(status)}
               >
-                {chip.label} {chipCount(chip.value)}
+                {STATUS_META[status].label}
               </Chip>
             ))}
           </QueueChips>
