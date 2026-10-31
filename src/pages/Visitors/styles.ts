@@ -46,33 +46,6 @@ export const PreviewColumn = styled.aside`
   gap: ${({ theme }) => theme.spacing.base};
 `;
 
-export const Section = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-export const SectionHeader = styled.div`
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-export const SectionTitle = styled.h2`
-  margin: 0;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 17px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.ink};
-`;
-
-export const SectionCount = styled.span`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
 export const RowList = styled.ul`
   margin: 0;
   padding: 0;
@@ -125,14 +98,6 @@ export const RowName = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-`;
-
-export const RowReason = styled.span<{ $tone: 'info' | 'warning' | 'muted' }>`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 13px;
-  font-weight: 500;
-  color: ${({ theme, $tone }) =>
-    $tone === 'info' ? theme.colors.info : $tone === 'warning' ? theme.colors.warning : theme.colors.muted};
 `;
 
 export const PreviewHeader = styled.div`

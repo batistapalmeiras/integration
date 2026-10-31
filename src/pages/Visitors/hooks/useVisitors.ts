@@ -4,27 +4,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { loadSavedFilters, saveFilters } from '../persistence';
-import {
-  fetchContactAttemptDates,
-  Person,
-  VISITOR_QUEUES,
-  VisitorQueue,
-  visitorQueue,
-  visitorReason,
-} from '../../../features/visitors';
+import { Person } from '../../../features/visitors';
 
 export const VISIBLE_STATUSES: Person['status'][] = ['initial_contact', 'retry_contact', 'archived'];
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
-export interface VisitorRow {
-  person: Person;
-  queue: VisitorQueue;
-  reason: string;
-}
-
 export function useVisitors() {
-  const [rows, setRows] = useState<VisitorRow[]>([]);
+  const [rows, setRows] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -54,20 +41,7 @@ export function useVisitors() {
       return;
     }
 
-    const people = (data as Person[]).sort(comparePeopleByPipeline);
-    try {
-      const attempts = await fetchContactAttemptDates(people.filter((p) => p.status === 'retry_contact').map((p) => p.id));
-      const now = new Date();
-      setRows(
-        people.map((person) => ({
-          person,
-          queue: visitorQueue(person),
-          reason: visitorReason(person, attempts[person.id] ?? [], now),
-        })),
-      );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Não foi possível carregar.');
-    }
+    setRows((data as Person[]).sort(comparePeopleByPipeline));
     setLoading(false);
   }, []);
 
@@ -86,13 +60,10 @@ export function useVisitors() {
   };
 
   const filtered = rows.filter(
-    (r) =>
-      (!debouncedSearch || r.person.name.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
-      (statusFilter.length === 0 || statusFilter.includes(r.person.status)),
+    (person) =>
+      (!debouncedSearch || person.name.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
+      (statusFilter.length === 0 || statusFilter.includes(person.status)),
   );
-  const counts = Object.fromEntries(
-    VISITOR_QUEUES.map((q) => [q, filtered.filter((r) => r.queue === q).length]),
-  ) as Record<VisitorQueue, number>;
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
@@ -101,7 +72,6 @@ export function useVisitors() {
   return {
     rows: pageRows,
     totalCount: filtered.length,
-    counts,
     loading,
     error,
     page: clampedPage,

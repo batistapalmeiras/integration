@@ -78,20 +78,6 @@ export async function deletePersonRow(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function fetchContactAttemptDates(personIds: string[]): Promise<Record<string, string[]>> {
-  if (personIds.length === 0) return {};
-  const { data, error } = await supabase
-    .from('contact_attempts')
-    .select('person_id, created_at')
-    .in('person_id', personIds);
-  if (error) throw error;
-  const byPerson: Record<string, string[]> = {};
-  for (const row of (data ?? []) as { person_id: string; created_at: string }[]) {
-    (byPerson[row.person_id] ??= []).push(row.created_at);
-  }
-  return byPerson;
-}
-
 export async function findPersonByPhone(digits: string): Promise<Person | null> {
   const { data, error } = await supabase.from('people').select('*').eq('phone', digits).limit(1).maybeSingle();
   if (error) throw error;

@@ -6,11 +6,11 @@ import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, tex
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
-import { VisitorQueue } from '../../features/visitors';
+import { Person } from '../../features/visitors';
 import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META } from '../../types/person';
 import { VisitorPreview } from './components/VisitorPreview';
-import { useVisitors, VISIBLE_STATUSES, VisitorRow } from './hooks/useVisitors';
+import { useVisitors, VISIBLE_STATUSES } from './hooks/useVisitors';
 import {
   ListColumn,
   PaginationWrap,
@@ -20,27 +20,10 @@ import {
   RowButton,
   RowList,
   RowName,
-  RowReason,
   RowText,
   SearchRow,
-  Section,
-  SectionCount,
-  SectionHeader,
-  SectionTitle,
   Split,
 } from './styles';
-
-const QUEUE_TITLES: Record<VisitorQueue, string> = {
-  contact: 'Precisam de você',
-  waiting: 'Aguardando resposta',
-  archived: 'Arquivados',
-};
-
-
-function reasonTone(row: VisitorRow): 'info' | 'warning' | 'muted' {
-  if (row.queue !== 'contact') return 'muted';
-  return row.person.status === 'initial_contact' ? 'info' : 'warning';
-}
 
 export function VisitorsPage() {
   const navigate = useNavigate();
@@ -49,7 +32,6 @@ export function VisitorsPage() {
   const {
     rows,
     totalCount,
-    counts,
     loading,
     error,
     page,
@@ -63,15 +45,11 @@ export function VisitorsPage() {
     hasFilter,
   } = useVisitors();
 
-  const sections = (['contact', 'waiting', 'archived'] as VisitorQueue[])
-    .map((q) => ({ queue: q, rows: rows.filter((r) => r.queue === q) }))
-    .filter((s) => s.rows.length > 0);
+  const previewId = isDesktop ? (selectedId ?? rows[0]?.id ?? null) : null;
 
-  const previewId = isDesktop ? (selectedId ?? rows[0]?.person.id ?? null) : null;
-
-  const openRow = (row: VisitorRow) => {
-    if (isDesktop) setSelectedId(row.person.id);
-    else navigate(`${AppRoute.Visitors}/${row.person.id}`);
+  const openRow = (person: Person) => {
+    if (isDesktop) setSelectedId(person.id);
+    else navigate(`${AppRoute.Visitors}/${person.id}`);
   };
 
   const toggleStatus = (status: PersonStatus) =>
@@ -127,29 +105,18 @@ export function VisitorsPage() {
       {!loading && !error && rows.length > 0 && (
         <Split>
           <ListColumn>
-            {sections.map((section) => (
-              <Section key={section.queue}>
-                <SectionHeader>
-                  <SectionTitle>{QUEUE_TITLES[section.queue]}</SectionTitle>
-                  <SectionCount>
-                    {counts[section.queue]} {counts[section.queue] === 1 ? 'pessoa' : 'pessoas'}
-                  </SectionCount>
-                </SectionHeader>
-                <RowList>
-                  {section.rows.map((row) => (
-                    <Row key={row.person.id} $selected={row.person.id === previewId}>
-                      <RowButton type="button" onClick={() => openRow(row)}>
-                        <RowText>
-                          <RowName>{row.person.name}</RowName>
-                          <RowReason $tone={reasonTone(row)}>{row.reason}</RowReason>
-                        </RowText>
-                        <StatusPill person={row.person} compact />
-                      </RowButton>
-                    </Row>
-                  ))}
-                </RowList>
-              </Section>
-            ))}
+            <RowList>
+              {rows.map((person) => (
+                <Row key={person.id} $selected={person.id === previewId}>
+                  <RowButton type="button" onClick={() => openRow(person)}>
+                    <RowText>
+                      <RowName>{person.name}</RowName>
+                    </RowText>
+                    <StatusPill person={person} compact />
+                  </RowButton>
+                </Row>
+              ))}
+            </RowList>
 
             {totalPages > 1 && (
               <PaginationWrap>
