@@ -1,5 +1,6 @@
 // Libs
 import { isCohortFinished, selectUpcomingCohort } from './cohortSchedule';
+import { fromIntegration } from './integrationPeople';
 import { supabase } from '../lib/supabase';
 import { AppRoute } from '../routes/paths';
 import { PersonStatus } from '../types/person';
@@ -133,7 +134,9 @@ export async function listEnrollablePeople(cohortId: string): Promise<Enrollable
   if (enrolledError) throw enrolledError;
   const enrolledIds = new Set((enrolled ?? []).map((e) => e.person_id as string));
 
-  const { data, error } = await supabase.from('people').select('id, name, status').neq('status', 'archived').order('name');
+  const { data, error } = await fromIntegration(supabase.from('people').select('id, name, status'))
+    .eq('status', 'pending_signup')
+    .order('name');
   if (error) throw error;
   return (data ?? []).filter((p) => !enrolledIds.has(p.id as string)) as EnrollablePerson[];
 }

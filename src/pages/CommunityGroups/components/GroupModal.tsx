@@ -1,14 +1,13 @@
 // React
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, Form, ModalActions, ModalTitle, TextInput, Typography, text } from 'bp-kit';
-import { Save, X } from 'lucide-react';
+import { Button, Form, ModalActions, ModalTitle, MultiSelect, TextInput, text } from 'bp-kit';
+import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
-import { FieldGroup, LeaderList, LeaderRow, RemoveTagButton } from '../styles';
-import { PersonSuggestInput } from './PersonSuggestInput';
+import { listMembers } from '../../../domain/communityGroups';
 
 const schema = z.object({
   name: z.string().min(1, text.validation.required('o nome')),
@@ -22,25 +21,8 @@ interface Props {
   initialLeaders?: string[];
   initialHosts?: string[];
   hasHosts?: boolean;
-  peopleOptions?: string[];
   close: () => void;
   onSave: (name: string, leaders: string[], hosts: string[]) => Promise<void>;
-}
-
-function NameList({ names, onRemove }: { names: string[]; onRemove: (name: string) => void }) {
-  if (names.length === 0) return <Typography type="caption">Ninguém cadastrado.</Typography>;
-  return (
-    <LeaderList>
-      {names.map((name) => (
-        <LeaderRow key={name}>
-          <Typography type="caption">{name}</Typography>
-          <RemoveTagButton type="button" onClick={() => onRemove(name)} title="Remover">
-            <X size={14} />
-          </RemoveTagButton>
-        </LeaderRow>
-      ))}
-    </LeaderList>
-  );
 }
 
 export function GroupModal({
@@ -50,14 +32,12 @@ export function GroupModal({
   initialLeaders,
   initialHosts,
   hasHosts,
-  peopleOptions,
   close,
   onSave,
 }: Props) {
   const [leaders, setLeaders] = useState<string[]>(initialLeaders ?? []);
   const [hosts, setHosts] = useState<string[]>(initialHosts ?? []);
-  const [leaderDraft, setLeaderDraft] = useState('');
-  const [hostDraft, setHostDraft] = useState('');
+  const [memberNames, setMemberNames] = useState<string[]>([]);
   const {
     control,
     handleSubmit,
@@ -67,22 +47,13 @@ export function GroupModal({
     defaultValues: { name: initialName ?? '' },
   });
 
-  const leaderSuggestions = (peopleOptions ?? []).filter((name) => !leaders.includes(name));
-  const hostSuggestions = (peopleOptions ?? []).filter((name) => !hosts.includes(name));
+  useEffect(() => {
+    listMembers().then((members) => setMemberNames(members.map((member) => member.name)));
+  }, []);
 
-  const addLeader = (draft?: string) => {
-    const value = (draft ?? leaderDraft).trim();
-    if (!value || leaders.includes(value)) return;
-    setLeaders([...leaders, value]);
-    setLeaderDraft('');
-  };
-
-  const addHost = (draft?: string) => {
-    const value = (draft ?? hostDraft).trim();
-    if (!value || hosts.includes(value)) return;
-    setHosts([...hosts, value]);
-    setHostDraft('');
-  };
+  const options = [...new Set([...memberNames, ...(initialLeaders ?? []), ...(initialHosts ?? [])])]
+    .sort((a, b) => a.localeCompare(b, 'pt-BR'))
+    .map((name) => ({ value: name, label: name }));
 
   const submit = handleSubmit(async (values) => {
     await onSave(values.name.trim(), leaders, hosts);
@@ -95,44 +66,22 @@ export function GroupModal({
       <Form onSubmit={submit}>
         <TextInput label={fieldLabel} control={control} name="name" placeholder={fieldLabel} />
 
-        <FieldGroup>
-          <Typography type="label">Líder(es)</Typography>
-          <NameList names={leaders} onRemove={(name) => setLeaders(leaders.filter((l) => l !== name))} />
-          <PersonSuggestInput
-            label="Novo líder"
-            value={leaderDraft}
-            onChange={setLeaderDraft}
-            onSelect={(name) => addLeader(name)}
-            options={leaderSuggestions}
-            placeholder="Nome"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addLeader();
-              }
-            }}
-          />
-        </FieldGroup>
+        <MultiSelect
+          label="Líder(es)"
+          options={options}
+          value={leaders}
+          onChange={setLeaders}
+          placeholder="Buscar membro…"
+        />
 
         {hasHosts && (
-          <FieldGroup>
-            <Typography type="label">Anfitrião(ões)</Typography>
-            <NameList names={hosts} onRemove={(name) => setHosts(hosts.filter((h) => h !== name))} />
-            <PersonSuggestInput
-              label="Novo anfitrião"
-              value={hostDraft}
-              onChange={setHostDraft}
-              onSelect={(name) => addHost(name)}
-              options={hostSuggestions}
-              placeholder="Nome"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addHost();
-                }
-              }}
-            />
-          </FieldGroup>
+          <MultiSelect
+            label="Anfitrião(ões)"
+            options={options}
+            value={hosts}
+            onChange={setHosts}
+            placeholder="Buscar membro…"
+          />
         )}
 
         <ModalActions>

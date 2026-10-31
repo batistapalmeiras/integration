@@ -30,6 +30,7 @@ export const LessonTabs = styled.div`
 
   @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
     grid-template-columns: repeat(4, 120px);
+    justify-content: center;
   }
 `;
 

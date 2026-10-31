@@ -2,23 +2,41 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, ModalActions, ModalTitle, PageHeader, Skeleton, Typography, text, useModal, useToast } from 'bp-kit';
-import { Trash2 } from 'lucide-react';
+import {
+  Button,
+  Empty,
+  IconButton,
+  ModalActions,
+  ModalTitle,
+  PageHeader,
+  Skeleton,
+  Typography,
+  text,
+  useModal,
+  useToast,
+} from 'bp-kit';
+import { Plus, Trash2, UserMinus } from 'lucide-react';
 // Local
+import { AddButton } from '../../../components/AddButton';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import {
   CommunityGroup,
   PersonInGroup,
+  addPeopleToMinistry,
+  addPeopleToSmallGroup,
   deleteMinistry,
   deleteSmallGroup,
   getMinistry,
   getSmallGroup,
   listPeopleInMinistry,
   listPeopleInSmallGroup,
+  removePersonFromMinistry,
+  removePersonFromSmallGroup,
   updateMinistry,
   updateSmallGroup,
 } from '../../../domain/communityGroups';
 import { AppRoute } from '../../../routes/paths';
+import { AddMembersModal } from '../components/AddMembersModal';
 import { GroupModal } from '../components/GroupModal';
 import { FieldGroup, HeaderActions, LeaderList, LeaderRow, Stack } from '../styles';
 
@@ -77,10 +95,57 @@ export function CommunityGroupDetailPage() {
         initialLeaders={group.leaders}
         initialHosts={group.hosts}
         hasHosts={isPg}
-        peopleOptions={people.map((p) => p.name)}
         close={close}
         onSave={save}
       />,
+    );
+
+  const openAddMembers = () =>
+    open(
+      <AddMembersModal
+        title={`Adicionar membros a ${group.name}`}
+        currentIds={people.map((person) => person.id)}
+        withoutSmallGroup={isPg}
+        close={close}
+        onAdd={async (personIds) => {
+          try {
+            if (isPg) await addPeopleToSmallGroup(group.id, personIds);
+            else await addPeopleToMinistry(group.id, personIds);
+            await load();
+          } catch (e) {
+            showToast((e as { message?: string }).message ?? 'Não foi possível adicionar.');
+          }
+        }}
+      />,
+    );
+
+  const openRemovePerson = (person: PersonInGroup) =>
+    open(
+      <>
+        <ModalTitle onClose={close}>Remover {person.name} de {group.name}?</ModalTitle>
+        <Typography type="p">
+          A pessoa continua cadastrada; só deixa de fazer parte deste {label.toLowerCase()}.
+        </Typography>
+        <ModalActions>
+          <Button
+            type="button"
+            variant="danger"
+            onClick={async () => {
+              try {
+                if (isPg) await removePersonFromSmallGroup(person.id);
+                else await removePersonFromMinistry(group.id, person.id);
+                close();
+                await load();
+              } catch (e) {
+                showToast((e as { message?: string }).message ?? 'Não foi possível remover.');
+              }
+            }}
+          >
+            <UserMinus size={16} />
+            Remover
+          </Button>
+        </ModalActions>
+      </>,
     );
 
   const openDelete = () =>
@@ -168,18 +233,38 @@ export function CommunityGroupDetailPage() {
             <thead>
               <tr>
                 <Th>{text.fields.name}</Th>
+                <Th $shrink />
               </tr>
             </thead>
             <tbody>
               {people.map((person) => (
                 <Tr key={person.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
                   <Td data-label={text.fields.name}>{person.name}</Td>
+                  <Td $shrink>
+                    <IconButton
+                      icon={<UserMinus size={14} />}
+                      iconPosition="center"
+                      variant="secondary"
+                      size="sm"
+                      aria-label={`Remover ${person.name}`}
+                      title="Remover"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openRemovePerson(person);
+                      }}
+                    />
+                  </Td>
                 </Tr>
               ))}
             </tbody>
           </Table>
         </TableWrapper>
       )}
+
+      <AddButton type="button" onClick={openAddMembers}>
+        <Plus size={18} />
+        Adicionar membros
+      </AddButton>
 
       {modal}
       {toast}

@@ -22,9 +22,9 @@ export function VisitorDetailPage() {
 
   return (
     <Content>
-      <PageHeader title={person.name} subtitle="Visitante" back />
+      <PageHeader title={person.name} subtitle={person.status === 'member' ? 'Membro' : 'Visitante'} back />
 
-      <ProgressStepper status={person.status} />
+      {person.status !== 'member' && <ProgressStepper status={person.status} />}
 
       <PersonCard person={person} onClick={() => navigate(`${AppRoute.Visitors}/${id}/editar`)} />
 

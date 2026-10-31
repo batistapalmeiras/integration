@@ -76,26 +76,6 @@ export const LeaderRow = styled.div<{ $readOnly?: boolean }>`
   border-radius: ${({ theme }) => theme.rounded.full};
 `;
 
-export const RemoveTagButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  border: none;
-  border-radius: ${({ theme }) => theme.rounded.full};
-  background: transparent;
-  color: ${({ theme }) => theme.colors.mutedSoft};
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.surfaceStrong};
-    color: ${({ theme }) => theme.colors.ink};
-  }
-`;
-
 export const LeadersCell = styled.span`
   color: ${({ theme }) => theme.colors.muted};
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
