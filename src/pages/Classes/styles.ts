@@ -88,7 +88,14 @@ export const StudentText = styled.button`
   color: ${({ theme }) => theme.colors.ink};
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: ${({ theme }) => theme.spacing.xs};
+`;
+
+export const StudentTags = styled.span`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
 `;
 
 export const FootHint = styled(Typography)`

@@ -4,15 +4,18 @@ import { useState } from 'react';
 import { Checkbox, Typography } from 'bp-kit';
 // Local
 import { List, ListItem, ListItemRow } from '../../../components/List';
+import { StatusPill } from '../../../components/StatusPill';
 import { todayKey } from '../../../domain/dates';
 import { formatDate } from '../domain';
 import { EnrollmentRow, Lesson } from '../types';
 import {
+  CountBadge,
   FootHint,
   LessonTab,
   LessonTabs,
   PresenceBar,
   PresenceHeader,
+  StudentTags,
   StudentText,
 } from '../styles';
 
@@ -81,9 +84,12 @@ export function LessonAttendanceList({ lessons, rows, onToggle, onOpen }: Props)
                 />
                 <StudentText type="button" onClick={() => onOpen(row.person.id)}>
                   <span>{row.person.name}</span>
-                  <Typography type="caption" as="span">
-                    {row.attendedCount} de {lessons.length} aulas
-                  </Typography>
+                  <StudentTags>
+                    <CountBadge $eligible={row.attendedCount >= lessons.length}>
+                      {row.attendedCount}/{lessons.length}
+                    </CountBadge>
+                    <StatusPill person={row.person} compact />
+                  </StudentTags>
                 </StudentText>
               </ListItemRow>
             </ListItem>
