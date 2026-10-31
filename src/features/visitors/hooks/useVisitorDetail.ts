@@ -13,7 +13,7 @@ import {
   markCoffeeAttended,
   markCoffeeNotAttended,
 } from '../../../domain/cafeSchedule';
-import { getPersonCommunityNames } from '../../../domain/communityGroups';
+import { getPersonCommunityNames, setPersonMinistries } from '../../../domain/communityGroups';
 import {
   ActiveCohort,
   CohortLesson,
@@ -68,7 +68,7 @@ export function useVisitorDetail(id: string) {
   const [integrationLoading, setIntegrationLoading] = useState(false);
   const [profileCoffeeDate, setProfileCoffeeDate] = useState<string | null>(null);
   const [profileCohortName, setProfileCohortName] = useState<string | null>(null);
-  const [profileMinistryName, setProfileMinistryName] = useState<string | null>(null);
+  const [profileMinistryNames, setProfileMinistryNames] = useState<string[]>([]);
   const [profileSmallGroupName, setProfileSmallGroupName] = useState<string | null>(null);
   const [lastAttempt, setLastAttempt] = useState<ContactAttemptRecord | null>(null);
 
@@ -87,8 +87,8 @@ export function useVisitorDetail(id: string) {
   }, [load]);
 
   const loadCommunityNames = useCallback(async () => {
-    const { ministryName, smallGroupName } = await getPersonCommunityNames(id);
-    setProfileMinistryName(ministryName);
+    const { ministryNames, smallGroupName } = await getPersonCommunityNames(id);
+    setProfileMinistryNames(ministryNames);
     setProfileSmallGroupName(smallGroupName);
   }, [id]);
 
@@ -250,19 +250,16 @@ export function useVisitorDetail(id: string) {
     return getMakeupLink(integrationClass.enrollmentId, lessonId);
   };
 
-  const confirmMember = async (smallGroupId: string | null, ministryId: string | null) => {
+  const confirmMember = async (smallGroupId: string | null, ministryIds: string[]) => {
     if (!person) return;
-    await confirmMemberUseCase(person, smallGroupId, ministryId, user?.id);
+    await confirmMemberUseCase(person, smallGroupId, ministryIds, user?.id);
     await load();
     await loadCommunityNames();
   };
 
-  const updateCommunity = async (smallGroupId: string | null, ministryId: string | null) => {
-    await updatePersonFields(id, {
-      small_group_id: smallGroupId,
-      ministry_id: ministryId,
-      updated_at: new Date().toISOString(),
-    });
+  const updateCommunity = async (smallGroupId: string | null, ministryIds: string[]) => {
+    await updatePersonFields(id, { small_group_id: smallGroupId, updated_at: new Date().toISOString() });
+    await setPersonMinistries(id, ministryIds);
     await loadCommunityNames();
     await load();
   };
@@ -295,7 +292,7 @@ export function useVisitorDetail(id: string) {
     updateCommunity,
     profileCoffeeDate,
     profileCohortName,
-    profileMinistryName,
+    profileMinistryNames,
     profileSmallGroupName,
     lastAttempt,
     editLastContactAttempt,

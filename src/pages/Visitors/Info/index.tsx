@@ -4,17 +4,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, LinkButton, PageHeader, Select, Skeleton, Tab, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, LinkButton, PageHeader, Skeleton, Tab, useAuthCtx, useModal } from 'bp-kit';
 import { Check, Save, UserRound } from 'lucide-react';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { CommunityGroup, listMinistries, listSmallGroups } from '../../../domain/communityGroups';
+import { CommunityGroup, getPersonMinistryIds, listMinistries, listSmallGroups } from '../../../domain/communityGroups';
 import { LessonMakeup, getPersonLessonMakeups } from '../../../domain/lessonMakeups';
 import { communityRequirements } from '../../../domain/membershipCommunity';
 import { PersonSensitive, getPersonSensitive } from '../../../domain/personSensitive';
 import { AppRoute } from '../../../routes/paths';
 import { UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
+import { CommunityFields } from '../components/CommunityFields';
 import { ConfirmMemberModal } from '../Detail/components/ConfirmMemberModal';
 import { CommunityFormValues, buildCommunitySchema } from '../validators';
 import {
@@ -45,7 +46,7 @@ export function VisitorInfoPage() {
     error,
     profileCoffeeDate,
     profileCohortName,
-    profileMinistryName,
+    profileMinistryNames,
     profileSmallGroupName,
     updateCommunity,
     confirmMember,
@@ -57,6 +58,7 @@ export function VisitorInfoPage() {
   const fromMembershipQueue = searchParams.get('from') === 'membership';
   const [smallGroups, setSmallGroups] = useState<CommunityGroup[]>([]);
   const [ministries, setMinistries] = useState<CommunityGroup[]>([]);
+  const [ministryIds, setMinistryIds] = useState<string[]>([]);
 
   const canConfirmMembership = user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
   const canSeeSensitive = canConfirmMembership || user?.role === UserRole.Teacher;
@@ -78,6 +80,7 @@ export function VisitorInfoPage() {
     if (canEditCommunity) {
       listSmallGroups().then(setSmallGroups);
       listMinistries().then(setMinistries);
+      if (id) getPersonMinistryIds(id).then(setMinistryIds);
     }
   }, [canEditCommunity]);
 
@@ -88,7 +91,7 @@ export function VisitorInfoPage() {
   } = useForm<CommunityFormValues>({
     resolver: (values, context, options) =>
       zodResolver(buildCommunitySchema(requirementsRef.current))(values, context, options),
-    values: { smallGroupId: person?.small_group_id ?? '', ministryId: person?.ministry_id ?? '' },
+    values: { smallGroupIds: person?.small_group_id ? [person.small_group_id] : [], ministryIds },
   });
 
   if (loading) return <Skeleton $h="240px" />;
@@ -113,10 +116,10 @@ export function VisitorInfoPage() {
     profileCohortName && { label: 'Turma', value: profileCohortName },
     profileCoffeeDate && { label: 'Café', value: formatDate(profileCoffeeDate) },
     !canEditCommunity && profileSmallGroupName && { label: 'Pequeno Grupo', value: profileSmallGroupName },
-    !canEditCommunity && profileMinistryName && { label: 'Ministério', value: profileMinistryName },
+    !canEditCommunity && profileMinistryNames.length > 0 && { label: 'Ministérios', value: profileMinistryNames.join(', ') },
   ].filter((row): row is { label: string; value: string } => !!row);
 
-  const submit = handleSubmit((values) => updateCommunity(values.smallGroupId || null, values.ministryId || null));
+  const submit = handleSubmit((values) => updateCommunity(values.smallGroupIds[0] ?? null, values.ministryIds));
 
   const showConfirmMember =
     fromMembershipQueue && user?.role === UserRole.Pastor && person.status === 'membership_pending';
@@ -125,8 +128,8 @@ export function VisitorInfoPage() {
       <ConfirmMemberModal
         person={person}
         close={close}
-        onConfirm={async (smallGroupId, ministryId) => {
-          await confirmMember(smallGroupId, ministryId);
+        onConfirm={async (smallGroupId, ministryIds) => {
+          await confirmMember(smallGroupId, ministryIds);
           navigate(AppRoute.Membership);
         }}
       />,
@@ -196,30 +199,12 @@ export function VisitorInfoPage() {
 
       {current === 'general' && canEditCommunity && (
         <Form onSubmit={submit}>
-          <Select
-            label={requirements.smallGroupRequired ? 'Pequeno Grupo' : 'Pequeno Grupo (opcional)'}
+          <CommunityFields
             control={control}
-            name="smallGroupId"
-          >
-            <option value="">{requirements.smallGroupRequired ? 'Selecione…' : 'Nenhum por enquanto'}</option>
-            {smallGroups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
-              </option>
-            ))}
-          </Select>
-          <Select
-            label={requirements.ministryRequired ? 'Ministério' : 'Ministério (opcional)'}
-            control={control}
-            name="ministryId"
-          >
-            <option value="">{requirements.ministryRequired ? 'Selecione…' : 'Nenhum por enquanto'}</option>
-            {ministries.map((ministry) => (
-              <option key={ministry.id} value={ministry.id}>
-                {ministry.name}
-              </option>
-            ))}
-          </Select>
+            requirements={requirements}
+            smallGroups={smallGroups}
+            ministries={ministries}
+          />
 
           <Actions>
             <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
