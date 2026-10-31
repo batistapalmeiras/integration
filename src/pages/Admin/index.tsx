@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageHeader, useAuthCtx } from 'bp-kit';
 import {
   ChevronRight,
+  ClipboardCheck,
   Contact,
   FileBarChart,
   GraduationCap,
@@ -73,6 +74,7 @@ export function AdminPage() {
             <MenuOptionCard icon={Users} label="Membros" onClick={() => navigate(AppRoute.Members)} />
             {isPastor && (
               <>
+                <MenuOptionCard icon={ClipboardCheck} label="Pendências" onClick={() => navigate(AppRoute.MemberPendencies)} />
                 <MenuOptionCard icon={HeartHandshake} label="Ministérios" onClick={() => navigate(AppRoute.Ministries)} />
                 <MenuOptionCard icon={UsersRound} label="Pequenos Grupos" onClick={() => navigate(AppRoute.SmallGroups)} />
               </>

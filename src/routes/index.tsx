@@ -15,6 +15,8 @@ import { ForgotPasswordPage } from '../pages/ForgotPassword';
 import { IntegrationSignupPage } from '../pages/IntegrationSignup';
 import { LoginPage } from '../pages/Login';
 import { MakeupAttendancePage } from '../pages/MakeupAttendance';
+import { MemberPendenciesPage } from '../pages/MemberPendencies';
+import { MemberRecordPage } from '../pages/MemberRecord';
 import { MembersPage } from '../pages/Members';
 import { MembershipPage } from '../pages/Membership';
 import { MembershipInterestPage } from '../pages/MembershipInterest';
@@ -131,6 +133,22 @@ export function AppRouter() {
                       element={
                         <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
                           <MembersPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={AppRoute.MemberPendencies}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Pastor]}>
+                          <MemberPendenciesPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={`${AppRoute.Members}/:id/ficha`}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Pastor]}>
+                          <MemberRecordPage />
                         </ProtectedRoute>
                       }
                     />

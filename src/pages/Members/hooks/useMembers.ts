@@ -2,12 +2,14 @@
 import { useCallback, useEffect, useState } from 'react';
 // Local
 import { supabase } from '../../../lib/supabase';
+import { MembershipStatus } from '../../../domain/memberRecords';
 import { EntryType } from '../../../types/church';
 
 export interface MemberRow {
   id: string;
   name: string;
   entry_type: EntryType | null;
+  membership_status: MembershipStatus;
 }
 
 export function useMembers() {
@@ -19,7 +21,7 @@ export function useMembers() {
     setLoading(true);
     const { data, error: loadError } = await supabase
       .from('people')
-      .select('id, name, entry_type')
+      .select('id, name, entry_type, membership_status')
       .eq('status', 'member')
       .order('name', { ascending: true });
 
