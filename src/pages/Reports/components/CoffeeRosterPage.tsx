@@ -2,7 +2,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Empty, PageHeader, Skeleton, text } from 'bp-kit';
-import { Archive, Check, CircleAlert, Clock, LucideIcon, X } from 'lucide-react';
+import { Archive, Check, CircleAlert, Clock, LucideIcon, RotateCcw, Send, X } from 'lucide-react';
 // Local
 import { PeopleCount } from '../../../components/PeopleCount';
 import { TonePill } from '../../../components/StatusPill';
@@ -19,6 +19,8 @@ const PRESENCE_TONES: Record<CoffeeHistoryPresence, { tone: StatusTone; icon: Lu
   archived: { tone: 'muted', icon: Archive },
   unmarked: { tone: 'warning', icon: CircleAlert },
   enrolled: { tone: 'info', icon: Clock },
+  invited: { tone: 'info', icon: Send },
+  awaiting_contact: { tone: 'warning', icon: RotateCcw },
 };
 
 export function CoffeeRosterPage() {

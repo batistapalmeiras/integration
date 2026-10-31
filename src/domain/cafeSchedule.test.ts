@@ -190,3 +190,37 @@ describe('countQueuedFrom', () => {
     });
   });
 });
+
+describe('coffeeHistory for the café still to come', () => {
+  const row = (personId: string, eventId: string, eventDate: string, attended: boolean, status: string, signupWindowFrom: string | null = null) => ({
+    id: personId + eventId,
+    person_id: personId,
+    coffee_event_id: eventId,
+    attended,
+    person: { id: personId, name: personId, phone: '', status, class_invite_sent_at: null, signup_window_from: signupWindowFrom },
+    coffee_event: { event_date: eventDate },
+  });
+
+  it('shows who is enrolled, who still awaits contact and whoever came back with the invite already sent', () => {
+    const [nov] = coffeeHistory(
+      {
+        events: [
+          { id: 'sep', event_date: '2026-09-13', event_time: '17:30:00' },
+          { id: 'nov', event_date: '2026-11-08', event_time: '17:30:00' },
+        ],
+        attendance: [
+          row('Bruna', 'nov', '2026-11-08', false, 'welcome_coffee'),
+          row('Liese', 'nov', '2026-11-08', false, 'retry_contact'),
+          row('Geovane', 'sep', '2026-09-13', true, 'pending_signup', '2026-10-31'),
+        ],
+      },
+      '2026-10-31',
+    );
+
+    expect(nov.people).toEqual([
+      { personId: 'Bruna', name: 'Bruna', presence: 'enrolled' },
+      { personId: 'Geovane', name: 'Geovane', presence: 'invited' },
+      { personId: 'Liese', name: 'Liese', presence: 'awaiting_contact' },
+    ]);
+  });
+});

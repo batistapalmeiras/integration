@@ -1,6 +1,7 @@
 // Libs
 import { supabase } from '../lib/supabase';
 // Local
+import { STATUS_META } from '../types/person';
 import { todayKey } from './dates';
 import { fromIntegration } from './integrationPeople';
 
@@ -260,6 +261,11 @@ export function isReturningToSignup(person: { status: string; signup_window_from
 
 export const COFFEE_LIST_STATUSES = ['welcome_coffee', 'pending_signup', 'retry_contact'];
 
+export function isListedInCoffee(person: { status: string } | null, eventDate: string, today: string): boolean {
+  const status = person?.status ?? '';
+  return COFFEE_LIST_STATUSES.includes(status) && (status !== 'retry_contact' || eventDate <= today);
+}
+
 export function coffeePresence(
   row: { attended: boolean; person: { status: string } | null; coffee_event: { event_date: string } | null },
   latestEventDate: string | undefined,
@@ -409,7 +415,7 @@ export async function attachPeopleToCoffee(personIds: string[], eventId: string)
   await Promise.all(personIds.map((id) => placeInCoffee(id, eventId)));
 }
 
-export type CoffeeHistoryPresence = 'came' | 'missed' | 'archived' | 'unmarked' | 'enrolled';
+export type CoffeeHistoryPresence = 'came' | 'missed' | 'archived' | 'unmarked' | 'enrolled' | 'invited' | 'awaiting_contact';
 
 export const COFFEE_HISTORY_PRESENCE_LABELS: Record<CoffeeHistoryPresence, string> = {
   came: 'Veio',
@@ -417,6 +423,8 @@ export const COFFEE_HISTORY_PRESENCE_LABELS: Record<CoffeeHistoryPresence, strin
   archived: 'Arquivado',
   unmarked: 'Não marcado',
   enrolled: 'Inscrito',
+  invited: 'Convite enviado',
+  awaiting_contact: STATUS_META.retry_contact.label,
 };
 
 export interface CoffeeHistoryPerson {
@@ -436,6 +444,10 @@ function historyPresence(
   return (row.coffee_event?.event_date ?? '') < today ? 'unmarked' : 'enrolled';
 }
 
+function futurePresence(person: { status: string } | null): CoffeeHistoryPresence {
+  return person?.status === 'retry_contact' ? 'awaiting_contact' : 'enrolled';
+}
+
 export interface CoffeeHistoryEvent {
   id: string;
   eventDate: string;
@@ -444,20 +456,32 @@ export interface CoffeeHistoryEvent {
 
 export function coffeeHistory(board: Pick<CoffeeBoard, 'events' | 'attendance'>, today: string): CoffeeHistoryEvent[] {
   const latest = latestCoffeeDateByPerson(board.attendance);
+  const current = currentCoffeeAttendance(board.attendance);
+  const upcomingId = upcomingCoffeeEvent([...board.events].sort((a, b) => a.event_date.localeCompare(b.event_date)), today)?.id;
+  const invited = current
+    .filter((row) => isReturningToSignup(row.person))
+    .map((row) => ({ personId: row.person_id, name: row.person?.name ?? '', presence: 'invited' as const }));
+
   return [...board.events]
     .sort((a, b) => b.event_date.localeCompare(a.event_date))
-    .map((event) => ({
-      id: event.id,
-      eventDate: event.event_date,
-      people: board.attendance
+    .map((event) => {
+      const isFuture = event.event_date >= today;
+      const seated = board.attendance
         .filter((row) => row.coffee_event_id === event.id && row.person)
+        .filter(
+          (row) => !isFuture || (COFFEE_LIST_STATUSES.includes(row.person?.status ?? '') && !isReturningToSignup(row.person)),
+        )
         .map((row) => ({
           personId: row.person_id,
           name: row.person?.name ?? '',
-          presence: historyPresence(row, latest.get(row.person_id), today),
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')),
-    }));
+          presence: isFuture && !row.attended ? futurePresence(row.person) : historyPresence(row, latest.get(row.person_id), today),
+        }));
+      return {
+        id: event.id,
+        eventDate: event.event_date,
+        people: [...seated, ...(event.id === upcomingId ? invited : [])].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')),
+      };
+    });
 }
 
 export async function leaveOpenCoffeeSeat(personId: string): Promise<void> {

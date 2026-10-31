@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthCtx } from 'bp-kit';
 // Local
 import {
-  COFFEE_LIST_STATUSES,
   CoffeeBoard,
   CoffeePresence,
   STATUS_AFTER_PRESENCE,
@@ -25,6 +24,7 @@ import {
   selectOrphanPeople,
   unmarkCoffeePresence,
   upcomingCoffeeEvent,
+  isListedInCoffee,
   isReturningToSignup,
   updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
@@ -73,8 +73,7 @@ export function useCoffee() {
       const isUpcoming = selected.id === upcomingCoffeeEvent(open, todayKey())?.id;
       const seated = current
         .filter((a) => a.coffee_event_id === selected.id && !isReturningToSignup(a.person))
-        .filter((a) => COFFEE_LIST_STATUSES.includes(a.person?.status ?? ''))
-        .filter((a) => a.person?.status !== 'retry_contact' || selected.event_date <= todayKey())
+        .filter((a) => isListedInCoffee(a.person, selected.event_date, todayKey()))
         .map((a) => {
           const { presence, editable } = coffeePresence(a, latest.get(a.person_id));
           return { ...a, presence, presenceEditable: editable, returning: false } as unknown as AttendeeRow;
