@@ -6,7 +6,7 @@ import { AlertTriangle } from 'lucide-react';
 // Components
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
-import { PENDENCY_LABELS, PendencyField } from '../../domain/memberRecords';
+import { isReviewPendency, PENDENCY_LABELS, PendencyField } from '../../domain/memberRecords';
 import { AppRoute } from '../../routes/paths';
 import { NameCell, NameText, ReviewFlag, Subline } from '../Membership/styles';
 import { PageFlexBody, PageFlexWrap, PaginationWrap, SearchFiltersRow } from '../Reports/styles';
@@ -66,7 +66,8 @@ export function MemberPendenciesPage() {
                 </thead>
                 <tbody>
                   {rows.map((row) => {
-                    const fields = row.missing_fields.filter((missing) => missing !== 'membership_status');
+                    const reviews = row.missing_fields.filter(isReviewPendency);
+                    const fields = row.missing_fields.filter((missing) => !isReviewPendency(missing));
                     return (
                       <Tr
                         key={row.person_id}
@@ -76,12 +77,12 @@ export function MemberPendenciesPage() {
                         <Td $truncate title={row.name}>
                           <NameCell>
                             <NameText>{row.name}</NameText>
-                            {row.missing_fields.includes('membership_status') && (
-                              <ReviewFlag>
+                            {reviews.map((review) => (
+                              <ReviewFlag key={review}>
                                 <AlertTriangle size={12} />
-                                {PENDENCY_LABELS.membership_status}
+                                {PENDENCY_LABELS[review]}
                               </ReviewFlag>
-                            )}
+                            ))}
                             {fields.length > 0 && (
                               <Subline>Falta: {fields.map((missing) => PENDENCY_LABELS[missing]).join(', ')}</Subline>
                             )}

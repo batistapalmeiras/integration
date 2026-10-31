@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Empty, PageHeader, Select, Skeleton, text, TextInput, Typography, useToast } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Local
+import { MembershipAlerts } from '../../components/MembershipAlerts';
 import {
   GENDER_LABELS,
   getMemberRecord,
@@ -53,6 +54,7 @@ export function MemberRecordPage() {
   return (
     <Content>
       <PageHeader title="Ficha do membro" subtitle={record.name} back />
+      <MembershipAlerts personId={id} />
 
       <Form onSubmit={submit}>
         <Select label="Situação" control={control} name="membershipStatus">

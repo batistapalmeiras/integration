@@ -1,10 +1,9 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
 // Components
+import { listMembershipAlerts, MEMBERSHIP_ALERT_LABELS } from '../../../domain/membershipAlerts';
 import { supabase } from '../../../lib/supabase';
 import { EntryType } from '../../../types/church';
-// Local
-import { membershipReviewReasons } from '../domain';
 
 export interface MembershipQueueRow {
   id: string;
@@ -26,8 +25,6 @@ interface PendingPersonRow {
 interface SensitiveRow {
   person_id: string;
   origin_church: string | null;
-  secret_society: string | null;
-  baptism_info: string | null;
 }
 
 interface EnrollmentRow {
@@ -56,16 +53,17 @@ export function useMembershipQueue() {
     const pending = (people ?? []) as PendingPersonRow[];
     const ids = pending.map((person) => person.id);
 
-    const [sensitive, enrollments] = ids.length
+    const [sensitive, enrollments, alerts] = ids.length
       ? await Promise.all([
-          supabase.from('person_sensitive').select('person_id, origin_church, secret_society, baptism_info').in('person_id', ids),
+          supabase.from('person_sensitive').select('person_id, origin_church').in('person_id', ids),
           supabase
             .from('enrollments')
             .select('person_id, cohort:cohorts(name)')
             .in('person_id', ids)
             .order('created_at', { ascending: false }),
+          listMembershipAlerts(ids),
         ])
-      : [{ data: [], error: null }, { data: [], error: null }];
+      : [{ data: [], error: null }, { data: [], error: null }, []];
 
     const failure = sensitive.error ?? enrollments.error;
     if (failure) {
@@ -89,10 +87,9 @@ export function useMembershipQueue() {
           originChurch: sensitiveById.get(person.id)?.origin_church ?? null,
           cohortName: cohortById.get(person.id) ?? null,
           statuteAgreedAt: person.statute_agreed_at,
-          reviewReasons: membershipReviewReasons({
-            secretSociety: sensitiveById.get(person.id)?.secret_society ?? null,
-            baptismInfo: sensitiveById.get(person.id)?.baptism_info ?? null,
-          }),
+          reviewReasons: alerts
+            .filter((alert) => alert.person_id === person.id && !alert.resolved)
+            .map((alert) => MEMBERSHIP_ALERT_LABELS[alert.code]),
         }))
         .sort((a, b) => (a.statuteAgreedAt ?? '9999').localeCompare(b.statuteAgreedAt ?? '9999')),
     );

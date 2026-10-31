@@ -1,6 +1,7 @@
 // Libs
 import { formatCPF, maskPhone } from 'bp-kit';
 // Local
+import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membershipAlerts';
 import { supabase } from '../lib/supabase';
 
 export type MembershipStatus = 'active' | 'pending_review' | 'inactive' | 'transferred' | 'removed' | 'deceased';
@@ -31,6 +32,7 @@ export const MARITAL_STATUS_LABELS: Record<MaritalStatus, string> = {
 };
 
 export type PendencyField =
+  | MembershipAlertCode
   | 'membership_status'
   | 'phone'
   | 'email'
@@ -43,6 +45,7 @@ export type PendencyField =
   | 'rg';
 
 export const PENDENCY_LABELS: Record<PendencyField, string> = {
+  ...MEMBERSHIP_ALERT_LABELS,
   membership_status: 'Situação a confirmar',
   phone: 'Telefone',
   email: 'E-mail',
@@ -54,6 +57,10 @@ export const PENDENCY_LABELS: Record<PendencyField, string> = {
   cpf: 'CPF',
   rg: 'RG',
 };
+
+export function isReviewPendency(field: PendencyField): boolean {
+  return field === 'membership_status' || field in MEMBERSHIP_ALERT_LABELS;
+}
 
 export interface MemberPendency {
   person_id: string;

@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { Button, Form, ModalActions, ModalTitle, Skeleton } from 'bp-kit';
 import { Check } from 'lucide-react';
 // Local
+import { MembershipAlerts } from '../../../../components/MembershipAlerts';
 import { CommunityGroup, listMinistries, listSmallGroups } from '../../../../domain/communityGroups';
 import { CommunityRequirements, communityRequirements } from '../../../../domain/membershipCommunity';
 import { getPersonSensitive } from '../../../../domain/personSensitive';
@@ -35,6 +36,7 @@ export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
       <ModalTitle onClose={close}>Confirmar {person.name} como membro</ModalTitle>
       {requirements ? (
         <ConfirmMemberForm
+          personId={person.id}
           requirements={requirements}
           smallGroups={smallGroups}
           ministries={ministries}
@@ -49,12 +51,13 @@ export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
 }
 
 interface FormProps extends Pick<Props, 'close' | 'onConfirm'> {
+  personId: string;
   requirements: CommunityRequirements;
   smallGroups: CommunityGroup[];
   ministries: CommunityGroup[];
 }
 
-function ConfirmMemberForm({ requirements, smallGroups, ministries, close, onConfirm }: FormProps) {
+function ConfirmMemberForm({ personId, requirements, smallGroups, ministries, close, onConfirm }: FormProps) {
   const {
     control,
     handleSubmit,
@@ -77,6 +80,8 @@ function ConfirmMemberForm({ requirements, smallGroups, ministries, close, onCon
         smallGroups={smallGroups}
         ministries={ministries}
       />
+
+      <MembershipAlerts personId={personId} />
 
       <ModalActions>
         <Button type="submit" variant="primary" disabled={isSubmitting}>
