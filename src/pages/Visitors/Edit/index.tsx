@@ -33,7 +33,7 @@ export function VisitorEditPage() {
     values: person
       ? {
           name: person.name,
-          phone: maskPhone(person.phone),
+          phone: person.phone ? maskPhone(person.phone) : '',
           age: person.age ? String(person.age) : '',
           email: person.email ?? '',
         }

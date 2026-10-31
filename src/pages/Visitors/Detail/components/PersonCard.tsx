@@ -17,7 +17,7 @@ export function PersonCard({ person, onClick }: Props) {
       <PersonCardRow>
         <PersonCardInfo>
           <Typography type="h6">{person.name}</Typography>
-          <Typography type="caption">{maskPhone(person.phone)}</Typography>
+          <Typography type="caption">{person.phone ? maskPhone(person.phone) : '—'}</Typography>
         </PersonCardInfo>
         <StatusPill person={person} />
         <ChevronRight size={18} />

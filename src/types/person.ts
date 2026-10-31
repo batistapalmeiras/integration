@@ -15,7 +15,7 @@ export type PersonStatus =
 export interface Person {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
   age: number | null;
   email: string | null;
   status: PersonStatus;
@@ -28,6 +28,8 @@ export interface Person {
   coffee_retry_used: boolean;
   small_group_id: string | null;
   ministry_id: string | null;
+  legacy_id: number | null;
+  membership_status: string | null;
   created_at: string;
   updated_at: string;
 }

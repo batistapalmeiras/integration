@@ -1,6 +1,7 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
 // Local
+import { fromIntegration } from '../../../domain/integrationPeople';
 import { supabase } from '../../../lib/supabase';
 import { AnnualCounts } from '../types';
 
@@ -22,7 +23,7 @@ export function useAnnualReport() {
 
   useEffect(() => {
     const loadYears = async () => {
-      const { data } = await supabase.from('people').select('created_at');
+      const { data } = await fromIntegration(supabase.from('people').select('created_at'));
       const years = new Set((data ?? []).map((p) => new Date(p.created_at).getFullYear()));
       years.add(currentYear);
       setAvailableYears(Array.from(years).sort((a, b) => b - a));
@@ -38,9 +39,9 @@ export function useAnnualReport() {
     const start = `${year}-01-01`;
     const end = `${year + 1}-01-01`;
 
-    const { count: initialContactCount, error: peopleError } = await supabase
-      .from('people')
-      .select('id', { count: 'exact', head: true })
+    const { count: initialContactCount, error: peopleError } = await fromIntegration(
+      supabase.from('people').select('id', { count: 'exact', head: true }),
+    )
       .gte('created_at', start)
       .lt('created_at', end);
 

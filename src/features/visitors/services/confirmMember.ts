@@ -8,7 +8,11 @@ export async function confirmMember(
   ministryId: string | null,
   actorId?: string,
 ): Promise<void> {
-  await updatePersonStatus(person.id, 'member', { small_group_id: smallGroupId, ministry_id: ministryId });
+  await updatePersonStatus(person.id, 'member', {
+    small_group_id: smallGroupId,
+    ministry_id: ministryId,
+    membership_status: 'active',
+  });
   await insertStatusHistory({
     personId: person.id,
     fromStatus: 'membership_pending',

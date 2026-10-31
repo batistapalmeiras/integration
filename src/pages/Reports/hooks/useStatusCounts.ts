@@ -1,6 +1,7 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
 // Local
+import { fromIntegration } from '../../../domain/integrationPeople';
 import { supabase } from '../../../lib/supabase';
 import { PersonStatus } from '../../../types/person';
 import { StatusCounts } from '../types';
@@ -15,7 +16,7 @@ export function useStatusCounts() {
     setLoading(true);
     setError(null);
 
-    const { data, error: loadError } = await supabase.from('people').select('status');
+    const { data, error: loadError } = await fromIntegration(supabase.from('people').select('status'));
     if (loadError) {
       setError(loadError.message);
       setLoading(false);
