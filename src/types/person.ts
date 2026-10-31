@@ -15,7 +15,7 @@ export type PersonStatus =
 export interface Person {
   id: string;
   name: string;
-  phone: string | null;
+  phone: string;
   age: number | null;
   email: string | null;
   status: PersonStatus;
