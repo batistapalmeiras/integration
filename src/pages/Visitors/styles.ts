@@ -95,11 +95,3 @@ export const PreviewHeader = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
 `;
-
-export const PreviewName = styled.h2`
-  margin: 0;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.displaySm.fontSize};
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.ink};
-`;

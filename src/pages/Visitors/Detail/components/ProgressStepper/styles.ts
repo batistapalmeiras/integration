@@ -30,8 +30,9 @@ export const Labels = styled.div`
 
 export const Label = styled.span<{ $current: boolean }>`
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 11px;
+  font-size: ${({ theme }) => theme.typography.badge.fontSize};
   text-align: center;
-  font-weight: ${({ $current }) => ($current ? 700 : 400)};
+  font-weight: ${({ theme, $current }) =>
+    $current ? theme.typography.titleMd.fontWeight : theme.typography.bodyMd.fontWeight};
   color: ${({ theme, $current }) => ($current ? theme.colors.ink : theme.colors.muted)};
 `;

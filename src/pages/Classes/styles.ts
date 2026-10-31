@@ -1,5 +1,8 @@
 // Libs
+import { StatsGrid, Typography } from 'bp-kit';
 import styled from 'styled-components';
+// Local
+import { Table, Td, Th } from '../../components/Table';
 
 export { Form } from 'bp-kit';
 
@@ -51,8 +54,6 @@ export const LessonTab = styled.button<{ $selected: boolean }>`
   border-radius: ${({ theme }) => theme.rounded.md};
   border: 1px solid ${({ theme, $selected }) => ($selected ? theme.colors.ink : theme.colors.borderStrong)};
   background: ${({ theme, $selected }) => ($selected ? theme.colors.ink : theme.colors.canvas)};
-  color: ${({ theme, $selected }) => ($selected ? theme.colors.onDark : theme.colors.ink)};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -60,12 +61,8 @@ export const LessonTab = styled.button<{ $selected: boolean }>`
   gap: 2px;
   cursor: pointer;
 
-  strong {
-    font-size: 14px;
-  }
-
-  span {
-    font-size: 12px;
+  & > * {
+    color: ${({ theme, $selected }) => ($selected ? theme.colors.onDark : theme.colors.ink)};
   }
 `;
 
@@ -75,20 +72,6 @@ export const PresenceHeader = styled.div`
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.sm};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-
-  h2 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.ink};
-  }
-
-  span {
-    font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.success};
-  }
 `;
 
 export const PresenceBar = styled.div<{ $percent: number }>`
@@ -140,75 +123,30 @@ export const StudentText = styled.span`
   display: flex;
   flex-direction: column;
   gap: 2px;
-
-  strong {
-    font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.ink};
-  }
-
-  span {
-    font-size: 13px;
-    color: ${({ theme }) => theme.colors.muted};
-  }
 `;
 
-export const FootHint = styled.p`
-  margin: ${({ theme }) => theme.spacing.sm} 0 0;
+export const FootHint = styled(Typography)`
+  margin-top: ${({ theme }) => theme.spacing.sm};
   text-align: center;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 13px;
-  color: ${({ theme }) => theme.colors.muted};
 `;
 
-export const GridWrap = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.hairline};
-  border-radius: ${({ theme }) => theme.rounded.md};
-  overflow-x: auto;
-`;
-
-export const Grid = styled.table`
-  width: 100%;
+export const Grid = styled(Table)`
   min-width: 760px;
-  border-collapse: collapse;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 15px;
 
-  th,
-  td {
-    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.hairlineSoft};
-  }
-
-  thead th {
-    font-size: 13px;
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.muted};
-    border-bottom-color: ${({ theme }) => theme.colors.hairline};
-  }
-
-  tbody th {
-    text-align: left;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  tbody tr:last-child th,
   tbody tr:last-child td {
     border-bottom: none;
   }
 `;
 
-export const LessonHead = styled.th`
+export const LessonHead = styled(Th)`
   text-align: center;
 
   span {
     display: block;
-    font-weight: 400;
   }
 `;
 
-export const CheckCell = styled.td`
+export const CheckCell = styled(Td)`
   text-align: center;
 
   label {
@@ -220,35 +158,11 @@ export const StudentLink = styled.button`
   padding: 0;
   border: none;
   background: transparent;
-  font: inherit;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.ink};
   cursor: pointer;
   text-align: left;
 `;
 
-export const SummaryCards = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: ${({ theme }) => theme.spacing.md};
+export const SummaryCards = styled(StatsGrid)`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
-export const SummaryCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: ${({ theme }) => theme.spacing.base};
-  border: 1px solid ${({ theme }) => theme.colors.hairline};
-  border-radius: ${({ theme }) => theme.rounded.md};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  color: ${({ theme }) => theme.colors.body};
-`;
-
-export const SummaryValue = styled.span<{ $tone?: 'success' | 'warning' }>`
-  font-size: 26px;
-  font-weight: 700;
-  color: ${({ theme, $tone }) =>
-    $tone === 'success' ? theme.colors.success : $tone === 'warning' ? theme.colors.warning : theme.colors.ink};
-`;

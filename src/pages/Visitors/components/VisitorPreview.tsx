@@ -7,7 +7,7 @@ import { useVisitorDetail } from '../../../features/visitors';
 import { AppRoute } from '../../../routes/paths';
 import { NextStep } from '../Detail/components/NextStep';
 import { ProgressStepper } from '../Detail/components/ProgressStepper';
-import { PreviewHeader, PreviewName } from '../styles';
+import { PreviewHeader } from '../styles';
 
 interface Props {
   personId: string;
@@ -26,7 +26,9 @@ export function VisitorPreview({ personId, onChanged }: Props) {
         <PreviewHeader>
           <Avatar name={person.name} size={56} />
           <div>
-            <PreviewName>{person.name}</PreviewName>
+            <Typography type="h3" as="h2">
+              {person.name}
+            </Typography>
             <Typography type="caption">{maskPhone(person.phone)}</Typography>
           </div>
         </PreviewHeader>

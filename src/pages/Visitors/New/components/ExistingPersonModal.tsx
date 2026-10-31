@@ -30,18 +30,26 @@ export function ExistingPersonModal({ person, close, onReactivate, onOpen }: Pro
         <ExistingHead>
           <Avatar name={person.name} size={44} />
           <ExistingName>
-            <strong>{person.name}</strong>
-            <span>{maskPhone(person.phone)}</span>
+            <Typography type="h5" as="span">
+              {person.name}
+            </Typography>
+            <Typography type="caption" as="span">
+              {maskPhone(person.phone)}
+            </Typography>
           </ExistingName>
           <StatusPill person={person} compact />
         </ExistingHead>
         <ExistingRow>
-          <span>Cadastrado em</span>
-          <span>{formatTimestampDate(person.created_at)}</span>
+          <Typography type="caption" as="span">
+            Cadastrado em
+          </Typography>
+          <Typography type="span">{formatTimestampDate(person.created_at)}</Typography>
         </ExistingRow>
         <ExistingRow>
-          <span>E-mail</span>
-          <span>{person.email ?? '—'}</span>
+          <Typography type="caption" as="span">
+            E-mail
+          </Typography>
+          <Typography type="span">{person.email ?? '—'}</Typography>
         </ExistingRow>
       </ExistingCard>
       <ModalActions>

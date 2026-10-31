@@ -1,6 +1,6 @@
 // Libs
+import { Form as BaseForm, Typography } from 'bp-kit';
 import styled from 'styled-components';
-import { Form as BaseForm } from 'bp-kit';
 
 export const Form = styled(BaseForm)`
   max-width: 420px;
@@ -23,12 +23,8 @@ export const InlineFields = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-export const Intro = styled.p`
-  margin: 0 0 ${({ theme }) => theme.spacing.lg};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 15px;
-  line-height: 1.45;
-  color: ${({ theme }) => theme.colors.body};
+export const Intro = styled(Typography)`
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 export const ExistingCard = styled.div`
@@ -53,17 +49,6 @@ export const ExistingName = styled.span`
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-
-  strong {
-    font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
-    color: ${({ theme }) => theme.colors.ink};
-  }
-
-  span {
-    font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-    color: ${({ theme }) => theme.colors.muted};
-  }
 `;
 
 export const ExistingRow = styled.div`
@@ -72,15 +57,4 @@ export const ExistingRow = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
   padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.base};
   border-top: 1px solid ${({ theme }) => theme.colors.hairlineSoft};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-
-  span:first-child {
-    color: ${({ theme }) => theme.colors.muted};
-  }
-
-  span:last-child {
-    font-weight: 500;
-    color: ${({ theme }) => theme.colors.ink};
-  }
 `;

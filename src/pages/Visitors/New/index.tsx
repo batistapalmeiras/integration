@@ -65,7 +65,7 @@ export function NewVisitorPage() {
   return (
     <div>
       <PageHeader title="Novo visitante" back />
-      <Intro>Só nome e WhatsApp são obrigatórios. O resto a pessoa completa na inscrição.</Intro>
+      <Intro type="p">Só nome e WhatsApp são obrigatórios. O resto a pessoa completa na inscrição.</Intro>
 
       <Form onSubmit={submit}>
         <TextInput label="WhatsApp" control={control} name="phone" mask="phone" placeholder={PHONE_PLACEHOLDER} />

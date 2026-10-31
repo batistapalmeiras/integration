@@ -1,22 +1,6 @@
 // Libs
+import { Typography } from 'bp-kit';
 import styled from 'styled-components';
-
-export const HeaderRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const Title = styled.h1`
-  margin: 0;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: ${({ theme }) => theme.colors.ink};
-`;
 
 export const RoundButton = styled.button`
   flex-shrink: 0;
@@ -66,60 +50,14 @@ export const EventLabel = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-`;
-
-export const EventDate = styled.span`
-  font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.ink};
-`;
-
-export const EventToday = styled.span`
-  font-size: 13px;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.success};
-`;
-
-export const Stats = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-bottom: ${({ theme }) => theme.spacing.base};
-`;
-
-export const Stat = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: ${({ theme }) => theme.spacing.md};
-  border: 1px solid ${({ theme }) => theme.colors.hairline};
-  border-radius: ${({ theme }) => theme.rounded.md};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-`;
-
-export const StatValue = styled.span<{ $tone?: 'success' | 'warning' }>`
-  font-size: 22px;
-  font-weight: 700;
-  color: ${({ theme, $tone }) =>
-    $tone === 'success' ? theme.colors.success : $tone === 'warning' ? theme.colors.warning : theme.colors.ink};
-`;
-
-export const StatLabel = styled.span`
-  font-size: 13px;
-  color: ${({ theme }) => theme.colors.muted};
 `;
 
 export const SearchRow = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.base};
 `;
 
-export const ListTitle = styled.h2`
-  margin: 0 0 ${({ theme }) => theme.spacing.sm};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 17px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.ink};
+export const ListTitle = styled(Typography)`
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
 export const PersonList = styled.ul`
@@ -159,18 +97,6 @@ export const PersonLink = styled.button`
   background: transparent;
   text-align: left;
   cursor: pointer;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-`;
-
-export const PersonName = styled.span`
-  font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.ink};
-`;
-
-export const PersonNote = styled.span`
-  font-size: 13px;
-  color: ${({ theme }) => theme.colors.muted};
 `;
 
 export const IconAction = styled.button`
@@ -205,8 +131,8 @@ export const SegmentButton = styled.button<{ $tone: 'positive' | 'negative' }>`
   justify-content: center;
   gap: 6px;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 15px;
-  font-weight: 600;
+  font-size: ${({ theme }) => theme.typography.caption.fontSize};
+  font-weight: ${({ theme }) => theme.typography.caption.fontWeight};
   color: ${({ theme }) => theme.colors.body};
   cursor: pointer;
 
@@ -225,8 +151,8 @@ export const AddButton = styled.button`
   background: ${({ theme }) => theme.colors.canvas};
   color: ${({ theme }) => theme.colors.ink};
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 15px;
-  font-weight: 600;
+  font-size: ${({ theme }) => theme.typography.caption.fontSize};
+  font-weight: ${({ theme }) => theme.typography.caption.fontWeight};
   display: flex;
   align-items: center;
   justify-content: center;

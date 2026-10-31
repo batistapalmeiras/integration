@@ -1,14 +1,14 @@
 // React
 import { useState } from 'react';
 // Libs
-import { Button, Card, InfoBox } from 'bp-kit';
+import { Button, Card, InfoBox, Typography } from 'bp-kit';
 import { useNavigate } from 'react-router-dom';
 // Local
 import { initialContactMessage } from '../../../../domain/whatsapp';
 import { AppRoute } from '../../../../routes/paths';
 import { Person } from '../../../../features/visitors';
 import { ContactAttemptFormValues } from '../../validators';
-import { Hint, InfoBoxAction, PanelTitle, SectionStack, Step, StepBody, StepNumber, Steps, StepTitle } from '../styles';
+import { Hint, InfoBoxAction, SectionStack, Step, StepBody, StepNumber, Steps, StepTitle } from '../styles';
 import { ContactTab } from './ContactTab';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
@@ -31,7 +31,9 @@ export function ContactStagePanel({ person, volunteerName, hasCoffeeEvent, onReg
   return (
     <Card>
       <SectionStack>
-        <PanelTitle>Contato</PanelTitle>
+        <Typography type="h3" as="h2">
+          Contato
+        </Typography>
         {noCoffeeScheduled && (
           <InfoBox variant="warning">
             Ainda não há um café de boas-vindas agendado. Agende uma data na aba Café antes de entrar em contato.
@@ -63,7 +65,9 @@ export function ContactStagePanel({ person, volunteerName, hasCoffeeEvent, onReg
           <Step>
             <StepNumber $active={opened && !noCoffeeScheduled}>2</StepNumber>
             <StepBody>
-              <StepTitle $muted={!opened || noCoffeeScheduled}>Resultado</StepTitle>
+              <StepTitle type="h5" as="span" $muted={!opened || noCoffeeScheduled}>
+                Resultado
+              </StepTitle>
               {opened && !noCoffeeScheduled ? (
                 <ContactTab onSubmit={onRegisterContact} />
               ) : (

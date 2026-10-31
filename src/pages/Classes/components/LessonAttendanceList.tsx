@@ -1,7 +1,7 @@
 // React
 import { useState } from 'react';
 // Libs
-import { Checkbox } from 'bp-kit';
+import { Checkbox, Typography } from 'bp-kit';
 // Local
 import { todayKey } from '../../../domain/dates';
 import { formatDate } from '../domain';
@@ -48,17 +48,23 @@ export function LessonAttendanceList({ lessons, rows, onToggle }: Props) {
             $selected={l.id === lesson.id}
             onClick={() => setLessonId(l.id)}
           >
-            <strong>Aula {l.number}</strong>
-            <span>{l.date === today ? 'Hoje' : formatDate(l.date).slice(0, 5)}</span>
+            <Typography type="h6" as="span">
+              Aula {l.number}
+            </Typography>
+            <Typography type="caption" as="span">
+              {l.date === today ? 'Hoje' : formatDate(l.date).slice(0, 5)}
+            </Typography>
           </LessonTab>
         ))}
       </LessonTabs>
 
       <PresenceHeader>
-        <h2>Quem está aqui?</h2>
-        <span>
+        <Typography type="h4" as="h2">
+          Quem está aqui?
+        </Typography>
+        <Typography type="caption" as="span">
           {present} de {rows.length} presentes
-        </span>
+        </Typography>
       </PresenceHeader>
       <PresenceBar $percent={rows.length ? Math.round((present / rows.length) * 100) : 0} />
 
@@ -73,10 +79,10 @@ export function LessonAttendanceList({ lessons, rows, onToggle }: Props) {
                   onChange={(e) => onToggle(row.id, lesson.id, e.target.checked)}
                   label={
                     <StudentText>
-                      <strong>{row.person.name}</strong>
-                      <span>
+                      <Typography type="span">{row.person.name}</Typography>
+                      <Typography type="caption" as="span">
                         {row.attendedCount} de {lessons.length} aulas
-                      </span>
+                      </Typography>
                     </StudentText>
                   }
                 />
@@ -85,7 +91,7 @@ export function LessonAttendanceList({ lessons, rows, onToggle }: Props) {
           );
         })}
       </StudentList>
-      <FootHint>Toque no nome para marcar. Salva sozinho.</FootHint>
+      <FootHint type="caption">Toque no nome para marcar. Salva sozinho.</FootHint>
     </>
   );
 }

@@ -6,6 +6,7 @@ import {
   Empty,
   ModalActions,
   ModalTitle,
+  PageHeader,
   Pagination,
   SearchInput,
   Skeleton,
@@ -28,31 +29,21 @@ import { useCoffee } from './hooks';
 import { AttendeeRow } from './types';
 import {
   AddButton,
-  EventDate,
   EventLabel,
   EventSwitcher,
-  EventToday,
-  HeaderRow,
   IconAction,
   ListTitle,
   PaginationWrap,
   PersonItem,
   PersonLink,
   PersonList,
-  PersonName,
-  PersonNote,
   PersonTop,
   RoundButton,
   SearchRow,
   SegmentButton,
   Segmented,
   SheetActions,
-  Stat,
-  StatLabel,
-  Stats,
-  StatValue,
   SwitchArrow,
-  Title,
 } from './styles';
 
 function weekdayLabel(eventDate: string): string {
@@ -65,7 +56,6 @@ export function CoffeePage() {
   const { user } = useAuthCtx();
   const {
     events,
-    stats,
     canCreateEvent,
     event,
     selectedEventId,
@@ -161,20 +151,22 @@ export function CoffeePage() {
   const canMark = !!event && canMarkCoffeeAttendance(event.event_date, todayKey());
 
   const personNote = (attendance: AttendeeRow) => {
-    if (attendance.attended) return null;
-    return canMark ? 'Presença não marcada' : 'A presença pode ser marcada a partir do dia do café';
+    if (attendance.attended || !canMark) return null;
+    return 'Presença não marcada';
   };
 
   return (
     <div>
-      <HeaderRow>
-        <Title>Café</Title>
-        {canPlan && (
-          <RoundButton type="button" aria-label="Opções do café" onClick={openEventMenu}>
-            <MoreHorizontal size={20} />
-          </RoundButton>
-        )}
-      </HeaderRow>
+      <PageHeader
+        title="Café"
+        action={
+          canPlan && (
+            <RoundButton type="button" aria-label="Opções do café" onClick={openEventMenu}>
+              <MoreHorizontal size={20} />
+            </RoundButton>
+          )
+        }
+      />
 
       {loading && <Skeleton $h="240px" />}
 
@@ -199,10 +191,10 @@ export function CoffeePage() {
               <ChevronLeft size={20} />
             </SwitchArrow>
             <EventLabel>
-              <EventDate>
+              <Typography type="h4">
                 {weekdayLabel(event.event_date)}, {formatDate(event.event_date).slice(0, 5)} · {event.event_time.slice(0, 5)}
-              </EventDate>
-              {event.event_date === todayKey() && <EventToday>Hoje</EventToday>}
+              </Typography>
+              {event.event_date === todayKey() && <Typography type="caption">Hoje</Typography>}
             </EventLabel>
             <SwitchArrow
               type="button"
@@ -213,21 +205,6 @@ export function CoffeePage() {
               <ChevronRight size={20} />
             </SwitchArrow>
           </EventSwitcher>
-
-          <Stats>
-            <Stat>
-              <StatValue>{stats.total}</StatValue>
-              <StatLabel>inscritos</StatLabel>
-            </Stat>
-            <Stat>
-              <StatValue $tone="success">{stats.attended}</StatValue>
-              <StatLabel>vieram</StatLabel>
-            </Stat>
-            <Stat>
-              <StatValue $tone="warning">{stats.pending}</StatValue>
-              <StatLabel>a marcar</StatLabel>
-            </Stat>
-          </Stats>
 
           <SearchRow>
             <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
@@ -246,14 +223,18 @@ export function CoffeePage() {
 
           {totalCount > 0 && (
             <>
-              <ListTitle>Quem veio?</ListTitle>
+              <ListTitle type="h4">Quem veio?</ListTitle>
               <PersonList>
                 {attendees.map((attendance) => (
                   <PersonItem key={attendance.id}>
                     <PersonTop>
                       <PersonLink type="button" onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}>
-                        <PersonName>{attendance.person.name}</PersonName>
-                        {personNote(attendance) && <PersonNote>{personNote(attendance)}</PersonNote>}
+                        <Typography type="span">{attendance.person.name}</Typography>
+                        {personNote(attendance) && (
+                          <Typography type="caption" as="span">
+                            {personNote(attendance)}
+                          </Typography>
+                        )}
                       </PersonLink>
                       {attendance.attended && <StatusPill person={attendance.person} compact />}
                       {canPlan && !attendance.attended && (

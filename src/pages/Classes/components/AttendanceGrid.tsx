@@ -1,19 +1,17 @@
 // Libs
-import { Button, Checkbox, Typography } from 'bp-kit';
+import { Button, Checkbox, StatCard, StatLabel, StatValue, Typography } from 'bp-kit';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
+import { TableWrapper, Td, Th } from '../../../components/Table';
 import { formatTimestampDate, todayKey } from '../../../domain/dates';
 import { formatDate } from '../domain';
 import { EnrollmentRow, Lesson } from '../types';
 import {
   CheckCell,
   Grid,
-  GridWrap,
   LessonHead,
   StudentLink,
-  SummaryCard,
   SummaryCards,
-  SummaryValue,
 } from '../styles';
 
 interface Props {
@@ -59,47 +57,43 @@ export function AttendanceGrid({ lessons, rows, onToggle, onOpen, onSendInterest
 
   return (
     <>
-      <SummaryCards>
-        <SummaryCard>
-          <SummaryValue $tone="success">{completed.length}</SummaryValue>
-          completaram as {lessons.length} aulas · enviar ficha
-        </SummaryCard>
-        <SummaryCard>
-          <SummaryValue $tone="warning">{needMakeup.length}</SummaryValue>
-          precisam de reposição
-        </SummaryCard>
-        <SummaryCard>
-          <SummaryValue>{interestSent.length}</SummaryValue>
-          ficha já enviada
-        </SummaryCard>
+      <SummaryCards $columns={3}>
+        <StatCard>
+          <StatLabel>completaram as {lessons.length} aulas · enviar ficha</StatLabel>
+          <StatValue>{completed.length}</StatValue>
+        </StatCard>
+        <StatCard>
+          <StatLabel>precisam de reposição</StatLabel>
+          <StatValue $tone="warning">{needMakeup.length}</StatValue>
+        </StatCard>
+        <StatCard>
+          <StatLabel>ficha já enviada</StatLabel>
+          <StatValue>{interestSent.length}</StatValue>
+        </StatCard>
       </SummaryCards>
 
-      <GridWrap>
+      <TableWrapper>
         <Grid>
           <thead>
             <tr>
-              <th scope="col" style={{ textAlign: 'left' }}>
-                Aluno
-              </th>
+              <Th scope="col">Aluno</Th>
               {lessons.map((l) => (
                 <LessonHead key={l.id} scope="col">
                   Aula {l.number}
                   <span>{formatDate(l.date).slice(0, 5)}</span>
                 </LessonHead>
               ))}
-              <th scope="col" style={{ textAlign: 'left' }}>
-                Próxima ação
-              </th>
+              <Th scope="col">Próxima ação</Th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                <th scope="row">
+                <Td>
                   <StudentLink type="button" onClick={() => onOpen(row.person.id)}>
-                    {row.person.name}
+                    <Typography type="span">{row.person.name}</Typography>
                   </StudentLink>
-                </th>
+                </Td>
                 {lessons.map((l) => (
                   <CheckCell key={l.id}>
                     <Checkbox
@@ -109,12 +103,12 @@ export function AttendanceGrid({ lessons, rows, onToggle, onOpen, onSendInterest
                     />
                   </CheckCell>
                 ))}
-                <td>{nextAction(row)}</td>
+                <Td>{nextAction(row)}</Td>
               </tr>
             ))}
           </tbody>
         </Grid>
-      </GridWrap>
+      </TableWrapper>
     </>
   );
 }

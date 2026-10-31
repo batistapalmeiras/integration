@@ -1,5 +1,5 @@
 // Libs
-import { TabBar } from 'bp-kit';
+import { TabBar, Typography } from 'bp-kit';
 import styled from 'styled-components';
 
 export { Form } from 'bp-kit';
@@ -138,14 +138,6 @@ export const SensitiveValue = styled.span<{ $muted?: boolean }>`
   white-space: pre-wrap;
 `;
 
-export const PanelTitle = styled.h2`
-  margin: 0;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.displaySm.fontSize};
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.ink};
-`;
-
 export const Steps = styled.ol`
   margin: 0;
   padding: 0;
@@ -168,9 +160,8 @@ export const StepNumber = styled.span<{ $active: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 13px;
-  font-weight: 700;
+  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
+  font-weight: ${({ theme }) => theme.typography.microLabel.fontWeight};
   background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.surfaceStrong)};
   color: ${({ theme, $active }) => ($active ? theme.colors.onPrimary : theme.colors.muted)};
 `;
@@ -183,9 +174,6 @@ export const StepBody = styled.div`
   gap: ${({ theme }) => theme.spacing.sm};
 `;
 
-export const StepTitle = styled.span<{ $muted?: boolean }>`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 15px;
-  font-weight: 600;
-  color: ${({ theme, $muted }) => ($muted ? theme.colors.muted : theme.colors.ink)};
+export const StepTitle = styled(Typography)<{ $muted?: boolean }>`
+  ${({ theme, $muted }) => $muted && `color: ${theme.colors.muted};`}
 `;
