@@ -3,6 +3,7 @@ import { useState } from 'react';
 // Libs
 import { Checkbox, Typography } from 'bp-kit';
 // Local
+import { List, ListItem, ListItemRow } from '../../../components/List';
 import { todayKey } from '../../../domain/dates';
 import { formatDate } from '../domain';
 import { EnrollmentRow, Lesson } from '../types';
@@ -12,15 +13,14 @@ import {
   LessonTabs,
   PresenceBar,
   PresenceHeader,
-  StudentList,
   StudentText,
-  StudentToggle,
 } from '../styles';
 
 interface Props {
   lessons: Lesson[];
   rows: EnrollmentRow[];
   onToggle: (enrollmentId: string, lessonId: string, attended: boolean) => void;
+  onOpen: (personId: string) => void;
 }
 
 export function currentLessonId(lessons: Lesson[]): string | undefined {
@@ -28,7 +28,7 @@ export function currentLessonId(lessons: Lesson[]): string | undefined {
   return [...lessons].reverse().find((l) => l.date <= today)?.id ?? lessons[0]?.id;
 }
 
-export function LessonAttendanceList({ lessons, rows, onToggle }: Props) {
+export function LessonAttendanceList({ lessons, rows, onToggle, onOpen }: Props) {
   const [lessonId, setLessonId] = useState(() => currentLessonId(lessons));
   const today = todayKey();
   const lesson = lessons.find((l) => l.id === lessonId) ?? lessons[0];
@@ -68,30 +68,29 @@ export function LessonAttendanceList({ lessons, rows, onToggle }: Props) {
       </PresenceHeader>
       <PresenceBar $percent={rows.length ? Math.round((present / rows.length) * 100) : 0} />
 
-      <StudentList>
+      <List>
         {rows.map((row) => {
           const checked = !!row.attendanceByLesson[lesson.id]?.attended;
           return (
-            <li key={row.id}>
-              <StudentToggle $checked={checked}>
+            <ListItem key={row.id} $selected={checked}>
+              <ListItemRow>
                 <Checkbox
+                  aria-label={`Presença de ${row.person.name} na aula ${lesson.number}`}
                   checked={checked}
                   onChange={(e) => onToggle(row.id, lesson.id, e.target.checked)}
-                  label={
-                    <StudentText>
-                      <span>{row.person.name}</span>
-                      <Typography type="caption" as="span">
-                        {row.attendedCount} de {lessons.length} aulas
-                      </Typography>
-                    </StudentText>
-                  }
                 />
-              </StudentToggle>
-            </li>
+                <StudentText type="button" onClick={() => onOpen(row.person.id)}>
+                  <span>{row.person.name}</span>
+                  <Typography type="caption" as="span">
+                    {row.attendedCount} de {lessons.length} aulas
+                  </Typography>
+                </StudentText>
+              </ListItemRow>
+            </ListItem>
           );
         })}
-      </StudentList>
-      <FootHint type="caption">Toque no nome para marcar. Salva sozinho.</FootHint>
+      </List>
+      <FootHint type="caption">Marque a caixa de quem veio. Salva sozinho.</FootHint>
     </>
   );
 }

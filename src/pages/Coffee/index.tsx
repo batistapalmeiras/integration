@@ -15,8 +15,12 @@ import {
   useAuthCtx,
   useModal,
 } from 'bp-kit';
-import { Archive, Check, ChevronLeft, ChevronRight, MoreHorizontal, Pencil, Plus, X, XCircle } from 'lucide-react';
+import { Archive, Check, Pencil, Plus, X, XCircle } from 'lucide-react';
 // Local
+import { AddButton } from '../../components/AddButton';
+import { ArrowSwitcher } from '../../components/ArrowSwitcher';
+import { List, ListItem, ListItemRow } from '../../components/List';
+import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { StatusPill } from '../../components/StatusPill';
 import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
 import { todayKey } from '../../domain/dates';
@@ -28,22 +32,13 @@ import { formatDate } from './domain';
 import { useCoffee } from './hooks';
 import { AttendeeRow } from './types';
 import {
-  AddButton,
-  EventLabel,
-  EventSwitcher,
   IconAction,
   ListTitle,
   PaginationWrap,
-  PersonItem,
   PersonLink,
-  PersonList,
-  PersonTop,
-  RoundButton,
   SearchRow,
   SegmentButton,
   Segmented,
-  SheetActions,
-  SwitchArrow,
 } from './styles';
 
 function weekdayLabel(eventDate: string): string {
@@ -93,7 +88,7 @@ export function CoffeePage() {
     open(
       <>
         <ModalTitle onClose={close}>Café de Boas-vindas</ModalTitle>
-        <SheetActions>
+        <OptionsMenuActions>
           <Button
             type="button"
             disabled={!canCreateEvent}
@@ -119,7 +114,7 @@ export function CoffeePage() {
               Editar café
             </Button>
           )}
-        </SheetActions>
+        </OptionsMenuActions>
       </>,
     );
 
@@ -160,11 +155,7 @@ export function CoffeePage() {
       <PageHeader
         title="Café"
         action={
-          canPlan && (
-            <RoundButton type="button" aria-label="Opções do café" onClick={openEventMenu}>
-              <MoreHorizontal size={20} />
-            </RoundButton>
-          )
+canPlan && <OptionsMenuButton label="Opções do café" onClick={openEventMenu} />
         }
       />
 
@@ -181,30 +172,14 @@ export function CoffeePage() {
 
       {!loading && !error && event && (
         <>
-          <EventSwitcher>
-            <SwitchArrow
-              type="button"
-              aria-label="Café anterior"
-              disabled={eventIndex <= 0}
-              onClick={() => selectEvent(events[eventIndex - 1].id)}
-            >
-              <ChevronLeft size={20} />
-            </SwitchArrow>
-            <EventLabel>
-              <Typography type="h4">
-                {weekdayLabel(event.event_date)}, {formatDate(event.event_date).slice(0, 5)} · {event.event_time.slice(0, 5)}
-              </Typography>
-              {event.event_date === todayKey() && <Typography type="caption">Hoje</Typography>}
-            </EventLabel>
-            <SwitchArrow
-              type="button"
-              aria-label="Próximo café"
-              disabled={eventIndex >= events.length - 1}
-              onClick={() => selectEvent(events[eventIndex + 1].id)}
-            >
-              <ChevronRight size={20} />
-            </SwitchArrow>
-          </EventSwitcher>
+          <ArrowSwitcher
+            title={`${weekdayLabel(event.event_date)}, ${formatDate(event.event_date).slice(0, 5)} · ${event.event_time.slice(0, 5)}`}
+            caption={event.event_date === todayKey() ? 'Hoje' : undefined}
+            previousLabel="Café anterior"
+            nextLabel="Próximo café"
+            onPrevious={eventIndex > 0 ? () => selectEvent(events[eventIndex - 1].id) : undefined}
+            onNext={eventIndex < events.length - 1 ? () => selectEvent(events[eventIndex + 1].id) : undefined}
+          />
 
           <SearchRow>
             <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
@@ -224,10 +199,10 @@ export function CoffeePage() {
           {totalCount > 0 && (
             <>
               <ListTitle type="h4">Quem veio?</ListTitle>
-              <PersonList>
+              <List>
                 {attendees.map((attendance) => (
-                  <PersonItem key={attendance.id}>
-                    <PersonTop>
+                  <ListItem key={attendance.id}>
+                    <ListItemRow>
                       <PersonLink type="button" onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}>
                         <span>{attendance.person.name}</span>
                         {personNote(attendance) && (
@@ -247,7 +222,7 @@ export function CoffeePage() {
                           <Archive size={18} />
                         </IconAction>
                       )}
-                    </PersonTop>
+                    </ListItemRow>
                     {canPlan && canMark && !attendance.attended && (
                       <Segmented role="group" aria-label={`Presença de ${attendance.person.name}`}>
                         <SegmentButton
@@ -264,9 +239,9 @@ export function CoffeePage() {
                         </SegmentButton>
                       </Segmented>
                     )}
-                  </PersonItem>
+                  </ListItem>
                 ))}
-              </PersonList>
+              </List>
             </>
           )}
 
@@ -276,7 +251,7 @@ export function CoffeePage() {
             </PaginationWrap>
           )}
 
-          {canPlan && (
+          {canPlan && event.event_date >= todayKey() && (
             <AddButton type="button" onClick={openEnrollModal}>
               <Plus size={18} />
               Adicionar pessoa a este café

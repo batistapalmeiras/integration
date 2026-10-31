@@ -14,21 +14,6 @@ export const SearchRow = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
-export const SelectorRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const CountRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`;
-
 export const CountBadge = styled.span<{ $eligible: boolean }>`
   display: inline-flex;
   align-items: center;
@@ -91,35 +76,14 @@ export const PresenceBar = styled.div<{ $percent: number }>`
   }
 `;
 
-export const StudentList = styled.ul`
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border: 1px solid ${({ theme }) => theme.colors.hairline};
-  border-radius: ${({ theme }) => theme.rounded.md};
-  overflow: hidden;
-
-  li + li {
-    border-top: 1px solid ${({ theme }) => theme.colors.hairlineSoft};
-  }
-`;
-
-export const StudentToggle = styled.div<{ $checked: boolean }>`
-  background: ${({ theme, $checked }) => ($checked ? theme.colors.primarySoft : theme.colors.canvas)};
-
-  & > label {
-    display: flex;
-    width: 100%;
-    box-sizing: border-box;
-    gap: ${({ theme }) => theme.spacing.md};
-    min-height: 60px;
-    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base};
-  }
-`;
-
-export const StudentText = styled.span`
+export const StudentText = styled.button`
   flex: 1;
   min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
   color: ${({ theme }) => theme.colors.ink};
   display: flex;

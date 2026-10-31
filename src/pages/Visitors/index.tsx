@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useMediaQuery } from 'bp-kit';
 // Local
+import { List, ListItem } from '../../components/List';
 import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
 import { Person } from '../../features/visitors';
@@ -16,9 +17,7 @@ import {
   PaginationWrap,
   PreviewColumn,
   QueueChips,
-  Row,
   RowButton,
-  RowList,
   RowText,
   SearchRow,
   Split,
@@ -104,18 +103,18 @@ export function VisitorsPage() {
       {!loading && !error && rows.length > 0 && (
         <Split>
           <ListColumn>
-            <RowList>
+            <List>
               {rows.map((person) => (
-                <Row key={person.id} $selected={person.id === previewId}>
+                <ListItem key={person.id} $selected={person.id === previewId}>
                   <RowButton type="button" onClick={() => openRow(person)}>
                     <RowText>
                       {person.name}
                     </RowText>
                     <StatusPill person={person} compact />
                   </RowButton>
-                </Row>
+                </ListItem>
               ))}
-            </RowList>
+            </List>
 
             {totalPages > 1 && (
               <PaginationWrap>

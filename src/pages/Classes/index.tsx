@@ -6,7 +6,6 @@ import {
   Empty,
   ModalTitle,
   PageHeader,
-  RawSelect,
   SearchInput,
   Skeleton,
   text,
@@ -14,10 +13,12 @@ import {
   useMediaQuery,
   useModal,
 } from 'bp-kit';
-import { Pencil, UserPlus } from 'lucide-react';
+import { Pencil, Plus } from 'lucide-react';
 // Local
+import { AddButton } from '../../components/AddButton';
+import { ArrowSwitcher } from '../../components/ArrowSwitcher';
+import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { PeopleCount } from '../../components/PeopleCount';
-import { ActionButton } from '../../components/ActionButton';
 import { makeupLessonMessage } from '../../domain/whatsapp';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
@@ -28,7 +29,7 @@ import { EditCohortModal } from './components/EditCohortModal';
 import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { LessonAttendanceList } from './components/LessonAttendanceList';
 import { useClasses } from './hooks';
-import { CountRow, SearchRow, SelectorRow } from './styles';
+import { SearchRow } from './styles';
 import { EnrollmentRow, Lesson } from './types';
 
 export function ClassesPage() {
@@ -87,59 +88,60 @@ export function ClassesPage() {
   const openEnrollModal = () =>
     cohort && open(<EnrollPersonModal cohortId={cohort.id} close={close} onEnroll={enrollPerson} />);
 
+  const openCohortMenu = () =>
+    open(
+      <>
+        <ModalTitle onClose={close}>Turma de Integração</ModalTitle>
+        <OptionsMenuActions>
+          <Button
+            type="button"
+            disabled={!canCreateCohort}
+            title={canCreateCohort ? undefined : 'Encerre uma turma antes de abrir outra — só é possível ter 2 ao mesmo tempo.'}
+            onClick={() => {
+              close();
+              openCreateModal();
+            }}
+          >
+            <Plus size={16} />
+            Nova turma
+          </Button>
+          {cohort && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                close();
+                openEditModal();
+              }}
+            >
+              <Pencil size={16} />
+              Editar aulas
+            </Button>
+          )}
+        </OptionsMenuActions>
+      </>,
+    );
+
+  const cohortIndex = cohorts.findIndex((c) => c.id === selectedCohortId);
+
   return (
     <div>
       <PageHeader
         title="Turma de Integração"
-        subtitle={cohort ? cohort.name : 'Nenhuma turma ativa'}
-        action={
-          canManageCohort ? (
-            <Button
-              onClick={openCreateModal}
-              disabled={!canCreateCohort}
-              title={canCreateCohort ? undefined : 'Encerre uma turma antes de abrir outra — só é possível ter 2 ao mesmo tempo.'}
-            >
-              Nova turma
-            </Button>
-          ) : undefined
-        }
+        action={canManageCohort && <OptionsMenuButton label="Opções da turma" onClick={openCohortMenu} />}
       />
 
-      {!loading && !error && cohort && (cohorts.length > 1 || canManageCohort) && (
-        <SelectorRow>
-          {cohorts.length > 1 && (
-            <RawSelect
-              size="sm"
-              wrapperStyle={{ flex: 1 }}
-              value={selectedCohortId ?? ''}
-              onChange={(e) => selectCohort(e.target.value)}
-            >
-              {cohorts.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </RawSelect>
-          )}
-          {canManageCohort && (
-            <ActionButton variant="secondary" size="sm" onClick={openEditModal}>
-              <Pencil size={16} />
-              Editar aulas
-            </ActionButton>
-          )}
-        </SelectorRow>
-      )}
-
       {!loading && !error && cohort && (
-        <CountRow>
+        <>
+          <ArrowSwitcher
+            title={cohort.name}
+            previousLabel="Turma anterior"
+            nextLabel="Próxima turma"
+            onPrevious={cohortIndex > 0 ? () => selectCohort(cohorts[cohortIndex - 1].id) : undefined}
+            onNext={cohortIndex < cohorts.length - 1 ? () => selectCohort(cohorts[cohortIndex + 1].id) : undefined}
+          />
           <PeopleCount count={totalCount} />
-          {canEnroll && (
-            <ActionButton variant="secondary" size="sm" onClick={openEnrollModal}>
-              <UserPlus size={16} />
-              Adicionar
-            </ActionButton>
-          )}
-        </CountRow>
+        </>
       )}
 
       {loading && <Skeleton $h="240px" />}
@@ -149,7 +151,7 @@ export function ClassesPage() {
       {!loading && !error && !cohort && (
         <Empty
           title="Nenhuma turma ativa"
-          description={canManageCohort ? 'Abra uma nova turma pelo botão acima.' : 'Aguarde o administrador abrir a próxima turma.'}
+          description={canManageCohort ? 'Abra uma nova turma pelo botão de opções acima.' : 'Aguarde o administrador abrir a próxima turma.'}
         />
       )}
 
@@ -171,7 +173,13 @@ export function ClassesPage() {
       )}
 
       {!loading && !error && cohort && totalCount > 0 && !isDesktop && (
-        <LessonAttendanceList key={cohort.id} lessons={lessons} rows={enrollments} onToggle={toggleAttendance} />
+        <LessonAttendanceList
+          key={cohort.id}
+          lessons={lessons}
+          rows={enrollments}
+          onToggle={toggleAttendance}
+          onOpen={(personId) => navigate(`${AppRoute.Visitors}/${personId}`)}
+        />
       )}
 
       {!loading && !error && cohort && totalCount > 0 && isDesktop && (
@@ -183,6 +191,13 @@ export function ClassesPage() {
           onSendInterest={sendMembershipInterest}
           onSendMakeup={openMakeupModal}
         />
+      )}
+
+      {!loading && !error && cohort && canEnroll && (
+        <AddButton type="button" onClick={openEnrollModal}>
+          <Plus size={18} />
+          Adicionar pessoa a esta turma
+        </AddButton>
       )}
 
       {modal}
