@@ -26,44 +26,6 @@ export const LeaderList = styled.div`
   gap: ${({ theme }) => theme.spacing.xs};
 `;
 
-export const SuggestWrapper = styled.div`
-  position: relative;
-  flex: 1;
-`;
-
-export const SuggestPanel = styled.div`
-  position: absolute;
-  top: calc(100% + ${({ theme }) => theme.spacing.xs});
-  left: 0;
-  right: 0;
-  z-index: 20;
-  max-height: 200px;
-  overflow-y: auto;
-  background: ${({ theme }) => theme.colors.canvas};
-  border: 1px solid ${({ theme }) => theme.colors.hairline};
-  border-radius: ${({ theme }) => theme.rounded.md};
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  padding: ${({ theme }) => theme.spacing.xs};
-`;
-
-export const SuggestItem = styled.button`
-  display: block;
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: none;
-  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
-  border-radius: ${({ theme }) => theme.rounded.sm};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
-  color: ${({ theme }) => theme.colors.ink};
-  cursor: pointer;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.surfaceSoft};
-  }
-`;
-
 export const LeaderRow = styled.div<{ $readOnly?: boolean }>`
   display: inline-flex;
   align-items: center;
@@ -74,11 +36,6 @@ export const LeaderRow = styled.div<{ $readOnly?: boolean }>`
   background: ${({ theme }) => theme.colors.canvas};
   border: 1px solid ${({ theme }) => theme.colors.hairline};
   border-radius: ${({ theme }) => theme.rounded.full};
-`;
-
-export const LeadersCell = styled.span`
-  color: ${({ theme }) => theme.colors.muted};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
 `;
 
 export const CountPill = styled.span`

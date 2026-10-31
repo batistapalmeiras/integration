@@ -24,12 +24,13 @@ import {
   selectOpenCoffeeEvents,
   selectOrphanPeople,
   unmarkCoffeePresence,
+  upcomingCoffeeEvent,
   updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
 import { listAllCohorts } from '../../../domain/classesRoster';
 import { archivePeople, missedSignupIds } from '../../../domain/signupDeadline';
 import { supabase } from '../../../lib/supabase';
-import { UserRole } from '../../../types/enums';
+import { hasRole, INTEGRATION_TEAM_ROLES } from '../../../types/enums';
 import { todayKey } from '../../../domain/dates';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { AttendeeRow, CoffeeEvent } from '../types';
@@ -39,8 +40,7 @@ const MAX_EVENTS = 2;
 
 export function useCoffee() {
   const { user } = useAuthCtx();
-  const canSweep =
-    user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Pastor || user?.role === UserRole.Admin;
+  const canSweep = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
   const [events, setEvents] = useState<CoffeeEvent[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [allAttendees, setAllAttendees] = useState<AttendeeRow[]>([]);
@@ -56,7 +56,7 @@ export function useCoffee() {
       const open = selectOpenCoffeeEvents(
         board.events as CoffeeEvent[],
         countQueuedFrom(current),
-        new Date().toISOString().slice(0, 10),
+        todayKey(),
       );
       setEvents(open);
 
@@ -97,8 +97,7 @@ export function useCoffee() {
         if (canSweep) {
           const archived = await archivePeople(missedSignupIds(board.people, board.attendance, cohorts), user?.id);
 
-          const todayKey = new Date().toISOString().slice(0, 10);
-          const upcomingId = board.events.find((e) => e.event_date >= todayKey)?.id;
+          const upcomingId = upcomingCoffeeEvent(board.events, todayKey())?.id;
           const orphans = upcomingId ? selectOrphanPeople(board.people, board.attendance) : [];
           if (orphans.length > 0 && upcomingId) await attachPeopleToCoffee(orphans, upcomingId);
 

@@ -13,7 +13,7 @@ import { LessonMakeup, getPersonLessonMakeups } from '../../../domain/lessonMake
 import { communityRequirements } from '../../../domain/membershipCommunity';
 import { PersonSensitive, getPersonSensitive } from '../../../domain/personSensitive';
 import { AppRoute } from '../../../routes/paths';
-import { UserRole } from '../../../types/enums';
+import { hasRole, TEACHING_ROLES, UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
 import { CommunityFields } from '../components/CommunityFields';
 import { ConfirmMemberModal } from '../Detail/components/ConfirmMemberModal';
@@ -60,8 +60,7 @@ export function VisitorInfoPage() {
   const [ministries, setMinistries] = useState<CommunityGroup[]>([]);
   const [ministryIds, setMinistryIds] = useState<string[]>([]);
 
-  const canConfirmMembership = user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
-  const canSeeSensitive = canConfirmMembership || user?.role === UserRole.Teacher;
+  const canSeeSensitive = hasRole(user?.role, TEACHING_ROLES);
   const [sensitive, setSensitive] = useState<PersonSensitive | null>(null);
   const [makeups, setMakeups] = useState<LessonMakeup[]>([]);
   const requirements = communityRequirements(sensitive);

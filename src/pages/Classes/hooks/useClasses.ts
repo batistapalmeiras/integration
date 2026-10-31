@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthCtx } from 'bp-kit';
 // Local
 import { getUpcomingCoffeeEventDate } from '../../../domain/cafeSchedule';
+import { todayKey } from '../../../domain/dates';
 import {
   CohortBoard,
   CohortWithLessons,
@@ -16,7 +17,7 @@ import {
 } from '../../../domain/classesRoster';
 import { enrollInIntegrationClass } from '../../../features/visitors';
 import { supabase } from '../../../lib/supabase';
-import { UserRole } from '../../../types/enums';
+import { hasRole, LEADERSHIP_ROLES } from '../../../types/enums';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { firstLessonDate } from '../../../domain/cohortSchedule';
 import { formatDate, weeklyLessonDates } from '../domain';
@@ -32,7 +33,7 @@ function sortByFirstLesson(list: CohortWithLessons[]): CohortWithLessons[] {
 
 export function useClasses() {
   const { user } = useAuthCtx();
-  const canManage = user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
+  const canManage = hasRole(user?.role, LEADERSHIP_ROLES);
   const [cohorts, setCohorts] = useState<CohortWithLessons[]>([]);
   const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
   const [allEnrollments, setAllEnrollments] = useState<EnrollmentRow[]>([]);
@@ -85,7 +86,7 @@ export function useClasses() {
         const board = await fetchCohortBoard();
 
         if (canManage) {
-          const finished = finishedCohortIds(board, new Date().toISOString().slice(0, 10));
+          const finished = finishedCohortIds(board, todayKey());
           if (finished.length > 0) {
             await closeCohorts(finished);
             applyBoard(

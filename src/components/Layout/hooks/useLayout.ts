@@ -6,7 +6,7 @@ import { useAuthCtx } from 'bp-kit';
 // Local
 import { supabase } from '../../../lib/supabase';
 import { AppRoute } from '../../../routes/paths';
-import { UserRole } from '../../../types/enums';
+import { hasRole, INTEGRATION_TEAM_ROLES, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
 
 export function useLayout() {
   const { user, logout } = useAuthCtx();
@@ -15,8 +15,7 @@ export function useLayout() {
   const [membershipCount, setMembershipCount] = useState(0);
 
   const isAdmin = user?.role === UserRole.Admin;
-  const isPastor = user?.role === UserRole.Pastor;
-  const showMembership = isAdmin || isPastor;
+  const showMembership = hasRole(user?.role, LEADERSHIP_ROLES);
 
   useEffect(() => {
     if (!showMembership) return;
@@ -49,10 +48,10 @@ export function useLayout() {
     isExactTab,
     membershipCount,
     showPeople: !!user,
-    showVisitors: isAdmin || isPastor || user?.role === UserRole.IntegrationTeam,
-    showCoffee: isAdmin || isPastor || user?.role === UserRole.IntegrationTeam,
-    showClasses: isAdmin || isPastor || user?.role === UserRole.Teacher,
+    showVisitors: hasRole(user?.role, INTEGRATION_TEAM_ROLES),
+    showCoffee: hasRole(user?.role, INTEGRATION_TEAM_ROLES),
+    showClasses: hasRole(user?.role, TEACHING_ROLES),
     showMembership,
-    showAdmin: isAdmin || isPastor,
+    showAdmin: showMembership,
   };
 }

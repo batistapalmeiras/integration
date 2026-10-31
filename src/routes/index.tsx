@@ -40,7 +40,7 @@ import { VolunteersPage } from '../pages/Volunteers';
 import { VolunteerDetailPage } from '../pages/Volunteers/Detail';
 // Local
 import { supabase } from '../lib/supabase';
-import { UserRole } from '../types/enums';
+import { INTEGRATION_TEAM_ROLES, LEADERSHIP_ROLES, STAFF_ROLES, TEACHING_ROLES, UserRole } from '../types/enums';
 import { AppRoute } from './paths';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -67,7 +67,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Visitors}
                       element={
-                        <ProtectedRoute roles={[UserRole.IntegrationTeam, UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={INTEGRATION_TEAM_ROLES}>
                           <VisitorsPage />
                         </ProtectedRoute>
                       }
@@ -75,7 +75,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.NewVisitor}
                       element={
-                        <ProtectedRoute roles={[UserRole.IntegrationTeam, UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={INTEGRATION_TEAM_ROLES}>
                           <NewVisitorPage />
                         </ProtectedRoute>
                       }
@@ -84,7 +84,7 @@ export function AppRouter() {
                       path={`${AppRoute.Visitors}/:id`}
                       element={
                         <ProtectedRoute
-                          roles={[UserRole.IntegrationTeam, UserRole.Admin, UserRole.Pastor, UserRole.Teacher]}
+                          roles={STAFF_ROLES}
                         >
                           <VisitorDetailPage />
                         </ProtectedRoute>
@@ -94,7 +94,7 @@ export function AppRouter() {
                       path={`${AppRoute.Visitors}/:id/editar`}
                       element={
                         <ProtectedRoute
-                          roles={[UserRole.IntegrationTeam, UserRole.Admin, UserRole.Pastor, UserRole.Teacher]}
+                          roles={STAFF_ROLES}
                         >
                           <VisitorEditPage />
                         </ProtectedRoute>
@@ -104,7 +104,7 @@ export function AppRouter() {
                       path={`${AppRoute.Visitors}/:id/detalhes`}
                       element={
                         <ProtectedRoute
-                          roles={[UserRole.IntegrationTeam, UserRole.Admin, UserRole.Pastor, UserRole.Teacher]}
+                          roles={STAFF_ROLES}
                         >
                           <VisitorInfoPage />
                         </ProtectedRoute>
@@ -113,7 +113,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Coffee}
                       element={
-                        <ProtectedRoute roles={[UserRole.IntegrationTeam, UserRole.Pastor, UserRole.Admin]}>
+                        <ProtectedRoute roles={INTEGRATION_TEAM_ROLES}>
                           <CoffeePage />
                         </ProtectedRoute>
                       }
@@ -121,7 +121,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Classes}
                       element={
-                        <ProtectedRoute roles={[UserRole.Teacher, UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={TEACHING_ROLES}>
                           <ClassesPage />
                         </ProtectedRoute>
                       }
@@ -131,7 +131,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Members}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <MembersPage />
                         </ProtectedRoute>
                       }
@@ -155,7 +155,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Membership}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <MembershipPage />
                         </ProtectedRoute>
                       }
@@ -187,7 +187,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Reports}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <ReportsPage />
                         </ProtectedRoute>
                       }
@@ -195,7 +195,7 @@ export function AppRouter() {
                     <Route
                       path={`${AppRoute.Reports}/turmas`}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <CohortsListPage />
                         </ProtectedRoute>
                       }
@@ -203,7 +203,7 @@ export function AppRouter() {
                     <Route
                       path={`${AppRoute.Reports}/turmas/:id`}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <CohortRosterPage />
                         </ProtectedRoute>
                       }
@@ -211,7 +211,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.Volunteers}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <VolunteersPage />
                         </ProtectedRoute>
                       }
@@ -219,7 +219,7 @@ export function AppRouter() {
                     <Route
                       path={`${AppRoute.Volunteers}/:id`}
                       element={
-                        <ProtectedRoute roles={[UserRole.Admin, UserRole.Pastor]}>
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <VolunteerDetailPage />
                         </ProtectedRoute>
                       }

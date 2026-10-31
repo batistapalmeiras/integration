@@ -128,11 +128,6 @@ export const DropdownItem = styled.button`
   &.danger { color: ${({ theme }) => theme.colors.primaryErrorText}; }
 `;
 
-export const DropdownDivider = styled.div`
-  height: 1px;
-  background: ${({ theme }) => theme.colors.hairlineSoft};
-`;
-
 export const BottomBar = styled.nav`
   display: none;
 

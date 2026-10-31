@@ -2,7 +2,7 @@
 import { useAuthCtx } from 'bp-kit';
 // Local
 import { useVisitorDetail } from '../../../../features/visitors';
-import { UserRole } from '../../../../types/enums';
+import { hasRole, INTEGRATION_TEAM_ROLES, TEACHING_ROLES, UserRole } from '../../../../types/enums';
 import { ContactAttemptFormValues } from '../../validators';
 import { CoffeeStagePanel } from './CoffeeStagePanel';
 import { ContactStagePanel } from './ContactStagePanel';
@@ -20,10 +20,9 @@ export function NextStep({ detail, onContactRegistered }: Props) {
   const { person } = detail;
   if (!person) return null;
 
-  const isAdmin = user?.role === UserRole.Admin;
   const isPastor = user?.role === UserRole.Pastor;
-  const canManage = user?.role === UserRole.IntegrationTeam || isAdmin || isPastor;
-  const canRecordAttendance = user?.role === UserRole.Teacher || isAdmin || isPastor;
+  const canManage = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
+  const canRecordAttendance = hasRole(user?.role, TEACHING_ROLES);
 
   const handleRegisterContact = async (values: ContactAttemptFormValues) => {
     await detail.registerContactAttempt(values);

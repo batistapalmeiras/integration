@@ -169,38 +169,6 @@ export async function getMakeupLink(enrollmentId: string, lessonId: string): Pro
   return `${window.location.origin}${AppRoute.MakeupAttendance}/${id}`;
 }
 
-export async function closeFinishedCohorts(): Promise<number> {
-  const open = await listOpenCohorts();
-  if (open.length === 0) return 0;
-
-  const { data, error } = await supabase
-    .from('enrollments')
-    .select('cohort_id, person:people(status)')
-    .in('cohort_id', open.map((c) => c.cohort.id));
-  if (error) throw error;
-
-  const stillGoing = new Map<string, number>();
-  for (const row of (data ?? []) as unknown as { cohort_id: string; person: { status: string } | null }[]) {
-    if (row.person?.status !== 'integration') continue;
-    stillGoing.set(row.cohort_id, (stillGoing.get(row.cohort_id) ?? 0) + 1);
-  }
-
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const finished = open
-    .filter((c) => isCohortFinished(c.lessons, stillGoing.get(c.cohort.id) ?? 0, todayKey))
-    .map((c) => c.cohort.id);
-  if (finished.length === 0) return 0;
-
-  const { data: closed, error: closeError } = await supabase
-    .from('cohorts')
-    .update({ status: 'closed' })
-    .in('id', finished)
-    .eq('status', 'active')
-    .select('id');
-  if (closeError) throw closeError;
-  return (closed ?? []).length;
-}
-
 export interface CohortBoardEnrollment {
   id: string;
   cohort_id: string;

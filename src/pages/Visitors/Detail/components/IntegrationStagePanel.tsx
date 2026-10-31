@@ -3,7 +3,7 @@ import { Send } from 'lucide-react';
 import { Card, Checkbox, LinkButton, ModalTitle, Skeleton, Typography, useModal } from 'bp-kit';
 // Local
 import { CountBadge } from '../../../Classes/styles';
-import { formatDate } from '../../../../domain/dates';
+import { formatDate, todayKey } from '../../../../domain/dates';
 import { hasCompletedLessons } from '../../../../domain/membershipEligibility';
 import { makeupLessonMessage, membershipInterestMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
@@ -41,8 +41,7 @@ export function IntegrationStagePanel({
 
   const { lessons, attendanceByLesson, attendedCount } = integrationClass;
   const lastLesson = lessons[lessons.length - 1];
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const makeupUnlocked = !!lastLesson && lastLesson.date < todayKey;
+  const makeupUnlocked = !!lastLesson && lastLesson.date < todayKey();
   const eligible = hasCompletedLessons(attendedCount, lessons.length);
 
   const openMakeupMessage = async (lessonId: string, lessonNumber: number) => {

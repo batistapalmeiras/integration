@@ -17,7 +17,7 @@ import {
 // Local
 import icon from '../../assets/icon.png';
 import { AppRoute } from '../../routes/paths';
-import { ROLE_LABELS, UserRole } from '../../types/enums';
+import { hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../types/enums';
 import { MenuOptionCard } from './components/MenuOptionCard';
 import {
   Avatar,
@@ -39,9 +39,8 @@ export function AdminPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
 
-  const isAdmin = user?.role === UserRole.Admin;
   const isPastor = user?.role === UserRole.Pastor;
-  const canManageOperations = isAdmin || isPastor;
+  const canManageOperations = hasRole(user?.role, LEADERSHIP_ROLES);
 
   const firstInitial = user?.name?.trim().charAt(0).toUpperCase() ?? '?';
 

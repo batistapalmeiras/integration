@@ -7,7 +7,7 @@ import { Archive, RotateCcw, Save, Trash2 } from 'lucide-react';
 import { Button, Empty, maskPhone, ModalActions, ModalTitle, PageHeader, Skeleton, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
 // Local
 import { AppRoute } from '../../../routes/paths';
-import { UserRole } from '../../../types/enums';
+import { hasRole, INTEGRATION_TEAM_ROLES, UserRole } from '../../../types/enums';
 import { useVisitorDetail } from '../../../features/visitors';
 import { VisitorForm, VisitorFormActions } from '../components/VisitorForm';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
@@ -20,8 +20,7 @@ export function VisitorEditPage() {
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
 
-  const canManage =
-    user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
+  const canManage = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
 
   const {
     control,

@@ -50,10 +50,6 @@ export const PaginationWrap = styled.div`
   padding-top: ${({ theme }) => theme.spacing.lg};
 `;
 
-export const SectionHeading = styled.div`
-  margin: ${({ theme }) => theme.spacing.xl} 0 ${({ theme }) => theme.spacing.sm};
-`;
-
 export const NameCell = styled.div`
   display: flex;
   flex-direction: column;

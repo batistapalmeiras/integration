@@ -1,24 +1,29 @@
 // Libs
 import { supabase } from '../lib/supabase';
 // Local
+import { todayKey } from './dates';
 import { fromIntegration } from './integrationPeople';
-
-async function findFutureCoffeeEvent(): Promise<{ id: string; event_date: string } | null> {
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const { data, error } = await supabase
-    .from('coffee_events')
-    .select('id, event_date')
-    .gte('event_date', todayKey)
-    .order('event_date', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw error;
-  return data;
-}
 
 export interface CoffeeEventRef {
   id: string;
   event_date: string;
+}
+
+export function upcomingCoffeeEvent<T extends CoffeeEventRef>(events: T[], today: string): T | null {
+  return events.find((e) => e.event_date >= today) ?? null;
+}
+
+async function listCoffeeEvents(): Promise<CoffeeEventRef[]> {
+  const { data, error } = await supabase
+    .from('coffee_events')
+    .select('id, event_date')
+    .order('event_date', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function findFutureCoffeeEvent(): Promise<CoffeeEventRef | null> {
+  return upcomingCoffeeEvent(await listCoffeeEvents(), todayKey());
 }
 
 export function selectOpenCoffeeEvents<T extends CoffeeEventRef>(
@@ -27,19 +32,6 @@ export function selectOpenCoffeeEvents<T extends CoffeeEventRef>(
   todayKey: string,
 ): T[] {
   return events.filter((e) => e.event_date >= todayKey || (queuedByEventId[e.id] ?? 0) > 0);
-}
-
-export async function countQueuedByCoffeeEvent(): Promise<Record<string, number>> {
-  const { data, error } = await supabase.from('coffee_attendance').select('coffee_event_id, person:people(status)');
-  if (error) throw error;
-
-  const rows = (data ?? []) as unknown as { coffee_event_id: string; person: { status: string } | null }[];
-  const counts: Record<string, number> = {};
-  for (const row of rows) {
-    if (row.person?.status !== 'welcome_coffee' && row.person?.status !== 'pending_signup') continue;
-    counts[row.coffee_event_id] = (counts[row.coffee_event_id] ?? 0) + 1;
-  }
-  return counts;
 }
 
 export async function insertCoffeeEvent(eventDate: string): Promise<string> {
@@ -93,16 +85,8 @@ export function canMarkCoffeeAttendance(eventDate: string, today: string): boole
 }
 
 export async function resolveCurrentCoffeeEventId(): Promise<string | null> {
-  const { data: events, error } = await supabase
-    .from('coffee_events')
-    .select('id, event_date')
-    .order('event_date', { ascending: true });
-  if (error) throw error;
-
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const list = events ?? [];
-  const current = list.find((e) => e.event_date >= todayKey) ?? list[list.length - 1] ?? null;
-  return current?.id ?? null;
+  const events = await listCoffeeEvents();
+  return (upcomingCoffeeEvent(events, todayKey()) ?? events.at(-1))?.id ?? null;
 }
 
 export interface PersonCoffeeAttendance {

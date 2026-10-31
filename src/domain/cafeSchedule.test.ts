@@ -5,6 +5,7 @@ import {
   currentCoffeeAttendance,
   selectOpenCoffeeEvents,
   selectOrphanPeople,
+  upcomingCoffeeEvent,
 } from './cafeSchedule';
 
 vi.mock('../lib/supabase', () => ({ supabase: {} }));
@@ -107,5 +108,22 @@ describe('coffeePresence', () => {
 
   it('locks the mark once the person moved past the café', () => {
     expect(coffeePresence(row(true, 'integration'), '2026-11-08')).toEqual({ presence: 'came', editable: false });
+  });
+});
+
+describe('upcomingCoffeeEvent', () => {
+  const events = [
+    { id: 'a', event_date: '2026-10-25' },
+    { id: 'b', event_date: '2026-11-08' },
+    { id: 'c', event_date: '2026-11-22' },
+  ];
+
+  it('picks the first café from today on, today included', () => {
+    expect(upcomingCoffeeEvent(events, '2026-11-08')?.id).toBe('b');
+    expect(upcomingCoffeeEvent(events, '2026-11-01')?.id).toBe('b');
+  });
+
+  it('returns null when every café is in the past', () => {
+    expect(upcomingCoffeeEvent(events, '2026-12-01')).toBeNull();
   });
 });

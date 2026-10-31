@@ -11,7 +11,7 @@ import { PeopleCount } from '../../components/PeopleCount';
 import { lastLessonDate } from '../../domain/cohortSchedule';
 import { todayKey } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
-import { UserRole } from '../../types/enums';
+import { hasRole, LEADERSHIP_ROLES } from '../../types/enums';
 import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
 import { EnrollPersonModal } from './components/EnrollPersonModal';
@@ -41,10 +41,8 @@ export function ClassesPage() {
   } = useClasses();
   const { open, close, modal } = useModal('drawer');
 
-  const isAdmin = user?.role === UserRole.Admin;
-  const isPastor = user?.role === UserRole.Pastor;
-  const canManageCohort = isAdmin || isPastor;
-  const canEnroll = isAdmin || isPastor;
+  const canManageCohort = hasRole(user?.role, LEADERSHIP_ROLES);
+  const canEnroll = canManageCohort;
 
   const openCreateModal = () =>
     open(<CreateCohortModal close={close} onCreate={createCohort} minDate={minCohortDate} />);

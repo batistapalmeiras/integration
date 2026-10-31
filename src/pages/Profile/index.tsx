@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProfilePage as SharedProfilePage, useAuthCtx } from 'bp-kit';
 // Local
 import { AppRoute } from '../../routes/paths';
-import { ROLE_LABELS, UserRole } from '../../types/enums';
+import { hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../types/enums';
 
 export function ProfilePage() {
   const { user, logout } = useAuthCtx();
@@ -19,7 +19,7 @@ export function ProfilePage() {
       roleLabel={user ? ROLE_LABELS[user.role as UserRole] : undefined}
       changePasswordPath={AppRoute.ChangePassword}
       onLogout={handleLogout}
-      back={user?.role === UserRole.Admin || user?.role === UserRole.Pastor}
+      back={hasRole(user?.role, LEADERSHIP_ROLES)}
     />
   );
 }

@@ -25,7 +25,7 @@ import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { AppRoute } from '../../../routes/paths';
-import { ADMIN_MANAGEABLE_ROLES, ROLE_LABELS, UserRole } from '../../../types/enums';
+import { ADMIN_MANAGEABLE_ROLES, hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../../types/enums';
 import { Content } from '../../Visitors/Detail/styles';
 import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
 
@@ -52,7 +52,7 @@ export function VolunteerDetailPage() {
     : Array.from(new Set([...ADMIN_MANAGEABLE_ROLES, ...(volunteer ? [volunteer.role] : [])]));
 
   const isSelf = volunteer?.id === user?.id;
-  const isTargetPrivileged = volunteer?.role === UserRole.Admin || volunteer?.role === UserRole.Pastor;
+  const isTargetPrivileged = hasRole(volunteer?.role, LEADERSHIP_ROLES);
   const canEdit = isPastor || isSelf || !isTargetPrivileged;
   const visibleRoleOptions = canEdit ? roleOptions : volunteer ? [volunteer.role] : [];
 

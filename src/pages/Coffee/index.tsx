@@ -35,7 +35,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
 import { todayKey } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
-import { UserRole } from '../../types/enums';
+import { hasRole, INTEGRATION_TEAM_ROLES } from '../../types/enums';
 import { CreateEventModal } from './components/CreateEventModal';
 import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { formatDate } from './domain';
@@ -75,8 +75,7 @@ export function CoffeePage() {
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
 
-  const canPlan =
-    user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
+  const canPlan = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
 
   const openCreateModal = () => open(<CreateEventModal close={close} onCreate={createEvent} />);
   const openEditModal = () =>
