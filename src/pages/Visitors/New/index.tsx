@@ -4,16 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, PageHeader, parsePhone, text, TextInput, useAuthCtx, useModal } from 'bp-kit';
+import { Button, PageHeader, parsePhone, useAuthCtx, useModal } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Local
-import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { findPersonByPhone, reactivatePerson } from '../../../features/visitors';
 import { AppRoute } from '../../../routes/paths';
 import { useCreatePerson } from '../hooks';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
 import { ExistingPersonModal } from './components/ExistingPersonModal';
-import { Actions, Form, InlineFields, Intro } from './styles';
+import { VisitorForm, VisitorFormActions } from '../components/VisitorForm';
+import { Intro } from './styles';
 
 const MIN_PHONE_DIGITS = 10;
 
@@ -67,21 +67,8 @@ export function NewVisitorPage() {
       <PageHeader title="Novo visitante" back />
       <Intro type="p">Só nome e WhatsApp são obrigatórios. O resto a pessoa completa na inscrição.</Intro>
 
-      <Form onSubmit={submit}>
-        <TextInput label="WhatsApp" control={control} name="phone" mask="phone" placeholder={PHONE_PLACEHOLDER} />
-        <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />
-        <InlineFields>
-          <TextInput label="Idade" control={control} name="age" type="text" inputMode="numeric" placeholder="Idade" />
-          <TextInput
-            label={text.fields.email}
-            control={control}
-            name="email"
-            type="email"
-            placeholder={text.fields.emailPlaceholder}
-          />
-        </InlineFields>
-
-        <Actions>
+      <VisitorForm control={control} onSubmit={submit}>
+        <VisitorFormActions>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Salvando...'
@@ -92,8 +79,8 @@ export function NewVisitorPage() {
               </>
             )}
           </Button>
-        </Actions>
-      </Form>
+        </VisitorFormActions>
+      </VisitorForm>
 
       {modal}
     </div>

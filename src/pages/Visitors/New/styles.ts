@@ -1,27 +1,6 @@
 // Libs
-import { Form as BaseForm, Typography } from 'bp-kit';
+import { Typography } from 'bp-kit';
 import styled from 'styled-components';
-
-export const Form = styled(BaseForm)`
-  max-width: 420px;
-`;
-
-export const Actions = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-top: ${({ theme }) => theme.spacing.lg};
-
-  & > button {
-    width: 100%;
-  }
-`;
-
-export const InlineFields = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: ${({ theme }) => theme.spacing.md};
-`;
 
 export const Intro = styled(Typography)`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
