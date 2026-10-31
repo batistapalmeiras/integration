@@ -101,14 +101,6 @@ export function VisitorsPage() {
             <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
           </SearchRow>
           <QueueChips role="group" aria-label="Filtrar por status">
-            <Chip
-              type="button"
-              aria-pressed={statusFilter.length === 0}
-              $active={statusFilter.length === 0}
-              onClick={() => setStatusFilter([])}
-            >
-              Todos
-            </Chip>
             {VISIBLE_STATUSES.map((status) => (
               <Chip
                 key={status}
