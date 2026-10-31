@@ -184,7 +184,20 @@ export async function markCoffeeCanceled(personId: string, actorId?: string): Pr
   });
 }
 
-export async function markCoffeeNotAttended(personId: string, actorId?: string): Promise<void> {
+export async function markCoffeeNotAttended(
+  personId: string,
+  actorId?: string,
+  attendanceId?: string,
+  fromStatus = 'welcome_coffee',
+): Promise<void> {
+  if (attendanceId) {
+    const { error: attendanceError } = await supabase
+      .from('coffee_attendance')
+      .update({ attended: false })
+      .eq('id', attendanceId);
+    if (attendanceError) throw attendanceError;
+  }
+
   const { error: statusError } = await supabase
     .from('people')
     .update({ status: 'retry_contact', coffee_retry_used: true, whatsapp_opened_at: null, updated_at: new Date().toISOString() })
@@ -193,11 +206,93 @@ export async function markCoffeeNotAttended(personId: string, actorId?: string):
 
   await supabase.from('status_history').insert({
     person_id: personId,
-    from_status: 'welcome_coffee',
+    from_status: fromStatus,
     to_status: 'retry_contact',
     changed_by: actorId,
     note: 'Confirmou presença mas não compareceu ao café — retomando contato para o próximo café',
   });
+}
+
+export async function markCoffeeAttendedAfterMiss(
+  attendanceId: string,
+  personId: string,
+  actorId?: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('people')
+    .update({ status: 'welcome_coffee', coffee_retry_used: false, updated_at: new Date().toISOString() })
+    .eq('id', personId);
+  if (error) throw error;
+
+  try {
+    await markCoffeeAttended(attendanceId, personId, actorId);
+  } catch (attendedError) {
+    await supabase
+      .from('people')
+      .update({ status: 'retry_contact', coffee_retry_used: true, updated_at: new Date().toISOString() })
+      .eq('id', personId);
+    throw attendedError;
+  }
+}
+
+export async function unmarkCoffeePresence(
+  attendanceId: string,
+  personId: string,
+  fromStatus: string,
+  actorId?: string,
+): Promise<void> {
+  const { error: attendanceError } = await supabase
+    .from('coffee_attendance')
+    .update({ attended: false })
+    .eq('id', attendanceId);
+  if (attendanceError) throw attendanceError;
+
+  const { error: statusError } = await supabase
+    .from('people')
+    .update({ status: 'welcome_coffee', coffee_retry_used: false, updated_at: new Date().toISOString() })
+    .eq('id', personId);
+  if (statusError) throw statusError;
+
+  await supabase.from('status_history').insert({
+    person_id: personId,
+    from_status: fromStatus,
+    to_status: 'welcome_coffee',
+    changed_by: actorId,
+    note: 'Marcação de presença no café desfeita',
+  });
+}
+
+export type CoffeePresence = 'came' | 'missed' | null;
+
+export const STATUS_AFTER_PRESENCE: Record<'came' | 'missed' | 'none', string> = {
+  came: 'pending_signup',
+  missed: 'retry_contact',
+  none: 'welcome_coffee',
+};
+
+export const COFFEE_LIST_STATUSES = ['welcome_coffee', 'pending_signup', 'retry_contact'];
+
+export function coffeePresence(
+  row: { attended: boolean; person: { status: string } | null; coffee_event: { event_date: string } | null },
+  latestEventDate: string | undefined,
+): { presence: CoffeePresence; editable: boolean } {
+  const isLatest = (row.coffee_event?.event_date ?? '') >= (latestEventDate ?? '');
+  const status = row.person?.status ?? '';
+  const editable = isLatest && COFFEE_LIST_STATUSES.includes(status);
+  if (row.attended) return { presence: 'came', editable };
+  if (!isLatest || status === 'retry_contact') return { presence: 'missed', editable };
+  return { presence: null, editable };
+}
+
+export function latestCoffeeDateByPerson(
+  attendance: Pick<CoffeeBoardAttendance, 'person_id' | 'coffee_event'>[],
+): Map<string, string> {
+  const latest = new Map<string, string>();
+  for (const row of attendance) {
+    const date = row.coffee_event?.event_date ?? '';
+    if (date > (latest.get(row.person_id) ?? '')) latest.set(row.person_id, date);
+  }
+  return latest;
 }
 
 export async function markClassInviteNoResponse(personId: string, actorId?: string): Promise<void> {

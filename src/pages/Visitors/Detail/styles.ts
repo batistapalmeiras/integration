@@ -1,5 +1,5 @@
 // Libs
-import { TabBar, Typography } from 'bp-kit';
+import { TabBar } from 'bp-kit';
 import styled from 'styled-components';
 
 export { Form } from 'bp-kit';
@@ -172,8 +172,4 @@ export const StepBody = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-export const StepTitle = styled(Typography)<{ $muted?: boolean }>`
-  ${({ theme, $muted }) => $muted && `color: ${theme.colors.muted};`}
 `;

@@ -1,41 +1,30 @@
 // React
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 // Libs
-import { Checkbox, Typography } from 'bp-kit';
+import { Checkbox, text, Typography } from 'bp-kit';
 // Local
-import { List, ListItem, ListItemRow } from '../../../components/List';
+import { List, ListChevron, ListHeader, ListItem, ListItemRow, ListName, ListSlot, ListStatusCell } from '../../../components/List';
 import { StatusPill } from '../../../components/StatusPill';
+import { currentLesson } from '../../../domain/cohortSchedule';
 import { todayKey } from '../../../domain/dates';
 import { formatDate } from '../domain';
 import { EnrollmentRow, Lesson } from '../types';
-import {
-  CountBadge,
-  LessonTab,
-  LessonTabs,
-  PresenceBar,
-  PresenceHeader,
-  StudentText,
-} from '../styles';
+import { CountBadge, LessonTab, LessonTabs, NameHeading, PresenceHeading, StudentText } from '../styles';
 
 interface Props {
   lessons: Lesson[];
   rows: EnrollmentRow[];
   onToggle: (enrollmentId: string, lessonId: string, attended: boolean) => void;
   onOpen: (personId: string) => void;
+  summary: ReactNode;
+  empty: ReactNode;
 }
 
-export function currentLessonId(lessons: Lesson[]): string | undefined {
-  const today = todayKey();
-  return [...lessons].reverse().find((l) => l.date <= today)?.id ?? lessons[0]?.id;
-}
-
-export function LessonAttendanceList({ lessons, rows, onToggle, onOpen }: Props) {
-  const [lessonId, setLessonId] = useState(() => currentLessonId(lessons));
+export function LessonAttendanceList({ lessons, rows, onToggle, onOpen, summary, empty }: Props) {
+  const [lessonId, setLessonId] = useState(() => currentLesson(lessons, todayKey())?.id);
   const today = todayKey();
   const lesson = lessons.find((l) => l.id === lessonId) ?? lessons[0];
   if (!lesson) return null;
-
-  const present = rows.filter((r) => r.attendanceByLesson[lesson.id]?.attended).length;
 
   return (
     <>
@@ -59,39 +48,47 @@ export function LessonAttendanceList({ lessons, rows, onToggle, onOpen }: Props)
         ))}
       </LessonTabs>
 
-      <PresenceHeader>
-        <Typography type="h4" as="h2">
-          Quem está aqui?
-        </Typography>
-        <Typography type="caption" as="span">
-          {present} de {rows.length} presentes
-        </Typography>
-      </PresenceHeader>
-      <PresenceBar $percent={rows.length ? Math.round((present / rows.length) * 100) : 0} />
+      {summary}
 
-      <List>
-        {rows.map((row) => {
-          const checked = !!row.attendanceByLesson[lesson.id]?.attended;
-          return (
-            <ListItem key={row.id}>
-              <ListItemRow>
-                <Checkbox
-                  aria-label={`Presença de ${row.person.name} na aula ${lesson.number}`}
-                  checked={checked}
-                  onChange={(e) => onToggle(row.id, lesson.id, e.target.checked)}
-                />
-                <StudentText type="button" onClick={() => onOpen(row.person.id)}>
-                  <span>{row.person.name}</span>
-                  <CountBadge $eligible={row.attendedCount >= lessons.length}>
-                    {row.attendedCount}/{lessons.length}
-                  </CountBadge>
-                </StudentText>
-                <StatusPill person={row.person} compact />
-              </ListItemRow>
-            </ListItem>
-          );
-        })}
-      </List>
+      {rows.length === 0 && empty}
+
+      {rows.length > 0 && (
+        <List>
+          <ListHeader aria-hidden="true">
+            <ListSlot $width={20} />
+            <NameHeading>
+              <span>{text.fields.name}</span>
+              <PresenceHeading>Presenças</PresenceHeading>
+            </NameHeading>
+            <ListStatusCell>Situação</ListStatusCell>
+            <ListSlot $width={16} />
+          </ListHeader>
+          {rows.map((row) => {
+            const checked = !!row.attendanceByLesson[lesson.id]?.attended;
+            return (
+              <ListItem key={row.id}>
+                <ListItemRow>
+                  <Checkbox
+                    aria-label={`Presença de ${row.person.name} na aula ${lesson.number}`}
+                    checked={checked}
+                    onChange={(e) => onToggle(row.id, lesson.id, e.target.checked)}
+                  />
+                  <StudentText type="button" onClick={() => onOpen(row.person.id)}>
+                    <ListName>{row.person.name}</ListName>
+                    <CountBadge $eligible={row.attendedCount >= lessons.length}>
+                      {row.attendedCount} de {lessons.length} aulas
+                    </CountBadge>
+                  </StudentText>
+                  <ListStatusCell>
+                    <StatusPill person={row.person} compact />
+                  </ListStatusCell>
+                  <ListChevron label={`Abrir perfil de ${row.person.name}`} onClick={() => onOpen(row.person.id)} />
+                </ListItemRow>
+              </ListItem>
+            );
+          })}
+        </List>
+      )}
     </>
   );
 }

@@ -21,31 +21,6 @@ export const QueueChips = styled.div`
   }
 `;
 
-export const Split = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const ListColumn = styled.div`
-  flex: 999 1 420px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const PreviewColumn = styled.aside`
-  flex: 1 1 360px;
-  max-width: 100%;
-  position: sticky;
-  top: ${({ theme }) => theme.spacing.lg};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.base};
-`;
-
 export const RowButton = styled.button`
   flex: 1;
   min-width: 0;
@@ -67,10 +42,4 @@ export const RowText = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-export const PreviewHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
 `;

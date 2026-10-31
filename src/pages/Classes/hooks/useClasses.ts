@@ -12,20 +12,16 @@ import {
   enrollPerson as enrollPersonRow,
   fetchCohortBoard,
   finishedCohortIds,
-  getMakeupLink,
   toggleLessonAttendance,
 } from '../../../domain/classesRoster';
-import { buildWhatsAppLink, membershipInterestMessage } from '../../../domain/whatsapp';
-import { enrollInIntegrationClass, updatePersonFields } from '../../../features/visitors';
+import { enrollInIntegrationClass } from '../../../features/visitors';
 import { supabase } from '../../../lib/supabase';
 import { UserRole } from '../../../types/enums';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { firstLessonDate } from '../../../domain/cohortSchedule';
 import { formatDate, weeklyLessonDates } from '../domain';
-import { loadSavedFilters, saveFilters } from '../persistence';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
-const SEARCH_DEBOUNCE_MS = 300;
 const MAX_COHORTS = 2;
 
 function sortByFirstLesson(list: CohortWithLessons[]): CohortWithLessons[] {
@@ -43,18 +39,7 @@ export function useClasses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [minCohortDate, setMinCohortDate] = useState<string | null>(null);
-  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const boardRef = useRef<CohortBoard | null>(null);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timeout);
-  }, [search]);
-
-  useEffect(() => {
-    saveFilters({ search });
-  }, [search]);
 
   useEffect(() => {
     getUpcomingCoffeeEventDate().then(setMinCohortDate);
@@ -184,8 +169,6 @@ export function useClasses() {
     await load(cohort.id);
   };
 
-  const setSearch = (value: string) => setSearchState(value);
-
   const refresh = async () => applyBoard(await fetchCohortBoard(), selectedCohortId ?? undefined);
 
   const toggleAttendance = async (enrollmentId: string, lessonId: string, attended: boolean) => {
@@ -208,20 +191,6 @@ export function useClasses() {
     await refresh();
   };
 
-  const sendMembershipInterest = async (row: EnrollmentRow) => {
-    const eligible = row.attendedCount >= lessons.length;
-    window.open(buildWhatsAppLink(row.person.phone, membershipInterestMessage(row.person.name, eligible)), '_blank');
-    await updatePersonFields(row.person.id, { membership_interest_sent_at: new Date().toISOString() });
-    await refresh();
-  };
-
-  const makeupLink = (row: EnrollmentRow, lessonId: string) => getMakeupLink(row.id, lessonId);
-
-  const filtered = debouncedSearch
-    ? allEnrollments.filter((e) => e.person.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
-    : allEnrollments;
-
-
   return {
     cohorts: cohorts.map((c) => c.cohort as Cohort),
     cohort,
@@ -229,20 +198,15 @@ export function useClasses() {
     selectCohort,
     canCreateCohort: cohorts.length < MAX_COHORTS,
     lessons,
-    enrollments: filtered,
-    totalCount: filtered.length,
+    enrollments: allEnrollments,
+    totalCount: allEnrollments.length,
     loading,
     error,
     minCohortDate,
-    search,
-    setSearch,
-    hasFilter: !!search.trim(),
     createCohort,
     updateLessonDates,
     closeCohort,
     enrollPerson,
     toggleAttendance,
-    sendMembershipInterest,
-    makeupLink,
   };
 }

@@ -81,7 +81,6 @@ export function useVisitors() {
     setSearch,
     statusFilter,
     setStatusFilter,
-    reload: load,
     hasFilter: !!search.trim() || statusFilter.length > 0,
   };
 }

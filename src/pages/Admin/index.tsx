@@ -86,7 +86,7 @@ export function AdminPage() {
           <MenuSectionTitle>Integração</MenuSectionTitle>
           <OptionsGrid>
             <MenuOptionCard icon={Contact} label="Pessoas" onClick={() => navigate(AppRoute.People)} />
-            <MenuOptionCard icon={GraduationCap} label="Turmas" onClick={() => navigate(`${AppRoute.Reports}/turmas`)} />
+            <MenuOptionCard icon={GraduationCap} label="Histórico de turmas" onClick={() => navigate(`${AppRoute.Reports}/turmas`)} />
             <MenuOptionCard icon={UserPlus} label="Voluntários" onClick={() => navigate(AppRoute.Volunteers)} />
             <MenuOptionCard icon={FileBarChart} label="Relatórios" onClick={() => navigate(AppRoute.Reports)} />
           </OptionsGrid>

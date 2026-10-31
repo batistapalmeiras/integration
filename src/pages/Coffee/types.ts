@@ -1,3 +1,4 @@
+import { CoffeePresence } from '../../domain/cafeSchedule';
 import { Person } from '../../types/person';
 
 export interface CoffeeEvent {
@@ -15,4 +16,6 @@ export interface CoffeeAttendance {
 
 export interface AttendeeRow extends CoffeeAttendance {
   person: Pick<Person, 'id' | 'name' | 'phone' | 'status' | 'class_invite_sent_at'>;
+  presence: CoffeePresence;
+  presenceEditable: boolean;
 }

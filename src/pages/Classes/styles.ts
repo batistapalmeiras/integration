@@ -1,17 +1,12 @@
 // Libs
-import { StatsGrid } from 'bp-kit';
 import styled from 'styled-components';
 // Local
-import { Table, Td, Th } from '../../components/Table';
+import { ListGrow } from '../../components/List';
 
 export { Form } from 'bp-kit';
 
 export const PaginationWrap = styled.div`
   margin-top: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const SearchRow = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 export const CountBadge = styled.span<{ $eligible: boolean }>`
@@ -32,6 +27,10 @@ export const LessonTabs = styled.div`
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
   margin-bottom: ${({ theme }) => theme.spacing.base};
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: repeat(4, 120px);
+  }
 `;
 
 export const LessonTab = styled.button<{ $selected: boolean }>`
@@ -51,31 +50,6 @@ export const LessonTab = styled.button<{ $selected: boolean }>`
   }
 `;
 
-export const PresenceHeader = styled.div`
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
-`;
-
-export const PresenceBar = styled.div<{ $percent: number }>`
-  height: 6px;
-  border-radius: ${({ theme }) => theme.rounded.full};
-  background: ${({ theme }) => theme.colors.hairlineSoft};
-  margin-bottom: ${({ theme }) => theme.spacing.base};
-  overflow: hidden;
-
-  &::after {
-    content: '';
-    display: block;
-    height: 100%;
-    width: ${({ $percent }) => $percent}%;
-    background: ${({ theme }) => theme.colors.primary};
-    border-radius: inherit;
-  }
-`;
-
 export const StudentText = styled.button`
   flex: 1;
   min-width: 0;
@@ -90,43 +64,23 @@ export const StudentText = styled.button`
   flex-direction: column;
   align-items: flex-start;
   gap: ${({ theme }) => theme.spacing.xs};
-`;
 
-export const Grid = styled(Table)`
-  min-width: 760px;
-
-  tbody tr:last-child td {
-    border-bottom: none;
+  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${({ theme }) => theme.spacing.md};
   }
 `;
 
-export const LessonHead = styled(Th)`
-  text-align: center;
+export const NameHeading = styled(ListGrow)`
+  display: flex;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.md};
+`;
 
-  span {
-    display: block;
+export const PresenceHeading = styled.span`
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
   }
 `;
-
-export const CheckCell = styled(Td)`
-  text-align: center;
-
-  label {
-    justify-content: center;
-  }
-`;
-
-export const StudentLink = styled.button`
-  padding: 0;
-  border: none;
-  background: transparent;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
-`;
-
-export const SummaryCards = styled(StatsGrid)`
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`;
-

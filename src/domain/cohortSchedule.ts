@@ -14,6 +14,15 @@ export function firstLessonDate(lessons: LessonLike[]): string | null {
   return first?.date ?? null;
 }
 
+export function lastLessonDate(lessons: LessonLike[]): string | null {
+  return [...lessons].sort((a, b) => a.number - b.number).at(-1)?.date ?? null;
+}
+
+export function currentLesson<T extends LessonLike>(lessons: T[], todayKey: string): T | undefined {
+  const byDate = [...lessons].sort((a, b) => a.date.localeCompare(b.date));
+  return [...byDate].reverse().find((l) => l.date <= todayKey) ?? byDate[0];
+}
+
 export function firstLessonStart(date: string): Date {
   return new Date(`${date}T${FIRST_LESSON_TIME}:00`);
 }
@@ -74,7 +83,6 @@ export function selectMissedSignups<T extends CohortLike>(
 }
 
 export function isCohortFinished(lessons: LessonLike[], stillInIntegration: number, todayKey: string): boolean {
-  if (lessons.length === 0) return false;
-  const lastLesson = [...lessons].sort((a, b) => a.number - b.number).at(-1)!;
-  return lastLesson.date < todayKey && stillInIntegration === 0;
+  const last = lastLessonDate(lessons);
+  return !!last && last < todayKey && stillInIntegration === 0;
 }

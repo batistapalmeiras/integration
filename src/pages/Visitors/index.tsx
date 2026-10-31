@@ -1,32 +1,18 @@
 // React
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useMediaQuery } from 'bp-kit';
+import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, text } from 'bp-kit';
 // Local
-import { List, ListItem } from '../../components/List';
+import { List, ListChevron, ListGrow, ListHeader, ListItem, ListSlot, ListStatusCell } from '../../components/List';
 import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
-import { Person } from '../../features/visitors';
 import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META } from '../../types/person';
-import { VisitorPreview } from './components/VisitorPreview';
 import { useVisitors, VISIBLE_STATUSES } from './hooks/useVisitors';
-import {
-  ListColumn,
-  PaginationWrap,
-  PreviewColumn,
-  QueueChips,
-  RowButton,
-  RowText,
-  SearchRow,
-  Split,
-} from './styles';
+import { PaginationWrap, QueueChips, RowButton, RowText, SearchRow } from './styles';
 
 export function VisitorsPage() {
   const navigate = useNavigate();
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const {
     rows,
     totalCount,
@@ -39,16 +25,8 @@ export function VisitorsPage() {
     setSearch,
     statusFilter,
     setStatusFilter,
-    reload,
     hasFilter,
   } = useVisitors();
-
-  const previewId = isDesktop ? (selectedId ?? rows[0]?.id ?? null) : null;
-
-  const openRow = (person: Person) => {
-    if (isDesktop) setSelectedId(person.id);
-    else navigate(`${AppRoute.Visitors}/${person.id}`);
-  };
 
   const toggleStatus = (status: PersonStatus) =>
     setStatusFilter(
@@ -101,34 +79,32 @@ export function VisitorsPage() {
       )}
 
       {!loading && !error && rows.length > 0 && (
-        <Split>
-          <ListColumn>
-            <List>
-              {rows.map((person) => (
-                <ListItem key={person.id} $selected={person.id === previewId}>
-                  <RowButton type="button" onClick={() => openRow(person)}>
-                    <RowText>
-                      {person.name}
-                    </RowText>
+        <>
+          <List>
+            <ListHeader aria-hidden="true">
+              <ListGrow>{text.fields.name}</ListGrow>
+              <ListStatusCell>{text.fields.status}</ListStatusCell>
+              <ListSlot $width={16} />
+            </ListHeader>
+            {rows.map((person) => (
+              <ListItem key={person.id}>
+                <RowButton type="button" onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
+                  <RowText>{person.name}</RowText>
+                  <ListStatusCell>
                     <StatusPill person={person} compact />
-                  </RowButton>
-                </ListItem>
-              ))}
-            </List>
+                  </ListStatusCell>
+                  <ListChevron />
+                </RowButton>
+              </ListItem>
+            ))}
+          </List>
 
-            {totalPages > 1 && (
-              <PaginationWrap>
-                <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
-              </PaginationWrap>
-            )}
-          </ListColumn>
-
-          {previewId && (
-            <PreviewColumn aria-label="Pessoa selecionada">
-              <VisitorPreview key={previewId} personId={previewId} onChanged={reload} />
-            </PreviewColumn>
+          {totalPages > 1 && (
+            <PaginationWrap>
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+            </PaginationWrap>
           )}
-        </Split>
+        </>
       )}
     </div>
   );

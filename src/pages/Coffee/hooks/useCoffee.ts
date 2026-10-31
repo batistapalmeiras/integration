@@ -4,31 +4,37 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthCtx } from 'bp-kit';
 // Local
 import {
+  COFFEE_LIST_STATUSES,
   CoffeeBoard,
+  CoffeePresence,
+  STATUS_AFTER_PRESENCE,
   EnrollableCoffeePerson,
   attachPeopleToCoffee,
+  coffeePresence,
   countQueuedFrom,
   currentCoffeeAttendance,
   placeInCoffee,
   fetchCoffeeBoard,
   insertCoffeeEvent,
+  latestCoffeeDateByPerson,
   markCoffeeAttended,
+  markCoffeeAttendedAfterMiss,
   markCoffeeCanceled,
   markCoffeeNotAttended,
   selectOpenCoffeeEvents,
   selectOrphanPeople,
+  unmarkCoffeePresence,
   updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
 import { listAllCohorts } from '../../../domain/classesRoster';
 import { archivePeople, missedSignupIds } from '../../../domain/signupDeadline';
 import { supabase } from '../../../lib/supabase';
 import { UserRole } from '../../../types/enums';
+import { todayKey } from '../../../domain/dates';
 import { comparePeopleByPipeline } from '../../../types/person';
-import { loadSavedFilters, saveFilters } from '../persistence';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
 const PAGE_SIZE = 10;
-const SEARCH_DEBOUNCE_MS = 300;
 const MAX_EVENTS = 2;
 
 export function useCoffee() {
@@ -41,18 +47,7 @@ export function useCoffee() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const boardRef = useRef<CoffeeBoard | null>(null);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timeout);
-  }, [search]);
-
-  useEffect(() => {
-    saveFilters({ search });
-  }, [search]);
 
   const applyBoard = useCallback(
     (board: CoffeeBoard, keepSelectionId?: string) => {
@@ -73,11 +68,15 @@ export function useCoffee() {
 
       const selected = open.find((e) => e.id === keepSelectionId) ?? open[0];
       setSelectedEventId(selected.id);
+      const latest = latestCoffeeDateByPerson(board.attendance);
       setAllAttendees(
         current
-          .filter((a) => a.coffee_event_id === selected.id)
-          .filter((a) => a.person?.status === 'welcome_coffee' || a.person?.status === 'pending_signup')
-          .map((a) => a as unknown as AttendeeRow)
+          .filter((a) => a.coffee_event_id === selected.id && COFFEE_LIST_STATUSES.includes(a.person?.status ?? ''))
+          .filter((a) => a.person?.status !== 'retry_contact' || selected.event_date <= todayKey())
+          .map((a) => {
+            const { presence, editable } = coffeePresence(a, latest.get(a.person_id));
+            return { ...a, presence, presenceEditable: editable } as unknown as AttendeeRow;
+          })
           .sort((a, b) => comparePeopleByPipeline(a.person, b.person)),
       );
       setPage(1);
@@ -151,39 +150,42 @@ export function useCoffee() {
     await load(selectedEventId);
   };
 
-  const markAttended = async (attendanceId: string, personId: string) => {
-    await markCoffeeAttended(attendanceId, personId, user?.id);
-    setAllAttendees((prev) =>
-      prev.map((a) =>
-        a.id === attendanceId ? { ...a, attended: true, person: { ...a.person, status: 'pending_signup' } } : a,
-      ),
-    );
+  const changePresence = async (
+    attendanceId: string,
+    personId: string,
+    from: CoffeePresence,
+    to: CoffeePresence,
+  ) => {
+    const personStatus = STATUS_AFTER_PRESENCE[from ?? 'none'];
+    if (to === 'came') {
+      if (from === 'missed') await markCoffeeAttendedAfterMiss(attendanceId, personId, user?.id);
+      else await markCoffeeAttended(attendanceId, personId, user?.id);
+    } else if (to === 'missed') {
+      await markCoffeeNotAttended(personId, user?.id, attendanceId, personStatus);
+    } else {
+      await unmarkCoffeePresence(attendanceId, personId, personStatus, user?.id);
+    }
+    await load(selectedEventId ?? undefined);
   };
 
-  const markNotAttended = async (personId: string) => {
-    await markCoffeeNotAttended(personId, user?.id);
-    setAllAttendees((prev) => prev.filter((a) => a.person.id !== personId));
+  const setPresence = async (row: AttendeeRow, presence: 'came' | 'missed') => {
+    if (presence === row.presence) return;
+    await changePresence(row.id, row.person.id, row.presence, presence);
   };
+
+  const undoPresence = (row: AttendeeRow, applied: 'came' | 'missed') =>
+    changePresence(row.id, row.person.id, applied, row.presence);
 
   const markCanceled = async (personId: string) => {
     await markCoffeeCanceled(personId, user?.id);
     setAllAttendees((prev) => prev.filter((a) => a.person.id !== personId));
   };
 
-  const setSearch = (value: string) => {
-    setSearchState(value);
-    setPage(1);
-  };
-
   const event = events.find((e) => e.id === selectedEventId) ?? null;
 
-  const filtered = debouncedSearch
-    ? allAttendees.filter((a) => a.person.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
-    : allAttendees;
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(allAttendees.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
-  const attendees = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
+  const attendees = allAttendees.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
 
   return {
     events,
@@ -192,21 +194,18 @@ export function useCoffee() {
     selectedEventId,
     selectEvent: (eventId: string) => (boardRef.current ? applyBoard(boardRef.current, eventId) : load(eventId)),
     attendees,
-    totalCount: filtered.length,
+    totalCount: allAttendees.length,
     loading,
     error,
     page: clampedPage,
     totalPages,
     setPage,
-    search,
-    setSearch,
-    hasFilter: !!search.trim(),
     createEvent,
     updateEvent,
     deleteSelectedEvent,
     enrollPerson,
-    markAttended,
-    markNotAttended,
+    setPresence,
+    undoPresence,
     markCanceled,
   };
 }

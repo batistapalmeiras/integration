@@ -113,7 +113,7 @@ export function Layout({ children }: ILayoutProps) {
           {showClasses && (
             <SideNavLink to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
               <GraduationCap size={18} />
-              Turma
+              Turmas
             </SideNavLink>
           )}
           {showMembership && (
@@ -168,7 +168,7 @@ export function Layout({ children }: ILayoutProps) {
           {showClasses && (
             <BottomTab to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
               <GraduationCap size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Classes)}>Turma</BottomTabLabel>
+              <BottomTabLabel $active={isActive(AppRoute.Classes)}>Turmas</BottomTabLabel>
             </BottomTab>
           )}
           {showMembership && (

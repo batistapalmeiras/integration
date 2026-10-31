@@ -6,7 +6,7 @@ import { CohortsList } from './CohortsList';
 export function CohortsListPage() {
   return (
     <div>
-      <PageHeader title="Turmas" back />
+      <PageHeader title="Histórico de turmas" back />
       <CohortsList />
     </div>
   );

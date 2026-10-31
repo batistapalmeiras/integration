@@ -8,7 +8,7 @@ import { initialContactMessage } from '../../../../domain/whatsapp';
 import { AppRoute } from '../../../../routes/paths';
 import { Person } from '../../../../features/visitors';
 import { ContactAttemptFormValues } from '../../validators';
-import { Hint, InfoBoxAction, SectionStack, Step, StepBody, StepNumber, Steps, StepTitle } from '../styles';
+import { InfoBoxAction, SectionStack, Step, StepBody, StepNumber, Steps } from '../styles';
 import { ContactTab } from './ContactTab';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
@@ -62,19 +62,17 @@ export function ContactStagePanel({ person, volunteerName, hasCoffeeEvent, onReg
               )}
             </StepBody>
           </Step>
-          <Step>
-            <StepNumber $active={opened && !noCoffeeScheduled}>2</StepNumber>
-            <StepBody>
-              <StepTitle type="h5" as="span" $muted={!opened || noCoffeeScheduled}>
-                Resultado
-              </StepTitle>
-              {opened && !noCoffeeScheduled ? (
+          {opened && !noCoffeeScheduled && (
+            <Step>
+              <StepNumber $active>2</StepNumber>
+              <StepBody>
+                <Typography type="h5" as="span">
+                  Resultado
+                </Typography>
                 <ContactTab onSubmit={onRegisterContact} />
-              ) : (
-                <Hint>Aparece depois de abrir o WhatsApp.</Hint>
-              )}
-            </StepBody>
-          </Step>
+              </StepBody>
+            </Step>
+          )}
         </Steps>
       </SectionStack>
     </Card>

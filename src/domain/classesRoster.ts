@@ -201,7 +201,7 @@ export async function closeFinishedCohorts(): Promise<number> {
 export interface CohortBoardEnrollment {
   id: string;
   cohort_id: string;
-  person: { id: string; name: string; phone: string; status: string; membership_interest_sent_at: string | null };
+  person: { id: string; name: string; status: string; membership_interest_sent_at: string | null };
 }
 
 export interface CohortBoardAttendance {
@@ -227,7 +227,7 @@ export async function fetchCohortBoard(): Promise<CohortBoard> {
   const [enrollments, attendance] = await Promise.all([
     supabase
       .from('enrollments')
-      .select('id, cohort_id, person:people(id,name,phone,status,membership_interest_sent_at)')
+      .select('id, cohort_id, person:people(id,name,status,membership_interest_sent_at)')
       .in('cohort_id', cohortIds),
     lessonIds.length
       ? supabase.from('lesson_attendance').select('id, enrollment_id, lesson_id, attended').in('lesson_id', lessonIds)

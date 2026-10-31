@@ -8,18 +8,28 @@ import {
   ModalTitle,
   PageHeader,
   Pagination,
-  SearchInput,
   Skeleton,
   text,
   Typography,
   useAuthCtx,
   useModal,
+  useToast,
 } from 'bp-kit';
 import { Archive, Check, Pencil, Plus, X, XCircle } from 'lucide-react';
 // Local
 import { AddButton } from '../../components/AddButton';
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';
-import { List, ListItem, ListItemRow } from '../../components/List';
+import {
+  List,
+  ListChevron,
+  ListGrow,
+  ListHeader,
+  ListItem,
+  ListItemRow,
+  ListName,
+  ListSlot,
+  ListStatusCell,
+} from '../../components/List';
 import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { StatusPill } from '../../components/StatusPill';
 import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
@@ -31,15 +41,7 @@ import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { formatDate } from './domain';
 import { useCoffee } from './hooks';
 import { AttendeeRow } from './types';
-import {
-  IconAction,
-  ListTitle,
-  PaginationWrap,
-  PersonLink,
-  SearchRow,
-  SegmentButton,
-  Segmented,
-} from './styles';
+import { IconAction, PaginationWrap, PersonLink, RowActions } from './styles';
 
 function weekdayLabel(eventDate: string): string {
   const weekday = new Date(`${eventDate}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long' });
@@ -62,25 +64,31 @@ export function CoffeePage() {
     page,
     totalPages,
     setPage,
-    search,
-    setSearch,
-    hasFilter,
     createEvent,
     updateEvent,
     deleteSelectedEvent,
     enrollPerson,
-    markAttended,
-    markNotAttended,
+    setPresence,
+    undoPresence,
     markCanceled,
   } = useCoffee();
   const { open, close, modal } = useModal('drawer');
+  const { show: showToast, toast } = useToast();
 
   const canPlan =
     user?.role === UserRole.IntegrationTeam || user?.role === UserRole.Admin || user?.role === UserRole.Pastor;
 
   const openCreateModal = () => open(<CreateEventModal close={close} onCreate={createEvent} />);
   const openEditModal = () =>
-    event && open(<CreateEventModal close={close} onCreate={updateEvent} onDelete={deleteSelectedEvent} initialDate={event.event_date} />);
+    event &&
+    open(
+      <CreateEventModal
+        close={close}
+        onCreate={updateEvent}
+        onDelete={deleteSelectedEvent}
+        initialDate={event.event_date}
+      />,
+    );
   const openEnrollModal = () =>
     selectedEventId && open(<EnrollPersonModal eventId={selectedEventId} close={close} onEnroll={enrollPerson} />);
 
@@ -92,7 +100,9 @@ export function CoffeePage() {
           <Button
             type="button"
             disabled={!canCreateEvent}
-            title={canCreateEvent ? undefined : 'Encerre um café antes de criar outro — só é possível ter 2 ao mesmo tempo.'}
+            title={
+              canCreateEvent ? undefined : 'Encerre um café antes de criar outro — só é possível ter 2 ao mesmo tempo.'
+            }
             onClick={() => {
               close();
               openCreateModal();
@@ -123,8 +133,8 @@ export function CoffeePage() {
       <>
         <ModalTitle onClose={close}>Cancelar presença de {personName}?</ModalTitle>
         <Typography type="p">
-          A pessoa avisou que não vem mais e será arquivada. Isso pode ser revertido depois, reativando o cadastro
-          dela em Visitantes.
+          A pessoa avisou que não vem mais e será arquivada. Isso pode ser revertido depois, reativando o cadastro dela
+          em Visitantes.
         </Typography>
         <ModalActions>
           <Button
@@ -142,21 +152,37 @@ export function CoffeePage() {
       </>,
     );
 
-  const eventIndex = events.findIndex((e) => e.id === selectedEventId);
   const canMark = !!event && canMarkCoffeeAttendance(event.event_date, todayKey());
 
-  const personNote = (attendance: AttendeeRow) => {
-    if (attendance.attended || !canMark) return null;
-    return 'Presença não marcada';
+  const showError = (e: unknown) =>
+    showToast((e as { message?: string }).message ?? 'Não foi possível salvar a presença.');
+
+  const markPresence = async (attendance: AttendeeRow, presence: 'came' | 'missed') => {
+    if (presence === attendance.presence) return;
+    try {
+      await setPresence(attendance, presence);
+    } catch (e) {
+      showError(e);
+      return;
+    }
+    showToast(`${attendance.person.name}: ${presence === 'came' ? 'veio' : 'faltou'}`, {
+      label: 'Desfazer',
+      onClick: () => undoPresence(attendance, presence).catch(showError),
+    });
   };
+  const canChangePresence = (attendance: AttendeeRow) =>
+    attendance.presenceEditable && !attendance.person.class_invite_sent_at;
+
+  const hasActions = (attendance: AttendeeRow) => canPlan && (!canMark || canChangePresence(attendance));
+  const showStatus = attendees.some((attendance) => !hasActions(attendance));
+
+  const eventIndex = events.findIndex((e) => e.id === selectedEventId);
 
   return (
     <div>
       <PageHeader
         title="Café"
-        action={
-canPlan && <OptionsMenuButton label="Opções do café" onClick={openEventMenu} />
-        }
+        action={canPlan && <OptionsMenuButton label="Opções do café" onClick={openEventMenu} />}
       />
 
       {loading && <Skeleton $h="240px" />}
@@ -166,7 +192,9 @@ canPlan && <OptionsMenuButton label="Opções do café" onClick={openEventMenu} 
       {!loading && !error && !event && (
         <Empty
           title="Nenhum café agendado"
-          description={canPlan ? 'Agende o próximo café pelo botão de opções acima.' : 'Aguarde o próximo café ser agendado.'}
+          description={
+            canPlan ? 'Agende o próximo café pelo botão de opções acima.' : 'Aguarde o próximo café ser agendado.'
+          }
         />
       )}
 
@@ -181,64 +209,78 @@ canPlan && <OptionsMenuButton label="Opções do café" onClick={openEventMenu} 
             onNext={eventIndex < events.length - 1 ? () => selectEvent(events[eventIndex + 1].id) : undefined}
           />
 
-          <SearchRow>
-            <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
-          </SearchRow>
-
           {totalCount === 0 && (
-            <Empty
-              title="Ninguém convidado ainda"
-              description={
-                hasFilter
-                  ? 'Nenhum convidado encontrado para os filtros aplicados.'
-                  : 'Visitantes que aceitaram o convite aparecerão aqui.'
-              }
-            />
+            <Empty title="Ninguém convidado ainda" description="Visitantes que aceitaram o convite aparecerão aqui." />
           )}
 
           {totalCount > 0 && (
             <>
-              <ListTitle type="h4">Quem veio?</ListTitle>
               <List>
+                <ListHeader aria-hidden="true">
+                  <ListGrow>{text.fields.name}</ListGrow>
+                  {showStatus && (
+                    <>
+                      <ListStatusCell>Situação</ListStatusCell>
+                      <ListSlot $width={16} />
+                    </>
+                  )}
+                </ListHeader>
                 {attendees.map((attendance) => (
                   <ListItem key={attendance.id}>
                     <ListItemRow>
-                      <PersonLink type="button" onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}>
-                        <span>{attendance.person.name}</span>
-                        {personNote(attendance) && (
-                          <Typography type="caption" as="span">
-                            {personNote(attendance)}
-                          </Typography>
-                        )}
+                      <PersonLink
+                        type="button"
+                        onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}
+                      >
+                        <ListName>{attendance.person.name}</ListName>
                       </PersonLink>
-                      {attendance.attended && <StatusPill person={attendance.person} compact />}
-                      {canPlan && !attendance.attended && (
-                        <IconAction
-                          type="button"
-                          aria-label={`Cancelou: ${attendance.person.name} avisou que não vem`}
-                          title="Cancelou (avisou que não vem)"
-                          onClick={() => confirmCanceled(attendance.person.id, attendance.person.name)}
-                        >
-                          <Archive size={18} />
-                        </IconAction>
+                      {hasActions(attendance) ? (
+                        <RowActions>
+                          <IconAction
+                            type="button"
+                            aria-label={`Cancelou: ${attendance.person.name} avisou que não vem`}
+                            title="Cancelou (avisou que não vem)"
+                            onClick={() => confirmCanceled(attendance.person.id, attendance.person.name)}
+                          >
+                            <Archive size={16} />
+                          </IconAction>
+                          {canMark && (
+                            <>
+                              <IconAction
+                                type="button"
+                                $tone="negative"
+                                aria-label={`Faltou: ${attendance.person.name}`}
+                                title="Faltou"
+                                aria-pressed={attendance.presence === 'missed'}
+                                onClick={() => markPresence(attendance, 'missed')}
+                              >
+                                <X size={16} />
+                              </IconAction>
+                              <IconAction
+                                type="button"
+                                $tone="positive"
+                                aria-label={`Veio: ${attendance.person.name}`}
+                                title="Veio"
+                                aria-pressed={attendance.presence === 'came'}
+                                onClick={() => markPresence(attendance, 'came')}
+                              >
+                                <Check size={16} />
+                              </IconAction>
+                            </>
+                          )}
+                        </RowActions>
+                      ) : (
+                        <>
+                          <ListStatusCell>
+                            <StatusPill person={attendance.person} compact />
+                          </ListStatusCell>
+                          <ListChevron
+                            label={`Abrir perfil de ${attendance.person.name}`}
+                            onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}
+                          />
+                        </>
                       )}
                     </ListItemRow>
-                    {canPlan && canMark && !attendance.attended && (
-                      <Segmented role="group" aria-label={`Presença de ${attendance.person.name}`}>
-                        <SegmentButton
-                          type="button"
-                          $tone="positive"
-                          onClick={() => markAttended(attendance.id, attendance.person.id)}
-                        >
-                          <Check size={16} />
-                          Veio
-                        </SegmentButton>
-                        <SegmentButton type="button" $tone="negative" onClick={() => markNotAttended(attendance.person.id)}>
-                          <X size={16} />
-                          Faltou
-                        </SegmentButton>
-                      </Segmented>
-                    )}
                   </ListItem>
                 ))}
               </List>
@@ -261,6 +303,7 @@ canPlan && <OptionsMenuButton label="Opções do café" onClick={openEventMenu} 
       )}
 
       {modal}
+      {toast}
     </div>
   );
 }
