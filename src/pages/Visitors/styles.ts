@@ -135,25 +135,6 @@ export const RowReason = styled.span<{ $tone: 'info' | 'warning' | 'muted' }>`
     $tone === 'info' ? theme.colors.info : $tone === 'warning' ? theme.colors.warning : theme.colors.muted};
 `;
 
-export const WhatsAppButton = styled.button`
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: ${({ theme }) => theme.rounded.full};
-  border: none;
-  background: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.onPrimary};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.primaryActive};
-  }
-`;
-
 export const PreviewHeader = styled.div`
   display: flex;
   align-items: center;

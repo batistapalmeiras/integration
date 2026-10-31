@@ -3,10 +3,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useMediaQuery } from 'bp-kit';
-import { MessageCircle } from 'lucide-react';
 // Local
-import { Avatar } from '../../components/Avatar';
 import { PeopleCount } from '../../components/PeopleCount';
+import { StatusPill } from '../../components/StatusPill';
 import { VisitorQueue } from '../../features/visitors';
 import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META } from '../../types/person';
@@ -29,7 +28,6 @@ import {
   SectionHeader,
   SectionTitle,
   Split,
-  WhatsAppButton,
 } from './styles';
 
 const QUEUE_TITLES: Record<VisitorQueue, string> = {
@@ -61,7 +59,6 @@ export function VisitorsPage() {
     setSearch,
     statusFilter,
     setStatusFilter,
-    openWhatsApp,
     reload,
     hasFilter,
   } = useVisitors();
@@ -142,21 +139,12 @@ export function VisitorsPage() {
                   {section.rows.map((row) => (
                     <Row key={row.person.id} $selected={row.person.id === previewId}>
                       <RowButton type="button" onClick={() => openRow(row)}>
-                        <Avatar name={row.person.name} muted={row.queue !== 'contact'} />
                         <RowText>
                           <RowName>{row.person.name}</RowName>
                           <RowReason $tone={reasonTone(row)}>{row.reason}</RowReason>
                         </RowText>
+                        <StatusPill person={row.person} compact />
                       </RowButton>
-                      {row.queue === 'contact' && (
-                        <WhatsAppButton
-                          type="button"
-                          aria-label={`Enviar WhatsApp para ${row.person.name}`}
-                          onClick={() => openWhatsApp(row.person)}
-                        >
-                          <MessageCircle size={20} />
-                        </WhatsAppButton>
-                      )}
                     </Row>
                   ))}
                 </RowList>

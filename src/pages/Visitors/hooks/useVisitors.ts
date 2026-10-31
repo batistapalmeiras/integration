@@ -1,16 +1,12 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
-// Libs
-import { useAuthCtx } from 'bp-kit';
 // Local
 import { supabase } from '../../../lib/supabase';
-import { buildWhatsAppLink, initialContactMessage } from '../../../domain/whatsapp';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { loadSavedFilters, saveFilters } from '../persistence';
 import {
   fetchContactAttemptDates,
   Person,
-  updatePersonFields,
   VISITOR_QUEUES,
   VisitorQueue,
   visitorQueue,
@@ -28,7 +24,6 @@ export interface VisitorRow {
 }
 
 export function useVisitors() {
-  const { user } = useAuthCtx();
   const [rows, setRows] = useState<VisitorRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,12 +85,6 @@ export function useVisitors() {
     setPage(1);
   };
 
-  const openWhatsApp = async (person: Person) => {
-    window.open(buildWhatsAppLink(person.phone, initialContactMessage(person.name, user?.name ?? '')), '_blank');
-    await updatePersonFields(person.id, { whatsapp_opened_at: new Date().toISOString() });
-    await load();
-  };
-
   const filtered = rows.filter(
     (r) =>
       (!debouncedSearch || r.person.name.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
@@ -122,7 +111,6 @@ export function useVisitors() {
     setSearch,
     statusFilter,
     setStatusFilter,
-    openWhatsApp,
     reload: load,
     hasFilter: !!search.trim() || statusFilter.length > 0,
   };
