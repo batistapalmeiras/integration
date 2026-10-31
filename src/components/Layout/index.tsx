@@ -1,7 +1,6 @@
 // React
 import React from 'react';
 // Libs
-import { Brand } from 'bp-kit';
 import {
   Contact,
   GraduationCap,
@@ -27,6 +26,9 @@ import {
   Main,
   MainInner,
   SideBrand,
+  SideBrandLink,
+  SideBrandLogo,
+  SideBrandName,
   SideFooter,
   SideMenu,
   SideNav,
@@ -83,7 +85,10 @@ export function Layout({ children }: ILayoutProps) {
     <>
       <SideMenu>
         <SideBrand>
-          <Brand to={homeRoute} icon={icon} alt="Batista Palmeiras" name="Integração" />
+          <SideBrandLink to={homeRoute}>
+            <SideBrandLogo src={icon} alt="" />
+            <SideBrandName>Batista Palmeiras</SideBrandName>
+          </SideBrandLink>
         </SideBrand>
 
         <SideNav>
