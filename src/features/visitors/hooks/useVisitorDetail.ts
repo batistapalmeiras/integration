@@ -27,9 +27,9 @@ import {
 } from '../../../domain/classesRoster';
 import { confirmMember as confirmMemberUseCase } from '../services/confirmMember';
 import { editLastContactAttempt as editLastContactAttemptUseCase } from '../services/editLastContactAttempt';
+import { reactivatePerson } from '../services/reactivatePerson';
 import { registerContactAttempt as registerContactAttemptUseCase } from '../services/registerContactAttempt';
 import {
-  clearWhatsAppOpened,
   deletePersonRow,
   fetchLastContactAttempt,
   fetchPerson,
@@ -202,8 +202,9 @@ export function useVisitorDetail(id: string) {
 
   const archive = () => changeStatus('archived');
   const reactivate = async () => {
-    await clearWhatsAppOpened(id);
-    await changeStatus('retry_contact');
+    if (!person) return;
+    await reactivatePerson(person, user?.id);
+    await load();
   };
 
   const deletePerson = () => deletePersonRow(id);

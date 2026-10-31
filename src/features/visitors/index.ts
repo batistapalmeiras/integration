@@ -5,3 +5,5 @@ export type { ContactResult, Person, PersonStatus, StatusTone } from './domain/t
 export { VISITOR_QUEUES, visitorQueue, visitorReason } from './domain/visitorQueue';
 export type { VisitorQueue } from './domain/visitorQueue';
 export { fetchContactAttemptDates, updatePersonFields } from './infra/peopleRepository';
+export { reactivatePerson } from './services/reactivatePerson';
+export { findPersonByPhone } from './infra/peopleRepository';

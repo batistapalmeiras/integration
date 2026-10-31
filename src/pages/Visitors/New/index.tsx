@@ -1,20 +1,28 @@
 // React
+import { useEffect, useRef } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, PageHeader, text, TextInput } from 'bp-kit';
+import { Button, PageHeader, parsePhone, text, TextInput, useAuthCtx, useModal } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Local
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
+import { findPersonByPhone, reactivatePerson } from '../../../features/visitors';
 import { AppRoute } from '../../../routes/paths';
 import { useCreatePerson } from '../hooks';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
-import { Actions, Form } from './styles';
+import { ExistingPersonModal } from './components/ExistingPersonModal';
+import { Actions, Form, InlineFields, Intro } from './styles';
+
+const MIN_PHONE_DIGITS = 10;
 
 export function NewVisitorPage() {
   const navigate = useNavigate();
+  const { user } = useAuthCtx();
   const { createPerson } = useCreatePerson();
+  const { open, close, modal } = useModal('drawer');
+  const checkedPhone = useRef('');
 
   const {
     control,
@@ -25,6 +33,30 @@ export function NewVisitorPage() {
     defaultValues: { name: '', phone: '', age: '', email: '' },
   });
 
+  const phone = useWatch({ control, name: 'phone' });
+
+  useEffect(() => {
+    const digits = parsePhone(phone ?? '');
+    if (digits.length < MIN_PHONE_DIGITS || digits === checkedPhone.current) return;
+    checkedPhone.current = digits;
+
+    findPersonByPhone(digits).then((person) => {
+      if (!person) return;
+      const profile = `${AppRoute.Visitors}/${person.id}`;
+      open(
+        <ExistingPersonModal
+          person={person}
+          close={close}
+          onOpen={() => navigate(profile)}
+          onReactivate={async () => {
+            await reactivatePerson(person, user?.id);
+            navigate(profile);
+          }}
+        />,
+      );
+    });
+  }, [phone, open, close, navigate, user?.id]);
+
   const submit = handleSubmit(async (values) => {
     await createPerson(values);
     navigate(AppRoute.Visitors);
@@ -33,24 +65,21 @@ export function NewVisitorPage() {
   return (
     <div>
       <PageHeader title="Novo visitante" back />
+      <Intro>Só nome e WhatsApp são obrigatórios. O resto a pessoa completa na inscrição.</Intro>
 
       <Form onSubmit={submit}>
+        <TextInput label="WhatsApp" control={control} name="phone" mask="phone" placeholder={PHONE_PLACEHOLDER} />
         <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />
-        <TextInput
-          label={text.fields.phone}
-          control={control}
-          name="phone"
-          mask="phone"
-          placeholder={PHONE_PLACEHOLDER}
-        />
-        <TextInput
-          label={text.fields.email}
-          control={control}
-          name="email"
-          type="email"
-          placeholder={text.fields.emailPlaceholder}
-        />
-        <TextInput label="Idade" control={control} name="age" type="text" inputMode="numeric" placeholder="Idade" />
+        <InlineFields>
+          <TextInput label="Idade" control={control} name="age" type="text" inputMode="numeric" placeholder="Idade" />
+          <TextInput
+            label={text.fields.email}
+            control={control}
+            name="email"
+            type="email"
+            placeholder={text.fields.emailPlaceholder}
+          />
+        </InlineFields>
 
         <Actions>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
@@ -65,6 +94,8 @@ export function NewVisitorPage() {
           </Button>
         </Actions>
       </Form>
+
+      {modal}
     </div>
   );
 }

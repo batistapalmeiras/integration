@@ -91,3 +91,9 @@ export async function fetchContactAttemptDates(personIds: string[]): Promise<Rec
   }
   return byPerson;
 }
+
+export async function findPersonByPhone(digits: string): Promise<Person | null> {
+  const { data, error } = await supabase.from('people').select('*').eq('phone', digits).limit(1).maybeSingle();
+  if (error) throw error;
+  return data as Person | null;
+}
