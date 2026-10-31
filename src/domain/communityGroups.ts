@@ -47,6 +47,42 @@ async function deleteGroup(table: Table, id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function listMembers({ withoutSmallGroup = false } = {}): Promise<PersonInGroup[]> {
+  const query = supabase.from('people').select('id, name').eq('status', 'member');
+  const { data, error } = await (withoutSmallGroup ? query.is('small_group_id', null) : query).order('name');
+  if (error) throw error;
+  return (data ?? []) as PersonInGroup[];
+}
+
+export async function addPeopleToSmallGroup(groupId: string, personIds: string[]): Promise<void> {
+  const { error } = await supabase.from('people').update({ small_group_id: groupId }).in('id', personIds);
+  if (error) throw error;
+}
+
+export async function addPeopleToMinistry(ministryId: string, personIds: string[]): Promise<void> {
+  const { error } = await supabase
+    .from('person_ministries')
+    .upsert(
+      personIds.map((personId) => ({ person_id: personId, ministry_id: ministryId })),
+      { onConflict: 'person_id,ministry_id', ignoreDuplicates: true },
+    );
+  if (error) throw error;
+}
+
+export async function removePersonFromSmallGroup(personId: string): Promise<void> {
+  const { error } = await supabase.from('people').update({ small_group_id: null }).eq('id', personId);
+  if (error) throw error;
+}
+
+export async function removePersonFromMinistry(ministryId: string, personId: string): Promise<void> {
+  const { error } = await supabase
+    .from('person_ministries')
+    .delete()
+    .eq('ministry_id', ministryId)
+    .eq('person_id', personId);
+  if (error) throw error;
+}
+
 async function countSmallGroupPeople(id: string): Promise<number> {
   const { count, error } = await supabase
     .from('people')

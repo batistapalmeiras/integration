@@ -1,5 +1,7 @@
 // Libs
 import { supabase } from '../lib/supabase';
+// Local
+import { fromIntegration } from './integrationPeople';
 
 async function findFutureCoffeeEvent(): Promise<{ id: string; event_date: string } | null> {
   const todayKey = new Date().toISOString().slice(0, 10);
@@ -150,10 +152,8 @@ export async function listEnrollableCoffeePeople(eventId: string): Promise<Enrol
   if (attendingError) throw attendingError;
   const attendingIds = new Set((attending ?? []).map((a) => a.person_id as string));
 
-  const { data, error } = await supabase
-    .from('people')
-    .select('id, name')
-    .not('status', 'in', '(archived,welcome_coffee)')
+  const { data, error } = await fromIntegration(supabase.from('people').select('id, name'))
+    .in('status', ['initial_contact', 'retry_contact'])
     .order('name');
   if (error) throw error;
   return (data ?? []).filter((p) => !attendingIds.has(p.id as string)) as EnrollableCoffeePerson[];
