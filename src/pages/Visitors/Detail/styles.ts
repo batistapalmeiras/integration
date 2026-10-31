@@ -137,3 +137,55 @@ export const SensitiveValue = styled.span<{ $muted?: boolean }>`
   font-style: ${({ $muted }) => ($muted ? 'italic' : 'normal')};
   white-space: pre-wrap;
 `;
+
+export const PanelTitle = styled.h2`
+  margin: 0;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.displaySm.fontSize};
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.ink};
+`;
+
+export const Steps = styled.ol`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.lg};
+`;
+
+export const Step = styled.li`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.md};
+`;
+
+export const StepNumber = styled.span<{ $active: boolean }>`
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: ${({ theme }) => theme.rounded.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  font-weight: 700;
+  background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.surfaceStrong)};
+  color: ${({ theme, $active }) => ($active ? theme.colors.onPrimary : theme.colors.muted)};
+`;
+
+export const StepBody = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+`;
+
+export const StepTitle = styled.span<{ $muted?: boolean }>`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 15px;
+  font-weight: 600;
+  color: ${({ theme, $muted }) => ($muted ? theme.colors.muted : theme.colors.ink)};
+`;

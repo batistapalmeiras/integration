@@ -8,7 +8,7 @@ import { initialContactMessage } from '../../../../domain/whatsapp';
 import { AppRoute } from '../../../../routes/paths';
 import { Person } from '../../../../features/visitors';
 import { ContactAttemptFormValues } from '../../validators';
-import { InfoBoxAction, SectionDivider, SectionStack, StagePanel } from '../styles';
+import { Hint, InfoBoxAction, PanelTitle, SectionStack, Step, StepBody, StepNumber, Steps, StepTitle } from '../styles';
 import { ContactTab } from './ContactTab';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
@@ -29,38 +29,50 @@ export function ContactStagePanel({ person, volunteerName, hasCoffeeEvent, onReg
   const noCoffeeScheduled = hasCoffeeEvent === false;
 
   return (
-    <StagePanel>
-      <Card>
-        <SectionStack>
-          {noCoffeeScheduled && (
-            <InfoBox variant="warning">
-              Ainda não há um café de boas-vindas agendado. Agende uma data na aba Café antes de entrar em contato.
-              <InfoBoxAction>
-                <Button type="button" variant="secondary" size="sm" onClick={() => navigate(AppRoute.Coffee)}>
-                  Ir para Café
+    <Card>
+      <SectionStack>
+        <PanelTitle>Contato</PanelTitle>
+        {noCoffeeScheduled && (
+          <InfoBox variant="warning">
+            Ainda não há um café de boas-vindas agendado. Agende uma data na aba Café antes de entrar em contato.
+            <InfoBoxAction>
+              <Button type="button" variant="secondary" size="sm" onClick={() => navigate(AppRoute.Coffee)}>
+                Ir para Café
+              </Button>
+            </InfoBoxAction>
+          </InfoBox>
+        )}
+        <Steps>
+          <Step>
+            <StepNumber $active>1</StepNumber>
+            <StepBody>
+              <WhatsAppMessageBox
+                person={person}
+                defaultMessage={initialContactMessage(person.name, volunteerName)}
+                onOpen={onWhatsAppOpened}
+                bare
+                disabled={noCoffeeScheduled}
+              />
+              {!opened && !noCoffeeScheduled && (
+                <Button type="button" variant="secondary" size="sm" onClick={() => setSkipWhatsApp(true)}>
+                  Já fiz contato de outra forma
                 </Button>
-              </InfoBoxAction>
-            </InfoBox>
-          )}
-          <WhatsAppMessageBox
-            person={person}
-            defaultMessage={initialContactMessage(person.name, volunteerName)}
-            onOpen={onWhatsAppOpened}
-            bare
-            disabled={noCoffeeScheduled}
-          />
-          {!opened && !noCoffeeScheduled && (
-            <Button type="button" variant="secondary" size="sm" onClick={() => setSkipWhatsApp(true)}>
-              Já fiz contato de outra forma
-            </Button>
-          )}
-          {opened && !noCoffeeScheduled && (
-            <SectionDivider>
-              <ContactTab onSubmit={onRegisterContact} />
-            </SectionDivider>
-          )}
-        </SectionStack>
-      </Card>
-    </StagePanel>
+              )}
+            </StepBody>
+          </Step>
+          <Step>
+            <StepNumber $active={opened && !noCoffeeScheduled}>2</StepNumber>
+            <StepBody>
+              <StepTitle $muted={!opened || noCoffeeScheduled}>Resultado</StepTitle>
+              {opened && !noCoffeeScheduled ? (
+                <ContactTab onSubmit={onRegisterContact} />
+              ) : (
+                <Hint>Aparece depois de abrir o WhatsApp.</Hint>
+              )}
+            </StepBody>
+          </Step>
+        </Steps>
+      </SectionStack>
+    </Card>
   );
 }
