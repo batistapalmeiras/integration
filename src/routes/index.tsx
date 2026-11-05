@@ -11,6 +11,7 @@ import { CoffeePage } from '../pages/Coffee';
 import { CommunityGroupDetailPage } from '../pages/CommunityGroups/Detail';
 import { MinistriesPage } from '../pages/CommunityGroups/Ministries';
 import { SmallGroupsPage } from '../pages/CommunityGroups/SmallGroups';
+import { DashboardPage } from '../pages/Dashboard';
 import { ForgotPasswordPage } from '../pages/ForgotPassword';
 import { IntegrationSignupPage } from '../pages/IntegrationSignup';
 import { LoginPage } from '../pages/Login';
@@ -66,6 +67,14 @@ export function AppRouter() {
                 <PasswordGate>
                   <Layout>
                     <Routes>
+                    <Route
+                      path={AppRoute.Dashboard}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Pastor]}>
+                          <DashboardPage />
+                        </ProtectedRoute>
+                      }
+                    />
                     <Route
                       path={AppRoute.Visitors}
                       element={

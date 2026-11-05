@@ -1,7 +1,8 @@
 // React
-import React from 'react';
+import React, { useState } from 'react';
 // Libs
 import {
+  ChevronDown,
   Contact,
   GraduationCap,
   LogOut,
@@ -14,6 +15,7 @@ import {
 import { Coffee as CoffeeIcon } from 'lucide-react';
 // Components
 import icon from '../../assets/icon.png';
+import { activeNavPath, NAV_ITEMS, PASTOR_NAV_AREAS } from '../../routes/navigation';
 import { AppRoute } from '../../routes/paths';
 import { ROLE_LABELS } from '../../types/enums';
 // Local
@@ -32,6 +34,8 @@ import {
   SideFooter,
   SideMenu,
   SideNav,
+  SideNavArea,
+  SideNavAreaToggle,
   SideNavCount,
   SideNavLink,
   SideUserInfo,
@@ -52,6 +56,8 @@ export function Layout({ children }: ILayoutProps) {
     handleLogout,
     isActive,
     isExactTab,
+    pathname,
+    showDashboard,
     showPeople,
     showVisitors,
     showCoffee,
@@ -60,9 +66,19 @@ export function Layout({ children }: ILayoutProps) {
     showAdmin,
     membershipCount,
   } = useLayout();
+  const [closedAreas, setClosedAreas] = useState<string[]>([]);
+
+  const toggleArea = (title: string) =>
+    setClosedAreas((closed) => (closed.includes(title) ? closed.filter((t) => t !== title) : [...closed, title]));
+
+  const pastorActivePath = activeNavPath(pathname, [
+    NAV_ITEMS.dashboard.path,
+    ...PASTOR_NAV_AREAS.flatMap((area) => area.items.map((item) => item.path)),
+  ]);
 
   const homeRoute =
     ([
+      [showDashboard, AppRoute.Dashboard],
       [showVisitors, AppRoute.Visitors],
       [showCoffee, AppRoute.Coffee],
       [showClasses, AppRoute.Classes],
@@ -92,42 +108,74 @@ export function Layout({ children }: ILayoutProps) {
         </SideBrand>
 
         <SideNav>
-          {showAdmin && (
-            <SideNavLink to={AppRoute.Settings} $active={isActive(AppRoute.Settings)}>
-              <Settings size={18} />
-              Configurações
-            </SideNavLink>
-          )}
-          {showVisitors && (
-            <SideNavLink to={AppRoute.Visitors} $active={isActive(AppRoute.Visitors)}>
-              <UsersIcon size={18} />
-              Visitantes
-            </SideNavLink>
-          )}
-          {showCoffee && (
-            <SideNavLink to={AppRoute.Coffee} $active={isActive(AppRoute.Coffee)}>
-              <CoffeeIcon size={18} />
-              Café
-            </SideNavLink>
-          )}
-          {showClasses && (
-            <SideNavLink to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
-              <GraduationCap size={18} />
-              Turmas
-            </SideNavLink>
-          )}
-          {showMembership && (
-            <SideNavLink to={AppRoute.Membership} $active={isActive(AppRoute.Membership)}>
-              <UserCheck size={18} />
-              Membresia
-              {membershipCount > 0 && <SideNavCount>{membershipCount}</SideNavCount>}
-            </SideNavLink>
-          )}
-          {showPeople && (
-            <SideNavLink to={AppRoute.People} $active={isActive(AppRoute.People)}>
-              <Contact size={18} />
-              Pessoas
-            </SideNavLink>
+          {showDashboard ? (
+            <>
+              <SideNavLink to={NAV_ITEMS.dashboard.path} $active={pastorActivePath === NAV_ITEMS.dashboard.path}>
+                <NAV_ITEMS.dashboard.icon size={18} />
+                {NAV_ITEMS.dashboard.label}
+              </SideNavLink>
+              {PASTOR_NAV_AREAS.map((area) => {
+                const open = !closedAreas.includes(area.title);
+                return (
+                  <SideNavArea key={area.title}>
+                    <SideNavAreaToggle type="button" $open={open} aria-expanded={open} onClick={() => toggleArea(area.title)}>
+                      {area.title}
+                      <ChevronDown size={14} />
+                    </SideNavAreaToggle>
+                    {open &&
+                      area.items.map((item) => (
+                        <SideNavLink key={item.path} to={item.path} $active={pastorActivePath === item.path}>
+                          <item.icon size={18} />
+                          {item.label}
+                          {item.path === AppRoute.Membership && membershipCount > 0 && (
+                            <SideNavCount>{membershipCount}</SideNavCount>
+                          )}
+                        </SideNavLink>
+                      ))}
+                  </SideNavArea>
+                );
+              })}
+            </>
+          ) : (
+            <>
+              {showAdmin && (
+                <SideNavLink to={AppRoute.Settings} $active={isActive(AppRoute.Settings)}>
+                  <Settings size={18} />
+                  Configurações
+                </SideNavLink>
+              )}
+              {showVisitors && (
+                <SideNavLink to={AppRoute.Visitors} $active={isActive(AppRoute.Visitors)}>
+                  <UsersIcon size={18} />
+                  Visitantes
+                </SideNavLink>
+              )}
+              {showCoffee && (
+                <SideNavLink to={AppRoute.Coffee} $active={isActive(AppRoute.Coffee)}>
+                  <CoffeeIcon size={18} />
+                  Café
+                </SideNavLink>
+              )}
+              {showClasses && (
+                <SideNavLink to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
+                  <GraduationCap size={18} />
+                  Turmas
+                </SideNavLink>
+              )}
+              {showMembership && (
+                <SideNavLink to={AppRoute.Membership} $active={isActive(AppRoute.Membership)}>
+                  <UserCheck size={18} />
+                  Membresia
+                  {membershipCount > 0 && <SideNavCount>{membershipCount}</SideNavCount>}
+                </SideNavLink>
+              )}
+              {showPeople && (
+                <SideNavLink to={AppRoute.People} $active={isActive(AppRoute.People)}>
+                  <Contact size={18} />
+                  Pessoas
+                </SideNavLink>
+              )}
+            </>
           )}
         </SideNav>
 

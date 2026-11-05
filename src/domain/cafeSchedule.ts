@@ -27,6 +27,17 @@ async function findFutureCoffeeEvent(): Promise<CoffeeEventRef | null> {
   return upcomingCoffeeEvent(await listCoffeeEvents(), todayKey());
 }
 
+export async function getUpcomingCoffeeRoster(): Promise<{ eventDate: string; rosterCount: number } | null> {
+  const future = await findFutureCoffeeEvent();
+  if (!future) return null;
+  const { count, error } = await supabase
+    .from('coffee_attendance')
+    .select('id', { count: 'exact', head: true })
+    .eq('coffee_event_id', future.id);
+  if (error) throw error;
+  return { eventDate: future.event_date, rosterCount: count ?? 0 };
+}
+
 export function selectOpenCoffeeEvents<T extends CoffeeEventRef>(
   events: T[],
   queuedByEventId: Record<string, number>,

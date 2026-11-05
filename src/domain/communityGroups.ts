@@ -54,6 +54,21 @@ export async function listMembers({ withoutSmallGroup = false } = {}): Promise<P
   return (data ?? []) as PersonInGroup[];
 }
 
+export interface CommunityOverview {
+  smallGroups: number;
+  ministries: number;
+}
+
+export async function getCommunityOverview(): Promise<CommunityOverview> {
+  const [smallGroups, ministries] = await Promise.all([
+    supabase.from('small_groups').select('id', { count: 'exact', head: true }),
+    supabase.from('ministries').select('id', { count: 'exact', head: true }),
+  ]);
+  const failure = smallGroups.error ?? ministries.error;
+  if (failure) throw failure;
+  return { smallGroups: smallGroups.count ?? 0, ministries: ministries.count ?? 0 };
+}
+
 export async function addPeopleToSmallGroup(groupId: string, personIds: string[]): Promise<void> {
   const { error } = await supabase.from('people').update({ small_group_id: groupId }).in('id', personIds);
   if (error) throw error;

@@ -8,7 +8,7 @@ import { AppRoute } from '../../routes/paths';
 
 function resolveRoute(role: string): string {
   if (role === UserRole.Admin) return AppRoute.Admin;
-  if (role === UserRole.Pastor) return AppRoute.Coffee;
+  if (role === UserRole.Pastor) return AppRoute.Dashboard;
   if (role === UserRole.Teacher) return AppRoute.Classes;
   return AppRoute.Visitors;
 }

@@ -1,9 +1,8 @@
 // React
 import { useCallback, useEffect, useState } from 'react';
 // Local
-import { fromIntegration } from '../../../domain/integrationPeople';
+import { countIntegrationPeopleByStatus } from '../../../domain/integrationPeople';
 import { supabase } from '../../../lib/supabase';
-import { PersonStatus } from '../../../types/person';
 import { StatusCounts } from '../types';
 
 export function useStatusCounts() {
@@ -16,19 +15,13 @@ export function useStatusCounts() {
     setLoading(true);
     setError(null);
 
-    const { data, error: loadError } = await fromIntegration(supabase.from('people').select('status'));
-    if (loadError) {
-      setError(loadError.message);
+    try {
+      setCounts(await countIntegrationPeopleByStatus());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
       setLoading(false);
       return;
     }
-
-    const nextCounts: StatusCounts = {};
-    for (const row of data ?? []) {
-      const status = row.status as PersonStatus;
-      nextCounts[status] = (nextCounts[status] ?? 0) + 1;
-    }
-    setCounts(nextCounts);
 
     const { count: cohortsCount, error: cohortsError } = await supabase
       .from('cohorts')

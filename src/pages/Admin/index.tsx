@@ -2,21 +2,10 @@
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { PageHeader, useAuthCtx } from 'bp-kit';
-import {
-  ChevronRight,
-  ClipboardCheck,
-  Contact,
-  Coffee,
-  FileBarChart,
-  GraduationCap,
-  HeartHandshake,
-  Store,
-  UserPlus,
-  Users,
-  UsersRound,
-} from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 // Local
 import icon from '../../assets/icon.png';
+import { NAV_ITEMS } from '../../routes/navigation';
 import { AppRoute } from '../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../types/enums';
 import { MenuOptionCard } from './components/MenuOptionCard';
@@ -71,12 +60,13 @@ export function AdminPage() {
         <MenuSection>
           <MenuSectionTitle>Igreja</MenuSectionTitle>
           <OptionsGrid>
-            <MenuOptionCard icon={Users} label="Membros" onClick={() => navigate(AppRoute.Members)} />
+            <MenuOptionCard icon={NAV_ITEMS.members.icon} label={NAV_ITEMS.members.label} onClick={() => navigate(NAV_ITEMS.members.path)} />
             {isPastor && (
               <>
-                <MenuOptionCard icon={ClipboardCheck} label="Pendências" onClick={() => navigate(AppRoute.MemberPendencies)} />
-                <MenuOptionCard icon={HeartHandshake} label="Ministérios" onClick={() => navigate(AppRoute.Ministries)} />
-                <MenuOptionCard icon={UsersRound} label="Pequenos Grupos" onClick={() => navigate(AppRoute.SmallGroups)} />
+                <MenuOptionCard icon={NAV_ITEMS.dashboard.icon} label={NAV_ITEMS.dashboard.label} onClick={() => navigate(NAV_ITEMS.dashboard.path)} />
+                <MenuOptionCard icon={NAV_ITEMS.pendencies.icon} label={NAV_ITEMS.pendencies.label} onClick={() => navigate(NAV_ITEMS.pendencies.path)} />
+                <MenuOptionCard icon={NAV_ITEMS.ministries.icon} label={NAV_ITEMS.ministries.label} onClick={() => navigate(NAV_ITEMS.ministries.path)} />
+                <MenuOptionCard icon={NAV_ITEMS.smallGroups.icon} label={NAV_ITEMS.smallGroups.label} onClick={() => navigate(NAV_ITEMS.smallGroups.path)} />
               </>
             )}
           </OptionsGrid>
@@ -87,11 +77,11 @@ export function AdminPage() {
         <MenuSection>
           <MenuSectionTitle>Integração</MenuSectionTitle>
           <OptionsGrid>
-            <MenuOptionCard icon={Contact} label="Pessoas" onClick={() => navigate(AppRoute.People)} />
-            <MenuOptionCard icon={GraduationCap} label="Histórico de turmas" onClick={() => navigate(`${AppRoute.Reports}/turmas`)} />
-            <MenuOptionCard icon={Coffee} label="Histórico de cafés" onClick={() => navigate(`${AppRoute.Reports}/cafes`)} />
-            <MenuOptionCard icon={UserPlus} label="Voluntários" onClick={() => navigate(AppRoute.Volunteers)} />
-            <MenuOptionCard icon={FileBarChart} label="Relatórios" onClick={() => navigate(AppRoute.Reports)} />
+            <MenuOptionCard icon={NAV_ITEMS.people.icon} label={NAV_ITEMS.people.label} onClick={() => navigate(NAV_ITEMS.people.path)} />
+            <MenuOptionCard icon={NAV_ITEMS.cohortHistory.icon} label={NAV_ITEMS.cohortHistory.label} onClick={() => navigate(NAV_ITEMS.cohortHistory.path)} />
+            <MenuOptionCard icon={NAV_ITEMS.coffeeHistory.icon} label={NAV_ITEMS.coffeeHistory.label} onClick={() => navigate(NAV_ITEMS.coffeeHistory.path)} />
+            <MenuOptionCard icon={NAV_ITEMS.volunteers.icon} label={NAV_ITEMS.volunteers.label} onClick={() => navigate(NAV_ITEMS.volunteers.path)} />
+            <MenuOptionCard icon={NAV_ITEMS.reports.icon} label={NAV_ITEMS.reports.label} onClick={() => navigate(NAV_ITEMS.reports.path)} />
           </OptionsGrid>
         </MenuSection>
       )}
@@ -100,7 +90,7 @@ export function AdminPage() {
         <MenuSection>
           <MenuSectionTitle>Loja</MenuSectionTitle>
           <OptionsGrid>
-            <MenuOptionCard icon={Store} label="Loja" disabled />
+            <MenuOptionCard icon={NAV_ITEMS.store.icon} label={NAV_ITEMS.store.label} disabled />
           </OptionsGrid>
         </MenuSection>
       )}

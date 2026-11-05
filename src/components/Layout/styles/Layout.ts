@@ -63,6 +63,38 @@ export const SideNav = styled.nav`
   gap: 2px;
 `;
 
+export const SideNavArea = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: ${({ theme }) => theme.spacing.md};
+`;
+
+export const SideNavAreaToggle = styled.button<{ $open: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 ${({ theme }) => theme.spacing.md};
+  border: 0;
+  border-radius: ${({ theme }) => theme.rounded.sm};
+  background: transparent;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.microLabel.fontSize};
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.muted};
+  cursor: pointer;
+
+  svg {
+    transition: transform 0.15s;
+    transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
+  }
+
+  &:hover { color: ${({ theme }) => theme.colors.ink}; }
+`;
+
 export const SideNavLink = styled(Link)<{ $active: boolean }>`
   display: flex;
   align-items: center;

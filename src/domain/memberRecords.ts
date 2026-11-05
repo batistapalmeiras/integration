@@ -89,6 +89,12 @@ export async function listMemberPendencies(filters: {
   return { rows: (data ?? []) as MemberPendency[], total: count ?? 0 };
 }
 
+export async function countMembers(): Promise<number> {
+  const { count, error } = await supabase.from('people').select('id', { count: 'exact', head: true }).eq('status', 'member');
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export interface MemberRecord {
   name: string;
   phone: string;
