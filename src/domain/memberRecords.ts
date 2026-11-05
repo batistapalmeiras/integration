@@ -27,8 +27,8 @@ export type MaritalStatus = 'single' | 'married' | 'widowed' | 'divorced';
 export const MARITAL_STATUS_LABELS: Record<MaritalStatus, string> = {
   single: 'Solteiro(a)',
   married: 'Casado(a)',
-  widowed: 'Viúvo(a)',
   divorced: 'Divorciado(a)',
+  widowed: 'Viúvo(a)',
 };
 
 export type PendencyField =

@@ -21,6 +21,7 @@ import { MemberRecordPage } from '../pages/MemberRecord';
 import { MembersPage } from '../pages/Members';
 import { MembershipPage } from '../pages/Membership';
 import { MembershipInterestPage } from '../pages/MembershipInterest';
+import { MembershipInterestPreviewPage } from '../pages/MembershipInterestPreview';
 import { ModuleMorePage } from '../pages/ModuleMore';
 import { PeoplePage } from '../pages/People';
 import { ProfilePage } from '../pages/Profile';
@@ -60,6 +61,7 @@ export function AppRouter() {
           <Route path={AppRoute.IntegrationSignup} element={<IntegrationSignupPage />} />
           <Route path={`${AppRoute.MakeupAttendance}/:token`} element={<MakeupAttendancePage />} />
           <Route path={AppRoute.MembershipInterest} element={<MembershipInterestPage />} />
+          <Route path={AppRoute.MembershipInterestPreview} element={<MembershipInterestPreviewPage />} />
           <Route path={AppRoute.StorePublic} element={<StorePublicPage />} />
 
           <Route

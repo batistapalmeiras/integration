@@ -15,3 +15,13 @@ export function weekdayLabel(dateKey: string): string {
   const weekday = new Date(`${dateKey}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long' });
   return weekday.charAt(0).toUpperCase() + weekday.slice(1).replace('-feira', '');
 }
+
+export function parseTypedDate(value: string): string | null {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!match) return null;
+  const [, day, month, year] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  const valid =
+    date.getFullYear() === Number(year) && date.getMonth() === Number(month) - 1 && date.getDate() === Number(day);
+  return valid ? `${year}-${month}-${day}` : null;
+}
