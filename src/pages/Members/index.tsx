@@ -1,8 +1,10 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 import { SlidersHorizontal } from 'lucide-react';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';

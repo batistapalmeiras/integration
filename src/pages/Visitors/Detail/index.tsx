@@ -1,7 +1,9 @@
 // React
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Empty, PageHeader, Skeleton } from 'bp-kit';
+import { Empty, Skeleton } from 'bp-kit';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { NextStep } from './components/NextStep';

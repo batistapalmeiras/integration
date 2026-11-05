@@ -12,6 +12,29 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   [UserRole.Teacher]: 'Professor',
 };
 
+export enum SystemModule {
+  Church = 'church',
+  Integration = 'integration',
+}
+
+export const MODULE_LABELS: Record<SystemModule, string> = {
+  [SystemModule.Church]: 'Igreja',
+  [SystemModule.Integration]: 'Integração',
+};
+
+export const ROLE_MODULE: Record<UserRole, SystemModule> = {
+  [UserRole.Pastor]: SystemModule.Church,
+  [UserRole.Admin]: SystemModule.Integration,
+  [UserRole.IntegrationTeam]: SystemModule.Integration,
+  [UserRole.Teacher]: SystemModule.Integration,
+};
+
+export function groupRolesByModule(roles: UserRole[]): { module: SystemModule; label: string; roles: UserRole[] }[] {
+  return Object.values(SystemModule)
+    .map((module) => ({ module, label: MODULE_LABELS[module], roles: roles.filter((role) => ROLE_MODULE[role] === module) }))
+    .filter((group) => group.roles.length > 0);
+}
+
 export const ADMIN_MANAGEABLE_ROLES = [UserRole.IntegrationTeam, UserRole.Teacher];
 
 export const LEADERSHIP_ROLES = [UserRole.Admin, UserRole.Pastor];

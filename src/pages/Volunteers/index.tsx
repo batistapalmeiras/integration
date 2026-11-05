@@ -1,22 +1,26 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Skeleton, Typography, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, Skeleton, Typography, text, useAuthCtx, useModal } from 'bp-kit';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
-import { ADMIN_MANAGEABLE_ROLES, UserRole } from '../../types/enums';
+import { ADMIN_MANAGEABLE_ROLES, groupRolesByModule, UserRole } from '../../types/enums';
 import { AddVolunteerModal } from './components/AddVolunteerModal';
 import { useVolunteers } from './hooks/useVolunteers';
-import { EmptySectionHint, Section, Sections } from './styles';
+import { EmptySectionHint, ModuleSection, ModuleTitle, Section, Sections } from './styles';
 import { VolunteerRow } from './types';
 
-const SECTIONS: { role: UserRole; label: string }[] = [
-  { role: UserRole.Pastor, label: 'Pastores' },
-  { role: UserRole.Admin, label: 'Administradores' },
-  { role: UserRole.Teacher, label: 'Professores' },
-  { role: UserRole.IntegrationTeam, label: 'Equipe de Integração' },
-];
+const ROLE_SECTION_LABELS: Record<UserRole, string> = {
+  [UserRole.Pastor]: 'Pastores',
+  [UserRole.Admin]: 'Administradores',
+  [UserRole.Teacher]: 'Professores',
+  [UserRole.IntegrationTeam]: 'Equipe de Integração',
+};
+
+const MODULE_GROUPS = groupRolesByModule([UserRole.Pastor, UserRole.Admin, UserRole.Teacher, UserRole.IntegrationTeam]);
 
 export function VolunteersPage() {
   const navigate = useNavigate();
@@ -29,9 +33,13 @@ export function VolunteersPage() {
 
   const openAddModal = () => open(<AddVolunteerModal close={close} onAdd={addVolunteer} allowedRoles={allowedRoles} />);
 
-  const sections = SECTIONS.map((section) => ({
-    ...section,
-    volunteers: volunteers.filter((v) => v.role === section.role),
+  const modules = MODULE_GROUPS.map((group) => ({
+    ...group,
+    sections: group.roles.map((role) => ({
+      role,
+      label: ROLE_SECTION_LABELS[role],
+      volunteers: volunteers.filter((v) => v.role === role),
+    })),
   }));
 
   const renderTable = (rows: VolunteerRow[]) => (
@@ -71,17 +79,22 @@ export function VolunteersPage() {
         <Empty title="Nenhum voluntário cadastrado" description="Adicione o primeiro pelo botão acima." />
       )}
 
-      {!loading && !error && sections.length > 0 && (
+      {!loading && !error && volunteers.length > 0 && (
         <Sections>
-          {sections.map((section) => (
-            <Section key={section.role}>
-              <Typography type="label">{section.label}</Typography>
-              {section.volunteers.length > 0 ? (
-                renderTable(section.volunteers)
-              ) : (
-                <EmptySectionHint>Nenhum voluntário cadastrado.</EmptySectionHint>
-              )}
-            </Section>
+          {modules.map((group) => (
+            <ModuleSection key={group.module} aria-labelledby={`module-${group.module}`}>
+              <ModuleTitle id={`module-${group.module}`}>{group.label}</ModuleTitle>
+              {group.sections.map((section) => (
+                <Section key={section.role}>
+                  <Typography type="label">{section.label}</Typography>
+                  {section.volunteers.length > 0 ? (
+                    renderTable(section.volunteers)
+                  ) : (
+                    <EmptySectionHint>Nenhum voluntário cadastrado.</EmptySectionHint>
+                  )}
+                </Section>
+              ))}
+            </ModuleSection>
           ))}
         </Sections>
       )}

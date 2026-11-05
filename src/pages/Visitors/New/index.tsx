@@ -4,8 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, PageHeader, parsePhone, useAuthCtx, useModal } from 'bp-kit';
+import { Button, parsePhone, useAuthCtx, useModal } from 'bp-kit';
 import { Save } from 'lucide-react';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { findPersonByPhone, reactivatePerson } from '../../../features/visitors';
 import { AppRoute } from '../../../routes/paths';

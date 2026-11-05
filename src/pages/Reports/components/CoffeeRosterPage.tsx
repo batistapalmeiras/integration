@@ -1,8 +1,10 @@
 // React
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Empty, PageHeader, Skeleton, text } from 'bp-kit';
+import { Empty, Skeleton, text } from 'bp-kit';
 import { Archive, Check, CircleAlert, Clock, LucideIcon, RotateCcw, Send, X } from 'lucide-react';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { PeopleCount } from '../../../components/PeopleCount';
 import { TonePill } from '../../../components/StatusPill';

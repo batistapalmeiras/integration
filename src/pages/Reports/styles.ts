@@ -116,3 +116,13 @@ export const CountBadge = styled.span<{ $eligible: boolean }>`
   color: ${({ theme, $eligible }) => ($eligible ? theme.colors.success : theme.colors.muted)};
   border: 1px solid ${({ theme, $eligible }) => ($eligible ? theme.colors.successBorder : theme.colors.hairline)};
 `;
+
+export const ReportSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+
+  & + & {
+    margin-top: ${({ theme }) => theme.spacing.xl};
+  }
+`;

@@ -14,7 +14,6 @@ import {
   ModalActions,
   ModalTitle,
   MultiSelect,
-  PageHeader,
   Switch,
   text,
   TextInput,
@@ -23,6 +22,8 @@ import {
 } from 'bp-kit';
 import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { useStoreItemsCtx } from '../hooks/StoreItemsProvider';

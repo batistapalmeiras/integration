@@ -1,9 +1,10 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Empty, PageHeader, Pagination, RawSelect, SearchInput, Skeleton, text } from 'bp-kit';
+import { Empty, Pagination, RawSelect, SearchInput, Skeleton, text } from 'bp-kit';
 import { AlertTriangle } from 'lucide-react';
 // Components
+import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { isReviewPendency, PENDENCY_LABELS, PendencyField } from '../../domain/memberRecords';

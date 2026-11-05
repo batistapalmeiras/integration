@@ -1,6 +1,5 @@
 // Libs
 import { Card, StatValue } from 'bp-kit';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Highlights = styled.div`
@@ -40,18 +39,16 @@ export const StageGrid = styled.div`
   }
 `;
 
-export const Panel = styled(Card)`
+export const Section = styled.section`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-export const PanelHeader = styled.div`
+export const Panel = styled(Card)`
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.sm};
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
 `;
 
 export const PanelTitle = styled.h2`
@@ -59,13 +56,6 @@ export const PanelTitle = styled.h2`
   font-size: ${({ theme }) => theme.typography.titleMd.fontSize};
   font-weight: ${({ theme }) => theme.typography.titleMd.fontWeight};
   color: ${({ theme }) => theme.colors.ink};
-`;
-
-export const PanelLink = styled(Link)`
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.primaryActive};
-  text-decoration: none;
 `;
 
 export const PanelText = styled.p`
@@ -101,11 +91,6 @@ export const SideColumn = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.md};
-`;
-
-export const ListLink = styled(Link)`
-  color: inherit;
-  text-decoration: none;
 `;
 
 export const AgendaItem = styled.div`

@@ -2,9 +2,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, Form, PageHeader, TextInput, text, useAuthCtx, useToast } from 'bp-kit';
+import { Button, Form, TextInput, text, useAuthCtx, useToast } from 'bp-kit';
 import { Save } from 'lucide-react';
 import { z } from 'zod';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import { Content } from '../Visitors/Detail/styles';
 import { supabase } from '../../lib/supabase';

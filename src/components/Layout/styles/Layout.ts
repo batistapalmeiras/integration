@@ -5,11 +5,12 @@ import { fadeUp } from 'bp-kit';
 import styled from 'styled-components';
 
 export const SIDEMENU_WIDTH = 248;
+export const SIDEMENU_MEDIA = '(min-width: 745px)';
 
 export const SideMenu = styled.aside`
   display: none;
 
-  @media (min-width: 745px) {
+  @media ${SIDEMENU_MEDIA} {
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -64,6 +65,7 @@ export const SideNav = styled.nav`
 `;
 
 export const SideNavArea = styled.div`
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -96,6 +98,7 @@ export const SideNavAreaToggle = styled.button<{ $open: boolean }>`
 `;
 
 export const SideNavLink = styled(Link)<{ $active: boolean }>`
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
@@ -206,6 +209,10 @@ export const BottomTabLabel = styled.span<{ $active: boolean }>`
   font-weight: ${({ $active }) => ($active ? 700 : 400)};
   line-height: 1;
   letter-spacing: 0.2px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const TabIcon = styled.span`
@@ -251,8 +258,31 @@ export const Main = styled.main<{ $hasBottomBar: boolean }>`
     padding-bottom: ${({ $hasBottomBar }) => ($hasBottomBar ? 'calc(56px + env(safe-area-inset-bottom))' : '0')};
   }
 
-  @media (min-width: 745px) {
+  @media ${SIDEMENU_MEDIA} {
     margin-left: ${SIDEMENU_WIDTH}px;
+  }
+`;
+
+export const ModuleBar = styled(Link)`
+  display: none;
+
+  @media (max-width: 744px) {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: ${({ theme }) => theme.spacing.xs};
+    padding: calc(${({ theme }) => theme.spacing.md} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.md};
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid ${({ theme }) => theme.colors.hairline};
+    font-family: ${({ theme }) => theme.typography.fontFamily};
+    font-size: ${({ theme }) => theme.typography.titleMd.fontSize};
+    font-weight: ${({ theme }) => theme.typography.titleMd.fontWeight};
+    color: ${({ theme }) => theme.colors.ink};
+    text-decoration: none;
   }
 `;
 
@@ -266,7 +296,7 @@ export const MainInner = styled.div`
     padding: calc(${({ theme }) => theme.spacing.lg} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.lg};
   }
 
-  @media (min-width: 745px) {
+  @media ${SIDEMENU_MEDIA} {
     padding-top: ${({ theme }) => theme.spacing.xl};
   }
 `;

@@ -1,8 +1,10 @@
 // React
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Skeleton, text } from 'bp-kit';
+import { Button, Empty, Skeleton, text } from 'bp-kit';
 import { Lock } from 'lucide-react';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';

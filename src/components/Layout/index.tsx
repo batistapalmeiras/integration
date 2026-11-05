@@ -1,8 +1,10 @@
 // React
 import React, { useState } from 'react';
 // Libs
+import { useMediaQuery } from 'bp-kit';
 import {
   ChevronDown,
+  ChevronLeft,
   Contact,
   GraduationCap,
   LogOut,
@@ -15,12 +17,22 @@ import {
 import { Coffee as CoffeeIcon } from 'lucide-react';
 // Components
 import icon from '../../assets/icon.png';
-import { activeNavPath, NAV_ITEMS, PASTOR_NAV_AREAS } from '../../routes/navigation';
+import {
+  activeNavPath,
+  areaItems,
+  findPastorArea,
+  MORE_TAB_ICON,
+  MORE_TAB_LABEL,
+  NAV_ITEMS,
+  NavItem,
+  PASTOR_NAV_AREAS,
+} from '../../routes/navigation';
 import { homeRouteFor } from '../../routes/HomeRedirect';
 import { AppRoute } from '../../routes/paths';
 import { ROLE_LABELS } from '../../types/enums';
 // Local
 import { useLayout } from './hooks';
+import { NavDestinationContext } from './navDestination';
 import {
   BottomBar,
   BottomTab,
@@ -28,6 +40,8 @@ import {
   DropdownItem,
   Main,
   MainInner,
+  ModuleBar,
+  SIDEMENU_MEDIA,
   SideBrand,
   SideBrandLink,
   SideBrandLogo,
@@ -72,10 +86,23 @@ export function Layout({ children }: ILayoutProps) {
   const toggleArea = (title: string) =>
     setClosedAreas((closed) => (closed.includes(title) ? closed.filter((t) => t !== title) : [...closed, title]));
 
-  const pastorActivePath = activeNavPath(pathname, [
-    NAV_ITEMS.dashboard.path,
-    ...PASTOR_NAV_AREAS.flatMap((area) => area.items.map((item) => item.path)),
-  ]);
+  const pastorNavPaths = [NAV_ITEMS.dashboard.path, ...PASTOR_NAV_AREAS.flatMap((area) => areaItems(area).map((item) => item.path))];
+  const pastorActivePath = activeNavPath(pathname, pastorNavPaths);
+
+  const sidebarPaths = showDashboard
+    ? pastorNavPaths
+    : ([
+        [showAdmin, AppRoute.Settings],
+        [showVisitors, AppRoute.Visitors],
+        [showCoffee, AppRoute.Coffee],
+        [showClasses, AppRoute.Classes],
+        [showMembership, AppRoute.Membership],
+        [showPeople, AppRoute.People],
+      ] as const)
+        .filter(([visible]) => visible)
+        .map(([, path]) => path as string);
+  const hasSidebar = useMediaQuery(SIDEMENU_MEDIA);
+  const isSidebarDestination = sidebarPaths.includes(pathname);
 
   const homeRoute = homeRouteFor(user?.role);
 
@@ -89,7 +116,18 @@ export function Layout({ children }: ILayoutProps) {
     (showPeopleTab && isExactTab(AppRoute.People)) ||
     isExactTab(showAdmin ? AppRoute.Admin : AppRoute.Profile);
 
-  const shouldShowBottomBar = visibleTabs > 1 && isOnATab;
+  const pastorArea = showDashboard ? findPastorArea(pathname) : undefined;
+  const pastorTabs: NavItem[] = pastorArea
+    ? [...pastorArea.tabs, { label: MORE_TAB_LABEL, path: pastorArea.morePath, icon: MORE_TAB_ICON }]
+    : [
+        NAV_ITEMS.dashboard,
+        ...PASTOR_NAV_AREAS.map((area) => ({ label: area.title, path: area.tabs[0].path, icon: area.icon })),
+        NAV_ITEMS.profile,
+      ];
+  const isOnPastorTab = !!pastorArea || isExactTab(AppRoute.Dashboard) || isExactTab(AppRoute.Profile);
+
+  const shouldShowBottomBar = showDashboard ? isOnPastorTab : visibleTabs > 1 && isOnATab;
+  const isNavDestination = hasSidebar ? isSidebarDestination : shouldShowBottomBar;
 
   return (
     <>
@@ -117,7 +155,7 @@ export function Layout({ children }: ILayoutProps) {
                       <ChevronDown size={14} />
                     </SideNavAreaToggle>
                     {open &&
-                      area.items.map((item) => (
+                      areaItems(area).map((item) => (
                         <SideNavLink key={item.path} to={item.path} $active={pastorActivePath === item.path}>
                           <item.icon size={18} />
                           {item.label}
@@ -190,54 +228,79 @@ export function Layout({ children }: ILayoutProps) {
       </SideMenu>
 
       <Main $hasBottomBar={shouldShowBottomBar}>
-        <MainInner>{children}</MainInner>
+        {pastorArea && (
+          <ModuleBar to={AppRoute.Dashboard}>
+            <ChevronLeft size={20} />
+            {pastorArea.title}
+          </ModuleBar>
+        )}
+        <MainInner>
+          <NavDestinationContext.Provider value={isNavDestination}>{children}</NavDestinationContext.Provider>
+        </MainInner>
       </Main>
 
       {shouldShowBottomBar && (
         <BottomBar>
-          {showVisitors && (
-            <BottomTab to={AppRoute.Visitors} $active={isActive(AppRoute.Visitors)}>
-              <UsersIcon size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Visitors)}>Visitantes</BottomTabLabel>
-            </BottomTab>
-          )}
-          {showCoffee && (
-            <BottomTab to={AppRoute.Coffee} $active={isActive(AppRoute.Coffee)}>
-              <CoffeeIcon size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Coffee)}>Café</BottomTabLabel>
-            </BottomTab>
-          )}
-          {showClasses && (
-            <BottomTab to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
-              <GraduationCap size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Classes)}>Turmas</BottomTabLabel>
-            </BottomTab>
-          )}
-          {showMembership && (
-            <BottomTab to={AppRoute.Membership} $active={isActive(AppRoute.Membership)}>
-              <TabIcon>
-                <UserCheck size={22} />
-                {membershipCount > 0 && <TabCount>{membershipCount}</TabCount>}
-              </TabIcon>
-              <BottomTabLabel $active={isActive(AppRoute.Membership)}>Membresia</BottomTabLabel>
-            </BottomTab>
-          )}
-          {showPeopleTab && (
-            <BottomTab to={AppRoute.People} $active={isActive(AppRoute.People)}>
-              <Contact size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.People)}>Pessoas</BottomTabLabel>
-            </BottomTab>
-          )}
-          {showAdmin ? (
-            <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
-              <MenuIcon size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Admin)}>Menu</BottomTabLabel>
-            </BottomTab>
+          {showDashboard ? (
+            pastorTabs.map((item) => {
+              const active = pathname === item.path;
+              return (
+                <BottomTab key={item.path} to={item.path} $active={active}>
+                  <TabIcon>
+                    <item.icon size={22} />
+                    {item.path === AppRoute.Membership && membershipCount > 0 && <TabCount>{membershipCount}</TabCount>}
+                  </TabIcon>
+                  <BottomTabLabel $active={active}>{item.tabLabel ?? item.label}</BottomTabLabel>
+                </BottomTab>
+              );
+            })
           ) : (
-            <BottomTab to={AppRoute.Profile} $active={isActive(AppRoute.Profile)}>
-              <User size={22} />
-              <BottomTabLabel $active={isActive(AppRoute.Profile)}>Meu perfil</BottomTabLabel>
-            </BottomTab>
+            <>
+              {showVisitors && (
+                <BottomTab to={AppRoute.Visitors} $active={isActive(AppRoute.Visitors)}>
+                  <UsersIcon size={22} />
+                  <BottomTabLabel $active={isActive(AppRoute.Visitors)}>Visitantes</BottomTabLabel>
+                </BottomTab>
+              )}
+              {showCoffee && (
+                <BottomTab to={AppRoute.Coffee} $active={isActive(AppRoute.Coffee)}>
+                  <CoffeeIcon size={22} />
+                  <BottomTabLabel $active={isActive(AppRoute.Coffee)}>Café</BottomTabLabel>
+                </BottomTab>
+              )}
+              {showClasses && (
+                <BottomTab to={AppRoute.Classes} $active={isActive(AppRoute.Classes)}>
+                  <GraduationCap size={22} />
+                  <BottomTabLabel $active={isActive(AppRoute.Classes)}>Turmas</BottomTabLabel>
+                </BottomTab>
+              )}
+              {showMembership && (
+                <BottomTab to={AppRoute.Membership} $active={isActive(AppRoute.Membership)}>
+                  <TabIcon>
+                    <UserCheck size={22} />
+                    {membershipCount > 0 && <TabCount>{membershipCount}</TabCount>}
+                  </TabIcon>
+                  <BottomTabLabel $active={isActive(AppRoute.Membership)}>Membresia</BottomTabLabel>
+                </BottomTab>
+              )}
+              {showPeopleTab && (
+                <BottomTab to={AppRoute.People} $active={isActive(AppRoute.People)}>
+                  <Contact size={22} />
+                  <BottomTabLabel $active={isActive(AppRoute.People)}>Pessoas</BottomTabLabel>
+                </BottomTab>
+              )}
+              {showAdmin ? (
+                <BottomTab to={AppRoute.Admin} $active={isActive(AppRoute.Admin)}>
+                  <MenuIcon size={22} />
+                  <BottomTabLabel $active={isActive(AppRoute.Admin)}>Menu</BottomTabLabel>
+                </BottomTab>
+              ) : (
+                <BottomTab to={AppRoute.Profile} $active={isActive(AppRoute.Profile)}>
+                  <User size={22} />
+                  <BottomTabLabel $active={isActive(AppRoute.Profile)}>Meu perfil</BottomTabLabel>
+                </BottomTab>
+              )}
+            </>
           )}
         </BottomBar>
       )}

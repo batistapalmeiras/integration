@@ -3,6 +3,8 @@ export enum AppRoute {
   ForgotPassword = '/entrar/recuperar',
   ResetPassword = '/entrar/nova-senha',
   Dashboard = '/painel',
+  ChurchMore = '/igreja/mais',
+  IntegrationMore = '/integracao/mais',
   Visitors = '/visitantes',
   NewVisitor = '/visitantes/novo',
   People = '/pessoas',

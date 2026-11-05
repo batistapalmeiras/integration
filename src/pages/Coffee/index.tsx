@@ -6,7 +6,6 @@ import {
   Empty,
   ModalActions,
   ModalTitle,
-  PageHeader,
   Pagination,
   Skeleton,
   text,
@@ -16,6 +15,8 @@ import {
   useToast,
 } from 'bp-kit';
 import { Archive, Check, Pencil, Plus, X, XCircle } from 'lucide-react';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import { AddButton } from '../../components/AddButton';
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';

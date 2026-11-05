@@ -1,14 +1,16 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { PageHeader, useAuthCtx } from 'bp-kit';
+import { useAuthCtx } from 'bp-kit';
 import { ChevronRight } from 'lucide-react';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import icon from '../../assets/icon.png';
+import { MenuOptionCard, OptionsGrid } from '../../components/MenuOptions';
 import { NAV_ITEMS } from '../../routes/navigation';
 import { AppRoute } from '../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../types/enums';
-import { MenuOptionCard } from './components/MenuOptionCard';
 import {
   Avatar,
   DesktopTitle,
@@ -18,7 +20,6 @@ import {
   MobileBrandLogo,
   MobileBrandName,
   MobileMenu,
-  OptionsGrid,
   ProfileCard,
   ProfileInfo,
   ProfileName,
@@ -61,6 +62,7 @@ export function AdminPage() {
           <MenuSectionTitle>Igreja</MenuSectionTitle>
           <OptionsGrid>
             <MenuOptionCard icon={NAV_ITEMS.members.icon} label={NAV_ITEMS.members.label} onClick={() => navigate(NAV_ITEMS.members.path)} />
+            <MenuOptionCard icon={NAV_ITEMS.volunteers.icon} label={NAV_ITEMS.volunteers.label} onClick={() => navigate(NAV_ITEMS.volunteers.path)} />
             {isPastor && (
               <>
                 <MenuOptionCard icon={NAV_ITEMS.dashboard.icon} label={NAV_ITEMS.dashboard.label} onClick={() => navigate(NAV_ITEMS.dashboard.path)} />
@@ -80,7 +82,6 @@ export function AdminPage() {
             <MenuOptionCard icon={NAV_ITEMS.people.icon} label={NAV_ITEMS.people.label} onClick={() => navigate(NAV_ITEMS.people.path)} />
             <MenuOptionCard icon={NAV_ITEMS.cohortHistory.icon} label={NAV_ITEMS.cohortHistory.label} onClick={() => navigate(NAV_ITEMS.cohortHistory.path)} />
             <MenuOptionCard icon={NAV_ITEMS.coffeeHistory.icon} label={NAV_ITEMS.coffeeHistory.label} onClick={() => navigate(NAV_ITEMS.coffeeHistory.path)} />
-            <MenuOptionCard icon={NAV_ITEMS.volunteers.icon} label={NAV_ITEMS.volunteers.label} onClick={() => navigate(NAV_ITEMS.volunteers.path)} />
             <MenuOptionCard icon={NAV_ITEMS.reports.icon} label={NAV_ITEMS.reports.label} onClick={() => navigate(NAV_ITEMS.reports.path)} />
           </OptionsGrid>
         </MenuSection>

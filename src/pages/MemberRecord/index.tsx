@@ -4,8 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, PageHeader, Select, Skeleton, text, TextInput, Typography, useToast } from 'bp-kit';
+import { Button, Empty, Select, Skeleton, text, TextInput, Typography, useToast } from 'bp-kit';
 import { Save } from 'lucide-react';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import { MembershipAlerts } from '../../components/MembershipAlerts';
 import {

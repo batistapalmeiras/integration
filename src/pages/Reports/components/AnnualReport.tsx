@@ -1,32 +1,19 @@
 // Libs
-import { ModalTitle, RawSelect, Skeleton, StatCard, StatLabel, StatsGrid, StatValue } from 'bp-kit';
+import { Empty, Skeleton, StatCard, StatLabel, StatsGrid, StatValue, text } from 'bp-kit';
 // Local
 import { useAnnualReport } from '../hooks';
-import { FiltersRow } from '../styles';
 
 interface Props {
-  close: () => void;
+  year: number;
 }
 
-export function AnnualReportModal({ close }: Props) {
-  const { year, setYear, availableYears, counts, loading, error } = useAnnualReport();
+export function AnnualReport({ year }: Props) {
+  const { counts, loading, error } = useAnnualReport(year);
 
   return (
     <>
-      <ModalTitle onClose={close}>Relatório anual</ModalTitle>
-
-      <FiltersRow>
-        <RawSelect label="Ano" value={year} onChange={(e) => setYear(Number(e.target.value))}>
-          {availableYears.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </RawSelect>
-      </FiltersRow>
-
       {loading && <Skeleton $h="160px" />}
-      {!loading && error && <p>{error}</p>}
+      {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
 
       {!loading && !error && (
         <StatsGrid $columns={5}>

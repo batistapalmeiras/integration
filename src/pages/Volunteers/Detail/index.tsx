@@ -10,7 +10,6 @@ import {
   InfoBox,
   ModalActions,
   ModalTitle,
-  PageHeader,
   Select,
   Skeleton,
   Switch,
@@ -23,10 +22,13 @@ import {
 } from 'bp-kit';
 import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
-import { ADMIN_MANAGEABLE_ROLES, hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../../types/enums';
+import { ADMIN_MANAGEABLE_ROLES, hasRole, LEADERSHIP_ROLES, UserRole } from '../../../types/enums';
 import { Content } from '../../Visitors/Detail/styles';
+import { RoleOptions } from '../components/RoleOptions';
 import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
 
 const schema = z.object({
@@ -142,11 +144,7 @@ export function VolunteerDetailPage() {
           disabled={!canEdit}
         />
         <Select label="Cargo" control={control} name="role">
-          {visibleRoleOptions.map((role) => (
-            <option key={role} value={role}>
-              {ROLE_LABELS[role]}
-            </option>
-          ))}
+          <RoleOptions roles={visibleRoleOptions} />
         </Select>
         <Switch label="Conta ativa" checked={volunteer.active} onChange={toggleActive} disabled={!canEdit} />
 

@@ -1,7 +1,9 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Chip, Empty, PageHeader, Pagination, SearchInput, Skeleton, text } from 'bp-kit';
+import { Button, Chip, Empty, Pagination, SearchInput, Skeleton, text } from 'bp-kit';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import { List, ListChevron, ListGrow, ListHeader, ListItem, ListSlot, ListStatusCell } from '../../components/List';
 import { PeopleCount } from '../../components/PeopleCount';

@@ -1,5 +1,6 @@
 // Libs
 import {
+  Church,
   ClipboardCheck,
   Coffee,
   Contact,
@@ -8,7 +9,10 @@ import {
   HeartHandshake,
   LayoutDashboard,
   LucideIcon,
+  Menu,
+  Sprout,
   Store,
+  User,
   UserCheck,
   UserPlus,
   Users,
@@ -19,6 +23,7 @@ import { AppRoute } from './paths';
 
 export interface NavItem {
   label: string;
+  tabLabel?: string;
   path: string;
   icon: LucideIcon;
 }
@@ -37,35 +42,57 @@ export const NAV_ITEMS = {
   members: { label: 'Membros', path: AppRoute.Members, icon: Users },
   pendencies: { label: 'Pendências', path: AppRoute.MemberPendencies, icon: ClipboardCheck },
   ministries: { label: 'Ministérios', path: AppRoute.Ministries, icon: HeartHandshake },
-  smallGroups: { label: 'Pequenos Grupos', path: AppRoute.SmallGroups, icon: UsersRound },
+  smallGroups: { label: 'Pequenos Grupos', tabLabel: 'PGs', path: AppRoute.SmallGroups, icon: UsersRound },
   store: { label: 'Loja', path: AppRoute.Store, icon: Store },
+  profile: { label: 'Perfil', path: AppRoute.Profile, icon: User },
 } satisfies Record<string, NavItem>;
 
 export interface NavArea {
+  id: string;
   title: string;
-  items: NavItem[];
+  icon: LucideIcon;
+  tabs: NavItem[];
+  more: NavItem[];
+  morePath: AppRoute;
 }
 
 export const PASTOR_NAV_AREAS: NavArea[] = [
   {
-    title: 'Integração',
-    items: [
-      NAV_ITEMS.visitors,
-      NAV_ITEMS.coffee,
-      NAV_ITEMS.classes,
-      NAV_ITEMS.membership,
-      NAV_ITEMS.people,
-      NAV_ITEMS.cohortHistory,
-      NAV_ITEMS.coffeeHistory,
-      NAV_ITEMS.volunteers,
-      NAV_ITEMS.reports,
-    ],
+    id: 'church',
+    title: 'Igreja',
+    icon: Church,
+    tabs: [NAV_ITEMS.members, NAV_ITEMS.pendencies, NAV_ITEMS.smallGroups, NAV_ITEMS.ministries],
+    more: [NAV_ITEMS.volunteers],
+    morePath: AppRoute.ChurchMore,
   },
   {
-    title: 'Igreja',
-    items: [NAV_ITEMS.members, NAV_ITEMS.pendencies, NAV_ITEMS.ministries, NAV_ITEMS.smallGroups],
+    id: 'integration',
+    title: 'Integração',
+    icon: Sprout,
+    tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
+    more: [NAV_ITEMS.people, NAV_ITEMS.cohortHistory, NAV_ITEMS.coffeeHistory, NAV_ITEMS.reports],
+    morePath: AppRoute.IntegrationMore,
   },
 ];
+
+export const MORE_TAB_LABEL = 'Mais';
+export const MORE_TAB_ICON = Menu;
+
+export function areaItems(area: NavArea): NavItem[] {
+  return [...area.tabs, ...area.more];
+}
+
+export function areaTabPaths(area: NavArea): string[] {
+  return [...area.tabs.map((item) => item.path), area.morePath];
+}
+
+export function findPastorArea(pathname: string): NavArea | undefined {
+  return PASTOR_NAV_AREAS.find((area) => areaTabPaths(area).includes(pathname));
+}
+
+export function findPastorAreaById(id: string): NavArea | undefined {
+  return PASTOR_NAV_AREAS.find((area) => area.id === id);
+}
 
 export function activeNavPath(pathname: string, paths: string[]): string | null {
   return (

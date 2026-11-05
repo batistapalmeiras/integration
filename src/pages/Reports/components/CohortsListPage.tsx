@@ -1,5 +1,5 @@
-// Libs
-import { PageHeader } from 'bp-kit';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { CohortsList } from './CohortsList';
 

@@ -4,9 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, DatePicker, Form, ImageUpload, ImageUploadItem, MultiSelect, PageHeader, Switch, text, TextInput } from 'bp-kit';
+import { Button, DatePicker, Form, ImageUpload, ImageUploadItem, MultiSelect, Switch, text, TextInput } from 'bp-kit';
 import { Save } from 'lucide-react';
 import { z } from 'zod';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { useStoreItemsCtx } from '../hooks/StoreItemsProvider';

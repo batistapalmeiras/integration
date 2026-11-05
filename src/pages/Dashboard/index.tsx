@@ -1,7 +1,6 @@
 // Libs
 import {
   Empty,
-  PageHeader,
   Skeleton,
   StatCard,
   StatLabel,
@@ -10,9 +9,9 @@ import {
   useAuthCtx,
 } from 'bp-kit';
 // Components
+import { PageHeader } from '../../components/PageHeader';
 import { List, ListItem, ListName } from '../../components/List';
 import { formatTimestampDate, todayKey, weekdayLabel } from '../../domain/dates';
-import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META } from '../../types/person';
 // Local
 import { usePastorDashboard } from './hooks/usePastorDashboard';
@@ -24,13 +23,11 @@ import {
   Detail,
   HighlightValue,
   Highlights,
-  ListLink,
   MainColumn,
   Panel,
-  PanelHeader,
-  PanelLink,
   PanelText,
   PanelTitle,
+  Section,
   SideColumn,
   AgendaCell,
   StageGrid,
@@ -134,49 +131,31 @@ export function DashboardPage() {
           </Panel>
         </AgendaCell>
         <StatCard>
-          <PanelHeader>
-            <StatLabel>Membros</StatLabel>
-            <PanelLink to={AppRoute.Members}>Ver membros</PanelLink>
-          </PanelHeader>
+          <StatLabel>Membros</StatLabel>
           <HighlightValue>{totalMembers}</HighlightValue>
         </StatCard>
         <StatCard>
-          <PanelHeader>
-            <StatLabel>Na Integração</StatLabel>
-            <PanelLink to={AppRoute.People}>Ver pessoas</PanelLink>
-          </PanelHeader>
+          <StatLabel>Na Integração</StatLabel>
           <HighlightValue>{inIntegration}</HighlightValue>
         </StatCard>
         <StatCard>
-          <PanelHeader>
-            <StatLabel>Membresia</StatLabel>
-            <PanelLink to={AppRoute.Membership}>Ver membresia</PanelLink>
-          </PanelHeader>
+          <StatLabel>Membresia</StatLabel>
           <HighlightValue>{funnel.membership_pending ?? 0}</HighlightValue>
         </StatCard>
         <StatCard>
-          <PanelHeader>
-            <StatLabel>Pequenos Grupos</StatLabel>
-            <PanelLink to={AppRoute.SmallGroups}>Ver PGs</PanelLink>
-          </PanelHeader>
+          <StatLabel>Pequenos Grupos</StatLabel>
           <HighlightValue>{community.smallGroups}</HighlightValue>
         </StatCard>
         <StatCard>
-          <PanelHeader>
-            <StatLabel>Ministérios</StatLabel>
-            <PanelLink to={AppRoute.Ministries}>Ver ministérios</PanelLink>
-          </PanelHeader>
+          <StatLabel>Ministérios</StatLabel>
           <HighlightValue>{community.ministries}</HighlightValue>
         </StatCard>
       </Highlights>
 
       <Columns>
         <MainColumn>
-          <Panel aria-labelledby="integration">
-            <PanelHeader>
-              <PanelTitle id="integration">Integração</PanelTitle>
-              <PanelLink to={AppRoute.Visitors}>Ver visitantes</PanelLink>
-            </PanelHeader>
+          <Section aria-labelledby="integration">
+            <PanelTitle id="integration">Integração</PanelTitle>
             <StageGrid>
               {FUNNEL.map((stage) => (
                 <StatCard key={stage.status}>
@@ -186,7 +165,7 @@ export function DashboardPage() {
                 </StatCard>
               ))}
             </StageGrid>
-          </Panel>
+          </Section>
         </MainColumn>
 
         {makeupNotes.length > 0 && (
@@ -196,14 +175,12 @@ export function DashboardPage() {
               <List>
                 {makeupNotes.map((note) => (
                   <ListItem key={`${note.personId}-${note.cohortName}-${note.lessonNumber}`}>
-                    <ListLink to={`${AppRoute.Visitors}/${note.personId}/detalhes?tab=makeup`}>
-                      <ListName>{note.personName}</ListName>
-                      <Detail>
-                        Aula {note.lessonNumber}
-                        {note.confirmedAt && ` · ${formatTimestampDate(note.confirmedAt)}`}
-                      </Detail>
-                      <PanelText>{note.notes}</PanelText>
-                    </ListLink>
+                    <ListName>{note.personName}</ListName>
+                    <Detail>
+                      Aula {note.lessonNumber}
+                      {note.confirmedAt && ` · ${formatTimestampDate(note.confirmedAt)}`}
+                    </Detail>
+                    <PanelText>{note.notes}</PanelText>
                   </ListItem>
                 ))}
               </List>

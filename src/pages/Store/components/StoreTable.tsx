@@ -1,7 +1,9 @@
 // Libs
 import { useNavigate } from 'react-router-dom';
-import { Button, Empty, IconButton, PageHeader, useToast } from 'bp-kit';
+import { Button, Empty, IconButton, useToast } from 'bp-kit';
 import { Pencil } from 'lucide-react';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { formatDate } from '../../../domain/dates';

@@ -1,9 +1,10 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Empty, PageHeader, Skeleton, text } from 'bp-kit';
+import { Empty, Skeleton, text } from 'bp-kit';
 import { AlertTriangle } from 'lucide-react';
 // Components
+import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { formatTimestampDate } from '../../domain/dates';

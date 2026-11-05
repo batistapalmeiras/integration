@@ -1,8 +1,10 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, ModalTitle, PageHeader, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, ModalTitle, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 import { Pencil, Plus } from 'lucide-react';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import { AddButton } from '../../components/AddButton';
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';

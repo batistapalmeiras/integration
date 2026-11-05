@@ -1,5 +1,14 @@
 // Local
-import { hasRole, INTEGRATION_TEAM_ROLES, LEADERSHIP_ROLES, STAFF_ROLES, TEACHING_ROLES, UserRole } from './enums';
+import {
+  groupRolesByModule,
+  hasRole,
+  INTEGRATION_TEAM_ROLES,
+  LEADERSHIP_ROLES,
+  STAFF_ROLES,
+  SystemModule,
+  TEACHING_ROLES,
+  UserRole,
+} from './enums';
 
 describe('role groups', () => {
   it('lets admin and pastor into every group', () => {
@@ -19,5 +28,18 @@ describe('role groups', () => {
 
   it('lets no one in without a role', () => {
     expect(hasRole(undefined, STAFF_ROLES)).toBe(false);
+  });
+});
+
+describe('roles by module', () => {
+  it('puts the pastor under Igreja and the integration roles under Integração, in module order', () => {
+    expect(groupRolesByModule([UserRole.Teacher, UserRole.Pastor, UserRole.Admin])).toEqual([
+      { module: SystemModule.Church, label: 'Igreja', roles: [UserRole.Pastor] },
+      { module: SystemModule.Integration, label: 'Integração', roles: [UserRole.Teacher, UserRole.Admin] },
+    ]);
+  });
+
+  it('leaves out a module with none of the given roles', () => {
+    expect(groupRolesByModule([UserRole.IntegrationTeam]).map((group) => group.module)).toEqual([SystemModule.Integration]);
   });
 });

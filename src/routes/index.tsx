@@ -21,6 +21,7 @@ import { MemberRecordPage } from '../pages/MemberRecord';
 import { MembersPage } from '../pages/Members';
 import { MembershipPage } from '../pages/Membership';
 import { MembershipInterestPage } from '../pages/MembershipInterest';
+import { ModuleMorePage } from '../pages/ModuleMore';
 import { PeoplePage } from '../pages/People';
 import { ProfilePage } from '../pages/Profile';
 import { ReportsPage } from '../pages/Reports';
@@ -73,6 +74,22 @@ export function AppRouter() {
                       element={
                         <ProtectedRoute roles={[UserRole.Pastor]}>
                           <DashboardPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={AppRoute.ChurchMore}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Pastor]}>
+                          <ModuleMorePage areaId="church" />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={AppRoute.IntegrationMore}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Pastor]}>
+                          <ModuleMorePage areaId="integration" />
                         </ProtectedRoute>
                       }
                     />

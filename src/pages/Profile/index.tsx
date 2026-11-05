@@ -1,6 +1,8 @@
 // Libs
 import { useNavigate } from 'react-router-dom';
 import { ProfilePage as SharedProfilePage, useAuthCtx } from 'bp-kit';
+// Components
+import { useIsNavDestination } from '../../components/Layout/navDestination';
 // Local
 import { AppRoute } from '../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../types/enums';
@@ -8,6 +10,7 @@ import { hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../types/en
 export function ProfilePage() {
   const { user, logout } = useAuthCtx();
   const navigate = useNavigate();
+  const isNavDestination = useIsNavDestination();
 
   const handleLogout = async () => {
     await logout();
@@ -19,7 +22,7 @@ export function ProfilePage() {
       roleLabel={user ? ROLE_LABELS[user.role as UserRole] : undefined}
       changePasswordPath={AppRoute.ChangePassword}
       onLogout={handleLogout}
-      back={hasRole(user?.role, LEADERSHIP_ROLES)}
+      back={hasRole(user?.role, LEADERSHIP_ROLES) && !isNavDestination}
     />
   );
 }

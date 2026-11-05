@@ -1,5 +1,7 @@
 // Libs
-import { PageHeader, useAuthCtx } from 'bp-kit';
+import { useAuthCtx } from 'bp-kit';
+// Components
+import { PageHeader } from '../../components/PageHeader';
 // Local
 import { hasRole, LEADERSHIP_ROLES } from '../../types/enums';
 import { PageFlexWrap } from '../Reports/styles';

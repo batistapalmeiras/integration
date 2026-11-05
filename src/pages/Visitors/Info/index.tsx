@@ -4,8 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, LinkButton, PageHeader, Skeleton, Tab, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, LinkButton, Skeleton, Tab, useAuthCtx, useModal } from 'bp-kit';
 import { Check, Save, UserRound } from 'lucide-react';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { formatDate } from '../../../domain/dates';
 import { CommunityGroup, getPersonMinistryIds, listMinistries, listSmallGroups } from '../../../domain/communityGroups';

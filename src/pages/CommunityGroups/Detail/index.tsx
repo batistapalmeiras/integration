@@ -8,7 +8,6 @@ import {
   IconButton,
   ModalActions,
   ModalTitle,
-  PageHeader,
   Skeleton,
   Typography,
   text,
@@ -16,6 +15,8 @@ import {
   useToast,
 } from 'bp-kit';
 import { Plus, Trash2, UserMinus } from 'lucide-react';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AddButton } from '../../../components/AddButton';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';

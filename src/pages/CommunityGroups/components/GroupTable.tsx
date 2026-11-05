@@ -1,5 +1,7 @@
 // Libs
-import { Button, Empty, PageHeader, Skeleton, text, useModal } from 'bp-kit';
+import { Button, Empty, Skeleton, text, useModal } from 'bp-kit';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { GroupRow } from '../hooks/useCommunityGroupsList';

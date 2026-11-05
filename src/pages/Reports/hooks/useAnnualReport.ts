@@ -13,13 +13,9 @@ const EMPTY_COUNTS: AnnualCounts = {
   archived: 0,
 };
 
-export function useAnnualReport() {
+export function useAnnualYears() {
   const currentYear = new Date().getFullYear();
-  const [year, setYear] = useState(currentYear);
   const [availableYears, setAvailableYears] = useState<number[]>([currentYear]);
-  const [counts, setCounts] = useState<AnnualCounts>(EMPTY_COUNTS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadYears = async () => {
@@ -31,6 +27,14 @@ export function useAnnualReport() {
     loadYears();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  return availableYears;
+}
+
+export function useAnnualReport(year: number) {
+  const [counts, setCounts] = useState<AnnualCounts>(EMPTY_COUNTS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -82,5 +86,5 @@ export function useAnnualReport() {
     load();
   }, [load]);
 
-  return { year, setYear, availableYears, counts, loading, error };
+  return { counts, loading, error };
 }

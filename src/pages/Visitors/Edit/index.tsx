@@ -4,7 +4,9 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Archive, RotateCcw, Save, Trash2 } from 'lucide-react';
-import { Button, Empty, maskPhone, ModalActions, ModalTitle, PageHeader, Skeleton, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
+import { Button, Empty, maskPhone, ModalActions, ModalTitle, Skeleton, Typography, useAuthCtx, useModal, useToast } from 'bp-kit';
+// Components
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES, UserRole } from '../../../types/enums';

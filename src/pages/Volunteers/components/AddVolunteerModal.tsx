@@ -5,9 +5,10 @@ import { useForm } from 'react-hook-form';
 import { Button, Form, InfoBox, ModalActions, ModalTitle, Select, text, TextInput, useToast } from 'bp-kit';
 import { UserPlus } from 'lucide-react';
 // Local
-import { UserRole, ROLE_LABELS } from '../../../types/enums';
+import { UserRole } from '../../../types/enums';
 import { getDefaultVolunteerPassword } from '../domain';
 import { AddVolunteerFormValues, addVolunteerSchema } from '../validators';
+import { RoleOptions } from './RoleOptions';
 
 interface Props {
   close: () => void;
@@ -44,11 +45,7 @@ export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
         <TextInput label={text.fields.email} control={control} name="email" type="email" placeholder="nome@exemplo.com" />
         <Select label="Cargo" control={control} name="role">
           <option value="">Selecione…</option>
-          {allowedRoles.map((role) => (
-            <option key={role} value={role}>
-              {ROLE_LABELS[role]}
-            </option>
-          ))}
+          <RoleOptions roles={allowedRoles} />
         </Select>
 
         <ModalActions>

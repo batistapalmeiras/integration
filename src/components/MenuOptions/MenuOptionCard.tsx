@@ -2,7 +2,7 @@
 import { ChevronRight, LucideIcon } from 'lucide-react';
 import { Typography } from 'bp-kit';
 // Local
-import { Chevron, ComingSoonTag, IconBadge, OptionCard, OptionLabel, OptionRow } from '../styles';
+import { Chevron, ComingSoonTag, IconBadge, OptionCard, OptionLabel, OptionRow } from './styles';
 
 interface Props {
   icon: LucideIcon;
