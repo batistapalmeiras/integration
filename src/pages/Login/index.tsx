@@ -3,15 +3,8 @@ import { LoginPage as SharedLoginPage } from 'bp-kit';
 // Local
 import icon from '../../assets/icon.png';
 import { InstallPrompt } from '../../components/InstallPrompt';
-import { UserRole } from '../../types/enums';
+import { homeRouteFor } from '../../routes/HomeRedirect';
 import { AppRoute } from '../../routes/paths';
-
-function resolveRoute(role: string): string {
-  if (role === UserRole.Admin) return AppRoute.Admin;
-  if (role === UserRole.Pastor) return AppRoute.Dashboard;
-  if (role === UserRole.Teacher) return AppRoute.Classes;
-  return AppRoute.Visitors;
-}
 
 export function LoginPage() {
   return (
@@ -23,7 +16,7 @@ export function LoginPage() {
         sub: 'Igreja Batista Palmeiras',
         quote: 'Mais que uma Igreja, uma Família!',
       }}
-      resolveRoute={resolveRoute}
+      resolveRoute={homeRouteFor}
       forgotPasswordPath={AppRoute.ForgotPassword}
       footerSlot={<InstallPrompt />}
     />

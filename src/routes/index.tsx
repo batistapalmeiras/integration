@@ -1,5 +1,5 @@
 // React
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 // Libs
 import { AuthProvider, ChangePasswordPage } from 'bp-kit';
 // Components
@@ -44,6 +44,7 @@ import { VolunteerDetailPage } from '../pages/Volunteers/Detail';
 // Local
 import { supabase } from '../lib/supabase';
 import { INTEGRATION_TEAM_ROLES, LEADERSHIP_ROLES, STAFF_ROLES, TEACHING_ROLES, UserRole } from '../types/enums';
+import { HomeRedirect } from './HomeRedirect';
 import { AppRoute } from './paths';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -268,7 +269,7 @@ export function AppRouter() {
                     <Route path={AppRoute.People} element={<PeoplePage />} />
                     <Route path={AppRoute.Profile} element={<ProfilePage />} />
                     <Route path={AppRoute.ChangePassword} element={<ChangePasswordPage />} />
-                    <Route path="*" element={<Navigate to={AppRoute.Visitors} replace />} />
+                    <Route path="*" element={<HomeRedirect />} />
                     </Routes>
                   </Layout>
                 </PasswordGate>

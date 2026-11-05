@@ -16,6 +16,7 @@ import { Coffee as CoffeeIcon } from 'lucide-react';
 // Components
 import icon from '../../assets/icon.png';
 import { activeNavPath, NAV_ITEMS, PASTOR_NAV_AREAS } from '../../routes/navigation';
+import { homeRouteFor } from '../../routes/HomeRedirect';
 import { AppRoute } from '../../routes/paths';
 import { ROLE_LABELS } from '../../types/enums';
 // Local
@@ -76,14 +77,7 @@ export function Layout({ children }: ILayoutProps) {
     ...PASTOR_NAV_AREAS.flatMap((area) => area.items.map((item) => item.path)),
   ]);
 
-  const homeRoute =
-    ([
-      [showDashboard, AppRoute.Dashboard],
-      [showVisitors, AppRoute.Visitors],
-      [showCoffee, AppRoute.Coffee],
-      [showClasses, AppRoute.Classes],
-      [showAdmin, AppRoute.Settings],
-    ] as const).find(([visible]) => visible)?.[1] ?? AppRoute.People;
+  const homeRoute = homeRouteFor(user?.role);
 
   const showPeopleTab = showPeople && !showAdmin;
   const visibleTabs = [showPeopleTab, showVisitors, showCoffee, showClasses, showMembership, true].filter(Boolean).length;
