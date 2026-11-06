@@ -28,5 +28,4 @@ export enum AppRoute {
   SmallGroups = '/comunidade/pgs',
   Store = '/loja',
   NewStoreItem = '/loja/novo',
-  StorePublic = '/loja/reservar',
 }

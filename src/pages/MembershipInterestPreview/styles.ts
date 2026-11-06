@@ -7,31 +7,6 @@ export const Stack = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-export const Progress = styled.div`
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: ${({ theme }) => theme.spacing.xs};
-`;
-
-export const ProgressSegment = styled.span<{ $done: boolean }>`
-  height: 4px;
-  border-radius: ${({ theme }) => theme.rounded.full};
-  background: ${({ $done, theme }) => ($done ? theme.colors.primary : theme.colors.hairline)};
-  transition: background 0.2s ease;
-`;
-
-export const StepHeading = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-export const StepCount = styled.span`
-  font-size: ${({ theme }) => theme.typography.caption.fontSize};
-  font-weight: ${({ theme }) => theme.typography.caption.fontWeight};
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
 export const Hint = styled.p`
   margin: calc(-1 * ${({ theme }) => theme.spacing.sm}) 0 0;
   font-size: ${({ theme }) => theme.typography.caption.fontSize};
@@ -43,16 +18,6 @@ export const FieldRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: ${({ theme }) => theme.spacing.md};
-`;
-
-export const NavRow = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-top: ${({ theme }) => theme.spacing.sm};
-
-  & > * {
-    flex: 1;
-  }
 `;
 
 export const ChapterList = styled.div`

@@ -4,9 +4,7 @@ import { z } from 'zod';
 // Local
 import { isValidCpf } from '../../domain/cpf';
 import { parseTypedDate, todayKey } from '../../domain/dates';
-import { MaritalStatus } from '../../domain/memberRecords';
-
-export type MaritalStatusOption = MaritalStatus | 'stable_union';
+import { MaritalStatusOption } from '../../domain/memberRecords';
 
 export interface MembershipFormValues {
   name: string;
@@ -29,7 +27,6 @@ export interface MembershipFormValues {
   baptismChurch: string;
   baptismDate: string;
   lastChurch: string;
-  firstChurch: boolean;
   statuteAgreed: boolean;
   ministryInterests: string[];
   noMinistryInterest: boolean;
@@ -37,7 +34,6 @@ export interface MembershipFormValues {
   smallGroupId: string;
   secretSociety: 'yes' | 'no' | '';
   secretSocietyName: string;
-  relatives: string;
   membershipNote: string;
 }
 
@@ -62,7 +58,6 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   baptismChurch: '',
   baptismDate: '',
   lastChurch: '',
-  firstChurch: false,
   statuteAgreed: false,
   ministryInterests: [],
   noMinistryInterest: false,
@@ -70,12 +65,11 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   smallGroupId: '',
   secretSociety: '',
   secretSocietyName: '',
-  relatives: '',
   membershipNote: '',
 };
 
 const digits = (value: string) => value.replace(/\D/g, '');
-export const ENFORCE_REQUIRED = false;
+export const ENFORCE_REQUIRED = true;
 
 const required = (what: string) =>
   z.string().refine((value) => !ENFORCE_REQUIRED || value.trim() !== '', text.validation.required(what));
@@ -99,7 +93,7 @@ const personalSchema = z.object({
   cpf: required('seu CPF').refine(whenFilled(isValidCpf), 'CPF inválido. Confira os números.'),
   birthDate: required('sua data de nascimento').refine(whenFilled(pastDate), 'Data inválida. Use o formato dd/mm/aaaa.'),
   maritalStatus: choice(['single', 'married', 'divorced', 'widowed', 'stable_union'], 'Selecione o estado civil'),
-  motherName: required('o nome da sua mãe'),
+  motherName: z.string(),
   fatherName: z.string(),
 });
 
@@ -126,19 +120,12 @@ function addressSchema(identificationPhone: string) {
   });
 }
 
-const journeySchema = z
-  .object({
-    entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
-    baptismChurch: z.string(),
-    baptismDate: z.string().refine(whenFilled(pastDate), 'Data inválida. Use o formato dd/mm/aaaa.'),
-    lastChurch: z.string(),
-    firstChurch: z.boolean(),
-  })
-  .refine((values) => !ENFORCE_REQUIRED || values.firstChurch || values.lastChurch.trim() !== '', {
-    message: 'Informe a última igreja, ou marque que esta é a primeira',
-    path: ['lastChurch'],
-    when: () => true,
-  });
+const journeySchema = z.object({
+  entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
+  baptismChurch: z.string(),
+  baptismDate: z.string().refine(whenFilled(pastDate), 'Data inválida. Use o formato dd/mm/aaaa.'),
+  lastChurch: required('o nome da igreja'),
+});
 
 const statuteSchema = z.object({
   statuteAgreed: z
@@ -154,7 +141,6 @@ const serveSchema = z
     smallGroupId: z.string(),
     secretSociety: choice(['yes', 'no'], 'Selecione uma opção'),
     secretSocietyName: z.string(),
-    relatives: z.string(),
     membershipNote: z.string(),
   })
   .refine((values) => values.ministryInterests.length <= 3, {

@@ -3,11 +3,11 @@ import { FormEvent, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, useForm } from 'react-hook-form';
 // Libs
-import { Button, InfoBox, Typography } from 'bp-kit';
+import { Button, InfoBox } from 'bp-kit';
 import { ArrowLeft, ArrowRight, Send } from 'lucide-react';
 // Local
 import { PublicPage } from '../../components/PublicPage';
-import { Form } from '../../components/PublicPage/styles';
+import { ActionBar, Form, PageHeading, PageLead, PageTitle } from '../../components/PublicPage/styles';
 import { AddressStep } from './components/AddressStep';
 import { DoneStep } from './components/DoneStep';
 import { IdentificationStep } from './components/IdentificationStep';
@@ -19,7 +19,6 @@ import { StatuteStep } from './components/StatuteStep';
 import { usePublicGroups } from './hooks/usePublicGroups';
 import { STEP_TITLES } from './options';
 import { EMPTY_MEMBERSHIP_FORM, ENFORCE_REQUIRED, MembershipFormValues, stepSchemas } from './schema';
-import { NavRow, Progress, ProgressSegment, StepCount, StepHeading } from './styles';
 
 type Screen = 'identification' | number | 'review' | 'done';
 
@@ -73,35 +72,36 @@ export function MembershipInterestPreviewPage() {
     go('identification');
   };
 
-  return (
-    <PublicPage title="Ficha de Interesse de Membresia">
-      <InfoBox variant="warning" style={{ marginBottom: 24 }}>
-        Versão de teste para validação. Nenhum dado é enviado{ENFORCE_REQUIRED ? '' : ' e nenhum campo é obrigatório'}.
-      </InfoBox>
+  const title =
+    screen === 'identification'
+      ? 'Ficha de Interesse de Membresia'
+      : typeof screen === 'number'
+        ? STEP_TITLES[screen]
+        : undefined;
 
+  return (
+    <PublicPage
+      barTitle="Ficha de Membresia"
+      title={title}
+      progress={typeof screen === 'number' ? { current: screen + 1, total: STEP_TITLES.length } : undefined}
+    >
       {screen === 'identification' && (
-        <IdentificationStep
-          onContinue={(value) => {
-            setPhone(value);
-            go(0);
-          }}
-        />
+        <>
+          <InfoBox variant="warning">
+            Versão de teste para validação. Nenhum dado é enviado
+            {ENFORCE_REQUIRED ? '' : ' e nenhum campo é obrigatório'}.
+          </InfoBox>
+          <IdentificationStep
+            onContinue={(value) => {
+              setPhone(value);
+              go(0);
+            }}
+          />
+        </>
       )}
 
       {typeof screen === 'number' && (
         <Form onSubmit={submitStep(screen)} noValidate>
-          <StepHeading>
-            <Progress aria-hidden>
-              {STEP_TITLES.map((title, index) => (
-                <ProgressSegment key={title} $done={index <= screen} />
-              ))}
-            </Progress>
-            <StepCount>
-              Etapa {screen + 1} de {STEP_TITLES.length}
-            </StepCount>
-            <Typography type="h5">{STEP_TITLES[screen]}</Typography>
-          </StepHeading>
-
           {screen === 0 && <PersonalStep control={control} />}
           {screen === 1 && <AddressStep control={control} setValue={setValue} />}
           {screen === 2 && <JourneyStep control={control} />}
@@ -114,7 +114,7 @@ export function MembershipInterestPreviewPage() {
           )}
           {screen === 4 && <ServeStep control={control} ministries={ministries} smallGroups={smallGroups} />}
 
-          <NavRow>
+          <ActionBar>
             {screen > 0 && !returnToReview && (
               <Button type="button" variant="secondary" size="lg" onClick={() => go(screen - 1)}>
                 <ArrowLeft size={16} />
@@ -125,23 +125,23 @@ export function MembershipInterestPreviewPage() {
               {returnToReview ? 'Salvar e revisar' : screen === LAST_STEP ? 'Revisar ficha' : 'Continuar'}
               {!returnToReview && <ArrowRight size={16} />}
             </Button>
-          </NavRow>
+          </ActionBar>
         </Form>
       )}
 
       {screen === 'review' && (
         <Form onSubmit={submitReview}>
-          <StepHeading>
-            <Typography type="h5">Revise suas respostas</Typography>
-            <Typography type="p">Confira se está tudo certo antes de enviar. Se precisar, toque em Corrigir.</Typography>
-          </StepHeading>
+          <PageHeading>
+            <PageTitle>Revise suas respostas</PageTitle>
+            <PageLead>Confira se está tudo certo antes de enviar. Se precisar, toque em Corrigir.</PageLead>
+          </PageHeading>
           <ReviewStep values={getValues()} smallGroups={smallGroups} onEdit={edit} />
-          <NavRow>
+          <ActionBar>
             <Button type="submit" variant="primary" size="lg">
               <Send size={16} />
               Enviar ficha
             </Button>
-          </NavRow>
+          </ActionBar>
         </Form>
       )}
 

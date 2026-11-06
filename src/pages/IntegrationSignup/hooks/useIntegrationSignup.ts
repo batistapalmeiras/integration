@@ -2,7 +2,7 @@
 import { useState } from 'react';
 // Local
 import { supabase } from '../../../lib/supabase';
-import { SignupFormValues } from '../validators/schema';
+import { SignupFormValues, toSignupAnswers } from '../validators/schema';
 import { CohortSchedule } from '../types';
 
 export function useIntegrationSignup(initialResult: CohortSchedule | null = null) {
@@ -14,14 +14,15 @@ export function useIntegrationSignup(initialResult: CohortSchedule | null = null
     setSubmitting(true);
     setError(null);
 
+    const answers = toSignupAnswers(values);
     const { data, error: rpcError } = await supabase
       .rpc('submit_integration_signup', {
         p_phone: phone,
-        p_attending_since: values.attendingSince,
-        p_previous_church: values.previousChurch,
-        p_baptism_info: values.baptismInfo,
-        p_conversion_testimony: values.conversionTestimony,
-        p_marital_status_story: values.maritalStatusStory,
+        p_attending_since: null,
+        p_previous_church: answers.previousChurch,
+        p_baptism_info: answers.baptismInfo,
+        p_conversion_testimony: answers.conversionTestimony,
+        p_marital_status_story: answers.maritalStatusStory,
       })
       .single();
 

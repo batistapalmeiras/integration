@@ -2,9 +2,12 @@
 import { formatCPF, maskPhone } from 'bp-kit';
 // Local
 import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membershipAlerts';
+import { toOptions } from './text';
 import { supabase } from '../lib/supabase';
 
 export type MembershipStatus = 'active' | 'pending_review' | 'inactive' | 'transferred' | 'removed' | 'deceased';
+
+const COUNTED_MEMBERSHIP_STATUSES: MembershipStatus[] = ['active', 'pending_review'];
 
 export const MEMBERSHIP_STATUS_LABELS: Record<MembershipStatus, string> = {
   active: 'Ativo',
@@ -31,6 +34,15 @@ export const MARITAL_STATUS_LABELS: Record<MaritalStatus, string> = {
   widowed: 'Viúvo(a)',
 };
 
+export type MaritalStatusOption = MaritalStatus | 'stable_union';
+
+export const MARITAL_STATUS_OPTION_LABELS: Record<MaritalStatusOption, string> = {
+  ...MARITAL_STATUS_LABELS,
+  stable_union: 'União estável',
+};
+
+export const MARITAL_STATUS_OPTIONS = toOptions(MARITAL_STATUS_OPTION_LABELS);
+
 export type PendencyField =
   | MembershipAlertCode
   | 'membership_status'
@@ -41,8 +53,7 @@ export type PendencyField =
   | 'marital_status'
   | 'nationality'
   | 'address'
-  | 'cpf'
-  | 'rg';
+  | 'cpf';
 
 export const PENDENCY_LABELS: Record<PendencyField, string> = {
   ...MEMBERSHIP_ALERT_LABELS,
@@ -55,7 +66,6 @@ export const PENDENCY_LABELS: Record<PendencyField, string> = {
   nationality: 'Nacionalidade',
   address: 'Endereço',
   cpf: 'CPF',
-  rg: 'RG',
 };
 
 export function isReviewPendency(field: PendencyField): boolean {
@@ -90,7 +100,11 @@ export async function listMemberPendencies(filters: {
 }
 
 export async function countMembers(): Promise<number> {
-  const { count, error } = await supabase.from('people').select('id', { count: 'exact', head: true }).eq('status', 'member');
+  const { count, error } = await supabase
+    .from('people')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'member')
+    .in('membership_status', COUNTED_MEMBERSHIP_STATUSES);
   if (error) throw error;
   return count ?? 0;
 }

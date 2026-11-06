@@ -4,10 +4,12 @@ import { Control, Controller, useWatch } from 'react-hook-form';
 import { Checkbox, MultiSelect, MultiSelectOption, Select, Textarea, TextInput } from 'bp-kit';
 // Local
 import { SmallGroupOption, smallGroupLabel } from '../hooks/usePublicGroups';
-import { WANTS_SMALL_GROUP_OPTIONS, YES_NO_OPTIONS } from '../options';
+import { YES_NO_OPTIONS } from '../../../domain/text';
+import { WANTS_SMALL_GROUP_OPTIONS } from '../options';
 import { MembershipFormValues } from '../schema';
 import { Hint } from '../styles';
 import { ChoiceField } from './ChoiceField';
+import { SelectField } from '../../../components/SelectField';
 
 interface Props {
   control: Control<MembershipFormValues>;
@@ -50,7 +52,7 @@ export function ServeStep({ control, ministries, smallGroups }: Props) {
         )}
       />
 
-      <ChoiceField
+      <SelectField
         control={control}
         name="wantsSmallGroup"
         label="Você deseja fazer parte de um dos nossos Pequenos Grupos?"
@@ -75,14 +77,6 @@ export function ServeStep({ control, ministries, smallGroups }: Props) {
         options={YES_NO_OPTIONS}
       />
       {secretSociety === 'yes' && <TextInput label="Qual?" control={control} name="secretSocietyName" />}
-
-      <Textarea
-        label="Você tem familiares na igreja? Quem? (opcional)"
-        control={control}
-        name="relatives"
-        rows={2}
-        placeholder="Ex.: Maria Souza (mãe), João Souza (irmão)"
-      />
 
       <Textarea label="Deseja nos falar alguma coisa? (opcional)" control={control} name="membershipNote" rows={3} />
     </>

@@ -2,10 +2,11 @@
 import { LinkButton } from 'bp-kit';
 import { Pencil } from 'lucide-react';
 // Local
-import { GENDER_LABELS } from '../../../domain/memberRecords';
+import { GENDER_LABELS, MARITAL_STATUS_OPTION_LABELS } from '../../../domain/memberRecords';
+import { YES_NO_LABELS } from '../../../domain/text';
 import { ENTRY_TYPE_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
 import { SmallGroupOption, smallGroupLabel } from '../hooks/usePublicGroups';
-import { MARITAL_STATUS_OPTION_LABELS, STEP_TITLES, YES_NO_LABELS } from '../options';
+import { LAST_CHURCH_PROMPTS, STEP_TITLES } from '../options';
 import { MembershipFormValues } from '../schema';
 import { ReviewHeader, ReviewItem, ReviewList, ReviewSection, ReviewTitle } from '../styles';
 
@@ -57,7 +58,7 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
             ['Data do batismo', values.baptismDate],
           ] as Row[])
         : []),
-      ['Última igreja que frequentou', values.firstChurch ? 'Esta é a primeira igreja' : values.lastChurch],
+      [values.entryType ? LAST_CHURCH_PROMPTS[values.entryType].review : 'Igreja anterior', values.lastChurch],
     ],
     [['Estatuto', values.statuteAgreed ? 'Declarou estar de acordo' : '']],
     [
@@ -77,7 +78,6 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
           ? `Sim — ${values.secretSocietyName}`
           : label(YES_NO_LABELS, values.secretSociety),
       ],
-      ['Familiares na igreja', values.relatives],
       ['Mensagem', values.membershipNote],
     ],
   ];

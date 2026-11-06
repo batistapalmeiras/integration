@@ -1,10 +1,11 @@
 // React
-import { Control, Controller, useWatch } from 'react-hook-form';
+import { Control, useWatch } from 'react-hook-form';
 // Libs
-import { Checkbox, TextInput } from 'bp-kit';
+import { TextInput } from 'bp-kit';
 // Local
-import { ENTRY_TYPE_OPTIONS } from '../options';
+import { ENTRY_TYPE_OPTIONS, LAST_CHURCH_PROMPTS } from '../options';
 import { MembershipFormValues } from '../schema';
+import { Hint } from '../styles';
 import { ChoiceField } from './ChoiceField';
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 
 export function JourneyStep({ control }: Props) {
   const entryType = useWatch({ control, name: 'entryType' });
-  const firstChurch = useWatch({ control, name: 'firstChurch' });
+  const lastChurch = entryType ? LAST_CHURCH_PROMPTS[entryType] : null;
 
   return (
     <>
@@ -38,24 +39,12 @@ export function JourneyStep({ control }: Props) {
         </>
       )}
 
-      <TextInput
-        label="Qual a última igreja que você frequentou?"
-        control={control}
-        name="lastChurch"
-        placeholder="Nome da igreja"
-        disabled={firstChurch}
-      />
-      <Controller
-        control={control}
-        name="firstChurch"
-        render={({ field }) => (
-          <Checkbox
-            label="A Batista Palmeiras é a primeira igreja que frequento"
-            checked={field.value}
-            onChange={(e) => field.onChange(e.target.checked)}
-          />
-        )}
-      />
+      {lastChurch && (
+        <>
+          <TextInput label={lastChurch.label} control={control} name="lastChurch" placeholder={lastChurch.placeholder} />
+          {lastChurch.hint && <Hint>{lastChurch.hint}</Hint>}
+        </>
+      )}
     </>
   );
 }

@@ -16,6 +16,7 @@ interface Props {
 export function AddressStep({ control, setValue }: Props) {
   const zip = useWatch({ control, name: 'zip' });
   const { looking, notFound } = useZipLookup(zip, setValue);
+  const showAddress = zip.replace(/\D/g, '').length === 8 && !looking;
 
   return (
     <>
@@ -43,18 +44,22 @@ export function AddressStep({ control, setValue }: Props) {
           ? 'Buscando endereço…'
           : notFound
             ? 'Não encontramos esse CEP. Preencha o endereço abaixo.'
-            : 'Digite o CEP e o endereço é preenchido automaticamente.'}
+            : 'Digite o CEP para preencher o endereço.'}
       </Hint>
-      <TextInput label="Rua" control={control} name="street" autoComplete="address-line1" />
-      <FieldRow>
-        <TextInput label="Número" control={control} name="number" inputMode="numeric" />
-        <TextInput label="Complemento (opcional)" control={control} name="complement" placeholder="Apto, bloco…" />
-      </FieldRow>
-      <TextInput label="Bairro" control={control} name="neighborhood" />
-      <FieldRow>
-        <TextInput label="Cidade" control={control} name="city" />
-        <TextInput label="Estado" control={control} name="state" placeholder="MG" maxLength={2} />
-      </FieldRow>
+      {showAddress && (
+        <>
+          <TextInput label="Rua" control={control} name="street" autoComplete="address-line1" />
+          <FieldRow>
+            <TextInput label="Número" control={control} name="number" inputMode="numeric" />
+            <TextInput label="Complemento" control={control} name="complement" placeholder="Opcional" />
+          </FieldRow>
+          <TextInput label="Bairro" control={control} name="neighborhood" />
+          <FieldRow>
+            <TextInput label="Cidade" control={control} name="city" />
+            <TextInput label="Estado" control={control} name="state" placeholder="MG" maxLength={2} />
+          </FieldRow>
+        </>
+      )}
     </>
   );
 }

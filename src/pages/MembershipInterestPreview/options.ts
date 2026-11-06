@@ -1,25 +1,46 @@
 // Local
-import { GENDER_LABELS, MARITAL_STATUS_LABELS } from '../../domain/memberRecords';
+import { GENDER_LABELS } from '../../domain/memberRecords';
+import { toOptions } from '../../domain/text';
 import { ENTRY_TYPE_DESCRIPTIONS, ENTRY_TYPE_LABELS, EntryType, WANTS_SMALL_GROUP_LABELS } from '../../types/church';
-import { MaritalStatusOption } from './schema';
-
-export const MARITAL_STATUS_OPTION_LABELS: Record<MaritalStatusOption, string> = {
-  ...MARITAL_STATUS_LABELS,
-  stable_union: 'União estável',
-};
-
-export const YES_NO_LABELS: Record<'yes' | 'no', string> = { yes: 'Sim', no: 'Não' };
-
-const toOptions = (labels: Record<string, string>) => Object.entries(labels).map(([value, label]) => ({ value, label }));
 
 export const GENDER_OPTIONS = toOptions(GENDER_LABELS);
-export const MARITAL_STATUS_OPTIONS = toOptions(MARITAL_STATUS_OPTION_LABELS);
 export const WANTS_SMALL_GROUP_OPTIONS = toOptions(WANTS_SMALL_GROUP_LABELS);
-export const YES_NO_OPTIONS = toOptions(YES_NO_LABELS);
 export const ENTRY_TYPE_OPTIONS = (Object.entries(ENTRY_TYPE_LABELS) as [EntryType, string][]).map(([value, label]) => ({
   value,
   label,
   description: ENTRY_TYPE_DESCRIPTIONS[value],
 }));
+
+interface LastChurchPrompt {
+  label: string;
+  review: string;
+  placeholder: string;
+  hint?: string;
+}
+
+export const LAST_CHURCH_PROMPTS: Record<EntryType, LastChurchPrompt> = {
+  baptism: {
+    label: 'Qual a última igreja que você frequentou?',
+    review: 'Última igreja que frequentou',
+    placeholder: 'Ex.: Igreja Batista Central no Palmeiras',
+    hint: 'Se a Batista Palmeiras é a primeira igreja que você frequenta, escreva o nome dela.',
+  },
+  transfer_letter: {
+    label: 'De qual igreja você é membro hoje?',
+    review: 'Igreja onde é membro',
+    placeholder: 'Nome da igreja onde você é membro',
+    hint: 'É dessa igreja que vamos pedir sua carta.',
+  },
+  acclamation: {
+    label: 'De qual igreja você vem?',
+    review: 'Igreja de onde vem',
+    placeholder: 'Nome da igreja que você frequentava',
+  },
+  reconciliation: {
+    label: 'De qual igreja você foi desligado(a)?',
+    review: 'Igreja de onde foi desligado(a)',
+    placeholder: 'Nome da igreja de onde você foi desligado(a)',
+  },
+};
 
 export const STEP_TITLES = ['Seus dados', 'Contato e endereço', 'Sua caminhada', 'Estatuto', 'Servir e comunidade'];

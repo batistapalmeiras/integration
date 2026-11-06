@@ -1,6 +1,6 @@
 // Libs
 import { useNavigate } from 'react-router-dom';
-import { Button, Empty, IconButton, useToast } from 'bp-kit';
+import { Button, Empty, IconButton } from 'bp-kit';
 import { Pencil } from 'lucide-react';
 // Components
 import { PageHeader } from '../../../components/PageHeader';
@@ -8,7 +8,6 @@ import { PageHeader } from '../../../components/PageHeader';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { formatDate } from '../../../domain/dates';
 import { AppRoute } from '../../../routes/paths';
-import { getStorePublicLink } from '../domain';
 import { ActionsRow, HeaderActions, StatusPill } from '../styles';
 import { StoreItem } from '../types';
 
@@ -18,12 +17,6 @@ interface Props {
 
 export function StoreTable({ items }: Props) {
   const navigate = useNavigate();
-  const { show: showToast, toast } = useToast();
-
-  const copyStoreLink = async () => {
-    await navigator.clipboard.writeText(getStorePublicLink());
-    showToast('Link copiado!');
-  };
 
   return (
     <div>
@@ -32,9 +25,6 @@ export function StoreTable({ items }: Props) {
         back
         action={
           <HeaderActions>
-            <Button variant="secondary" onClick={copyStoreLink}>
-              Copiar link
-            </Button>
             <Button onClick={() => navigate(AppRoute.NewStoreItem)}>Adicionar</Button>
           </HeaderActions>
         }
@@ -84,7 +74,6 @@ export function StoreTable({ items }: Props) {
         </TableWrapper>
       )}
 
-      {toast}
     </div>
   );
 }

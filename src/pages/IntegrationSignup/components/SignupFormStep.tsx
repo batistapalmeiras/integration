@@ -1,12 +1,15 @@
 // React
 import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Resolver, useForm, useWatch } from 'react-hook-form';
 // Libs
 import { Button, Textarea, TextInput } from 'bp-kit';
 import { Check } from 'lucide-react';
 // Local
-import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
+import { ActionBar, ErrorMsg, Form } from '../../../components/PublicPage/styles';
+import { SelectField } from '../../../components/SelectField';
+import { MARITAL_STATUS_OPTIONS } from '../../../domain/memberRecords';
+import { YES_NO_OPTIONS } from '../../../domain/text';
 import { SignupFormValues, signupFormSchema } from '../validators/schema';
 
 interface Props {
@@ -20,17 +23,19 @@ interface Props {
 
 export function SignupFormStep({ name, submitting, error, initialValues, onSubmit, onValuesChange }: Props) {
   const { control, handleSubmit, watch } = useForm<SignupFormValues>({
-    resolver: zodResolver(signupFormSchema),
+    resolver: zodResolver(signupFormSchema) as Resolver<SignupFormValues>,
     defaultValues: {
       name,
-      attendingSince: '',
+      baptized: '',
+      baptismChurch: '',
       previousChurch: '',
-      baptismInfo: '',
       conversionTestimony: '',
+      maritalStatus: '',
       maritalStatusStory: '',
       ...initialValues,
     },
   });
+  const [baptized, maritalStatus] = useWatch({ control, name: ['baptized', 'maritalStatus'] });
 
   useEffect(() => {
     const subscription = watch(onValuesChange);
@@ -40,39 +45,49 @@ export function SignupFormStep({ name, submitting, error, initialValues, onSubmi
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <TextInput label="Nome completo" control={control} name="name" placeholder="Nome completo" />
-      <TextInput label="Desde quando você frequenta a nossa igreja?" control={control} name="attendingSince" />
-      <TextInput label="Você veio de qual igreja ou comunidade religiosa?" control={control} name="previousChurch" />
-      <Textarea
-        label="Você é batizado? Em qual igreja ou comunidade religiosa?"
+      <SelectField control={control} name="baptized" label="Você é batizado(a)?" options={YES_NO_OPTIONS} />
+      {baptized === 'yes' && (
+        <TextInput label="Em qual igreja você foi batizado(a)?" control={control} name="baptismChurch" />
+      )}
+
+      <TextInput
+        label="Qual igreja você frequentava antes?"
         control={control}
-        name="baptismInfo"
-        rows={3}
+        name="previousChurch"
+        placeholder="Se não frequentava, escreva: nenhuma"
       />
+
       <Textarea
-        label="Nos conte como foi sua experiência de conversão. Pode ser com detalhes."
+        label="Conte como foi sua conversão. Fique à vontade para dar detalhes."
         control={control}
         name="conversionTestimony"
         rows={4}
       />
-      <Textarea
-        label="Qual seu estado civil? Nos conte um pouco a história do seu relacionamento, caso haja."
-        control={control}
-        name="maritalStatusStory"
-        rows={4}
-      />
+
+      <SelectField control={control} name="maritalStatus" label="Estado civil" options={MARITAL_STATUS_OPTIONS} />
+      {maritalStatus && maritalStatus !== 'single' && (
+        <Textarea
+          label="Conte um pouco da história do seu relacionamento"
+          control={control}
+          name="maritalStatusStory"
+          rows={4}
+        />
+      )}
 
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
-      <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
-        {submitting ? (
-          'Enviando...'
-        ) : (
-          <>
-            <Check size={16} />
-            Confirmar inscrição
-          </>
-        )}
-      </Button>
+      <ActionBar>
+        <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
+          {submitting ? (
+            'Enviando...'
+          ) : (
+            <>
+              <Check size={16} />
+              Confirmar inscrição
+            </>
+          )}
+        </Button>
+      </ActionBar>
     </Form>
   );
 }

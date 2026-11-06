@@ -90,7 +90,10 @@ export function DashboardPage() {
   }
 
   const { funnel, totalMembers, community, coffee, cohort, makeupNotes } = overview;
-  const inIntegration = FUNNEL.reduce((sum, stage) => sum + (funnel[stage.status] ?? 0), 0);
+  const inIntegration = FUNNEL.filter((stage) => stage.status !== 'membership_pending').reduce(
+    (sum, stage) => sum + (funnel[stage.status] ?? 0),
+    0,
+  );
 
   return (
     <div>
@@ -139,7 +142,7 @@ export function DashboardPage() {
           <HighlightValue>{inIntegration}</HighlightValue>
         </StatCard>
         <StatCard>
-          <StatLabel>Membresia</StatLabel>
+          <StatLabel>Em processo de membresia</StatLabel>
           <HighlightValue>{funnel.membership_pending ?? 0}</HighlightValue>
         </StatCard>
         <StatCard>

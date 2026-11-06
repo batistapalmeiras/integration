@@ -35,7 +35,6 @@ import { StorePage } from '../pages/Store';
 import { EditStoreItemPage } from '../pages/Store/Edit';
 import { StoreItemsProvider } from '../pages/Store/hooks/StoreItemsProvider';
 import { NewStoreItemPage } from '../pages/Store/New';
-import { StorePublicPage } from '../pages/Store/Public';
 import { VisitorsPage } from '../pages/Visitors';
 import { VisitorDetailPage } from '../pages/Visitors/Detail';
 import { VisitorEditPage } from '../pages/Visitors/Edit';
@@ -62,7 +61,6 @@ export function AppRouter() {
           <Route path={`${AppRoute.MakeupAttendance}/:token`} element={<MakeupAttendancePage />} />
           <Route path={AppRoute.MembershipInterest} element={<MembershipInterestPage />} />
           <Route path={AppRoute.MembershipInterestPreview} element={<MembershipInterestPreviewPage />} />
-          <Route path={AppRoute.StorePublic} element={<StorePublicPage />} />
 
           <Route
             path="/*"

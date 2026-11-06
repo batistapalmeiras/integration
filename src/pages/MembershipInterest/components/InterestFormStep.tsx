@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Button, Checkbox, DatePicker, MultiSelectOption, MultiSelect, RadioGroup, Textarea, TextInput, Typography } from 'bp-kit';
 import { Send } from 'lucide-react';
 // Local
-import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
+import { ActionBar, ErrorMsg, Form } from '../../../components/PublicPage/styles';
 import { supabase } from '../../../lib/supabase';
 import { ENTRY_TYPE_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
 import { MembershipInterestFormValues, membershipInterestSchema } from '../validators/schema';
@@ -155,16 +155,18 @@ export function InterestFormStep({ name, submitting, submitError, onSubmit }: Pr
 
       {submitError && <ErrorMsg>{submitError}</ErrorMsg>}
 
-      <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
-        {submitting ? (
-          'Enviando...'
-        ) : (
-          <>
-            <Send size={16} />
-            Enviar ficha
-          </>
-        )}
-      </Button>
+      <ActionBar>
+        <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
+          {submitting ? (
+            'Enviando...'
+          ) : (
+            <>
+              <Send size={16} />
+              Enviar ficha
+            </>
+          )}
+        </Button>
+      </ActionBar>
     </Form>
   );
 }
