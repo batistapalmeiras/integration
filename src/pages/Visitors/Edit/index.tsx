@@ -10,7 +10,7 @@ import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES, UserRole } from '../../../types/enums';
-import { useVisitorDetail } from '../../../features/visitors';
+import { usePerson } from '../../../features/visitors';
 import { VisitorForm, VisitorFormActions } from '../components/VisitorForm';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
 
@@ -18,7 +18,7 @@ export function VisitorEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { person, loading, error, updatePerson, archive, reactivate, deletePerson } = useVisitorDetail(id ?? '');
+  const { person, loading, error, updatePerson, archive, reactivate, deletePerson } = usePerson(id ?? '');
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
 

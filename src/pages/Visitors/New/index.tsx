@@ -18,6 +18,7 @@ import { VisitorForm, VisitorFormActions } from '../components/VisitorForm';
 import { Intro } from './styles';
 
 const MIN_PHONE_DIGITS = 10;
+const PHONE_LOOKUP_DEBOUNCE_MS = 400;
 
 export function NewVisitorPage() {
   const navigate = useNavigate();
@@ -40,9 +41,13 @@ export function NewVisitorPage() {
   useEffect(() => {
     const digits = parsePhone(phone ?? '');
     if (digits.length < MIN_PHONE_DIGITS || digits === checkedPhone.current) return;
-    checkedPhone.current = digits;
 
-    findPersonByPhone(digits).then((person) => {
+    const timeout = setTimeout(() => {
+      checkedPhone.current = digits;
+      findPersonByPhone(digits).then(showExisting);
+    }, PHONE_LOOKUP_DEBOUNCE_MS);
+
+    function showExisting(person: Awaited<ReturnType<typeof findPersonByPhone>>) {
       if (!person) return;
       const profile = `${AppRoute.Visitors}/${person.id}`;
       open(
@@ -56,7 +61,9 @@ export function NewVisitorPage() {
           }}
         />,
       );
-    });
+    }
+
+    return () => clearTimeout(timeout);
   }, [phone, open, close, navigate, user?.id]);
 
   const submit = handleSubmit(async (values) => {

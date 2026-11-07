@@ -1,6 +1,8 @@
 // React
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 // Local
+import { errorMessage, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
 import { MembershipStatus } from '../../../domain/memberRecords';
 import { EntryType } from '../../../types/church';
@@ -16,13 +18,22 @@ export interface MemberRow {
   membership_status: MembershipStatus;
 }
 
+async function listMemberRows(): Promise<MemberRow[]> {
+  const { data, error } = await supabase
+    .from('people')
+    .select('id, name, entry_type, membership_status')
+    .eq('status', 'member')
+    .order('name', { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as MemberRow[];
+}
+
 export function useMembers() {
-  const [members, setMembers] = useState<MemberRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery(queryKeys.members, listMemberRows);
+  const members = query.data ?? [];
   const [page, setPage] = useState(1);
   const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(() => (loadSavedFilters()?.search ?? '').trim().toLowerCase());
   const [membershipStatusFilter, setMembershipStatusFilterState] = useState<MembershipStatus[]>(
     () => loadSavedFilters()?.membershipStatusFilter ?? [],
   );
@@ -38,23 +49,6 @@ export function useMembers() {
   useEffect(() => {
     saveFilters({ search, membershipStatusFilter, entryTypeFilter });
   }, [search, membershipStatusFilter, entryTypeFilter]);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const { data, error: loadError } = await supabase
-      .from('people')
-      .select('id, name, entry_type, membership_status')
-      .eq('status', 'member')
-      .order('name', { ascending: true });
-
-    if (loadError) setError(loadError.message);
-    else setMembers((data ?? []) as MemberRow[]);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
 
   const resetPage = <T,>(setter: (value: T) => void) => (value: T) => {
     setter(value);
@@ -84,7 +78,7 @@ export function useMembers() {
     entryTypeFilter,
     setEntryTypeFilter: resetPage(setEntryTypeFilterState),
     hasFilter: !!search.trim() || membershipStatusFilter.length > 0 || entryTypeFilter.length > 0,
-    loading,
-    error,
+    loading: query.loading,
+    error: errorMessage(query.error),
   };
 }

@@ -1,5 +1,3 @@
-// React
-import { useEffect, useState } from 'react';
 // Local
 import { getUpcomingCoffeeRoster } from '../../../domain/cafeSchedule';
 import { getUpcomingCohortWithLessons } from '../../../domain/classesRoster';
@@ -8,6 +6,8 @@ import { CommunityOverview, getCommunityOverview } from '../../../domain/communi
 import { countIntegrationPeopleByStatus } from '../../../domain/integrationPeople';
 import { listRecentMakeupNotes, MakeupNote } from '../../../domain/lessonMakeups';
 import { countMembers } from '../../../domain/memberRecords';
+import { errorMessage, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { PersonStatus } from '../../../types/person';
 
 const MAKEUP_NOTES_LIMIT = 3;
@@ -42,14 +42,6 @@ async function loadOverview(): Promise<Overview> {
 }
 
 export function usePastorDashboard() {
-  const [overview, setOverview] = useState<Overview | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadOverview()
-      .then(setOverview)
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
-  }, []);
-
-  return { overview, loading: !overview && !error, error };
+  const query = useQuery(queryKeys.pastorDashboard, loadOverview);
+  return { overview: query.data ?? null, loading: query.loading, error: errorMessage(query.error) };
 }

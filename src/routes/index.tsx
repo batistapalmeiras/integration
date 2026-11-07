@@ -5,6 +5,7 @@ import { AuthProvider, ChangePasswordPage } from 'bp-kit';
 // Components
 import { Layout } from '../components/Layout';
 import { PasswordGate } from '../components/PasswordGate';
+import { QueryCacheReset } from '../components/QueryCacheReset';
 import { AdminPage } from '../pages/Admin';
 import { ClassesPage } from '../pages/Classes';
 import { CoffeePage } from '../pages/Coffee';
@@ -53,6 +54,7 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <AuthProvider client={supabase}>
+        <QueryCacheReset />
         <Routes>
           <Route path={AppRoute.Login} element={<LoginPage />} />
           <Route path={AppRoute.ForgotPassword} element={<ForgotPasswordPage />} />

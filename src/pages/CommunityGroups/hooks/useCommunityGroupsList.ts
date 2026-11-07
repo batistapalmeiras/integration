@@ -1,105 +1,73 @@
-// React
-import { useCallback, useEffect, useState } from 'react';
 // Local
 import {
-  countPeopleInMinistry,
-  countPeopleInSmallGroup,
+  CommunityGroupWithCount,
   createMinistry,
   createSmallGroup,
   deleteMinistry,
   deleteSmallGroup,
-  listMinistries,
-  listSmallGroups,
+  listMinistriesWithCounts,
+  listSmallGroupsWithCounts,
   updateMinistry,
   updateSmallGroup,
 } from '../../../domain/communityGroups';
+import { errorMessage, invalidateQueries, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 
-export interface GroupRow {
-  id: string;
-  name: string;
-  leaders: string[];
-  peopleCount: number;
+export type GroupRow = Pick<CommunityGroupWithCount, 'id' | 'name' | 'leaders' | 'peopleCount'>;
+
+type GroupType = 'small-groups' | 'ministries';
+
+export function refreshGroupLists(type: GroupType): Promise<void> {
+  return Promise.all([
+    invalidateQueries(queryKeys.groupsWithCounts(type)),
+    invalidateQueries(type === 'small-groups' ? queryKeys.smallGroups : queryKeys.ministries, { refetchActive: false }),
+  ]).then(() => undefined);
 }
 
-async function withCounts(
-  groups: { id: string; name: string; leaders: string[] }[],
-  countFn: (id: string) => Promise<number>,
-) {
-  return Promise.all(groups.map(async (g) => ({ ...g, peopleCount: await countFn(g.id) })));
+function useGroupsList(type: GroupType, list: () => Promise<CommunityGroupWithCount[]>) {
+  const query = useQuery(queryKeys.groupsWithCounts(type), list);
+  const afterChange = () => refreshGroupLists(type);
+  return { rows: (query.data ?? []) as GroupRow[], loading: query.loading, error: errorMessage(query.error), afterChange };
 }
 
 export function useMinistriesList() {
-  const [rows, setRows] = useState<GroupRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      setRows(await withCounts(await listMinistries(), countPeopleInMinistry));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao carregar.');
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const { afterChange, ...state } = useGroupsList('ministries', listMinistriesWithCounts);
 
   const add = async (name: string, leaders: string[]) => {
     await createMinistry(name, leaders);
-    await load();
+    await afterChange();
   };
 
   const edit = async (id: string, name: string, leaders: string[]) => {
     await updateMinistry(id, name, leaders);
-    await load();
+    await afterChange();
   };
 
   const remove = async (id: string) => {
     await deleteMinistry(id);
-    await load();
+    await afterChange();
   };
 
-  return { rows, loading, error, add, edit, remove };
+  return { ...state, add, edit, remove };
 }
 
 export function useSmallGroupsList() {
-  const [rows, setRows] = useState<GroupRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      setRows(await withCounts(await listSmallGroups(), countPeopleInSmallGroup));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao carregar.');
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const { afterChange, ...state } = useGroupsList('small-groups', listSmallGroupsWithCounts);
 
   const add = async (name: string, leaders: string[], hosts: string[]) => {
     await createSmallGroup(name, leaders, hosts);
-    await load();
+    await afterChange();
   };
 
   const edit = async (id: string, name: string, leaders: string[], hosts: string[]) => {
     await updateSmallGroup(id, name, leaders, hosts);
-    await load();
+    await afterChange();
   };
 
   const remove = async (id: string) => {
     await deleteSmallGroup(id);
-    await load();
+    await afterChange();
   };
 
-  return { rows, loading, error, add, edit, remove };
+  return { ...state, add, edit, remove };
 }

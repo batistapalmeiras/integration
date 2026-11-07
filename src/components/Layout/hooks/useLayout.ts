@@ -1,30 +1,32 @@
 // React
-import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
+import { useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
+
+async function countMembershipPending(): Promise<number> {
+  const { count, error } = await supabase
+    .from('people')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'membership_pending');
+  if (error) throw error;
+  return count ?? 0;
+}
 
 export function useLayout() {
   const { user, logout } = useAuthCtx();
   const location = useLocation();
   const navigate = useNavigate();
-  const [membershipCount, setMembershipCount] = useState(0);
 
   const isAdmin = user?.role === UserRole.Admin;
   const showMembership = hasRole(user?.role, LEADERSHIP_ROLES);
 
-  useEffect(() => {
-    if (!showMembership) return;
-    supabase
-      .from('people')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'membership_pending')
-      .then(({ count }) => setMembershipCount(count ?? 0));
-  }, [showMembership, location.pathname]);
+  const membershipCount = useQuery(queryKeys.membershipPendingCount, countMembershipPending, { enabled: showMembership }).data ?? 0;
 
   const handleLogout = async () => {
     await logout();

@@ -1,5 +1,5 @@
 // React
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
@@ -7,7 +7,7 @@ import { Button, Form, ModalActions, ModalTitle, MultiSelect, TextInput, text } 
 import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Local
-import { listMembers } from '../../../domain/communityGroups';
+import { useMemberNames } from '../../../queries/reference';
 
 const schema = z.object({
   name: z.string().min(1, text.validation.required('o nome')),
@@ -37,7 +37,7 @@ export function GroupModal({
 }: Props) {
   const [leaders, setLeaders] = useState<string[]>(initialLeaders ?? []);
   const [hosts, setHosts] = useState<string[]>(initialHosts ?? []);
-  const [memberNames, setMemberNames] = useState<string[]>([]);
+  const memberNames = (useMemberNames().data ?? []).map((member) => member.name);
   const {
     control,
     handleSubmit,
@@ -46,10 +46,6 @@ export function GroupModal({
     resolver: zodResolver(schema),
     defaultValues: { name: initialName ?? '' },
   });
-
-  useEffect(() => {
-    listMembers().then((members) => setMemberNames(members.map((member) => member.name)));
-  }, []);
 
   const options = [...new Set([...memberNames, ...(initialLeaders ?? []), ...(initialHosts ?? [])])]
     .sort((a, b) => a.localeCompare(b, 'pt-BR'))

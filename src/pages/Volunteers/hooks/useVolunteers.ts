@@ -1,34 +1,19 @@
-// React
-import { useCallback, useEffect, useState } from 'react';
 // Local
+import { errorMessage, invalidateQueries, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
 import { UserRole } from '../../../types/enums';
 import { CREATE_VOLUNTEER_FUNCTION, getDefaultVolunteerPassword } from '../domain';
 import { VolunteerRow } from '../types';
 
+async function listVolunteers(): Promise<VolunteerRow[]> {
+  const { data, error } = await supabase.from('profiles').select('id,name,role,active').order('name');
+  if (error) throw error;
+  return (data ?? []) as VolunteerRow[];
+}
+
 export function useVolunteers() {
-  const [volunteers, setVolunteers] = useState<VolunteerRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    const { data, error: loadError } = await supabase.from('profiles').select('id,name,role,active').order('name');
-    if (loadError) {
-      setError(loadError.message);
-      setLoading(false);
-      return;
-    }
-
-    setVolunteers((data ?? []) as VolunteerRow[]);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const query = useQuery(queryKeys.volunteers, listVolunteers);
 
   const addVolunteer = async (email: string, name: string, role: UserRole) => {
     const { data, error: invokeError } = await supabase.functions.invoke(CREATE_VOLUNTEER_FUNCTION, {
@@ -36,8 +21,8 @@ export function useVolunteers() {
     });
     if (invokeError) throw invokeError;
     if (data?.error) throw new Error(data.error);
-    await load();
+    await invalidateQueries(queryKeys.volunteers);
   };
 
-  return { volunteers, loading, error, addVolunteer };
+  return { volunteers: query.data ?? [], loading: query.loading, error: errorMessage(query.error), addVolunteer };
 }

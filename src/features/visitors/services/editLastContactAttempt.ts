@@ -9,11 +9,11 @@ export async function editLastContactAttempt(
   attemptId: string,
   result: ContactResult,
   actorId?: string,
-): Promise<void> {
+): Promise<Person> {
   await updateContactAttemptResult(attemptId, result);
 
   const toStatus = statusAfterContact(result, await hasAttendedCoffee(person.id));
-  await updatePersonStatus(person.id, toStatus, { coffee_retry_used: false, ...fieldsAfterContact(toStatus) });
+  const updated = await updatePersonStatus(person.id, toStatus, { coffee_retry_used: false, ...fieldsAfterContact(toStatus) });
   await insertStatusHistory({
     personId: person.id,
     fromStatus: person.status,
@@ -23,4 +23,5 @@ export async function editLastContactAttempt(
   });
 
   await placeAfterContact(person.id, toStatus);
+  return updated;
 }

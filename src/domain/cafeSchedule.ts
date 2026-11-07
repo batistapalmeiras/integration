@@ -96,18 +96,13 @@ export function canMarkCoffeeAttendance(eventDate: string, today: string): boole
   return eventDate <= today;
 }
 
-export async function resolveCurrentCoffeeEventId(): Promise<string | null> {
-  const events = await listCoffeeEvents();
-  return (upcomingCoffeeEvent(events, todayKey()) ?? events.at(-1))?.id ?? null;
-}
-
 export interface PersonCoffeeAttendance {
   id: string;
   attended: boolean;
   eventDate: string;
 }
 
-async function fetchCurrentCoffeeAttendance(personId: string): Promise<PersonCoffeeAttendance | null> {
+export async function getCoffeeAttendanceForPerson(personId: string): Promise<PersonCoffeeAttendance | null> {
   const { data, error } = await supabase
     .from('coffee_attendance')
     .select('id, attended, person_id, coffee_event:coffee_events(event_date)')
@@ -122,17 +117,6 @@ async function fetchCurrentCoffeeAttendance(personId: string): Promise<PersonCof
   }[];
   const [current] = currentCoffeeAttendance(rows);
   return current ? { id: current.id, attended: current.attended, eventDate: current.coffee_event?.event_date ?? '' } : null;
-}
-
-export async function getCoffeeAttendanceForPerson(personId: string): Promise<PersonCoffeeAttendance | null> {
-  const existing = await fetchCurrentCoffeeAttendance(personId);
-  if (existing) return existing;
-
-  const eventId = await resolveCurrentCoffeeEventId();
-  if (!eventId) return null;
-
-  await placeInCoffee(personId, eventId);
-  return fetchCurrentCoffeeAttendance(personId);
 }
 
 export interface EnrollableCoffeePerson {
@@ -350,36 +334,40 @@ export interface CoffeeBoardAttendance {
   coffee_event: { event_date: string } | null;
 }
 
-export interface CoffeeBoardPerson {
-  id: string;
-  status: string;
-  signup_window_from: string | null;
-}
-
 export interface CoffeeBoard {
   events: { id: string; event_date: string; event_time: string }[];
   attendance: CoffeeBoardAttendance[];
-  people: CoffeeBoardPerson[];
 }
 
-export async function fetchCoffeeBoard(): Promise<CoffeeBoard> {
-  const [events, attendance, people] = await Promise.all([
+async function fetchBoard(onlyPeopleInProgress: boolean): Promise<CoffeeBoard> {
+  const attendanceQuery = onlyPeopleInProgress
+    ? supabase
+        .from('coffee_attendance')
+        .select(
+          '*, person:people!inner(id,name,phone,status,class_invite_sent_at,signup_window_from), coffee_event:coffee_events(event_date)',
+        )
+        .in('person.status', COFFEE_LIST_STATUSES)
+    : supabase
+        .from('coffee_attendance')
+        .select('*, person:people(id,name,phone,status,class_invite_sent_at,signup_window_from), coffee_event:coffee_events(event_date)');
+
+  const [events, attendance] = await Promise.all([
     supabase.from('coffee_events').select('*').order('event_date', { ascending: true }),
-    supabase
-      .from('coffee_attendance')
-      .select('*, person:people(id,name,phone,status,class_invite_sent_at,signup_window_from), coffee_event:coffee_events(event_date)'),
-    supabase.from('people').select('id, status, signup_window_from').in('status', ['welcome_coffee', 'pending_signup']),
+    attendanceQuery,
   ]);
 
-  const failure = events.error ?? attendance.error ?? people.error;
+  const failure = events.error ?? attendance.error;
   if (failure) throw failure;
 
   return {
     events: (events.data ?? []) as CoffeeBoard['events'],
     attendance: (attendance.data ?? []) as unknown as CoffeeBoardAttendance[],
-    people: (people.data ?? []) as CoffeeBoardPerson[],
   };
 }
+
+export const fetchCoffeeBoard = () => fetchBoard(true);
+
+export const fetchCoffeeHistoryBoard = () => fetchBoard(false);
 
 export function countQueuedFrom(attendance: CoffeeBoardAttendance[]): Record<string, number> {
   const counts: Record<string, number> = {};
@@ -402,28 +390,6 @@ export function currentCoffeeAttendance<T extends Pick<CoffeeBoardAttendance, 'p
     }
   }
   return [...latest.values()];
-}
-
-export function latestAttendedCoffeeByPerson(attendance: CoffeeBoardAttendance[]): Map<string, string> {
-  const latest = new Map<string, string>();
-  for (const row of attendance) {
-    if (!row.attended || !row.coffee_event) continue;
-    const current = latest.get(row.person_id);
-    if (!current || row.coffee_event.event_date > current) latest.set(row.person_id, row.coffee_event.event_date);
-  }
-  return latest;
-}
-
-export function selectOrphanPeople(
-  people: CoffeeBoardPerson[],
-  attendance: Pick<CoffeeBoardAttendance, 'person_id' | 'attended'>[],
-): string[] {
-  const withOpenSeat = new Set(attendance.filter((a) => !a.attended).map((a) => a.person_id));
-  return people.filter((p) => p.status === 'welcome_coffee' && !withOpenSeat.has(p.id)).map((p) => p.id);
-}
-
-export async function attachPeopleToCoffee(personIds: string[], eventId: string): Promise<void> {
-  await Promise.all(personIds.map((id) => placeInCoffee(id, eventId)));
 }
 
 export type CoffeeHistoryPresence = 'came' | 'missed' | 'archived' | 'unmarked' | 'enrolled' | 'invited' | 'awaiting_contact';

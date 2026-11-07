@@ -1,0 +1,45 @@
+export const PIPELINE_ROOTS = ['people', 'person', 'coffee', 'cohorts', 'groups'] as const;
+
+export const queryKeys = {
+  visitors: ['people', 'visitors'] as const,
+  members: ['people', 'members'] as const,
+  memberNames: (withoutSmallGroup: boolean) => ['people', 'member-names', { withoutSmallGroup }] as const,
+  membershipQueue: ['people', 'membership-queue'] as const,
+  membershipPendingCount: ['people', 'membership-pending-count'] as const,
+  memberPendencies: (params: object) => ['people', 'member-pendencies', params] as const,
+  peopleReport: (params: object) => ['people', 'report', params] as const,
+  statusCounts: ['people', 'status-counts'] as const,
+  annualYears: ['people', 'annual-years'] as const,
+  annualReport: (year: number) => ['people', 'annual-report', year] as const,
+  pastorDashboard: ['people', 'pastor-dashboard'] as const,
+
+  person: (id: string) => ['person', id] as const,
+  personProfile: (id: string) => ['person', id, 'profile'] as const,
+  personCoffeeAttendance: (id: string, status: string) => ['person', id, 'coffee-attendance', status] as const,
+  personLastContactAttempt: (id: string, status: string) => ['person', id, 'last-contact-attempt', status] as const,
+  personIntegrationClass: (id: string) => ['person', id, 'integration-class'] as const,
+  personSensitive: (id: string) => ['person', id, 'sensitive'] as const,
+  personMakeups: (id: string) => ['person', id, 'makeups'] as const,
+
+  coffeeBoard: ['coffee', 'board'] as const,
+  coffeeHistory: ['coffee', 'history'] as const,
+  hasUpcomingCoffeeEvent: ['coffee', 'has-upcoming'] as const,
+  upcomingCoffeeEventDate: ['coffee', 'upcoming-date'] as const,
+
+  cohortBoard: ['cohorts', 'board'] as const,
+  hasUpcomingCohort: ['cohorts', 'has-upcoming'] as const,
+  cohortNames: ['cohorts', 'names'] as const,
+  cohortsReport: ['cohorts', 'report'] as const,
+  cohortRoster: (id: string) => ['cohorts', 'roster', id] as const,
+
+  smallGroups: ['reference', 'small-groups'] as const,
+  ministries: ['reference', 'ministries'] as const,
+  groupsWithCounts: (type: 'small-groups' | 'ministries') => ['groups', type] as const,
+  groupDetail: (type: 'small-groups' | 'ministries', id: string) => ['groups', type, id] as const,
+
+  volunteers: ['volunteers', 'list'] as const,
+  volunteer: (id: string) => ['volunteers', id] as const,
+  volunteerEmail: (id: string) => ['volunteers', id, 'email'] as const,
+};
+
+export const REFERENCE_STALE_TIME = 5 * 60_000;

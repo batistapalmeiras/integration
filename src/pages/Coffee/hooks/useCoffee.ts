@@ -1,5 +1,5 @@
 // React
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
@@ -8,7 +8,6 @@ import {
   CoffeePresence,
   STATUS_AFTER_PRESENCE,
   EnrollableCoffeePerson,
-  attachPeopleToCoffee,
   coffeePresence,
   countQueuedFrom,
   currentCoffeeAttendance,
@@ -21,17 +20,16 @@ import {
   markCoffeeCanceled,
   markCoffeeNotAttended,
   selectOpenCoffeeEvents,
-  selectOrphanPeople,
   unmarkCoffeePresence,
   upcomingCoffeeEvent,
   isListedInCoffee,
   isReturningToSignup,
   updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
-import { listAllCohorts } from '../../../domain/classesRoster';
-import { archivePeople, missedSignupIds } from '../../../domain/signupDeadline';
+import { runPipelineMaintenance } from '../../../domain/pipelineMaintenance';
+import { errorMessage, fetchQuery, setQueryData, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
-import { hasRole, INTEGRATION_TEAM_ROLES } from '../../../types/enums';
 import { todayKey } from '../../../domain/dates';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { AttendeeRow, CoffeeEvent } from '../types';
@@ -39,122 +37,90 @@ import { AttendeeRow, CoffeeEvent } from '../types';
 const PAGE_SIZE = 10;
 const MAX_EVENTS = 2;
 
+function buildAttendees(board: CoffeeBoard, selected: CoffeeEvent, open: CoffeeEvent[]): AttendeeRow[] {
+  const current = currentCoffeeAttendance(board.attendance);
+  const latest = latestCoffeeDateByPerson(board.attendance);
+  const isUpcoming = selected.id === upcomingCoffeeEvent(open, todayKey())?.id;
+  const seated = current
+    .filter((a) => a.coffee_event_id === selected.id && !isReturningToSignup(a.person))
+    .filter((a) => isListedInCoffee(a.person, selected.event_date, todayKey()))
+    .map((a) => {
+      const { presence, editable } = coffeePresence(a, latest.get(a.person_id));
+      return { ...a, presence, presenceEditable: editable, returning: false } as unknown as AttendeeRow;
+    });
+  const returning = isUpcoming
+    ? current
+        .filter((a) => isReturningToSignup(a.person))
+        .map(
+          (a) =>
+            ({ ...a, coffee_event_id: selected.id, presence: null, presenceEditable: false, returning: true }) as unknown as AttendeeRow,
+        )
+    : [];
+  return [...seated, ...returning].sort((a, b) => comparePeopleByPipeline(a.person, b.person));
+}
+
 export function useCoffee() {
   const { user } = useAuthCtx();
-  const canSweep = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
-  const [events, setEvents] = useState<CoffeeEvent[]>([]);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [allAttendees, setAllAttendees] = useState<AttendeeRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const boardQuery = useQuery(queryKeys.coffeeBoard, fetchCoffeeBoard);
+  const board = boardQuery.data;
+  const [selectedEventIdState, setSelectedEventIdState] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const boardRef = useRef<CoffeeBoard | null>(null);
 
-  const applyBoard = useCallback(
-    (board: CoffeeBoard, keepSelectionId?: string) => {
-      boardRef.current = board;
-      const current = currentCoffeeAttendance(board.attendance);
-      const open = selectOpenCoffeeEvents(
-        board.events as CoffeeEvent[],
-        countQueuedFrom(current),
-        todayKey(),
-      );
-      setEvents(open);
+  const refreshBoard = () => fetchQuery(queryKeys.coffeeBoard, fetchCoffeeBoard);
 
-      if (open.length === 0) {
-        setSelectedEventId(null);
-        setAllAttendees([]);
-        return null;
-      }
+  const refreshAfterEventChange = async () => {
+    await runPipelineMaintenance();
+    await refreshBoard();
+  };
 
-      const selected = open.find((e) => e.id === keepSelectionId) ?? open[0];
-      setSelectedEventId(selected.id);
-      const latest = latestCoffeeDateByPerson(board.attendance);
-      const isUpcoming = selected.id === upcomingCoffeeEvent(open, todayKey())?.id;
-      const seated = current
-        .filter((a) => a.coffee_event_id === selected.id && !isReturningToSignup(a.person))
-        .filter((a) => isListedInCoffee(a.person, selected.event_date, todayKey()))
-        .map((a) => {
-          const { presence, editable } = coffeePresence(a, latest.get(a.person_id));
-          return { ...a, presence, presenceEditable: editable, returning: false } as unknown as AttendeeRow;
-        });
-      const returning = isUpcoming
-        ? current
-            .filter((a) => isReturningToSignup(a.person))
-            .map(
-              (a) =>
-                ({ ...a, coffee_event_id: selected.id, presence: null, presenceEditable: false, returning: true }) as unknown as AttendeeRow,
-            )
-        : [];
-      setAllAttendees([...seated, ...returning].sort((a, b) => comparePeopleByPipeline(a.person, b.person)));
-      setPage(1);
-      return selected.id;
-    },
-    [],
+  const events = useMemo(() => {
+    if (!board) return [];
+    const current = currentCoffeeAttendance(board.attendance);
+    return selectOpenCoffeeEvents(board.events as CoffeeEvent[], countQueuedFrom(current), todayKey());
+  }, [board]);
+
+  const event = events.find((e) => e.id === selectedEventIdState) ?? events[0] ?? null;
+  const selectedEventId = event?.id ?? null;
+
+  const allAttendees = useMemo(
+    () => (board && event ? buildAttendees(board, event, events) : []),
+    [board, event, events],
   );
 
-  const load = useCallback(
-    async (keepSelectionId?: string) => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const [board, cohorts] = await Promise.all([fetchCoffeeBoard(), listAllCohorts()]);
-
-        let healed = false;
-        if (canSweep) {
-          const archived = await archivePeople(missedSignupIds(board.people, board.attendance, cohorts), user?.id);
-
-          const upcomingId = upcomingCoffeeEvent(board.events, todayKey())?.id;
-          const orphans = upcomingId ? selectOrphanPeople(board.people, board.attendance) : [];
-          if (orphans.length > 0 && upcomingId) await attachPeopleToCoffee(orphans, upcomingId);
-
-          healed = archived > 0 || orphans.length > 0;
-        }
-
-        if (healed) {
-          applyBoard(await fetchCoffeeBoard(), keepSelectionId);
-        } else {
-          applyBoard(board, keepSelectionId);
-        }
-      } catch (loadError) {
-        setError((loadError as Error).message);
-      }
-
-      setLoading(false);
-    },
-    [applyBoard, canSweep, user?.id],
-  );
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const selectEvent = (eventId: string | null) => {
+    setSelectedEventIdState(eventId);
+    setPage(1);
+  };
 
   const createEvent = async (eventDate: string) => {
     if (events.length >= MAX_EVENTS) {
       throw new Error(`Só é possível ter ${MAX_EVENTS} cafés ao mesmo tempo — encerre um antes de criar outro.`);
     }
     const newId = await insertCoffeeEvent(eventDate);
-    await load(newId);
+    selectEvent(newId);
+    await refreshAfterEventChange();
   };
 
   const updateEvent = async (eventDate: string) => {
     if (!selectedEventId) return;
     await updateCoffeeEventDate(selectedEventId, eventDate);
-    await load(selectedEventId);
+    setPage(1);
+    await refreshAfterEventChange();
   };
 
   const deleteSelectedEvent = async () => {
     if (!selectedEventId) return;
     const { error: deleteError } = await supabase.from('coffee_events').delete().eq('id', selectedEventId);
     if (deleteError) throw deleteError;
-    await load();
+    selectEvent(null);
+    await refreshAfterEventChange();
   };
 
   const enrollPerson = async (person: EnrollableCoffeePerson) => {
     if (!selectedEventId) return;
     await placeInCoffee(person.id, selectedEventId);
-    await load(selectedEventId);
+    setPage(1);
+    await refreshBoard();
   };
 
   const changePresence = async (
@@ -172,7 +138,8 @@ export function useCoffee() {
     } else {
       await unmarkCoffeePresence(attendanceId, personId, personStatus, user?.id);
     }
-    await load(selectedEventId ?? undefined);
+    setPage(1);
+    await refreshBoard();
   };
 
   const setPresence = async (row: AttendeeRow, presence: 'came' | 'missed') => {
@@ -185,10 +152,13 @@ export function useCoffee() {
 
   const markCanceled = async (personId: string) => {
     await markCoffeeCanceled(personId, user?.id);
-    setAllAttendees((prev) => prev.filter((a) => a.person.id !== personId));
+    setQueryData<CoffeeBoard>(queryKeys.coffeeBoard, (current) => ({
+      ...(current as CoffeeBoard),
+      attendance: (current as CoffeeBoard).attendance.map((row) =>
+        row.person_id === personId && row.person ? { ...row, person: { ...row.person, status: 'archived' } } : row,
+      ),
+    }));
   };
-
-  const event = events.find((e) => e.id === selectedEventId) ?? null;
 
   const totalPages = Math.max(1, Math.ceil(allAttendees.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
@@ -199,11 +169,11 @@ export function useCoffee() {
     canCreateEvent: events.length < MAX_EVENTS,
     event,
     selectedEventId,
-    selectEvent: (eventId: string) => (boardRef.current ? applyBoard(boardRef.current, eventId) : load(eventId)),
+    selectEvent: (eventId: string) => selectEvent(eventId),
     attendees,
     totalCount: allAttendees.length,
-    loading,
-    error,
+    loading: boardQuery.loading,
+    error: errorMessage(boardQuery.error),
     page: clampedPage,
     totalPages,
     setPage,
