@@ -3,7 +3,7 @@ import { PersonStatus } from '../../../types/person';
 
 const STORAGE_KEY = 'people-report-filters';
 
-export interface PeopleFilters {
+interface PeopleFilters {
   statusFilter: PersonStatus[];
   cohortFilter: string;
   search: string;

@@ -7,7 +7,7 @@ export interface CoffeeEvent {
   event_time: string;
 }
 
-export interface CoffeeAttendance {
+interface CoffeeAttendance {
   id: string;
   person_id: string;
   coffee_event_id: string;

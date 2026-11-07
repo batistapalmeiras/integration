@@ -50,7 +50,7 @@ export const signupFormSchema = z
     },
   );
 
-export interface SignupAnswers {
+interface SignupAnswers {
   previousChurch: string;
   baptismInfo: string;
   conversionTestimony: string;

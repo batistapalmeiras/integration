@@ -11,7 +11,7 @@ import { loadSavedFilters, saveFilters } from '../persistence';
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
-export interface MemberRow {
+interface MemberRow {
   id: string;
   name: string;
   entry_type: EntryType | null;

@@ -5,13 +5,13 @@ import { supabase } from '../lib/supabase';
 import { AppRoute } from '../routes/paths';
 import { PersonStatus } from '../types/person';
 
-export interface ActiveCohort {
+interface ActiveCohort {
   id: string;
   name: string;
   status: 'active' | 'closed';
 }
 
-export interface CohortLesson {
+interface CohortLesson {
   id: string;
   cohort_id: string;
   number: number;
@@ -34,14 +34,8 @@ function toCohortWithLessons(row: CohortRow): CohortWithLessons {
   return { cohort, lessons: [...(lessons ?? [])].sort((a, b) => a.number - b.number) };
 }
 
-export async function listOpenCohorts(): Promise<CohortWithLessons[]> {
+async function listOpenCohorts(): Promise<CohortWithLessons[]> {
   const { data, error } = await supabase.from('cohorts').select(COHORT_WITH_LESSONS).eq('status', 'active');
-  if (error) throw error;
-  return ((data ?? []) as unknown as CohortRow[]).map(toCohortWithLessons);
-}
-
-export async function listAllCohorts(): Promise<CohortWithLessons[]> {
-  const { data, error } = await supabase.from('cohorts').select(COHORT_WITH_LESSONS);
   if (error) throw error;
   return ((data ?? []) as unknown as CohortRow[]).map(toCohortWithLessons);
 }
@@ -148,13 +142,13 @@ export async function getMakeupLink(enrollmentId: string, lessonId: string): Pro
   return `${window.location.origin}${AppRoute.MakeupAttendance}/${id}`;
 }
 
-export interface CohortBoardEnrollment {
+interface CohortBoardEnrollment {
   id: string;
   cohort_id: string;
   person: { id: string; name: string; status: string; membership_interest_sent_at: string | null };
 }
 
-export interface CohortBoardAttendance {
+interface CohortBoardAttendance {
   id: string;
   enrollment_id: string;
   lesson_id: string;

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { MembershipEligibility } from '../types';
 
-export interface CheckResult extends MembershipEligibility {
+interface CheckResult extends MembershipEligibility {
   name: string;
   alreadySubmitted: boolean;
 }

@@ -17,12 +17,12 @@ export enum SystemModule {
   Integration = 'integration',
 }
 
-export const MODULE_LABELS: Record<SystemModule, string> = {
+const MODULE_LABELS: Record<SystemModule, string> = {
   [SystemModule.Church]: 'Igreja',
   [SystemModule.Integration]: 'Integração',
 };
 
-export const ROLE_MODULE: Record<UserRole, SystemModule> = {
+const ROLE_MODULE: Record<UserRole, SystemModule> = {
   [UserRole.Pastor]: SystemModule.Church,
   [UserRole.Admin]: SystemModule.Integration,
   [UserRole.IntegrationTeam]: SystemModule.Integration,

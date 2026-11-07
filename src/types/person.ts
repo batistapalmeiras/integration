@@ -52,21 +52,21 @@ export const STATUS_META: Record<
 
 export const INTEGRATION_STATUSES = (Object.keys(STATUS_META) as PersonStatus[]).filter((status) => status !== 'member');
 
-export const AWAITING_REPLY_META = {
+const AWAITING_REPLY_META = {
   label: 'Aguardando Retorno',
   compactLabel: 'Aguardando',
   tone: 'warning' as StatusTone,
   icon: Clock,
 };
 
-export const AWAITING_CLASS_SIGNUP_META = {
+const AWAITING_CLASS_SIGNUP_META = {
   label: 'Convite Enviado',
   compactLabel: 'Convite enviado',
   tone: 'info' as StatusTone,
   icon: Send,
 };
 
-export const AWAITING_MEMBERSHIP_INTEREST_META = {
+const AWAITING_MEMBERSHIP_INTEREST_META = {
   label: 'Ficha Enviada',
   compactLabel: 'Ficha enviada',
   tone: 'info' as StatusTone,
@@ -80,15 +80,15 @@ export interface DisplayStatusInput {
   membership_interest_sent_at?: string | null;
 }
 
-export function isAwaitingReply(person: DisplayStatusInput): boolean {
+function isAwaitingReply(person: DisplayStatusInput): boolean {
   return (person.status === 'initial_contact' || person.status === 'retry_contact') && !!person.whatsapp_opened_at;
 }
 
-export function isAwaitingClassSignup(person: DisplayStatusInput): boolean {
+function isAwaitingClassSignup(person: DisplayStatusInput): boolean {
   return person.status === 'pending_signup' && !!person.class_invite_sent_at;
 }
 
-export function isAwaitingMembershipInterest(person: DisplayStatusInput): boolean {
+function isAwaitingMembershipInterest(person: DisplayStatusInput): boolean {
   return person.status === 'integration' && !!person.membership_interest_sent_at;
 }
 
@@ -101,7 +101,7 @@ export function getDisplayStatusMeta(person: DisplayStatusInput) {
 
 const PIPELINE_ORDER = new Map(Object.keys(STATUS_META).map((status, index) => [status as PersonStatus, index]));
 
-export interface PipelineSortInput extends DisplayStatusInput {
+interface PipelineSortInput extends DisplayStatusInput {
   name: string;
 }
 

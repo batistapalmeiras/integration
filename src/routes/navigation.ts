@@ -47,7 +47,7 @@ export const NAV_ITEMS = {
   profile: { label: 'Perfil', path: AppRoute.Profile, icon: User },
 } satisfies Record<string, NavItem>;
 
-export interface NavArea {
+interface NavArea {
   id: string;
   title: string;
   icon: LucideIcon;
@@ -82,7 +82,7 @@ export function areaItems(area: NavArea): NavItem[] {
   return [...area.tabs, ...area.more];
 }
 
-export function areaTabPaths(area: NavArea): string[] {
+function areaTabPaths(area: NavArea): string[] {
   return [...area.tabs.map((item) => item.path), area.morePath];
 }
 

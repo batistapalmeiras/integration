@@ -3,7 +3,7 @@ import { PersonStatus } from '../../types/person';
 
 const STORAGE_KEY = 'visitors-filters';
 
-export interface VisitorFilters {
+interface VisitorFilters {
   search: string;
   statusFilter: PersonStatus[];
 }

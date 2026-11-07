@@ -5,7 +5,7 @@ import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
 import { EntryType } from '../../../types/church';
 
-export interface MembershipQueueRow {
+interface MembershipQueueRow {
   id: string;
   name: string;
   entryType: EntryType | null;

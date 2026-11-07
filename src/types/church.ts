@@ -13,7 +13,7 @@ export const ENTRY_TYPE_DESCRIPTIONS: Partial<Record<EntryType, string>> = {
   reconciliation: 'Para quem foi desligado desta ou de outra igreja Batista e deseja voltar à comunhão.',
 };
 
-export type WantsSmallGroup = 'yes' | 'not_now' | 'already';
+type WantsSmallGroup = 'yes' | 'not_now' | 'already';
 
 export const WANTS_SMALL_GROUP_LABELS: Record<WantsSmallGroup, string> = {
   yes: 'Sim',

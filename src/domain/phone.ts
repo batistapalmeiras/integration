@@ -1,6 +1,6 @@
 export const INCOMPLETE_PHONE_MESSAGE = 'Telefone incompleto';
 
-export function phoneDigits(value: string): string {
+function phoneDigits(value: string): string {
   return value.replace(/\D/g, '');
 }
 

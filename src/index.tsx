@@ -6,7 +6,6 @@ import { ThemeProvider } from 'styled-components';
 // Local
 import App from './App';
 import { registerAppUpdates } from './pwa';
-import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -18,4 +17,3 @@ root.render(
 );
 
 registerAppUpdates();
-reportWebVitals();

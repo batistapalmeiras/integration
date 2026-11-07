@@ -1,4 +1,4 @@
-export interface CommunityAnswers {
+interface CommunityAnswers {
   wants_small_group: string | null;
   ministry_interests: string[] | null;
 }

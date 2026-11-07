@@ -1,15 +1,15 @@
-export interface StatuteClause {
+interface StatuteClause {
   label: string;
   text: string;
 }
 
-export interface StatuteBlock {
+interface StatuteBlock {
   label?: string;
   text: string;
   clauses?: StatuteClause[];
 }
 
-export interface StatuteArticle {
+interface StatuteArticle {
   label: string;
   blocks: StatuteBlock[];
 }

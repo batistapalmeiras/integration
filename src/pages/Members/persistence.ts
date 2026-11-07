@@ -4,7 +4,7 @@ import { EntryType } from '../../types/church';
 
 const STORAGE_KEY = 'members-filters';
 
-export interface MembersFilters {
+interface MembersFilters {
   search: string;
   membershipStatusFilter: MembershipStatus[];
   entryTypeFilter: EntryType[];

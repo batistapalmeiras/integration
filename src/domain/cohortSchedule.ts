@@ -1,11 +1,11 @@
-export const FIRST_LESSON_TIME = '17:30';
+const FIRST_LESSON_TIME = '17:30';
 
-export interface LessonLike {
+interface LessonLike {
   number: number;
   date: string;
 }
 
-export interface CohortLike {
+interface CohortLike {
   lessons: LessonLike[];
 }
 
@@ -23,7 +23,7 @@ export function currentLesson<T extends LessonLike>(lessons: T[], todayKey: stri
   return [...byDate].reverse().find((l) => l.date <= todayKey) ?? byDate[0];
 }
 
-export function firstLessonStart(date: string): Date {
+function firstLessonStart(date: string): Date {
   return new Date(`${date}T${FIRST_LESSON_TIME}:00`);
 }
 

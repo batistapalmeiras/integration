@@ -6,18 +6,6 @@ export const ActionsRow = styled.div`
   gap: ${({ theme }) => theme.spacing.sm};
 `;
 
-export const FiltersRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-
-  > * {
-    flex: 1;
-    min-width: 180px;
-  }
-`;
-
 export const SearchFiltersRow = styled.div`
   display: flex;
   align-items: flex-start;

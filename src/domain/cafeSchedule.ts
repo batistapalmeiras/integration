@@ -5,7 +5,7 @@ import { STATUS_META } from '../types/person';
 import { todayKey } from './dates';
 import { fromIntegration } from './integrationPeople';
 
-export interface CoffeeEventRef {
+interface CoffeeEventRef {
   id: string;
   event_date: string;
 }
@@ -254,7 +254,7 @@ export function isReturningToSignup(person: { status: string; signup_window_from
   return person?.status === 'pending_signup' && !!person.signup_window_from;
 }
 
-export const COFFEE_LIST_STATUSES = ['welcome_coffee', 'pending_signup', 'retry_contact'];
+const COFFEE_LIST_STATUSES = ['welcome_coffee', 'pending_signup', 'retry_contact'];
 
 export function isListedInCoffee(person: { status: string } | null, eventDate: string, today: string): boolean {
   const status = person?.status ?? '';
@@ -318,7 +318,7 @@ export async function markClassInviteDeclined(personId: string, actorId?: string
   });
 }
 
-export interface CoffeeBoardAttendance {
+interface CoffeeBoardAttendance {
   id: string;
   person_id: string;
   coffee_event_id: string;
@@ -404,7 +404,7 @@ export const COFFEE_HISTORY_PRESENCE_LABELS: Record<CoffeeHistoryPresence, strin
   awaiting_contact: STATUS_META.retry_contact.label,
 };
 
-export interface CoffeeHistoryPerson {
+interface CoffeeHistoryPerson {
   personId: string;
   name: string;
   presence: CoffeeHistoryPresence;
@@ -425,7 +425,7 @@ function futurePresence(person: { status: string } | null): CoffeeHistoryPresenc
   return person?.status === 'retry_contact' ? 'awaiting_contact' : 'enrolled';
 }
 
-export interface CoffeeHistoryEvent {
+interface CoffeeHistoryEvent {
   id: string;
   eventDate: string;
   people: CoffeeHistoryPerson[];

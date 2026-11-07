@@ -1,7 +1,7 @@
 const STORAGE_KEY = 'visitor-identity';
 const LEGACY_MEMBERSHIP_KEY = 'membership-interest-phone';
 
-export interface VisitorIdentity {
+interface VisitorIdentity {
   phone: string;
   name?: string;
 }

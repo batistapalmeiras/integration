@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { fadeUp } from 'bp-kit';
 import styled from 'styled-components';
 
-export const SIDEMENU_WIDTH = 248;
+const SIDEMENU_WIDTH = 248;
 export const SIDEMENU_MEDIA = '(min-width: 745px)';
 
 export const SideMenu = styled.aside`

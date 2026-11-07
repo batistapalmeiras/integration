@@ -1,7 +1,7 @@
 // Local
 import { ContactResult, PersonStatus } from './types';
 
-export interface ContactAttemptOutcome {
+interface ContactAttemptOutcome {
   toStatus: PersonStatus;
   clearWhatsAppOpened: boolean;
   noteOverride?: string;

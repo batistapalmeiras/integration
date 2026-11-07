@@ -18,14 +18,14 @@ export const MEMBERSHIP_STATUS_LABELS: Record<MembershipStatus, string> = {
   deceased: 'Falecido',
 };
 
-export type Gender = 'male' | 'female';
+type Gender = 'male' | 'female';
 
 export const GENDER_LABELS: Record<Gender, string> = {
   male: 'Masculino',
   female: 'Feminino',
 };
 
-export type MaritalStatus = 'single' | 'married' | 'widowed' | 'divorced';
+type MaritalStatus = 'single' | 'married' | 'widowed' | 'divorced';
 
 export const MARITAL_STATUS_LABELS: Record<MaritalStatus, string> = {
   single: 'Solteiro(a)',
@@ -72,14 +72,14 @@ export function isReviewPendency(field: PendencyField): boolean {
   return field === 'membership_status' || field in MEMBERSHIP_ALERT_LABELS;
 }
 
-export interface MemberPendency {
+interface MemberPendency {
   person_id: string;
   name: string;
   membership_status: MembershipStatus;
   missing_fields: PendencyField[];
 }
 
-export interface MemberPendencyPage {
+interface MemberPendencyPage {
   rows: MemberPendency[];
   total: number;
 }
