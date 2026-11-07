@@ -3,6 +3,7 @@ import { text } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { MemberRecord } from '../../domain/memberRecords';
+import { INCOMPLETE_PHONE_MESSAGE, isCompletePhone, isSamePhone } from '../../domain/phone';
 
 const optional = z.string();
 
@@ -15,9 +16,7 @@ export const memberRecordSchema = z.object({
   gender: z.enum(['male', 'female', '']),
   maritalStatus: z.enum(['single', 'married', 'widowed', 'divorced', '']),
   nationality: optional,
-  nickname: optional,
-  landline: optional,
-  otherPhone: optional,
+  otherPhone: z.string().refine((value) => value === '' || isCompletePhone(value), INCOMPLETE_PHONE_MESSAGE),
   addressZip: optional,
   addressStreet: optional,
   addressNumber: optional,
@@ -28,4 +27,8 @@ export const memberRecordSchema = z.object({
   addressReference: optional,
   cpf: z.string().refine((value) => value === '' || value.replace(/\D/g, '').length === 11, 'O CPF tem 11 dígitos'),
   rg: optional,
-}) satisfies z.ZodType<MemberRecord>;
+})
+  .refine((record) => !isSamePhone(record.otherPhone, record.phone), {
+    path: ['otherPhone'],
+    message: 'Informe um número diferente do celular',
+  }) satisfies z.ZodType<MemberRecord>;

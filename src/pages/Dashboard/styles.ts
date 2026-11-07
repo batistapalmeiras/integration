@@ -1,28 +1,55 @@
+// React
+import { Link } from 'react-router-dom';
 // Libs
 import { Card, StatValue } from 'bp-kit';
 import styled from 'styled-components';
 
+export const Page = styled.div`
+  container: dashboard / inline-size;
+`;
+
 export const Highlights = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: ${({ theme }) => theme.spacing.md};
+  margin-top: ${({ theme }) => theme.spacing.md};
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+  @container dashboard (max-width: 960px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @container dashboard (max-width: 600px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `;
 
-export const AgendaCell = styled.div`
+export const StatRow = styled.div`
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
 
-  > * {
-    flex: 1;
+  @container dashboard (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: ${({ theme }) => theme.spacing.sm};
   }
+`;
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    grid-column: span 2;
+export const StatText = styled.div`
+  flex: 1;
+  min-width: 0;
+
+  p {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
+`;
+
+export const AgendaList = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: ${({ theme }) => theme.spacing.md};
 `;
 
 export const HighlightValue = styled(StatValue)`
@@ -34,7 +61,7 @@ export const StageGrid = styled.div`
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: ${({ theme }) => theme.spacing.md};
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+  @container dashboard (max-width: 720px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `;
@@ -126,4 +153,17 @@ export const AgendaTitle = styled.span`
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
   font-weight: 600;
   color: ${({ theme }) => theme.colors.ink};
+`;
+
+export const CardLink = styled(Link)`
+  display: inline-block;
+  margin-top: ${({ theme }) => theme.spacing.xs};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.primaryActive};
+  text-decoration: none;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.luxe};
+  }
 `;

@@ -72,14 +72,19 @@ export function MemberRecordPage() {
         </SectionDivider>
         <TextInput label="Celular" control={control} name="phone" mask="phone" placeholder={PHONE_PLACEHOLDER} />
         <TextInput label={text.fields.email} control={control} name="email" type="email" placeholder={text.fields.emailPlaceholder} />
-        <TextInput label="Telefone fixo" control={control} name="landline" inputMode="tel" />
-        <TextInput label="Outro telefone" control={control} name="otherPhone" inputMode="tel" />
+        <TextInput
+          label="Outro telefone para contato (fixo ou de alguém da casa)"
+          control={control}
+          name="otherPhone"
+          mask="phone"
+          inputMode="numeric"
+          placeholder={PHONE_PLACEHOLDER}
+        />
 
         <SectionDivider>
           <Typography type="h6">Dados pessoais</Typography>
         </SectionDivider>
         <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />
-        <TextInput label="Apelido" control={control} name="nickname" />
         <TextInput label="Nascimento" control={control} name="birthDate" type="date" />
         <Select label="Sexo" control={control} name="gender">
           <option value="">Não informado</option>

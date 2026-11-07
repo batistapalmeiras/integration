@@ -11,7 +11,9 @@ import {
 // Components
 import { PageHeader } from '../../components/PageHeader';
 import { List, ListItem, ListName } from '../../components/List';
+import { IconBadge } from '../../components/MenuOptions';
 import { formatTimestampDate, todayKey, weekdayLabel } from '../../domain/dates';
+import { findPastorAreaById, NAV_ITEMS } from '../../routes/navigation';
 import { PersonStatus, STATUS_META } from '../../types/person';
 // Local
 import { usePastorDashboard } from './hooks/usePastorDashboard';
@@ -19,18 +21,22 @@ import {
   AgendaDate,
   AgendaItem,
   AgendaTitle,
+  CardLink,
   Columns,
   Detail,
   HighlightValue,
   Highlights,
   MainColumn,
+  Page,
   Panel,
   PanelText,
   PanelTitle,
   Section,
   SideColumn,
-  AgendaCell,
+  AgendaList,
   StageGrid,
+  StatRow,
+  StatText,
 } from './styles';
 
 const FUNNEL: { status: PersonStatus; owner: string }[] = [
@@ -41,6 +47,8 @@ const FUNNEL: { status: PersonStatus; owner: string }[] = [
   { status: 'integration', owner: 'Professor' },
   { status: 'membership_pending', owner: 'Conselho Administrativo' },
 ];
+
+const INTEGRATION_ICON = findPastorAreaById('integration')!.icon;
 
 const SAO_PAULO = { timeZone: 'America/Sao_Paulo' } as const;
 
@@ -58,6 +66,11 @@ function todayLabel(): string {
 
 function shortMonth(dateKey: string): string {
   return new Date(`${dateKey}T12:00:00`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+}
+
+function StageIcon({ status }: { status: PersonStatus }) {
+  const Icon = STATUS_META[status].icon;
+  return <Icon size={22} />;
 }
 
 function plural(count: number, singular: string, pluralForm: string): string {
@@ -95,64 +108,73 @@ export function DashboardPage() {
     0,
   );
 
+  const highlights = [
+    { label: 'Membros', value: totalMembers, icon: NAV_ITEMS.members.icon, link: 'Ver membros', path: NAV_ITEMS.members.path },
+    { label: 'Na Integração', value: inIntegration, icon: INTEGRATION_ICON, link: 'Ver pessoas', path: NAV_ITEMS.people.path },
+    {
+      label: 'Em processo de membresia',
+      value: funnel.membership_pending ?? 0,
+      icon: NAV_ITEMS.membership.icon,
+      link: 'Ver membresia',
+      path: NAV_ITEMS.membership.path,
+    },
+    { label: 'Pequenos Grupos', value: community.smallGroups, icon: NAV_ITEMS.smallGroups.icon, link: 'Ver PGs', path: NAV_ITEMS.smallGroups.path },
+    { label: 'Ministérios', value: community.ministries, icon: NAV_ITEMS.ministries.icon, link: 'Ver ministérios', path: NAV_ITEMS.ministries.path },
+  ];
+
   return (
-    <div>
+    <Page>
       <PageHeader title={title} subtitle={todayLabel()} />
 
-      <Highlights>
-        <AgendaCell>
-          <Panel aria-labelledby="agenda">
-            <PanelTitle id="agenda">Próximos dias</PanelTitle>
-            {!coffee && !cohort && <PanelText>Nenhum café ou turma agendado.</PanelText>}
-            {coffee && (
-              <AgendaItem>
-                <AgendaDate>
-                  {coffee.eventDate.slice(8, 10)}
-                  <small>{shortMonth(coffee.eventDate)}</small>
-                </AgendaDate>
-                <span>
-                  <AgendaTitle>Café de Boas-vindas</AgendaTitle>
-                  <Detail>
-                    {coffee.eventDate === todayKey() ? 'Hoje' : weekdayLabel(coffee.eventDate)}, 17:30 ·{' '}
-                    {plural(coffee.rosterCount, 'pessoa na lista', 'pessoas na lista')}
-                  </Detail>
-                </span>
-              </AgendaItem>
-            )}
-            {cohort && (
-              <AgendaItem>
-                <AgendaDate>
-                  {cohort.firstLesson.slice(8, 10)}
-                  <small>{shortMonth(cohort.firstLesson)}</small>
-                </AgendaDate>
-                <span>
-                  <AgendaTitle>1ª aula da {cohort.name}</AgendaTitle>
-                  <Detail>As inscrições fecham às 17:30</Detail>
-                </span>
-              </AgendaItem>
-            )}
-          </Panel>
-        </AgendaCell>
-        <StatCard>
-          <StatLabel>Membros</StatLabel>
-          <HighlightValue>{totalMembers}</HighlightValue>
-        </StatCard>
-        <StatCard>
-          <StatLabel>Na Integração</StatLabel>
-          <HighlightValue>{inIntegration}</HighlightValue>
-        </StatCard>
-        <StatCard>
-          <StatLabel>Em processo de membresia</StatLabel>
-          <HighlightValue>{funnel.membership_pending ?? 0}</HighlightValue>
-        </StatCard>
-        <StatCard>
-          <StatLabel>Pequenos Grupos</StatLabel>
-          <HighlightValue>{community.smallGroups}</HighlightValue>
-        </StatCard>
-        <StatCard>
-          <StatLabel>Ministérios</StatLabel>
-          <HighlightValue>{community.ministries}</HighlightValue>
-        </StatCard>
+      <Panel aria-labelledby="agenda">
+        <PanelTitle id="agenda">Próximos dias</PanelTitle>
+        {!coffee && !cohort && <PanelText>Nenhum café ou turma agendado.</PanelText>}
+        <AgendaList>
+          {coffee && (
+            <AgendaItem>
+              <AgendaDate>
+                {coffee.eventDate.slice(8, 10)}
+                <small>{shortMonth(coffee.eventDate)}</small>
+              </AgendaDate>
+              <span>
+                <AgendaTitle>Café de Boas-vindas</AgendaTitle>
+                <Detail>
+                  {coffee.eventDate === todayKey() ? 'Hoje' : weekdayLabel(coffee.eventDate)}, 17:30 ·{' '}
+                  {plural(coffee.rosterCount, 'pessoa na lista', 'pessoas na lista')}
+                </Detail>
+              </span>
+            </AgendaItem>
+          )}
+          {cohort && (
+            <AgendaItem>
+              <AgendaDate>
+                {cohort.firstLesson.slice(8, 10)}
+                <small>{shortMonth(cohort.firstLesson)}</small>
+              </AgendaDate>
+              <span>
+                <AgendaTitle>1ª aula da {cohort.name}</AgendaTitle>
+                <Detail>As inscrições fecham às 17:30</Detail>
+              </span>
+            </AgendaItem>
+          )}
+        </AgendaList>
+      </Panel>
+
+      <Highlights aria-label="Números da igreja">
+        {highlights.map((highlight) => (
+          <StatCard key={highlight.label}>
+            <StatRow>
+              <IconBadge>
+                <highlight.icon size={22} />
+              </IconBadge>
+              <StatText>
+                <StatLabel>{highlight.label}</StatLabel>
+                <HighlightValue>{highlight.value}</HighlightValue>
+                <CardLink to={highlight.path}>{highlight.link}</CardLink>
+              </StatText>
+            </StatRow>
+          </StatCard>
+        ))}
       </Highlights>
 
       <Columns>
@@ -162,9 +184,16 @@ export function DashboardPage() {
             <StageGrid>
               {FUNNEL.map((stage) => (
                 <StatCard key={stage.status}>
-                  <StatLabel>{STATUS_META[stage.status].label}</StatLabel>
-                  <StatValue>{funnel[stage.status] ?? 0}</StatValue>
-                  <Detail>{stage.owner}</Detail>
+                  <StatRow>
+                    <IconBadge>
+                      <StageIcon status={stage.status} />
+                    </IconBadge>
+                    <StatText>
+                      <StatLabel>{STATUS_META[stage.status].label}</StatLabel>
+                      <StatValue>{funnel[stage.status] ?? 0}</StatValue>
+                      <Detail>{stage.owner}</Detail>
+                    </StatText>
+                  </StatRow>
                 </StatCard>
               ))}
             </StageGrid>
@@ -191,6 +220,6 @@ export function DashboardPage() {
           </SideColumn>
         )}
       </Columns>
-    </div>
+    </Page>
   );
 }

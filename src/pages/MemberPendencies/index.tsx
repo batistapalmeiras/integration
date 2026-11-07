@@ -31,12 +31,12 @@ export function MemberPendenciesPage() {
         <SearchFiltersRow>
           <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
           <RawSelect
-            label="Pendência"
+            aria-label="Pendência"
             size="sm"
             value={field ?? ''}
             onChange={(e) => setField((e.target.value || null) as PendencyField | null)}
           >
-            <option value="">Todas</option>
+            <option value="">Todas as pendências</option>
             {FIELD_OPTIONS.map(([value, label]) => (
               <option key={value} value={value}>
                 {label}

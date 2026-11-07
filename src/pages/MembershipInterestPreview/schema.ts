@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { isValidCpf } from '../../domain/cpf';
 import { parseTypedDate, todayKey } from '../../domain/dates';
 import { MaritalStatusOption } from '../../domain/memberRecords';
+import { INCOMPLETE_PHONE_MESSAGE, isCompletePhone, isSamePhone } from '../../domain/phone';
 
 export interface MembershipFormValues {
   name: string;
@@ -105,9 +106,9 @@ function addressSchema(identificationPhone: string) {
     ),
     otherPhone: z
       .string()
-      .refine((value) => value === '' || [10, 11].includes(digits(value).length), 'Telefone incompleto')
+      .refine((value) => value === '' || isCompletePhone(value), INCOMPLETE_PHONE_MESSAGE)
       .refine(
-        (value) => value === '' || digits(value) !== digits(identificationPhone),
+        (value) => !isSamePhone(value, identificationPhone),
         'Informe um número diferente do que você usou para entrar',
       ),
     zip: required('o CEP').refine(whenFilled((value) => digits(value).length === 8), 'O CEP tem 8 dígitos'),

@@ -118,8 +118,6 @@ export interface MemberRecord {
   gender: Gender | '';
   maritalStatus: MaritalStatus | '';
   nationality: string;
-  nickname: string;
-  landline: string;
   otherPhone: string;
   addressZip: string;
   addressStreet: string;
@@ -137,8 +135,6 @@ const PROFILE_COLUMNS = {
   gender: 'gender',
   maritalStatus: 'marital_status',
   nationality: 'nationality',
-  nickname: 'nickname',
-  landline: 'landline',
   otherPhone: 'other_phone',
   addressZip: 'address_zip',
   addressStreet: 'address_street',
@@ -176,6 +172,7 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
   return {
     ...profileValues,
     cpf: profileValues.cpf && formatCPF(profileValues.cpf),
+    otherPhone: profileValues.otherPhone && maskPhone(profileValues.otherPhone),
     gender: profileValues.gender as Gender | '',
     maritalStatus: profileValues.maritalStatus as MaritalStatus | '',
     name: member.name,
@@ -191,6 +188,7 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
     (Object.entries(PROFILE_COLUMNS) as [ProfileKey, string][]).map(([key, column]) => [column, blankToNull(record[key])]),
   );
   profile.cpf = digitsOrNull(record.cpf);
+  profile.other_phone = digitsOrNull(record.otherPhone);
   profile.address_zip = digitsOrNull(record.addressZip);
 
   const results = await Promise.all([
