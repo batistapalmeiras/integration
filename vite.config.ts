@@ -11,6 +11,17 @@ export default defineConfig({
       injectRegister: null,
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'robots.txt'],
       devOptions: { enabled: true },
+      workbox: {
+        globIgnores: ['index.html'],
+        navigateFallback: null,
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: { cacheName: 'pages', networkTimeoutSeconds: 5 },
+          },
+        ],
+      },
       manifest: {
         name: 'Integração — Batista Palmeiras',
         short_name: 'Integração',
