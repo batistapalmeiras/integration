@@ -26,7 +26,6 @@ export const memberRecordSchema = z.object({
   addressState: optional,
   addressReference: optional,
   cpf: z.string().refine((value) => value === '' || value.replace(/\D/g, '').length === 11, 'O CPF tem 11 dígitos'),
-  rg: optional,
   publicNotes: optional,
 })
   .refine((record) => !isSamePhone(record.otherPhone, record.phone), {

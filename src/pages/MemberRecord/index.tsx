@@ -73,7 +73,7 @@ export function MemberRecordPage() {
         <TextInput label="Celular" control={control} name="phone" mask="phone" placeholder={PHONE_PLACEHOLDER} />
         <TextInput label={text.fields.email} control={control} name="email" type="email" placeholder={text.fields.emailPlaceholder} />
         <TextInput
-          label="Outro telefone para contato (fixo ou de alguém da casa)"
+          label="Outro telefone para contato"
           control={control}
           name="otherPhone"
           mask="phone"
@@ -120,7 +120,6 @@ export function MemberRecordPage() {
           <Typography type="h6">Documentos</Typography>
         </SectionDivider>
         <TextInput label="CPF" control={control} name="cpf" inputMode="numeric" placeholder="000.000.000-00" />
-        <TextInput label="RG" control={control} name="rg" />
 
         <SectionDivider>
           <Typography type="h6">Observações</Typography>

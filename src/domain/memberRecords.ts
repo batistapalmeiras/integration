@@ -128,7 +128,6 @@ export interface MemberRecord {
   addressState: string;
   addressReference: string;
   cpf: string;
-  rg: string;
   publicNotes: string;
 }
 
@@ -146,7 +145,6 @@ const PROFILE_COLUMNS = {
   addressState: 'address_state',
   addressReference: 'address_reference',
   cpf: 'cpf',
-  rg: 'rg',
   publicNotes: 'public_notes',
 } as const satisfies Partial<Record<keyof MemberRecord, string>>;
 
