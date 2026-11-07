@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, Select, Skeleton, text, TextInput, Typography, useToast } from 'bp-kit';
+import { Button, Empty, Select, Skeleton, text, Textarea, TextInput, Typography, useToast } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
@@ -121,6 +121,11 @@ export function MemberRecordPage() {
         </SectionDivider>
         <TextInput label="CPF" control={control} name="cpf" inputMode="numeric" placeholder="000.000.000-00" />
         <TextInput label="RG" control={control} name="rg" />
+
+        <SectionDivider>
+          <Typography type="h6">Observações</Typography>
+        </SectionDivider>
+        <Textarea label="Observações" control={control} name="publicNotes" rows={4} />
 
         <Actions>
           <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
