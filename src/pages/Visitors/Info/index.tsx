@@ -13,7 +13,7 @@ import { formatDate } from '../../../domain/dates';
 import { LessonMakeup, getPersonLessonMakeups } from '../../../domain/lessonMakeups';
 import { communityRequirements } from '../../../domain/membershipCommunity';
 import { AppRoute } from '../../../routes/paths';
-import { hasRole, TEACHING_ROLES, UserRole } from '../../../types/enums';
+import { hasRole, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
 import { useVisitorProfile } from '../../../features/visitors';
 import { CommunityFields } from '../components/CommunityFields';
 import { ConfirmMemberModal } from '../Detail/components/ConfirmMemberModal';
@@ -60,7 +60,8 @@ export function VisitorInfoPage() {
   const [tab, setTab] = useState<InfoTab>(() => (searchParams.get('tab') as InfoTab | null) ?? 'general');
   const fromMembershipQueue = searchParams.get('from') === 'membership';
 
-  const canSeeSensitive = hasRole(user?.role, TEACHING_ROLES);
+  const canSeeSensitive = hasRole(user?.role, LEADERSHIP_ROLES);
+  const canSeeMakeups = hasRole(user?.role, TEACHING_ROLES);
   const sensitive = usePersonSensitive(id ?? '', canSeeSensitive).data ?? null;
   const [makeups, setMakeups] = useState<LessonMakeup[]>([]);
   const requirements = communityRequirements(sensitive);
@@ -68,8 +69,8 @@ export function VisitorInfoPage() {
   requirementsRef.current = requirements;
 
   useEffect(() => {
-    if (canSeeSensitive && id) getPersonLessonMakeups(id).then(setMakeups);
-  }, [canSeeSensitive, id]);
+    if (canSeeMakeups && id) getPersonLessonMakeups(id).then(setMakeups);
+  }, [canSeeMakeups, id]);
   const canEditCommunity = user?.role === UserRole.Pastor && person?.status === 'member';
   const smallGroups = useSmallGroups(canEditCommunity).data ?? [];
   const ministries = useMinistries(canEditCommunity).data ?? [];
@@ -94,7 +95,7 @@ export function VisitorInfoPage() {
     { key: 'general', label: 'Geral' },
     ...(canSeeSensitive && reachedIntegration ? [{ key: 'integration' as InfoTab, label: 'Integração' }] : []),
     ...(canSeeSensitive && reachedMembership ? [{ key: 'membership' as InfoTab, label: 'Membresia' }] : []),
-    ...(canSeeSensitive && makeups.length > 0 ? [{ key: 'makeup' as InfoTab, label: 'Reposição' }] : []),
+    ...(canSeeMakeups && makeups.length > 0 ? [{ key: 'makeup' as InfoTab, label: 'Reposição' }] : []),
   ];
 
   const current = tabs.some((t) => t.key === tab) ? tab : 'general';

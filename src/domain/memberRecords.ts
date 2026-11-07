@@ -2,7 +2,7 @@
 import { formatCPF, maskPhone } from 'bp-kit';
 // Local
 import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membershipAlerts';
-import { toOptions } from './text';
+import { toOptions, YesNo } from './text';
 import { supabase } from '../lib/supabase';
 
 export type MembershipStatus = 'active' | 'pending_review' | 'inactive' | 'transferred' | 'removed' | 'deceased';
@@ -129,6 +129,24 @@ export interface MemberRecord {
   addressReference: string;
   cpf: string;
   publicNotes: string;
+  birthplace: string;
+  birthState: string;
+  education: string;
+  profession: string;
+  workplace: string;
+  fatherName: string;
+  motherName: string;
+  spouseName: string;
+  weddingDate: string;
+  childrenNames: string;
+  childrenCount: string;
+  baptismDate: string;
+  baptismChurch: string;
+  ministryBackground: string;
+  preferredContact: string;
+  readsEmail: YesNo | '';
+  acceptsVisits: YesNo | '';
+  legacyStatus: string;
 }
 
 const PROFILE_COLUMNS = {
@@ -146,9 +164,27 @@ const PROFILE_COLUMNS = {
   addressReference: 'address_reference',
   cpf: 'cpf',
   publicNotes: 'public_notes',
+  birthplace: 'birthplace',
+  birthState: 'birth_state',
+  education: 'education',
+  profession: 'profession',
+  workplace: 'workplace',
+  fatherName: 'father_name',
+  motherName: 'mother_name',
+  spouseName: 'spouse_name',
+  weddingDate: 'wedding_date',
+  childrenNames: 'children_names',
+  baptismDate: 'baptism_date',
+  baptismChurch: 'baptism_church',
+  ministryBackground: 'ministry_background',
+  preferredContact: 'preferred_contact',
+  legacyStatus: 'legacy_status',
 } as const satisfies Partial<Record<keyof MemberRecord, string>>;
 
 type ProfileKey = keyof typeof PROFILE_COLUMNS;
+
+const toYesNo = (value: unknown): YesNo | '' => (value === true ? 'yes' : value === false ? 'no' : '');
+const fromYesNo = (value: YesNo | '') => (value === '' ? null : value === 'yes');
 
 const blankToNull = (value: string) => (value.trim() === '' ? null : value.trim());
 const digitsOrNull = (value: string) => blankToNull(value.replace(/\D/g, ''));
@@ -164,9 +200,9 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
   const member = person.data;
   if (!member) throw new Error('Membro não encontrado.');
 
-  const profileRow = (profile.data ?? {}) as Record<string, string | null>;
+  const profileRow = (profile.data ?? {}) as Record<string, string | number | boolean | null>;
   const profileValues = Object.fromEntries(
-    (Object.entries(PROFILE_COLUMNS) as [ProfileKey, string][]).map(([key, column]) => [key, profileRow[column] ?? '']),
+    (Object.entries(PROFILE_COLUMNS) as [ProfileKey, string][]).map(([key, column]) => [key, String(profileRow[column] ?? '')]),
   ) as Record<ProfileKey, string>;
 
   return {
@@ -180,16 +216,23 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
     email: member.email ?? '',
     membershipStatus: member.membership_status as MembershipStatus,
     birthDate: sensitive.data?.birth_date ?? '',
+    childrenCount: profileRow.children_count == null ? '' : String(profileRow.children_count),
+    readsEmail: toYesNo(profileRow.reads_email),
+    acceptsVisits: toYesNo(profileRow.accepts_visits),
   };
 }
 
 export async function saveMemberRecord(personId: string, record: MemberRecord): Promise<void> {
-  const profile = Object.fromEntries(
+  const profile: Record<string, string | number | boolean | null> = Object.fromEntries(
     (Object.entries(PROFILE_COLUMNS) as [ProfileKey, string][]).map(([key, column]) => [column, blankToNull(record[key])]),
   );
   profile.cpf = digitsOrNull(record.cpf);
   profile.other_phone = digitsOrNull(record.otherPhone);
   profile.address_zip = digitsOrNull(record.addressZip);
+  profile.birth_state = blankToNull(record.birthState.toUpperCase());
+  profile.children_count = record.childrenCount.trim() === '' ? null : Number(record.childrenCount);
+  profile.reads_email = fromYesNo(record.readsEmail);
+  profile.accepts_visits = fromYesNo(record.acceptsVisits);
 
   const results = await Promise.all([
     supabase
