@@ -126,28 +126,6 @@ export const AgendaItem = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-export const AgendaDate = styled.span`
-  flex: none;
-  width: 48px;
-  height: 52px;
-  border-radius: ${({ theme }) => theme.rounded.sm};
-  background: ${({ theme }) => theme.colors.primarySoft};
-  color: ${({ theme }) => theme.colors.luxe};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  line-height: 1.1;
-  font-size: 18px;
-  font-weight: 700;
-
-  small {
-    font-size: ${({ theme }) => theme.typography.badge.fontSize};
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-`;
-
 export const AgendaTitle = styled.span`
   display: block;
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
@@ -165,5 +143,21 @@ export const CardLink = styled(Link)`
 
   &:hover {
     color: ${({ theme }) => theme.colors.luxe};
+  }
+`;
+
+export const BirthdaysPanel = styled(Panel)`
+  margin-top: ${({ theme }) => theme.spacing.md};
+`;
+
+export const BirthdayHeading = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.sm};
+
+  > a {
+    margin-top: 0;
   }
 `;

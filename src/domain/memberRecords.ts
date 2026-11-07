@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 
 export type MembershipStatus = 'active' | 'pending_review' | 'inactive' | 'transferred' | 'removed' | 'deceased';
 
-const COUNTED_MEMBERSHIP_STATUSES: MembershipStatus[] = ['active', 'pending_review'];
+export const COUNTED_MEMBERSHIP_STATUSES: MembershipStatus[] = ['active', 'pending_review'];
 
 export const MEMBERSHIP_STATUS_LABELS: Record<MembershipStatus, string> = {
   active: 'Ativo',

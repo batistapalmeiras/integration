@@ -7,6 +7,7 @@ import { Layout } from '../components/Layout';
 import { PasswordGate } from '../components/PasswordGate';
 import { QueryCacheReset } from '../components/QueryCacheReset';
 import { AdminPage } from '../pages/Admin';
+import { BirthdaysPage } from '../pages/Birthdays';
 import { ClassesPage } from '../pages/Classes';
 import { CoffeePage } from '../pages/Coffee';
 import { CommunityGroupDetailPage } from '../pages/CommunityGroups/Detail';
@@ -172,6 +173,14 @@ export function AppRouter() {
                       element={
                         <ProtectedRoute roles={[UserRole.Pastor]}>
                           <MemberPendenciesPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={AppRoute.Birthdays}
+                      element={
+                        <ProtectedRoute roles={[UserRole.Pastor]}>
+                          <BirthdaysPage />
                         </ProtectedRoute>
                       }
                     />

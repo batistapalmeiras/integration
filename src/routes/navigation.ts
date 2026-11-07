@@ -1,5 +1,6 @@
 // Libs
 import {
+  Cake,
   Church,
   ClipboardCheck,
   Coffee,
@@ -41,6 +42,7 @@ export const NAV_ITEMS = {
   reports: { label: 'Relatórios', path: AppRoute.Reports, icon: FileBarChart },
   members: { label: 'Membros', path: AppRoute.Members, icon: Users },
   pendencies: { label: 'Pendências', path: AppRoute.MemberPendencies, icon: ClipboardCheck },
+  birthdays: { label: 'Aniversariantes', path: AppRoute.Birthdays, icon: Cake },
   ministries: { label: 'Ministérios', path: AppRoute.Ministries, icon: HeartHandshake },
   smallGroups: { label: 'Pequenos Grupos', tabLabel: 'PGs', path: AppRoute.SmallGroups, icon: UsersRound },
   store: { label: 'Loja', path: AppRoute.Store, icon: Store },
@@ -62,7 +64,7 @@ export const PASTOR_NAV_AREAS: NavArea[] = [
     title: 'Igreja',
     icon: Church,
     tabs: [NAV_ITEMS.members, NAV_ITEMS.pendencies, NAV_ITEMS.smallGroups, NAV_ITEMS.ministries],
-    more: [NAV_ITEMS.volunteers],
+    more: [NAV_ITEMS.birthdays, NAV_ITEMS.volunteers],
     morePath: AppRoute.ChurchMore,
   },
   {

@@ -9,18 +9,22 @@ import {
   useAuthCtx,
 } from 'bp-kit';
 // Components
+import { DateBadge } from '../../components/DateBadge';
 import { PageHeader } from '../../components/PageHeader';
 import { List, ListItem, ListName } from '../../components/List';
 import { IconBadge } from '../../components/MenuOptions';
-import { formatTimestampDate, todayKey, weekdayLabel } from '../../domain/dates';
+import { birthdayAgeLabel, birthdayMonth, birthdaysInMonth, isBirthdayToday, MemberBirthday, upcomingBirthdaysThisMonth } from '../../domain/birthdays';
+import { formatTimestampDate, monthName, todayKey, weekdayLabel } from '../../domain/dates';
+import { useMemberBirthdays } from '../../queries/person';
 import { findPastorAreaById, NAV_ITEMS } from '../../routes/navigation';
 import { PersonStatus, STATUS_META } from '../../types/person';
 // Local
 import { usePastorDashboard } from './hooks/usePastorDashboard';
 import {
-  AgendaDate,
   AgendaItem,
   AgendaTitle,
+  BirthdayHeading,
+  BirthdaysPanel,
   CardLink,
   Columns,
   Detail,
@@ -64,13 +68,54 @@ function todayLabel(): string {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-function shortMonth(dateKey: string): string {
-  return new Date(`${dateKey}T12:00:00`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
-}
-
 function StageIcon({ status }: { status: PersonStatus }) {
   const Icon = STATUS_META[status].icon;
   return <Icon size={22} />;
+}
+
+const UPCOMING_BIRTHDAYS_LIMIT = 5;
+
+function birthdayDetail(birthday: MemberBirthday, today: string): string {
+  const day = isBirthdayToday(birthday.birthDate, today) ? 'Hoje' : weekdayLabel(`${today.slice(0, 4)}${birthday.birthDate.slice(4)}`);
+  const age = birthdayAgeLabel(birthday.birthDate, Number(today.slice(0, 4)), today);
+  return age ? `${day} · ${age.toLowerCase()}` : day;
+}
+
+function BirthdaysHighlight() {
+  const { data, loading, error } = useMemberBirthdays();
+  const today = todayKey();
+  const month = monthName(birthdayMonth(today)).toLowerCase();
+  const monthTotal = birthdaysInMonth(data ?? [], birthdayMonth(today)).length;
+  const upcoming = upcomingBirthdaysThisMonth(data ?? [], today);
+  const shown = upcoming.slice(0, UPCOMING_BIRTHDAYS_LIMIT);
+
+  return (
+    <BirthdaysPanel aria-labelledby="birthdays">
+      <BirthdayHeading>
+        <PanelTitle id="birthdays">Aniversariantes de {month}</PanelTitle>
+        {monthTotal > 0 && <CardLink to={NAV_ITEMS.birthdays.path}>Ver todos os {monthTotal}</CardLink>}
+      </BirthdayHeading>
+      {loading && <Skeleton $h="120px" />}
+      {!loading && !!error && <PanelText>{text.feedback.loadError}</PanelText>}
+      {!loading && !error && monthTotal === 0 && <PanelText>Nenhum membro faz aniversário em {month}.</PanelText>}
+      {!loading && !error && monthTotal > 0 && upcoming.length === 0 && (
+        <PanelText>Os aniversários de {month} já passaram.</PanelText>
+      )}
+      {shown.length > 0 && (
+        <AgendaList>
+          {shown.map((birthday) => (
+            <AgendaItem key={birthday.personId}>
+              <DateBadge date={birthday.birthDate} strong={isBirthdayToday(birthday.birthDate, today)} />
+              <span>
+                <AgendaTitle>{birthday.name}</AgendaTitle>
+                <Detail>{birthdayDetail(birthday, today)}</Detail>
+              </span>
+            </AgendaItem>
+          ))}
+        </AgendaList>
+      )}
+    </BirthdaysPanel>
+  );
 }
 
 function plural(count: number, singular: string, pluralForm: string): string {
@@ -132,10 +177,7 @@ export function DashboardPage() {
         <AgendaList>
           {coffee && (
             <AgendaItem>
-              <AgendaDate>
-                {coffee.eventDate.slice(8, 10)}
-                <small>{shortMonth(coffee.eventDate)}</small>
-              </AgendaDate>
+              <DateBadge date={coffee.eventDate} />
               <span>
                 <AgendaTitle>Café de Boas-vindas</AgendaTitle>
                 <Detail>
@@ -147,10 +189,7 @@ export function DashboardPage() {
           )}
           {cohort && (
             <AgendaItem>
-              <AgendaDate>
-                {cohort.firstLesson.slice(8, 10)}
-                <small>{shortMonth(cohort.firstLesson)}</small>
-              </AgendaDate>
+              <DateBadge date={cohort.firstLesson} />
               <span>
                 <AgendaTitle>1ª aula da {cohort.name}</AgendaTitle>
                 <Detail>As inscrições fecham às 17:30</Detail>
@@ -159,6 +198,8 @@ export function DashboardPage() {
           )}
         </AgendaList>
       </Panel>
+
+      <BirthdaysHighlight />
 
       <Highlights aria-label="Números da igreja">
         {highlights.map((highlight) => (

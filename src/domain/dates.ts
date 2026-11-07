@@ -25,3 +25,12 @@ export function parseTypedDate(value: string): string | null {
     date.getFullYear() === Number(year) && date.getMonth() === Number(month) - 1 && date.getDate() === Number(day);
   return valid ? `${year}-${month}-${day}` : null;
 }
+
+export function monthName(month: number): string {
+  const name = new Date(2000, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long' });
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+export function shortMonthName(month: number): string {
+  return new Date(2000, month - 1, 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+}

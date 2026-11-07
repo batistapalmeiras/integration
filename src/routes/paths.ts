@@ -22,6 +22,7 @@ export enum AppRoute {
   MembershipInterestPreview = '/nova-ficha-membresia',
   Members = '/membros',
   MemberPendencies = '/membros/pendencias',
+  Birthdays = '/membros/aniversariantes',
   Membership = '/membresia',
   CommunityGroups = '/comunidade',
   Ministries = '/comunidade/ministerios',
