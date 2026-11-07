@@ -9,21 +9,18 @@ export async function fetchPerson(id: string): Promise<Person> {
   return data as Person;
 }
 
-export async function updatePersonFields(id: string, fields: Record<string, unknown>): Promise<void> {
-  const { error } = await supabase.from('people').update(fields).eq('id', id);
+export async function updatePersonFields(id: string, fields: Record<string, unknown>): Promise<Person> {
+  const { data, error } = await supabase.from('people').update(fields).eq('id', id).select('*').single();
   if (error) throw error;
+  return data as Person;
 }
 
 export async function updatePersonStatus(
   id: string,
   toStatus: PersonStatus,
   extra: Record<string, unknown> = {},
-): Promise<void> {
-  const { error } = await supabase
-    .from('people')
-    .update({ status: toStatus, updated_at: new Date().toISOString(), ...extra })
-    .eq('id', id);
-  if (error) throw error;
+): Promise<Person> {
+  return updatePersonFields(id, { status: toStatus, updated_at: new Date().toISOString(), ...extra });
 }
 
 export async function insertStatusHistory(entry: {
@@ -55,6 +52,50 @@ export async function updateContactAttemptResult(attemptId: string, result: stri
   if (error) throw error;
 }
 
+export interface PersonProfileSummary {
+  coffeeDate: string | null;
+  cohortName: string | null;
+  smallGroupName: string | null;
+  ministryNames: string[];
+  ministryIds: string[];
+}
+
+interface PersonProfileRow {
+  small_group: { name: string } | null;
+  person_ministries: { ministry_id: string; ministry: { name: string } | null }[];
+  enrollments: { created_at: string; cohort: { name: string } | null }[];
+  coffee_attendance: { attended: boolean; coffee_event: { event_date: string } | null }[];
+}
+
+export async function fetchPersonProfileSummary(personId: string): Promise<PersonProfileSummary> {
+  const { data, error } = await supabase
+    .from('people')
+    .select(
+      'small_group:small_groups(name), person_ministries(ministry_id, ministry:ministries(name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))',
+    )
+    .eq('id', personId)
+    .single();
+  if (error) throw error;
+
+  const row = data as unknown as PersonProfileRow;
+  const latestEnrollment = [...row.enrollments].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+  const attendedDates = row.coffee_attendance
+    .filter((a) => a.attended && a.coffee_event)
+    .map((a) => a.coffee_event!.event_date)
+    .sort();
+
+  return {
+    coffeeDate: attendedDates.at(-1) ?? null,
+    cohortName: latestEnrollment?.cohort?.name ?? null,
+    smallGroupName: row.small_group?.name ?? null,
+    ministryNames: row.person_ministries
+      .map((m) => m.ministry?.name)
+      .filter((name): name is string => !!name)
+      .sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    ministryIds: row.person_ministries.map((m) => m.ministry_id),
+  };
+}
+
 export async function fetchLastContactAttempt(
   personId: string,
 ): Promise<{ id: string; result: string; created_at: string } | null> {
@@ -66,11 +107,6 @@ export async function fetchLastContactAttempt(
     .limit(1)
     .maybeSingle();
   return data as { id: string; result: string; created_at: string } | null;
-}
-
-export async function clearWhatsAppOpened(id: string): Promise<void> {
-  const { error } = await supabase.from('people').update({ whatsapp_opened_at: null }).eq('id', id);
-  if (error) throw error;
 }
 
 export async function deletePersonRow(id: string): Promise<void> {

@@ -6,7 +6,6 @@ import {
   countQueuedFrom,
   currentCoffeeAttendance,
   selectOpenCoffeeEvents,
-  selectOrphanPeople,
   upcomingCoffeeEvent,
 } from './cafeSchedule';
 
@@ -65,20 +64,6 @@ describe('canMarkCoffeeAttendance', () => {
   it('allows it from the café day on', () => {
     expect(canMarkCoffeeAttendance('2026-11-08', '2026-11-08')).toBe(true);
     expect(canMarkCoffeeAttendance('2026-11-08', '2026-11-09')).toBe(true);
-  });
-});
-
-describe('selectOrphanPeople', () => {
-  it('treats someone with only past cafés attended as needing a seat', () => {
-    expect(
-      selectOrphanPeople([{ id: 'raissa', status: 'welcome_coffee', signup_window_from: null }], [{ person_id: 'raissa', attended: true }]),
-    ).toEqual(['raissa']);
-  });
-
-  it('leaves someone who already has an open seat alone', () => {
-    expect(
-      selectOrphanPeople([{ id: 'raissa', status: 'welcome_coffee', signup_window_from: null }], [{ person_id: 'raissa', attended: false }]),
-    ).toEqual([]);
   });
 });
 

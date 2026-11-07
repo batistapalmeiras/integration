@@ -1,5 +1,4 @@
 // React
-import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import {
@@ -36,6 +35,9 @@ import {
   updateMinistry,
   updateSmallGroup,
 } from '../../../domain/communityGroups';
+import { errorMessage, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
+import { refreshGroupLists } from '../hooks/useCommunityGroupsList';
 import { AppRoute } from '../../../routes/paths';
 import { AddMembersModal } from '../components/AddMembersModal';
 import { GroupModal } from '../components/GroupModal';
@@ -48,34 +50,30 @@ export function CommunityGroupDetailPage() {
   const navigate = useNavigate();
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
-  const [group, setGroup] = useState<CommunityGroup | null>(null);
-  const [people, setPeople] = useState<PersonInGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const isPg = type === 'pgs';
+  const groupType = isPg ? 'small-groups' : 'ministries';
   const label = isPg ? 'Pequeno Grupo' : 'Ministério';
   const listRoute = isPg ? AppRoute.SmallGroups : AppRoute.Ministries;
 
-  const load = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
-    const getGroup = isPg ? getSmallGroup : getMinistry;
-    const listPeople = isPg ? listPeopleInSmallGroup : listPeopleInMinistry;
+  const query = useQuery(
+    queryKeys.groupDetail(groupType, id ?? ''),
+    async (): Promise<{ group: CommunityGroup; people: PersonInGroup[] }> => {
+      const getGroup = isPg ? getSmallGroup : getMinistry;
+      const listPeople = isPg ? listPeopleInSmallGroup : listPeopleInMinistry;
+      const [group, people] = await Promise.all([getGroup(id ?? ''), listPeople(id ?? '')]);
+      return { group, people };
+    },
+    { enabled: !!id },
+  );
+  const group = query.data?.group ?? null;
+  const people = query.data?.people ?? [];
+  const loading = query.loading;
+  const error = query.error ? errorMessage(query.error) ?? 'Erro ao carregar.' : null;
 
-    try {
-      const [groupData, peopleData] = await Promise.all([getGroup(id), listPeople(id)]);
-      setGroup(groupData);
-      setPeople(peopleData);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao carregar.');
-    }
-    setLoading(false);
-  }, [isPg, id]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const load = async () => {
+    await refreshGroupLists(groupType);
+    await query.refetch();
+  };
 
   if (loading) return <Skeleton $h="320px" />;
   if (error || !group) return <Empty title={`${label} não encontrado`} description={error ?? ''} />;
@@ -162,6 +160,7 @@ export function CommunityGroupDetailPage() {
               try {
                 const remove = isPg ? deleteSmallGroup : deleteMinistry;
                 await remove(group.id);
+                await refreshGroupLists(groupType);
                 close();
                 navigate(listRoute);
               } catch (e) {

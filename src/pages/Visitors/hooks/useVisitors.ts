@@ -1,6 +1,8 @@
 // React
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 // Local
+import { errorMessage, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { loadSavedFilters, saveFilters } from '../persistence';
@@ -10,14 +12,19 @@ export const VISIBLE_STATUSES: Person['status'][] = ['initial_contact', 'retry_c
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
+async function listVisitors(): Promise<Person[]> {
+  const { data, error } = await supabase.from('people').select('*').in('status', VISIBLE_STATUSES);
+  if (error) throw error;
+  return (data as Person[]).sort(comparePeopleByPipeline);
+}
+
 export function useVisitors() {
-  const [rows, setRows] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery(queryKeys.visitors, listVisitors);
+  const rows = query.data ?? [];
   const [page, setPage] = useState(1);
 
   const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(() => (loadSavedFilters()?.search ?? '').trim());
   const [statusFilter, setStatusFilterState] = useState<Person['status'][]>(
     () => loadSavedFilters()?.statusFilter ?? [],
   );
@@ -30,24 +37,6 @@ export function useVisitors() {
   useEffect(() => {
     saveFilters({ search, statusFilter });
   }, [search, statusFilter]);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const { data, error: loadError } = await supabase.from('people').select('*').in('status', VISIBLE_STATUSES);
-
-    if (loadError) {
-      setError(loadError.message);
-      setLoading(false);
-      return;
-    }
-
-    setRows((data as Person[]).sort(comparePeopleByPipeline));
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
 
   const setSearch = (value: string) => {
     setSearchState(value);
@@ -72,8 +61,8 @@ export function useVisitors() {
   return {
     rows: pageRows,
     totalCount: filtered.length,
-    loading,
-    error,
+    loading: query.loading,
+    error: errorMessage(query.error),
     page: clampedPage,
     totalPages,
     setPage,

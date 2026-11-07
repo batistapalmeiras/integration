@@ -1,5 +1,5 @@
 // Libs
-import { isCohortFinished, selectUpcomingCohort } from './cohortSchedule';
+import { selectUpcomingCohort } from './cohortSchedule';
 import { fromIntegration } from './integrationPeople';
 import { supabase } from '../lib/supabase';
 import { AppRoute } from '../routes/paths';
@@ -54,56 +54,35 @@ export async function hasUpcomingCohort(): Promise<boolean> {
   return !!(await getUpcomingCohortWithLessons());
 }
 
-export async function getPersonCohortWithLessons(personId: string): Promise<CohortWithLessons | null> {
+export interface PersonIntegrationClass extends CohortWithLessons {
+  enrollmentId: string;
+  attendanceByLesson: Record<string, { id: string; attended: boolean }>;
+}
+
+interface PersonEnrollmentRow {
+  id: string;
+  cohort: CohortRow | null;
+  lesson_attendance: { id: string; lesson_id: string; attended: boolean }[];
+}
+
+export async function getPersonIntegrationClass(personId: string): Promise<PersonIntegrationClass | null> {
   const { data, error } = await supabase
     .from('enrollments')
-    .select(`cohort:cohorts(${COHORT_WITH_LESSONS})`)
+    .select(`id, cohort:cohorts(${COHORT_WITH_LESSONS}), lesson_attendance(id, lesson_id, attended)`)
     .eq('person_id', personId)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error) throw error;
 
-  const row = data as unknown as { cohort: CohortRow } | null;
-  return row ? toCohortWithLessons(row.cohort) : null;
-}
+  const row = data as unknown as PersonEnrollmentRow | null;
+  if (!row?.cohort) return null;
 
-export async function getPersonCohortName(personId: string): Promise<string | null> {
-  const { data, error } = await supabase
-    .from('enrollments')
-    .select('cohort:cohorts(name)')
-    .eq('person_id', personId);
-  if (error) throw error;
-
-  const rows = (data ?? []) as unknown as { cohort: { name: string } }[];
-  return rows[0]?.cohort.name ?? null;
-}
-
-export async function getPersonEnrollmentId(personId: string, cohortId: string): Promise<string | null> {
-  const { data, error } = await supabase
-    .from('enrollments')
-    .select('id')
-    .eq('person_id', personId)
-    .eq('cohort_id', cohortId)
-    .maybeSingle();
-  if (error) throw error;
-  return (data?.id as string | undefined) ?? null;
-}
-
-export async function getLessonAttendanceMap(
-  enrollmentId: string,
-): Promise<Record<string, { id: string; attended: boolean }>> {
-  const { data, error } = await supabase
-    .from('lesson_attendance')
-    .select('id, lesson_id, attended')
-    .eq('enrollment_id', enrollmentId);
-  if (error) throw error;
-
-  const map: Record<string, { id: string; attended: boolean }> = {};
-  for (const row of data ?? []) {
-    map[row.lesson_id as string] = { id: row.id as string, attended: row.attended as boolean };
+  const attendanceByLesson: Record<string, { id: string; attended: boolean }> = {};
+  for (const attendance of row.lesson_attendance ?? []) {
+    attendanceByLesson[attendance.lesson_id] = { id: attendance.id, attended: attendance.attended };
   }
-  return map;
+  return { ...toCohortWithLessons(row.cohort), enrollmentId: row.id, attendanceByLesson };
 }
 
 export async function toggleLessonAttendance(
@@ -213,28 +192,4 @@ export async function fetchCohortBoard(): Promise<CohortBoard> {
     enrollments: (enrollments.data ?? []) as unknown as CohortBoardEnrollment[],
     attendance: (attendance.data ?? []) as unknown as CohortBoardAttendance[],
   };
-}
-
-export function finishedCohortIds(board: CohortBoard, todayKey: string): string[] {
-  return board.cohorts
-    .filter((c) => {
-      const stillGoing = board.enrollments.filter(
-        (e) => e.cohort_id === c.cohort.id && e.person?.status === 'integration',
-      ).length;
-      return isCohortFinished(c.lessons, stillGoing, todayKey);
-    })
-    .map((c) => c.cohort.id);
-}
-
-export async function closeCohorts(cohortIds: string[]): Promise<number> {
-  if (cohortIds.length === 0) return 0;
-
-  const { data, error } = await supabase
-    .from('cohorts')
-    .update({ status: 'closed' })
-    .in('id', cohortIds)
-    .eq('status', 'active')
-    .select('id');
-  if (error) throw error;
-  return (data ?? []).length;
 }

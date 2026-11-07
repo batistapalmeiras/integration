@@ -7,11 +7,9 @@ export function fromIntegration<Query extends { is(column: string, value: null):
 }
 
 export async function countIntegrationPeopleByStatus(): Promise<Partial<Record<PersonStatus, number>>> {
-  const { data, error } = await fromIntegration(supabase.from('people').select('status'));
+  const { data, error } = await supabase.rpc('count_integration_people_by_status');
   if (error) throw error;
   const counts: Partial<Record<PersonStatus, number>> = {};
-  for (const row of (data ?? []) as { status: PersonStatus }[]) {
-    counts[row.status] = (counts[row.status] ?? 0) + 1;
-  }
+  for (const row of (data ?? []) as { status: PersonStatus; total: number }[]) counts[row.status] = Number(row.total);
   return counts;
 }

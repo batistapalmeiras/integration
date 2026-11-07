@@ -1,5 +1,4 @@
 // React
-import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
@@ -7,12 +6,13 @@ import { Button, Form, ModalActions, ModalTitle, Skeleton } from 'bp-kit';
 import { Check } from 'lucide-react';
 // Local
 import { MembershipAlerts } from '../../../../components/MembershipAlerts';
-import { CommunityGroup, listMinistries, listSmallGroups } from '../../../../domain/communityGroups';
+import { CommunityGroup } from '../../../../domain/communityGroups';
 import { CommunityRequirements, communityRequirements } from '../../../../domain/membershipCommunity';
-import { getPersonSensitive } from '../../../../domain/personSensitive';
 import { Person } from '../../../../features/visitors';
 import { CommunityFields } from '../../components/CommunityFields';
 import { CommunityFormValues, buildCommunitySchema } from '../../validators';
+import { usePersonSensitive } from '../../../../queries/person';
+import { useMinistries, useSmallGroups } from '../../../../queries/reference';
 
 interface Props {
   person: Pick<Person, 'id' | 'name'>;
@@ -21,15 +21,10 @@ interface Props {
 }
 
 export function ConfirmMemberModal({ person, close, onConfirm }: Props) {
-  const [smallGroups, setSmallGroups] = useState<CommunityGroup[]>([]);
-  const [ministries, setMinistries] = useState<CommunityGroup[]>([]);
-  const [requirements, setRequirements] = useState<CommunityRequirements | null>(null);
-
-  useEffect(() => {
-    listSmallGroups().then(setSmallGroups);
-    listMinistries().then(setMinistries);
-    getPersonSensitive(person.id).then((answers) => setRequirements(communityRequirements(answers)));
-  }, [person.id]);
+  const smallGroups = useSmallGroups().data ?? [];
+  const ministries = useMinistries().data ?? [];
+  const sensitive = usePersonSensitive(person.id);
+  const requirements = sensitive.data !== undefined ? communityRequirements(sensitive.data) : null;
 
   return (
     <>

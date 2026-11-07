@@ -8,8 +8,8 @@ export async function confirmMember(
   smallGroupId: string | null,
   ministryIds: string[],
   actorId?: string,
-): Promise<void> {
-  await updatePersonStatus(person.id, 'member', { small_group_id: smallGroupId });
+): Promise<Person> {
+  const updated = await updatePersonStatus(person.id, 'member', { small_group_id: smallGroupId });
   await setPersonMinistries(person.id, ministryIds);
   await insertStatusHistory({
     personId: person.id,
@@ -17,4 +17,5 @@ export async function confirmMember(
     toStatus: 'member',
     changedBy: actorId,
   });
+  return updated;
 }

@@ -1,23 +1,21 @@
 // React
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
-import { getUpcomingCoffeeEventDate } from '../../../domain/cafeSchedule';
-import { todayKey } from '../../../domain/dates';
 import {
   CohortBoard,
   CohortWithLessons,
   EnrollablePerson,
-  closeCohorts,
   enrollPerson as enrollPersonRow,
   fetchCohortBoard,
-  finishedCohortIds,
   toggleLessonAttendance,
 } from '../../../domain/classesRoster';
 import { enrollInIntegrationClass } from '../../../features/visitors';
+import { errorMessage, fetchQuery, setQueryData, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
-import { hasRole, LEADERSHIP_ROLES } from '../../../types/enums';
+import { useUpcomingCoffeeEventDate } from '../../../queries/reference';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { firstLessonDate } from '../../../domain/cohortSchedule';
 import { formatDate, weeklyLessonDates } from '../domain';
@@ -31,96 +29,42 @@ function sortByFirstLesson(list: CohortWithLessons[]): CohortWithLessons[] {
   );
 }
 
+function buildEnrollments(board: CohortBoard, cohortId: string): EnrollmentRow[] {
+  return board.enrollments
+    .filter((e) => e.cohort_id === cohortId)
+    .filter((e) => e.person.status !== 'archived')
+    .map((enrollment) => {
+      const own = board.attendance.filter((a) => a.enrollment_id === enrollment.id);
+      return {
+        id: enrollment.id,
+        person: enrollment.person as EnrollmentRow['person'],
+        attendanceByLesson: Object.fromEntries(own.map((a) => [a.lesson_id, a as LessonAttendance])),
+        attendedCount: own.filter((a) => a.attended).length,
+      };
+    })
+    .sort((a, b) => comparePeopleByPipeline(a.person, b.person));
+}
+
 export function useClasses() {
   const { user } = useAuthCtx();
-  const canManage = hasRole(user?.role, LEADERSHIP_ROLES);
-  const [cohorts, setCohorts] = useState<CohortWithLessons[]>([]);
-  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
-  const [allEnrollments, setAllEnrollments] = useState<EnrollmentRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [minCohortDate, setMinCohortDate] = useState<string | null>(null);
-  const boardRef = useRef<CohortBoard | null>(null);
+  const boardQuery = useQuery(queryKeys.cohortBoard, fetchCohortBoard);
+  const board = boardQuery.data;
+  const [selectedCohortIdState, setSelectedCohortIdState] = useState<string | null>(null);
+  const minCohortDate = useUpcomingCoffeeEventDate().data ?? null;
 
-  useEffect(() => {
-    getUpcomingCoffeeEventDate().then(setMinCohortDate);
-  }, []);
+  const refreshBoard = () => fetchQuery(queryKeys.cohortBoard, fetchCohortBoard);
 
-  const applyBoard = useCallback((board: CohortBoard, keepSelectionId?: string) => {
-    boardRef.current = board;
-    const open = sortByFirstLesson(board.cohorts);
-    setCohorts(open);
-
-    if (open.length === 0) {
-      setSelectedCohortId(null);
-      setAllEnrollments([]);
-      return;
-    }
-
-    const selected = open.find((c) => c.cohort.id === keepSelectionId) ?? open[0];
-    setSelectedCohortId(selected.cohort.id);
-
-    const rows: EnrollmentRow[] = board.enrollments
-      .filter((e) => e.cohort_id === selected.cohort.id)
-      .filter((e) => e.person.status !== 'archived')
-      .map((enrollment) => {
-        const own = board.attendance.filter((a) => a.enrollment_id === enrollment.id);
-        return {
-          id: enrollment.id,
-          person: enrollment.person as EnrollmentRow['person'],
-          attendanceByLesson: Object.fromEntries(own.map((a) => [a.lesson_id, a as LessonAttendance])),
-          attendedCount: own.filter((a) => a.attended).length,
-        };
-      });
-
-    rows.sort((a, b) => comparePeopleByPipeline(a.person, b.person));
-    setAllEnrollments(rows);
-  }, []);
-
-  const load = useCallback(
-    async (keepSelectionId?: string) => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const board = await fetchCohortBoard();
-
-        if (canManage) {
-          const finished = finishedCohortIds(board, todayKey());
-          if (finished.length > 0) {
-            await closeCohorts(finished);
-            applyBoard(
-              { ...board, cohorts: board.cohorts.filter((c) => !finished.includes(c.cohort.id)) },
-              keepSelectionId,
-            );
-            setLoading(false);
-            return;
-          }
-        }
-
-        applyBoard(board, keepSelectionId);
-      } catch (loadError) {
-        setError((loadError as Error).message);
-      }
-
-      setLoading(false);
-    },
-    [applyBoard, canManage],
-  );
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [load]);
-
-  const selected = cohorts.find((c) => c.cohort.id === selectedCohortId) ?? null;
+  const cohorts = useMemo(() => (board ? sortByFirstLesson(board.cohorts) : []), [board]);
+  const selected = cohorts.find((c) => c.cohort.id === selectedCohortIdState) ?? cohorts[0] ?? null;
+  const selectedCohortId = selected?.cohort.id ?? null;
   const cohort = (selected?.cohort as Cohort | undefined) ?? null;
   const lessons = (selected?.lessons as Lesson[] | undefined) ?? [];
+  const allEnrollments = useMemo(
+    () => (board && selectedCohortId ? buildEnrollments(board, selectedCohortId) : []),
+    [board, selectedCohortId],
+  );
 
-  const selectCohort = async (cohortId: string) => {
-    if (boardRef.current) applyBoard(boardRef.current, cohortId);
-    else await load(cohortId);
-  };
+  const selectCohort = async (cohortId: string) => setSelectedCohortIdState(cohortId);
 
   const createCohort = async (firstDate: string) => {
     if (cohorts.length >= MAX_COHORTS) {
@@ -142,7 +86,8 @@ export function useClasses() {
     );
     if (lessonsError) throw lessonsError;
 
-    await load(newCohort.id as string);
+    setSelectedCohortIdState(newCohort.id as string);
+    await refreshBoard();
   };
 
   const updateLessonDates = async (lessonDates: [string, string, string, string]) => {
@@ -153,43 +98,36 @@ export function useClasses() {
     );
     const failed = results.find((r) => r.error);
     if (failed?.error) throw failed.error;
-    await load(selectedCohortId ?? undefined);
+    await refreshBoard();
   };
 
   const closeCohort = async () => {
     if (!cohort) return;
     const { error: closeError } = await supabase.from('cohorts').update({ status: 'closed' }).eq('id', cohort.id);
     if (closeError) throw closeError;
-    await load();
+    setSelectedCohortIdState(null);
+    await refreshBoard();
   };
 
   const enrollPerson = async (person: EnrollablePerson) => {
     if (!cohort) return;
     await enrollPersonRow(person.id, cohort.id);
     await enrollInIntegrationClass(person, user?.id);
-    await load(cohort.id);
+    await refreshBoard();
   };
 
-  const refresh = async () => applyBoard(await fetchCohortBoard(), selectedCohortId ?? undefined);
+  const replaceAttendance = (row: LessonAttendance) =>
+    setQueryData<CohortBoard>(queryKeys.cohortBoard, (current) => {
+      const value = current as CohortBoard;
+      const others = value.attendance.filter((a) => !(a.enrollment_id === row.enrollment_id && a.lesson_id === row.lesson_id));
+      return { ...value, attendance: [...others, row] };
+    });
 
   const toggleAttendance = async (enrollmentId: string, lessonId: string, attended: boolean) => {
-    setAllEnrollments((rows) =>
-      rows.map((row) => {
-        if (row.id !== enrollmentId) return row;
-        const previous = row.attendanceByLesson[lessonId];
-        const attendanceByLesson = {
-          ...row.attendanceByLesson,
-          [lessonId]: { ...(previous ?? { id: '', enrollment_id: enrollmentId, lesson_id: lessonId }), attended } as LessonAttendance,
-        };
-        return {
-          ...row,
-          attendanceByLesson,
-          attendedCount: Object.values(attendanceByLesson).filter((a) => a?.attended).length,
-        };
-      }),
-    );
-    await toggleLessonAttendance(enrollmentId, lessonId, attended);
-    await refresh();
+    const previous = board?.attendance.find((a) => a.enrollment_id === enrollmentId && a.lesson_id === lessonId);
+    replaceAttendance({ id: previous?.id ?? '', enrollment_id: enrollmentId, lesson_id: lessonId, attended });
+    const saved = await toggleLessonAttendance(enrollmentId, lessonId, attended);
+    replaceAttendance({ id: saved.id, enrollment_id: enrollmentId, lesson_id: lessonId, attended: saved.attended });
   };
 
   return {
@@ -201,8 +139,8 @@ export function useClasses() {
     lessons,
     enrollments: allEnrollments,
     totalCount: allEnrollments.length,
-    loading,
-    error,
+    loading: boardQuery.loading,
+    error: errorMessage(boardQuery.error),
     minCohortDate,
     createCohort,
     updateLessonDates,

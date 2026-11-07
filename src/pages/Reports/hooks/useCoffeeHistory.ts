@@ -1,20 +1,13 @@
 // React
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 // Local
-import { coffeeHistory, CoffeeHistoryEvent, fetchCoffeeBoard } from '../../../domain/cafeSchedule';
+import { coffeeHistory, fetchCoffeeHistoryBoard } from '../../../domain/cafeSchedule';
 import { todayKey } from '../../../domain/dates';
+import { errorMessage, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 
 export function useCoffeeHistory() {
-  const [events, setEvents] = useState<CoffeeHistoryEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchCoffeeBoard()
-      .then((board) => setEvents(coffeeHistory(board, todayKey())))
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { events, loading, error };
+  const query = useQuery(queryKeys.coffeeHistory, fetchCoffeeHistoryBoard);
+  const events = useMemo(() => (query.data ? coffeeHistory(query.data, todayKey()) : []), [query.data]);
+  return { events, loading: query.loading, error: errorMessage(query.error) };
 }

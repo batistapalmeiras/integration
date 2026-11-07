@@ -1,7 +1,6 @@
-// React
-import { useCallback, useEffect, useState } from 'react';
 // Local
-import { fromIntegration } from '../../../domain/integrationPeople';
+import { errorMessage, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
 import { AnnualCounts } from '../types';
 
@@ -13,78 +12,40 @@ const EMPTY_COUNTS: AnnualCounts = {
   archived: 0,
 };
 
+async function listAnnualYears(): Promise<number[]> {
+  const { data, error } = await supabase.rpc('integration_people_years');
+  if (error) throw error;
+  const years = new Set(((data ?? []) as { year: number }[]).map((row) => row.year));
+  years.add(new Date().getFullYear());
+  return Array.from(years).sort((a, b) => b - a);
+}
+
+interface AnnualCountsRow {
+  initial_contact: number;
+  welcome_coffee: number;
+  integration: number;
+  member: number;
+  archived: number;
+}
+
+async function loadAnnualCounts(year: number): Promise<AnnualCounts> {
+  const { data, error } = await supabase.rpc('annual_pipeline_counts', { p_year: year }).single();
+  if (error) throw error;
+  const row = data as AnnualCountsRow;
+  return {
+    initialContact: Number(row.initial_contact),
+    welcomeCoffee: Number(row.welcome_coffee),
+    integration: Number(row.integration),
+    member: Number(row.member),
+    archived: Number(row.archived),
+  };
+}
+
 export function useAnnualYears() {
-  const currentYear = new Date().getFullYear();
-  const [availableYears, setAvailableYears] = useState<number[]>([currentYear]);
-
-  useEffect(() => {
-    const loadYears = async () => {
-      const { data } = await fromIntegration(supabase.from('people').select('created_at'));
-      const years = new Set((data ?? []).map((p) => new Date(p.created_at).getFullYear()));
-      years.add(currentYear);
-      setAvailableYears(Array.from(years).sort((a, b) => b - a));
-    };
-    loadYears();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return availableYears;
+  return useQuery(queryKeys.annualYears, listAnnualYears).data ?? [new Date().getFullYear()];
 }
 
 export function useAnnualReport(year: number) {
-  const [counts, setCounts] = useState<AnnualCounts>(EMPTY_COUNTS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    const start = `${year}-01-01`;
-    const end = `${year + 1}-01-01`;
-
-    const { count: initialContactCount, error: peopleError } = await fromIntegration(
-      supabase.from('people').select('id', { count: 'exact', head: true }),
-    )
-      .gte('created_at', start)
-      .lt('created_at', end);
-
-    if (peopleError) {
-      setError(peopleError.message);
-      setLoading(false);
-      return;
-    }
-
-    const { data: historyData, error: historyError } = await supabase
-      .from('status_history')
-      .select('to_status, created_at')
-      .gte('created_at', start)
-      .lt('created_at', end);
-
-    if (historyError) {
-      setError(historyError.message);
-      setLoading(false);
-      return;
-    }
-
-    const tally = { welcome_coffee: 0, integration: 0, member: 0, archived: 0 };
-    for (const row of historyData ?? []) {
-      if (row.to_status in tally) tally[row.to_status as keyof typeof tally] += 1;
-    }
-
-    setCounts({
-      initialContact: initialContactCount ?? 0,
-      welcomeCoffee: tally.welcome_coffee,
-      integration: tally.integration,
-      member: tally.member,
-      archived: tally.archived,
-    });
-    setLoading(false);
-  }, [year]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  return { counts, loading, error };
+  const query = useQuery(queryKeys.annualReport(year), () => loadAnnualCounts(year));
+  return { counts: query.data ?? EMPTY_COUNTS, loading: query.loading, error: errorMessage(query.error) };
 }

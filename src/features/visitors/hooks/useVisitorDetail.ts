@@ -1,43 +1,22 @@
-// React
-import { useCallback, useEffect, useState } from 'react';
 // Libs
-import { parsePhone, useAuthCtx } from 'bp-kit';
+import { useAuthCtx } from 'bp-kit';
 // Local
 import {
   getCoffeeAttendanceForPerson,
-  PersonCoffeeAttendance,
-  getPersonAttendedCoffeeDate,
-  hasUpcomingCoffeeEvent,
   markClassInviteDeclined,
   markClassInviteNoResponse,
   markCoffeeAttended,
   markCoffeeNotAttended,
 } from '../../../domain/cafeSchedule';
-import { getPersonCommunityNames, setPersonMinistries } from '../../../domain/communityGroups';
-import {
-  ActiveCohort,
-  CohortLesson,
-  getPersonCohortWithLessons,
-  getLessonAttendanceMap,
-  getMakeupLink,
-  getPersonCohortName,
-  getPersonEnrollmentId,
-  hasUpcomingCohort,
-  toggleLessonAttendance,
-} from '../../../domain/classesRoster';
-import { confirmMember as confirmMemberUseCase } from '../services/confirmMember';
+import { getMakeupLink, getPersonIntegrationClass, PersonIntegrationClass, toggleLessonAttendance } from '../../../domain/classesRoster';
+import { setQueryData, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
+import { useHasUpcomingCoffeeEvent, useHasUpcomingCohort } from '../../../queries/reference';
 import { editLastContactAttempt as editLastContactAttemptUseCase } from '../services/editLastContactAttempt';
-import { reactivatePerson } from '../services/reactivatePerson';
 import { registerContactAttempt as registerContactAttemptUseCase } from '../services/registerContactAttempt';
-import {
-  deletePersonRow,
-  fetchLastContactAttempt,
-  fetchPerson,
-  insertStatusHistory,
-  updatePersonFields,
-  updatePersonStatus,
-} from '../infra/peopleRepository';
-import { ContactResult, Person, PersonStatus, UpdatePersonInput } from '../domain/types';
+import { fetchLastContactAttempt } from '../infra/peopleRepository';
+import { ContactResult, PersonStatus } from '../domain/types';
+import { useVisitorProfile } from './useVisitorProfile';
 
 interface ContactAttemptRecord {
   id: string;
@@ -46,203 +25,85 @@ interface ContactAttemptRecord {
 }
 
 const CONTACT_STAGES: PersonStatus[] = ['initial_contact', 'retry_contact', 'archived'];
+const COFFEE_STAGES: PersonStatus[] = ['welcome_coffee', 'pending_signup'];
+const CONTACT_PANEL_STAGES: PersonStatus[] = ['initial_contact', 'retry_contact'];
 
-interface IntegrationClassState {
-  cohort: ActiveCohort;
-  lessons: CohortLesson[];
-  enrollmentId: string;
-  attendanceByLesson: Record<string, { id: string; attended: boolean }>;
-  attendedCount: number;
+function countAttended(attendanceByLesson: PersonIntegrationClass['attendanceByLesson']): number {
+  return Object.values(attendanceByLesson).filter((a) => a.attended).length;
 }
 
 export function useVisitorDetail(id: string) {
   const { user } = useAuthCtx();
-  const [person, setPerson] = useState<Person | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [coffeeAttendance, setCoffeeAttendance] = useState<PersonCoffeeAttendance | null>(null);
-  const [coffeeLoading, setCoffeeLoading] = useState(false);
-  const [hasCoffeeEvent, setHasCoffeeEvent] = useState<boolean | null>(null);
-  const [hasCohort, setHasCohort] = useState<boolean | null>(null);
-  const [integrationClass, setIntegrationClass] = useState<IntegrationClassState | null>(null);
-  const [integrationLoading, setIntegrationLoading] = useState(false);
-  const [profileCoffeeDate, setProfileCoffeeDate] = useState<string | null>(null);
-  const [profileCohortName, setProfileCohortName] = useState<string | null>(null);
-  const [profileMinistryNames, setProfileMinistryNames] = useState<string[]>([]);
-  const [profileSmallGroupName, setProfileSmallGroupName] = useState<string | null>(null);
-  const [lastAttempt, setLastAttempt] = useState<ContactAttemptRecord | null>(null);
+  const profile = useVisitorProfile(id);
+  const { person, setPerson, reload, updateFields } = profile;
+  const status = person?.status ?? '';
+  const inCoffeeStage = COFFEE_STAGES.includes(status as PersonStatus);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      setPerson(await fetchPerson(id));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Não foi possível carregar.');
-    }
-    setLoading(false);
-  }, [id]);
+  const coffeeQuery = useQuery(queryKeys.personCoffeeAttendance(id, status), () => getCoffeeAttendanceForPerson(id), {
+    enabled: inCoffeeStage,
+  });
+  const coffeeAttendance = inCoffeeStage ? coffeeQuery.data ?? null : null;
+  const hasCohort = useHasUpcomingCohort(inCoffeeStage).data ?? null;
+  const hasCoffeeEvent = useHasUpcomingCoffeeEvent(CONTACT_PANEL_STAGES.includes(status as PersonStatus)).data ?? null;
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const inContactStage = CONTACT_STAGES.includes(status as PersonStatus);
+  const lastAttemptQuery = useQuery(
+    queryKeys.personLastContactAttempt(id, status),
+    async () => (await fetchLastContactAttempt(id)) as ContactAttemptRecord | null,
+    { enabled: inContactStage },
+  );
+  const lastAttempt = inContactStage ? lastAttemptQuery.data ?? null : null;
 
-  const loadCommunityNames = useCallback(async () => {
-    const { ministryNames, smallGroupName } = await getPersonCommunityNames(id);
-    setProfileMinistryNames(ministryNames);
-    setProfileSmallGroupName(smallGroupName);
-  }, [id]);
+  const integrationQuery = useQuery(queryKeys.personIntegrationClass(id), () => getPersonIntegrationClass(id), {
+    enabled: status === 'integration',
+  });
+  const integrationClass = integrationQuery.data
+    ? { ...integrationQuery.data, attendedCount: countAttended(integrationQuery.data.attendanceByLesson) }
+    : null;
 
-  useEffect(() => {
-    getPersonAttendedCoffeeDate(id).then(setProfileCoffeeDate);
-    getPersonCohortName(id).then(setProfileCohortName);
-    loadCommunityNames();
-  }, [id, loadCommunityNames]);
-
-  const loadCoffeeAttendance = useCallback(async () => {
-    setCoffeeLoading(true);
-    const attendance = await getCoffeeAttendanceForPerson(id);
-    setCoffeeAttendance(attendance);
-    setCoffeeLoading(false);
-  }, [id]);
-
-  useEffect(() => {
-    if (person?.status === 'welcome_coffee' || person?.status === 'pending_signup') {
-      loadCoffeeAttendance();
-      hasUpcomingCohort().then(setHasCohort);
-    }
-  }, [person?.status, loadCoffeeAttendance]);
-
-  useEffect(() => {
-    if (person?.status === 'initial_contact' || person?.status === 'retry_contact') {
-      hasUpcomingCoffeeEvent().then(setHasCoffeeEvent);
-    }
-  }, [person?.status]);
-
-  const loadLastAttempt = useCallback(async () => {
-    setLastAttempt((await fetchLastContactAttempt(id)) as ContactAttemptRecord | null);
-  }, [id]);
-
-  useEffect(() => {
-    if (person && CONTACT_STAGES.includes(person.status)) loadLastAttempt();
-    else setLastAttempt(null);
-  }, [person?.status, loadLastAttempt]);
-
-  const loadIntegrationClass = useCallback(async () => {
-    setIntegrationLoading(true);
-    const own = await getPersonCohortWithLessons(id);
-    if (!own) {
-      setIntegrationClass(null);
-      setIntegrationLoading(false);
-      return;
-    }
-
-    const enrollmentId = await getPersonEnrollmentId(id, own.cohort.id);
-    if (!enrollmentId) {
-      setIntegrationClass(null);
-      setIntegrationLoading(false);
-      return;
-    }
-
-    const attendanceByLesson = await getLessonAttendanceMap(enrollmentId);
-    const attendedCount = Object.values(attendanceByLesson).filter((a) => a.attended).length;
-    setIntegrationClass({ cohort: own.cohort, lessons: own.lessons, enrollmentId, attendanceByLesson, attendedCount });
-    setIntegrationLoading(false);
-  }, [id]);
-
-  useEffect(() => {
-    if (person?.status === 'integration') loadIntegrationClass();
-  }, [person?.status, loadIntegrationClass]);
-
-  const updatePerson = async (values: UpdatePersonInput) => {
-    await updatePersonFields(id, {
-      name: values.name.trim(),
-      phone: parsePhone(values.phone),
-      age: values.age ? Number(values.age) : null,
-      email: values.email || null,
-      updated_at: new Date().toISOString(),
-    });
-    await load();
-  };
-
-  const changeStatus = async (toStatus: PersonStatus, note?: string, extra: Record<string, unknown> = {}) => {
-    if (!person) return;
-    await updatePersonStatus(id, toStatus, extra);
-    await insertStatusHistory({ personId: id, fromStatus: person.status, toStatus, changedBy: user?.id, note });
-    await load();
-  };
-
-  const markWhatsAppOpened = async () => {
-    await updatePersonFields(id, { whatsapp_opened_at: new Date().toISOString() });
-    await load();
-  };
-
-  const markClassInviteSent = async () => {
-    await updatePersonFields(id, { class_invite_sent_at: new Date().toISOString() });
-    await load();
-  };
-
-  const markMembershipInterestSent = async () => {
-    await updatePersonFields(id, { membership_interest_sent_at: new Date().toISOString() });
-    await load();
-  };
+  const markWhatsAppOpened = () => updateFields({ whatsapp_opened_at: new Date().toISOString() });
+  const markClassInviteSent = () => updateFields({ class_invite_sent_at: new Date().toISOString() });
+  const markMembershipInterestSent = () => updateFields({ membership_interest_sent_at: new Date().toISOString() });
 
   const registerContactAttempt = async (values: { result: ContactResult }) => {
     if (!person) return;
-    await registerContactAttemptUseCase(person, values.result, user?.id);
-    await load();
-    await loadLastAttempt();
+    setPerson(await registerContactAttemptUseCase(person, values.result, user?.id));
   };
 
   const editLastContactAttempt = async (result: ContactResult) => {
     if (!lastAttempt || !person) return;
-    await editLastContactAttemptUseCase(person, lastAttempt.id, result, user?.id);
-    await load();
-    await loadLastAttempt();
+    const updated = await editLastContactAttemptUseCase(person, lastAttempt.id, result, user?.id);
+    setPerson(updated);
+    setQueryData(queryKeys.personLastContactAttempt(id, updated.status), { ...lastAttempt, result });
   };
-
-  const archive = () => changeStatus('archived');
-  const reactivate = async () => {
-    if (!person) return;
-    await reactivatePerson(person, user?.id);
-    await load();
-  };
-
-  const deletePerson = () => deletePersonRow(id);
 
   const markAttended = async () => {
     if (!coffeeAttendance) return;
     await markCoffeeAttended(coffeeAttendance.id, id, user?.id);
-    await load();
-    await loadCoffeeAttendance();
+    await reload();
   };
 
   const markNotAttended = async () => {
     await markCoffeeNotAttended(id, user?.id);
-    await load();
+    await reload();
   };
 
   const markInviteDeclined = async () => {
     await markClassInviteDeclined(id, user?.id);
-    await load();
+    await reload();
   };
 
   const markInviteNoResponse = async () => {
     await markClassInviteNoResponse(id, user?.id);
-    await loadCoffeeAttendance();
+    await coffeeQuery.refetch();
   };
 
   const toggleClassAttendance = async (lessonId: string, attended: boolean) => {
     if (!integrationClass) return;
     const saved = await toggleLessonAttendance(integrationClass.enrollmentId, lessonId, attended);
-    setIntegrationClass((prev) => {
-      if (!prev) return prev;
-      const attendanceByLesson = { ...prev.attendanceByLesson, [lessonId]: saved };
-      return {
-        ...prev,
-        attendanceByLesson,
-        attendedCount: Object.values(attendanceByLesson).filter((a) => a.attended).length,
-      };
-    });
+    setQueryData<PersonIntegrationClass | null>(queryKeys.personIntegrationClass(id), (current) =>
+      current ? { ...current, attendanceByLesson: { ...current.attendanceByLesson, [lessonId]: saved } } : null,
+    );
   };
 
   const getClassMakeupLink = async (lessonId: string): Promise<string> => {
@@ -250,50 +111,24 @@ export function useVisitorDetail(id: string) {
     return getMakeupLink(integrationClass.enrollmentId, lessonId);
   };
 
-  const confirmMember = async (smallGroupId: string | null, ministryIds: string[]) => {
-    if (!person) return;
-    await confirmMemberUseCase(person, smallGroupId, ministryIds, user?.id);
-    await load();
-    await loadCommunityNames();
-  };
-
-  const updateCommunity = async (smallGroupId: string | null, ministryIds: string[]) => {
-    await updatePersonFields(id, { small_group_id: smallGroupId, updated_at: new Date().toISOString() });
-    await setPersonMinistries(id, ministryIds);
-    await loadCommunityNames();
-    await load();
-  };
-
   return {
-    person,
-    loading,
-    error,
-    updatePerson,
+    ...profile,
     registerContactAttempt,
     markWhatsAppOpened,
     markClassInviteSent,
     markMembershipInterestSent,
-    archive,
-    reactivate,
-    deletePerson,
     hasCoffeeEvent,
     hasCohort,
     coffeeAttendance,
-    coffeeLoading,
+    coffeeLoading: coffeeQuery.loading,
     markAttended,
     markNotAttended,
     markInviteDeclined,
     markInviteNoResponse,
     integrationClass,
-    integrationLoading,
+    integrationLoading: integrationQuery.loading,
     toggleClassAttendance,
     getClassMakeupLink,
-    confirmMember,
-    updateCommunity,
-    profileCoffeeDate,
-    profileCohortName,
-    profileMinistryNames,
-    profileSmallGroupName,
     lastAttempt,
     editLastContactAttempt,
   };

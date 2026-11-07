@@ -1,50 +1,41 @@
-// React
-import { useCallback, useEffect, useState } from 'react';
 // Local
+import { errorMessage, invalidateQueries, setQueryData, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
 import { UserRole } from '../../../types/enums';
 import { VolunteerRow } from '../types';
 
+const VOLUNTEER_COLUMNS = 'id,name,role,active';
+
+async function getVolunteer(id: string): Promise<VolunteerRow> {
+  const { data, error } = await supabase.from('profiles').select(VOLUNTEER_COLUMNS).eq('id', id).single();
+  if (error) throw error;
+  return data as VolunteerRow;
+}
+
+async function getVolunteerEmail(id: string): Promise<string | null> {
+  const { data, error } = await supabase.functions.invoke('get-volunteer-email', { body: { id } });
+  if (error || data?.error) return null;
+  return data?.email ?? null;
+}
+
 export function useVolunteerDetail(id: string) {
-  const [volunteer, setVolunteer] = useState<VolunteerRow | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const volunteerQuery = useQuery(queryKeys.volunteer(id), () => getVolunteer(id), { enabled: !!id });
+  const emailQuery = useQuery(queryKeys.volunteerEmail(id), () => getVolunteerEmail(id), { enabled: !!id });
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    const { data, error: loadError } = await supabase
+  const updateProfile = async (fields: Partial<Pick<VolunteerRow, 'name' | 'role' | 'active'>>) => {
+    const { data, error: updateError } = await supabase
       .from('profiles')
-      .select('id,name,role,active')
+      .update(fields)
       .eq('id', id)
+      .select(VOLUNTEER_COLUMNS)
       .single();
-    if (loadError) {
-      setError(loadError.message);
-      setLoading(false);
-      return;
-    }
-
-    setVolunteer(data as VolunteerRow);
-
-    const { data: emailData, error: emailError } = await supabase.functions.invoke('get-volunteer-email', {
-      body: { id },
-    });
-    if (!emailError && !emailData?.error) setEmail(emailData?.email ?? null);
-
-    setLoading(false);
-  }, [id]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  const updateVolunteer = async (name: string, role: UserRole) => {
-    const { error: updateError } = await supabase.from('profiles').update({ name, role }).eq('id', id);
     if (updateError) throw updateError;
-    await load();
+    setQueryData(queryKeys.volunteer(id), data as VolunteerRow);
+    invalidateQueries(queryKeys.volunteers, { refetchActive: false });
   };
+
+  const updateVolunteer = (name: string, role: UserRole) => updateProfile({ name, role });
 
   const updateEmail = async (newEmail: string) => {
     const { data, error: invokeError } = await supabase.functions.invoke('update-volunteer-email', {
@@ -52,20 +43,26 @@ export function useVolunteerDetail(id: string) {
     });
     if (invokeError) throw invokeError;
     if (data?.error) throw new Error(data.error);
-    await load();
+    setQueryData(queryKeys.volunteerEmail(id), newEmail);
   };
 
-  const setActive = async (active: boolean) => {
-    const { error: updateError } = await supabase.from('profiles').update({ active }).eq('id', id);
-    if (updateError) throw updateError;
-    await load();
-  };
+  const setActive = (active: boolean) => updateProfile({ active });
 
   const removeVolunteer = async () => {
     const { data, error: invokeError } = await supabase.functions.invoke('delete-volunteer', { body: { id } });
     if (invokeError) throw invokeError;
     if (data?.error) throw new Error(data.error);
+    await invalidateQueries(queryKeys.volunteers, { refetchActive: false });
   };
 
-  return { volunteer, email, loading, error, updateVolunteer, updateEmail, setActive, removeVolunteer };
+  return {
+    volunteer: volunteerQuery.data ?? null,
+    email: emailQuery.data ?? null,
+    loading: volunteerQuery.loading || emailQuery.loading,
+    error: errorMessage(volunteerQuery.error),
+    updateVolunteer,
+    updateEmail,
+    setActive,
+    removeVolunteer,
+  };
 }

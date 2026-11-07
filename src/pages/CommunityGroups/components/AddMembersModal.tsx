@@ -1,10 +1,10 @@
 // React
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 // Libs
 import { Button, Form, ModalActions, ModalTitle, MultiSelect } from 'bp-kit';
 import { UserPlus } from 'lucide-react';
 // Local
-import { PersonInGroup, listMembers } from '../../../domain/communityGroups';
+import { useMemberNames } from '../../../queries/reference';
 
 interface Props {
   title: string;
@@ -15,13 +15,9 @@ interface Props {
 }
 
 export function AddMembersModal({ title, currentIds, withoutSmallGroup, close, onAdd }: Props) {
-  const [members, setMembers] = useState<PersonInGroup[]>([]);
+  const members = useMemberNames(withoutSmallGroup).data ?? [];
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    listMembers({ withoutSmallGroup }).then(setMembers);
-  }, [withoutSmallGroup]);
 
   const options = members
     .filter((member) => !currentIds.includes(member.id))

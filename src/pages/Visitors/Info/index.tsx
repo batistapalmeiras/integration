@@ -10,16 +10,16 @@ import { Check, Save, UserRound } from 'lucide-react';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { CommunityGroup, getPersonMinistryIds, listMinistries, listSmallGroups } from '../../../domain/communityGroups';
 import { LessonMakeup, getPersonLessonMakeups } from '../../../domain/lessonMakeups';
 import { communityRequirements } from '../../../domain/membershipCommunity';
-import { PersonSensitive, getPersonSensitive } from '../../../domain/personSensitive';
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, TEACHING_ROLES, UserRole } from '../../../types/enums';
-import { useVisitorDetail } from '../../../features/visitors';
+import { useVisitorProfile } from '../../../features/visitors';
 import { CommunityFields } from '../components/CommunityFields';
 import { ConfirmMemberModal } from '../Detail/components/ConfirmMemberModal';
 import { CommunityFormValues, buildCommunitySchema } from '../validators';
+import { usePersonSensitive } from '../../../queries/person';
+import { useMinistries, useSmallGroups } from '../../../queries/reference';
 import {
   Actions,
   Content,
@@ -50,40 +50,29 @@ export function VisitorInfoPage() {
     profileCohortName,
     profileMinistryNames,
     profileSmallGroupName,
+    profileMinistryIds,
     updateCommunity,
     confirmMember,
-  } = useVisitorDetail(id ?? '');
+  } = useVisitorProfile(id ?? '');
   const { open, close, modal } = useModal('drawer');
 
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<InfoTab>(() => (searchParams.get('tab') as InfoTab | null) ?? 'general');
   const fromMembershipQueue = searchParams.get('from') === 'membership';
-  const [smallGroups, setSmallGroups] = useState<CommunityGroup[]>([]);
-  const [ministries, setMinistries] = useState<CommunityGroup[]>([]);
-  const [ministryIds, setMinistryIds] = useState<string[]>([]);
 
   const canSeeSensitive = hasRole(user?.role, TEACHING_ROLES);
-  const [sensitive, setSensitive] = useState<PersonSensitive | null>(null);
+  const sensitive = usePersonSensitive(id ?? '', canSeeSensitive).data ?? null;
   const [makeups, setMakeups] = useState<LessonMakeup[]>([]);
   const requirements = communityRequirements(sensitive);
   const requirementsRef = useRef(requirements);
   requirementsRef.current = requirements;
 
   useEffect(() => {
-    if (canSeeSensitive && id) {
-      getPersonSensitive(id).then(setSensitive);
-      getPersonLessonMakeups(id).then(setMakeups);
-    }
+    if (canSeeSensitive && id) getPersonLessonMakeups(id).then(setMakeups);
   }, [canSeeSensitive, id]);
   const canEditCommunity = user?.role === UserRole.Pastor && person?.status === 'member';
-
-  useEffect(() => {
-    if (canEditCommunity) {
-      listSmallGroups().then(setSmallGroups);
-      listMinistries().then(setMinistries);
-      if (id) getPersonMinistryIds(id).then(setMinistryIds);
-    }
-  }, [canEditCommunity]);
+  const smallGroups = useSmallGroups(canEditCommunity).data ?? [];
+  const ministries = useMinistries(canEditCommunity).data ?? [];
 
   const {
     control,
@@ -92,7 +81,7 @@ export function VisitorInfoPage() {
   } = useForm<CommunityFormValues>({
     resolver: (values, context, options) =>
       zodResolver(buildCommunitySchema(requirementsRef.current))(values, context, options),
-    values: { smallGroupIds: person?.small_group_id ? [person.small_group_id] : [], ministryIds },
+    values: { smallGroupIds: person?.small_group_id ? [person.small_group_id] : [], ministryIds: profileMinistryIds },
   });
 
   if (loading) return <Skeleton $h="240px" />;

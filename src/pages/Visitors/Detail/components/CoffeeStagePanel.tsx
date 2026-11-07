@@ -33,7 +33,20 @@ export function CoffeeStagePanel({
   onNoResponse,
   onClassInviteSent,
 }: Props) {
-  if (loading || !attendance) return <Skeleton $h="80px" />;
+  if (loading) return <Skeleton $h="80px" />;
+
+  if (!attendance) {
+    return (
+      <StagePanel>
+        <CardHeader>
+          <Typography type="label">Presença no café</Typography>
+        </CardHeader>
+        <Typography type="p">
+          Ainda sem vaga em um café. Assim que houver um café agendado, a pessoa entra na lista automaticamente.
+        </Typography>
+      </StagePanel>
+    );
+  }
 
   if (!attendance.attended && !canMarkCoffeeAttendance(attendance.eventDate, todayKey())) {
     return (

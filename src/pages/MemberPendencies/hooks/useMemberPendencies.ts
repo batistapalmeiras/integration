@@ -1,17 +1,14 @@
 // React
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 // Local
-import { listMemberPendencies, MemberPendency, PendencyField } from '../../../domain/memberRecords';
+import { listMemberPendencies, PendencyField } from '../../../domain/memberRecords';
+import { errorMessage, useQuery } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export function useMemberPendencies() {
-  const [rows, setRows] = useState<MemberPendency[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [field, setFieldState] = useState<PendencyField | null>(null);
   const [search, setSearchState] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -22,22 +19,9 @@ export function useMemberPendencies() {
     return () => clearTimeout(timeout);
   }, [search]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await listMemberPendencies({ field, search: debouncedSearch, page, pageSize: PAGE_SIZE });
-      setRows(result.rows);
-      setTotal(result.total);
-      setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
-    setLoading(false);
-  }, [field, debouncedSearch, page]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const params = { field, search: debouncedSearch, page, pageSize: PAGE_SIZE };
+  const query = useQuery(queryKeys.memberPendencies(params), () => listMemberPendencies(params));
+  const total = query.data?.total ?? 0;
 
   const setSearch = (value: string) => {
     setSearchState(value);
@@ -50,10 +34,10 @@ export function useMemberPendencies() {
   };
 
   return {
-    rows,
+    rows: query.data?.rows ?? [],
     total,
-    loading,
-    error,
+    loading: query.loading,
+    error: errorMessage(query.error),
     field,
     setField,
     search,
