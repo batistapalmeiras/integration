@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, Pagination, SearchInput, Skeleton, text, useModal } from 'bp-kit';
 import { SlidersHorizontal } from 'lucide-react';
-// Local
+// Components
+import { PageFlexBody, PaginationWrap, SearchFiltersRow } from '../../../components/ListLayout';
 import { PeopleCount } from '../../../components/PeopleCount';
 import { StatusPill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { AppRoute } from '../../../routes/paths';
-import { usePeopleReport } from '../hooks';
-import { PageFlexBody, PaginationWrap, SearchFiltersRow } from '../../../components/ListLayout';
+// Local
+import { usePeopleList } from '../hooks/usePeopleList';
 import { PeopleFiltersModal } from './PeopleFiltersModal';
 
 export function PeopleSection() {
@@ -31,7 +32,7 @@ export function PeopleSection() {
     totalPages,
     setPage,
     hasFilter,
-  } = usePeopleReport();
+  } = usePeopleList();
 
   const activeFilterCount = (statusFilter.length > 0 ? 1 : 0) + (cohortFilter !== 'all' ? 1 : 0);
 

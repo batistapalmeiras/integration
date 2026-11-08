@@ -22,3 +22,8 @@ export async function countIntegrationPeopleCreatedSince(since: Date): Promise<n
   if (error) throw error;
   return count ?? 0;
 }
+
+export async function runPipelineMaintenance(): Promise<void> {
+  const { error } = await supabase.rpc('run_pipeline_maintenance');
+  if (error) throw error;
+}

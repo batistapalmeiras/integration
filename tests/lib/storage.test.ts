@@ -1,5 +1,5 @@
 // Local
-import { storedValue } from './storage';
+import { storedValue } from '../../src/lib/storage';
 
 describe('storedValue', () => {
   beforeEach(() => {

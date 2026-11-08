@@ -2,14 +2,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, text, TextInput, Typography } from 'bp-kit';
+import { Button, isCompletePhone, text, TextInput, Typography } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { Form } from '../../../components/PublicPage/styles';
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 
 const identificationSchema = z.object({
-  phone: z.string().refine((value) => value.replace(/\D/g, '').length >= 10, text.validation.required('um WhatsApp válido')),
+  phone: z.string().refine(isCompletePhone, text.validation.required('um WhatsApp válido')),
 });
 
 interface Props {

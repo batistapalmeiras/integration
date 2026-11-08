@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Checkbox, InfoBox, Skeleton, Textarea, Typography } from 'bp-kit';
 import { Check } from 'lucide-react';
 // Local
-import { getMakeupVideoId } from '../../domain/makeupVideos';
+import { getMakeupVideoId } from '../../domain/lessonMakeups';
 import { AppRoute } from '../../routes/paths';
 import { ErrorMsg, Form } from '../../components/PublicPage/styles';
 import { PublicPage } from '../../components/PublicPage';

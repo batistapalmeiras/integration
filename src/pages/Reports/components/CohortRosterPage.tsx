@@ -8,7 +8,7 @@ import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { StatusPill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
-import { hasCompletedLessons } from '../../../domain/membershipEligibility';
+import { hasCompletedLessons } from '../../../domain/membership';
 import { AppRoute } from '../../../routes/paths';
 import { useCohortRoster } from '../hooks';
 import { CountBadge, NameCell, NamePrimary, NameSubtitle } from '../styles';

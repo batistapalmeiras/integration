@@ -1,5 +1,5 @@
 // Libs
-import { parsePhone, useAuthCtx } from 'bp-kit';
+import { onlyDigits, useAuthCtx } from 'bp-kit';
 // Local
 import { errorMessage, refreshMembershipPendingCount, setQueryData, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
@@ -39,7 +39,7 @@ export function usePerson(id: string) {
   const updatePerson = (values: UpdatePersonInput) =>
     updateFields({
       name: values.name.trim(),
-      phone: parsePhone(values.phone),
+      phone: onlyDigits(values.phone),
       age: values.age ? Number(values.age) : null,
       email: values.email || null,
       updated_at: new Date().toISOString(),

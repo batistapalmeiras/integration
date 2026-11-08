@@ -8,8 +8,8 @@ import { YES_NO_OPTIONS } from '../../../domain/text';
 import { WANTS_SMALL_GROUP_OPTIONS } from '../options';
 import { MembershipFormValues } from '../schema';
 import { Hint } from '../styles';
-import { ChoiceField } from './ChoiceField';
 import { SelectField } from '../../../components/SelectField';
+import { ChoiceField } from './ChoiceField';
 
 interface Props {
   control: Control<MembershipFormValues>;

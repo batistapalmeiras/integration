@@ -1,7 +1,7 @@
 // React
 import { Control, UseFormSetValue, useWatch } from 'react-hook-form';
 // Libs
-import { text, TextInput } from 'bp-kit';
+import { onlyDigits, text, TextInput } from 'bp-kit';
 // Local
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { useZipLookup } from '../hooks/useZipLookup';
@@ -16,7 +16,7 @@ interface Props {
 export function AddressStep({ control, setValue }: Props) {
   const zip = useWatch({ control, name: 'zip' });
   const { looking, notFound } = useZipLookup(zip, setValue);
-  const showAddress = zip.replace(/\D/g, '').length === 8 && !looking;
+  const showAddress = onlyDigits(zip).length === 8 && !looking;
 
   return (
     <>

@@ -10,8 +10,8 @@ import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
 import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META } from '../../types/person';
-import { QUEUE_STATUSES, useVisitors } from './hooks/useVisitors';
 import { PaginationWrap } from '../../components/ListLayout';
+import { QUEUE_STATUSES, useVisitors } from './hooks/useVisitors';
 import { QueueChips, RowButton, RowText, SearchRow } from './styles';
 
 export function VisitorsPage() {

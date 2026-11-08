@@ -7,7 +7,7 @@ export const queryKeys = {
   membershipQueue: ['people', 'membership-queue'] as const,
   membershipPendingCount: ['people', 'membership-pending-count'] as const,
   memberPendencies: (params: object) => ['people', 'member-pendencies', params] as const,
-  peopleReport: (params: object) => ['people', 'report', params] as const,
+  peopleList: (params: object) => ['people', 'list', params] as const,
   statusCounts: ['people', 'status-counts'] as const,
   annualYears: ['people', 'annual-years'] as const,
   annualReport: (year: number) => ['people', 'annual-report', year] as const,

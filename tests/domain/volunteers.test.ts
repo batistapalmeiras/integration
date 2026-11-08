@@ -1,6 +1,6 @@
 // Local
-import { UserRole } from '../types/enums';
-import { assignableRoles, canChangeRole } from './volunteerRoles';
+import { UserRole } from '../../src/types/enums';
+import { assignableRoles, canChangeRole } from '../../src/domain/volunteers';
 
 const pastor = { id: 'p', role: UserRole.Pastor };
 const admin = { id: 'a', role: UserRole.Admin };

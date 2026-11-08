@@ -39,10 +39,10 @@ import { canMarkCoffeeAttendance, listEnrollableCoffeePeople } from '../../domai
 import { formatDate, todayKey, weekdayLabel } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES } from '../../types/enums';
+import { PaginationWrap } from '../../components/ListLayout';
 import { CreateEventModal } from './components/CreateEventModal';
 import { useCoffee } from './hooks';
 import { AttendeeRow } from './types';
-import { PaginationWrap } from '../../components/ListLayout';
 import { IconAction, PersonLink, RowActions } from './styles';
 
 export function CoffeePage() {

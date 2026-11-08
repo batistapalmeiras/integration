@@ -3,7 +3,7 @@ import { MultiSelect } from 'bp-kit';
 import { Control, Controller } from 'react-hook-form';
 // Local
 import { CommunityGroup } from '../../../domain/communityGroups';
-import { CommunityRequirements } from '../../../domain/membershipCommunity';
+import { CommunityRequirements } from '../../../domain/membership';
 import { Hint } from '../Detail/styles';
 import { CommunityFormValues } from '../validators';
 

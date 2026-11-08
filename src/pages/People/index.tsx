@@ -1,11 +1,11 @@
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Components
-import { PageHeader } from '../../components/PageHeader';
-// Local
-import { hasRole, LEADERSHIP_ROLES } from '../../types/enums';
 import { PageFlexWrap } from '../../components/ListLayout';
-import { PeopleSection } from '../Reports/components/PeopleSection';
+import { PageHeader } from '../../components/PageHeader';
+import { hasRole, LEADERSHIP_ROLES } from '../../types/enums';
+// Local
+import { PeopleSection } from './components/PeopleSection';
 
 export function PeoplePage() {
   const { user } = useAuthCtx();

@@ -18,7 +18,7 @@ import { PageHeader } from '../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
-import { assignableRoles, canChangeRole } from '../../domain/volunteerRoles';
+import { assignableRoles, canChangeRole } from '../../domain/volunteers';
 import { groupRolesByModule, ROLE_LABELS, UserRole } from '../../types/enums';
 import { AddVolunteerModal } from './components/AddVolunteerModal';
 import { DraggableVolunteer, RoleBoard, RoleDropZone } from './components/RoleBoard';

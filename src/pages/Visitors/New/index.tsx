@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, parsePhone, useAuthCtx, useModal } from 'bp-kit';
+import { Button, onlyDigits, useAuthCtx, useModal } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Components
 import { PageHeader } from '../../../components/PageHeader';
@@ -13,8 +13,8 @@ import { findPersonByPhone, reactivatePerson } from '../../../features/visitors'
 import { AppRoute } from '../../../routes/paths';
 import { useCreatePerson } from '../hooks';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
-import { ExistingPersonModal } from './components/ExistingPersonModal';
 import { VisitorForm, VisitorFormActions } from '../components/VisitorForm';
+import { ExistingPersonModal } from './components/ExistingPersonModal';
 import { Intro } from './styles';
 
 const MIN_PHONE_DIGITS = 10;
@@ -39,7 +39,7 @@ export function NewVisitorPage() {
   const phone = useWatch({ control, name: 'phone' });
 
   useEffect(() => {
-    const digits = parsePhone(phone ?? '');
+    const digits = onlyDigits(phone ?? '');
     if (digits.length < MIN_PHONE_DIGITS || digits === checkedPhone.current) return;
 
     const timeout = setTimeout(() => {

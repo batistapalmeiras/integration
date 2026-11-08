@@ -1,7 +1,10 @@
+// Libs
+import { onlyDigits } from 'bp-kit';
+// Local
 import { AppRoute } from '../routes/paths';
 
 export function buildWhatsAppLink(phone: string, text: string): string {
-  const digits = phone.replace(/\D/g, '');
+  const digits = onlyDigits(phone);
   const withCountryCode = digits.startsWith('55') ? digits : `55${digits}`;
   return `https://wa.me/${withCountryCode}?text=${encodeURIComponent(text)}`;
 }

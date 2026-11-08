@@ -3,7 +3,7 @@ import {
   currentLesson,
   hasFirstLessonStarted,
   selectUpcomingCohort,
-} from './cohortSchedule';
+} from '../../src/domain/cohortSchedule';
 
 const lessons = (first: string, id = first) => ({
   id,

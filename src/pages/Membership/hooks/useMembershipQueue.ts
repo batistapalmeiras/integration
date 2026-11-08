@@ -1,5 +1,5 @@
 // Local
-import { listMembershipAlerts, MEMBERSHIP_ALERT_LABELS } from '../../../domain/membershipAlerts';
+import { listMembershipAlerts, MEMBERSHIP_ALERT_LABELS } from '../../../domain/membership';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';

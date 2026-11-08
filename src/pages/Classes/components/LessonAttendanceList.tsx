@@ -6,9 +6,8 @@ import { Checkbox, text, Typography } from 'bp-kit';
 import { List, ListChevron, ListHeader, ListItem, ListItemRow, ListName, ListSlot, ListStatusCell } from '../../../components/List';
 import { StatusPill } from '../../../components/StatusPill';
 import { currentLesson } from '../../../domain/cohortSchedule';
-import { todayKey } from '../../../domain/dates';
-import { hasCompletedLessons } from '../../../domain/membershipEligibility';
-import { formatDate } from '../../../domain/dates';
+import { hasCompletedLessons } from '../../../domain/membership';
+import { formatDate, todayKey } from '../../../domain/dates';
 import { EnrollmentRow, Lesson } from '../types';
 import { CountBadge, LessonTab, LessonTabs, NameHeading, PresenceHeading, StudentText } from '../styles';
 

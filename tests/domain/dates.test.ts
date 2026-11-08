@@ -1,5 +1,5 @@
 // Local
-import { parseDateKey, parseTypedDate, toDateKey } from './dates';
+import { parseDateKey, parseTypedDate, toDateKey } from '../../src/domain/dates';
 
 describe('parseTypedDate', () => {
   it('turns a typed dd/mm/aaaa date into a date key', () => {

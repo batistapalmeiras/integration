@@ -11,7 +11,7 @@ import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { formatDate } from '../../../domain/dates';
 import { LessonMakeup, getPersonLessonMakeups } from '../../../domain/lessonMakeups';
-import { communityRequirements } from '../../../domain/membershipCommunity';
+import { communityRequirements } from '../../../domain/membership';
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
 import { useVisitorProfile } from '../../../features/visitors';

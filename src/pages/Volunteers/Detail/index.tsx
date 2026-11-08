@@ -26,7 +26,7 @@ import { z } from 'zod';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
-import { assignableRoles } from '../../../domain/volunteerRoles';
+import { assignableRoles } from '../../../domain/volunteers';
 import { hasRole, LEADERSHIP_ROLES, UserRole } from '../../../types/enums';
 import { Content } from '../../Visitors/Detail/styles';
 import { RoleOptions } from '../components/RoleOptions';

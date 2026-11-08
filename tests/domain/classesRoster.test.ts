@@ -1,8 +1,7 @@
 // Local
-import { CohortBoard } from './classesRoster';
-import { cohortsProgress } from './cohortProgress';
+import { CohortBoard, cohortsProgress } from '../../src/domain/classesRoster';
 
-vi.mock('../lib/supabase', () => ({ supabase: {} }));
+vi.mock('../../src/lib/supabase', () => ({ supabase: {} }));
 
 const lesson = (id: string, number: number, date: string) => ({ id, cohort_id: 'c1', number, date });
 

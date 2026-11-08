@@ -1,7 +1,7 @@
 // Libs
 import { InfoBox, Typography } from 'bp-kit';
 // Local
-import { hasCompletedLessons } from '../../../domain/membershipEligibility';
+import { hasCompletedLessons } from '../../../domain/membership';
 import { MembershipEligibility } from '../types';
 
 interface Props {

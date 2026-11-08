@@ -1,5 +1,5 @@
 // Libs
-import { parsePhone } from 'bp-kit';
+import { onlyDigits } from 'bp-kit';
 // Local
 import { supabase } from '../../../lib/supabase';
 import { CreateVisitorFormValues } from '../validators';
@@ -8,7 +8,7 @@ export function useCreatePerson() {
   const createPerson = async (values: CreateVisitorFormValues) => {
     const { error } = await supabase.from('people').insert({
       name: values.name.trim(),
-      phone: parsePhone(values.phone),
+      phone: onlyDigits(values.phone),
       age: values.age ? Number(values.age) : null,
       email: values.email || null,
     });

@@ -7,8 +7,8 @@ import { supabase } from '../../../lib/supabase';
 import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
 import { useCohortNames } from '../../../queries/reference';
 import { comparePeopleByPipeline, INTEGRATION_STATUSES, PersonStatus } from '../../../types/person';
-import { PersonReportRow } from '../types';
-import { peopleReportFilters } from './persistence';
+import { PersonRow } from '../types';
+import { peopleFilters } from '../persistence';
 
 const PAGE_SIZE = 10;
 
@@ -18,7 +18,7 @@ interface ReportFilters {
   search: string;
 }
 
-async function listReportPeople({ statusFilter, cohortFilter, search }: ReportFilters): Promise<PersonReportRow[]> {
+async function listPeople({ statusFilter, cohortFilter, search }: ReportFilters): Promise<PersonRow[]> {
   let cohortPersonIds: string[] | null = null;
   if (cohortFilter !== 'all') {
     const { data, error } = await supabase
@@ -52,9 +52,9 @@ async function listReportPeople({ statusFilter, cohortFilter, search }: ReportFi
     .sort(comparePeopleByPipeline);
 }
 
-export function usePeopleReport() {
+export function usePeopleList() {
 
-  const [saved] = useState(() => peopleReportFilters.load() ?? {});
+  const [saved] = useState(() => peopleFilters.load() ?? {});
   const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>(() =>
     (saved.statusFilter ?? []).filter((status) => INTEGRATION_STATUSES.includes(status)),
   );
@@ -63,11 +63,11 @@ export function usePeopleReport() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    peopleReportFilters.save({ statusFilter, cohortFilter, search });
+    peopleFilters.save({ statusFilter, cohortFilter, search });
   }, [statusFilter, cohortFilter, search]);
 
   const filters = { statusFilter, cohortFilter, search: debouncedSearch };
-  const query = useQuery(queryKeys.peopleReport(filters), () => listReportPeople(filters));
+  const query = useQuery(queryKeys.peopleList(filters), () => listPeople(filters));
   const allPeople = query.data ?? [];
   const cohortNames = useCohortNames().data ?? [];
 

@@ -7,9 +7,9 @@ import {
   currentCoffeeAttendance,
   selectOpenCoffeeEvents,
   upcomingCoffeeEvent,
-} from './cafeSchedule';
+} from '../../src/domain/cafeSchedule';
 
-vi.mock('../lib/supabase', () => ({ supabase: {} }));
+vi.mock('../../src/lib/supabase', () => ({ supabase: {} }));
 
 const past = { id: 'past', event_date: '2026-09-13' };
 const today = { id: 'today', event_date: '2026-09-23' };

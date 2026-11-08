@@ -8,7 +8,7 @@ import {
   MEMBERSHIP_ALERT_LABELS,
   MembershipAlert,
   setMembershipAlertResolved,
-} from '../../domain/membershipAlerts';
+} from '../../domain/membership';
 import { AlertAnswer, AlertItem, AlertNote, AlertSection, AlertSectionTitle, AlertTitle } from './styles';
 
 interface Props {

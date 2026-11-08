@@ -6,8 +6,8 @@ import { PageHeader } from '../../../components/PageHeader';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { GroupInput, WEEK_DAY_LABELS } from '../../../domain/communityGroups';
 import { GroupRow } from '../hooks/useCommunityGroupsList';
-import { GroupModal } from './GroupModal';
 import { CountPill } from '../styles';
+import { GroupModal } from './GroupModal';
 
 interface Props {
   title: string;

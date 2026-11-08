@@ -4,7 +4,7 @@ import { Card, Checkbox, LinkButton, ModalTitle, Skeleton, Typography, useModal 
 // Local
 import { CountBadge } from '../../../Classes/styles';
 import { formatDate, todayKey } from '../../../../domain/dates';
-import { hasCompletedLessons } from '../../../../domain/membershipEligibility';
+import { hasCompletedLessons } from '../../../../domain/membership';
 import { makeupLessonMessage, membershipInterestMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
 import { CardHeader, LessonList, LessonMakeupAction, LessonRow, StagePanel } from '../styles';

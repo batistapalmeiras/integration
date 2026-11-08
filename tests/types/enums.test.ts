@@ -8,7 +8,7 @@ import {
   SystemModule,
   TEACHING_ROLES,
   UserRole,
-} from './enums';
+} from '../../src/types/enums';
 
 describe('role groups', () => {
   it('lets admin and pastor into every group', () => {

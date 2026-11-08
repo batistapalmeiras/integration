@@ -7,7 +7,7 @@ import { Check } from 'lucide-react';
 // Local
 import { MembershipAlerts } from '../../../../components/MembershipAlerts';
 import { CommunityGroup } from '../../../../domain/communityGroups';
-import { CommunityRequirements, communityRequirements } from '../../../../domain/membershipCommunity';
+import { CommunityRequirements, communityRequirements } from '../../../../domain/membership';
 import { Person } from '../../../../features/visitors';
 import { CommunityFields } from '../../components/CommunityFields';
 import { CommunityFormValues, buildCommunitySchema } from '../../validators';

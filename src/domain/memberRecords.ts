@@ -1,9 +1,9 @@
 // Libs
-import { formatCPF, maskPhone } from 'bp-kit';
+import { formatCPF, maskPhone, onlyDigits } from 'bp-kit';
 // Local
-import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membershipAlerts';
-import { toOptions, YesNo } from './text';
 import { supabase } from '../lib/supabase';
+import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membership';
+import { toOptions, YesNo } from './text';
 
 export type MembershipStatus = 'active' | 'pending_review' | 'inactive' | 'transferred' | 'removed' | 'deceased';
 
@@ -187,7 +187,7 @@ const toYesNo = (value: unknown): YesNo | '' => (value === true ? 'yes' : value 
 const fromYesNo = (value: YesNo | '') => (value === '' ? null : value === 'yes');
 
 const blankToNull = (value: string) => (value.trim() === '' ? null : value.trim());
-const digitsOrNull = (value: string) => blankToNull(value.replace(/\D/g, ''));
+const digitsOrNull = (value: string) => blankToNull(onlyDigits(value));
 
 export async function getMemberRecord(personId: string): Promise<MemberRecord> {
   const [person, profile, sensitive] = await Promise.all([

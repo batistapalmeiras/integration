@@ -1,11 +1,9 @@
 // Libs
-import { text } from 'bp-kit';
+import { isCompletePhone, isSamePhone, isValidCpf, onlyDigits, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
-import { isValidCpf } from '../../domain/cpf';
 import { parseTypedDate, todayKey } from '../../domain/dates';
 import { MaritalStatusOption } from '../../domain/memberRecords';
-import { INCOMPLETE_PHONE_MESSAGE, isCompletePhone, isSamePhone } from '../../domain/phone';
 
 export interface MembershipFormValues {
   name: string;
@@ -69,7 +67,6 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   membershipNote: '',
 };
 
-const digits = (value: string) => value.replace(/\D/g, '');
 export const ENFORCE_REQUIRED = true;
 
 const required = (what: string) =>
@@ -91,7 +88,7 @@ const personalSchema = z.object({
     'Informe seu nome completo, com sobrenome',
   ),
   gender: choice(['male', 'female'], 'Selecione o sexo'),
-  cpf: required('seu CPF').refine(whenFilled(isValidCpf), 'CPF inválido. Confira os números.'),
+  cpf: required('seu CPF').refine(whenFilled(isValidCpf), text.validation.cpfInvalid),
   birthDate: required('sua data de nascimento').refine(whenFilled(pastDate), 'Data inválida. Use o formato dd/mm/aaaa.'),
   maritalStatus: choice(['single', 'married', 'divorced', 'widowed', 'stable_union'], 'Selecione o estado civil'),
   motherName: z.string(),
@@ -106,12 +103,12 @@ function addressSchema(identificationPhone: string) {
     ),
     otherPhone: z
       .string()
-      .refine((value) => value === '' || isCompletePhone(value), INCOMPLETE_PHONE_MESSAGE)
+      .refine((value) => value === '' || isCompletePhone(value), text.validation.phoneIncomplete)
       .refine(
         (value) => !isSamePhone(value, identificationPhone),
         'Informe um número diferente do que você usou para entrar',
       ),
-    zip: required('o CEP').refine(whenFilled((value) => digits(value).length === 8), 'O CEP tem 8 dígitos'),
+    zip: required('o CEP').refine(whenFilled((value) => onlyDigits(value).length === 8), 'O CEP tem 8 dígitos'),
     street: required('a rua'),
     number: required('o número'),
     complement: z.string(),

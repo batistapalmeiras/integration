@@ -1,6 +1,8 @@
 // React
 import { useEffect, useRef, useState } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
+// Libs
+import { onlyDigits } from 'bp-kit';
 // Local
 import { MembershipFormValues } from '../schema';
 
@@ -15,7 +17,7 @@ interface ViaCepAddress {
 export function useZipLookup(zip: string, setValue: UseFormSetValue<MembershipFormValues>) {
   const [looking, setLooking] = useState(false);
   const [notFound, setNotFound] = useState(false);
-  const zipDigits = zip.replace(/\D/g, '');
+  const zipDigits = onlyDigits(zip);
   const lookedUp = useRef(zipDigits);
 
   useEffect(() => {

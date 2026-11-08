@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { text } from 'bp-kit';
 // Components
-import { CommunityRequirements } from '../../../domain/membershipCommunity';
+import { CommunityRequirements } from '../../../domain/membership';
 
 export const createVisitorSchema = z.object({
   name: z.string().min(1, text.validation.required('o nome')),

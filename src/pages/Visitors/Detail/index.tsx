@@ -6,11 +6,11 @@ import { Empty, Skeleton } from 'bp-kit';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
+import { useVisitorDetail } from '../../../features/visitors';
 import { NextStep } from './components/NextStep';
 import { PersonCard } from './components/PersonCard';
 import { PersonDetailsCard } from './components/PersonDetailsCard';
 import { ProgressStepper } from './components/ProgressStepper';
-import { useVisitorDetail } from '../../../features/visitors';
 import { Content } from './styles';
 
 export function VisitorDetailPage() {

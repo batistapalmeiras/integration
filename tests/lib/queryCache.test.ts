@@ -1,7 +1,7 @@
 // Libs
 import { renderHook, waitFor } from '@testing-library/react';
 // Local
-import { clearQueries, fetchQuery, invalidateQueries, setQueryData, useQuery } from './queryCache';
+import { clearQueries, fetchQuery, invalidateQueries, setQueryData, useQuery } from '../../src/lib/queryCache';
 
 describe('queryCache', () => {
   afterEach(() => clearQueries());

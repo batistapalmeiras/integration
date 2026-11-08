@@ -7,7 +7,7 @@ import {
   isBirthdayToday,
   MemberBirthday,
   upcomingBirthdaysThisMonth,
-} from './birthdays';
+} from '../../src/domain/birthdays';
 
 const birthday = (name: string, birthDate: string, phone: string | null = null): MemberBirthday => ({
   personId: name,

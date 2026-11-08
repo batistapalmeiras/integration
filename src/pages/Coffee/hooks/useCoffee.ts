@@ -26,7 +26,7 @@ import {
   isReturningToSignup,
   updateCoffeeEventDate,
 } from '../../../domain/cafeSchedule';
-import { runPipelineMaintenance } from '../../../domain/pipelineMaintenance';
+import { runPipelineMaintenance } from '../../../domain/integrationPeople';
 import { errorMessage, fetchQuery, setQueryData, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';

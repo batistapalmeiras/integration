@@ -1,5 +1,5 @@
 // Local
-import { isJwtClockError, isJwtExpiredError, supabase } from './supabase';
+import { isJwtClockError, isJwtExpiredError, supabase } from '../../src/lib/supabase';
 
 vi.stubGlobal('import.meta', { env: {} });
 

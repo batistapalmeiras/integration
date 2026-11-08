@@ -1,6 +1,6 @@
 // Local
-import { activeNavPath, findNavArea, INTEGRATION_TEAM_NAV_AREAS, PASTOR_NAV_AREAS } from './navigation';
-import { AppRoute } from './paths';
+import { activeNavPath, findNavArea, INTEGRATION_TEAM_NAV_AREAS, PASTOR_NAV_AREAS } from '../../src/routes/navigation';
+import { AppRoute } from '../../src/routes/paths';
 
 describe('pastor modules', () => {
   it('finds the module of each module tab and of its Mais page', () => {

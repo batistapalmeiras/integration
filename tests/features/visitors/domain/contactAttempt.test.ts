@@ -1,5 +1,5 @@
 // Local
-import { resolveContactAttemptOutcome, statusAfterContact } from './contactAttempt';
+import { resolveContactAttemptOutcome, statusAfterContact } from '../../../../src/features/visitors/domain/contactAttempt';
 
 describe('resolveContactAttemptOutcome', () => {
   it('moves to welcome_coffee when accepted', () => {
