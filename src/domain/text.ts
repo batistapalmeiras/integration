@@ -9,3 +9,5 @@ export function toOptions<K extends string>(labels: Record<K, string>): { value:
 }
 
 export const YES_NO_OPTIONS = toOptions(YES_NO_LABELS);
+
+export const LOAD_RETRY_MESSAGE = 'Não foi possível carregar agora. Atualize a página para tentar de novo.';

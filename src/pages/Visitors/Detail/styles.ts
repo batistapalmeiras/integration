@@ -4,24 +4,6 @@ import styled from 'styled-components';
 
 export { Form } from 'bp-kit';
 
-export const Actions = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-  margin-top: ${({ theme }) => theme.spacing.md};
-
-  & > button {
-    width: 100%;
-  }
-`;
-
-export const Content = styled.div`
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xl};
-`;
-
 export const PersonCardRow = styled.div`
   display: flex;
   align-items: center;
@@ -72,11 +54,6 @@ export const SectionStack = styled.div`
   gap: ${({ theme }) => theme.spacing.xl};
 `;
 
-export const SectionDivider = styled.div`
-  border-top: 1px solid ${({ theme }) => theme.colors.hairline};
-  padding-top: ${({ theme }) => theme.spacing.xl};
-`;
-
 export const DetailsList = styled.div`
   display: flex;
   flex-direction: column;
@@ -103,7 +80,6 @@ export const DetailValue = styled.span`
   color: ${({ theme }) => theme.colors.ink};
   text-align: right;
 `;
-
 
 export const InfoBoxAction = styled.div`
   margin-top: ${({ theme }) => theme.spacing.sm};

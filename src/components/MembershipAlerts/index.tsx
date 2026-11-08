@@ -1,10 +1,13 @@
 // React
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 // Libs
 import { Checkbox } from 'bp-kit';
 // Local
 import { MEMBERSHIP_ALERT_LABELS, MembershipAlert } from '../../domain/membership';
-import { listMembershipAlerts, setMembershipAlertResolved } from '../../repositories/membership';
+import { errorMessage, setQueryData } from '../../lib/queryCache';
+import { queryKeys } from '../../lib/queryKeys';
+import { useMembershipAlerts } from '../../queries/person';
+import { setMembershipAlertResolved } from '../../repositories/membership';
 import { AlertAnswer, AlertItem, AlertNote, AlertSection, AlertSectionTitle, AlertTitle } from './styles';
 
 interface Props {
@@ -12,28 +15,27 @@ interface Props {
 }
 
 export function MembershipAlerts({ personId }: Props) {
-  const [alerts, setAlerts] = useState<MembershipAlert[]>([]);
+  const query = useMembershipAlerts(personId);
+  const alerts = query.data ?? [];
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    listMembershipAlerts([personId])
-      .then(setAlerts)
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
-  }, [personId]);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const error = saveError ?? errorMessage(query.error);
 
   if (alerts.length === 0 && !error) return null;
 
   const toggle = async (alert: MembershipAlert, resolved: boolean) => {
     setSaving(true);
-    setError(null);
+    setSaveError(null);
     try {
       await setMembershipAlertResolved(personId, alert.code, resolved);
-      setAlerts((current) => current.map((item) => (item.code === alert.code ? { ...item, resolved } : item)));
+      setQueryData<MembershipAlert[]>(queryKeys.membershipAlerts(personId), (current) =>
+        (current ?? []).map((item) => (item.code === alert.code ? { ...item, resolved } : item)),
+      );
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setSaveError(errorMessage(e));
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (

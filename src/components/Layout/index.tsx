@@ -51,6 +51,8 @@ import {
   TabIcon,
 } from './styles';
 
+const DashboardIcon = NAV_ITEMS.dashboard.icon;
+
 interface ILayoutProps {
   children: React.ReactNode;
 }
@@ -115,7 +117,7 @@ export function Layout({ children }: ILayoutProps) {
 
         <SideNav>
           <SideNavLink to={NAV_ITEMS.dashboard.path} $active={activePath === NAV_ITEMS.dashboard.path}>
-            <NAV_ITEMS.dashboard.icon size={18} />
+            <DashboardIcon size={18} />
             {NAV_ITEMS.dashboard.label}
           </SideNavLink>
           {navAreas.map((area) => {

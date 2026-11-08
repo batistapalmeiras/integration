@@ -6,7 +6,7 @@ import { Send } from 'lucide-react';
 // Local
 import { buildWhatsAppLink } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
-import { Actions } from '../styles';
+import { FormActions } from '../../../../components/FormLayout';
 
 interface Props {
   person: Person;
@@ -18,7 +18,15 @@ interface Props {
   rows?: number;
 }
 
-export function WhatsAppMessageBox({ person, defaultMessage, buttonLabel = 'Abrir WhatsApp', onOpen, bare, disabled, rows = 6 }: Props) {
+export function WhatsAppMessageBox({
+  person,
+  defaultMessage,
+  buttonLabel = 'Abrir WhatsApp',
+  onOpen,
+  bare,
+  disabled,
+  rows = 6,
+}: Props) {
   const [message, setMessage] = useState(defaultMessage);
 
   const phone = person.phone;
@@ -31,13 +39,19 @@ export function WhatsAppMessageBox({ person, defaultMessage, buttonLabel = 'Abri
 
   const content = (
     <>
-      <RawTextarea label="Mensagem" value={message} onChange={(e) => setMessage(e.target.value)} rows={rows} disabled={disabled} />
-      <Actions>
+      <RawTextarea
+        label="Mensagem"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        rows={rows}
+        disabled={disabled}
+      />
+      <FormActions>
         <Button type="button" variant="primary" onClick={openWhatsApp} disabled={disabled || !phone}>
           <Send size={16} />
           {buttonLabel}
         </Button>
-      </Actions>
+      </FormActions>
     </>
   );
 

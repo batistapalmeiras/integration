@@ -3,8 +3,26 @@ import { getPersonSensitive } from '../repositories/personSensitive';
 import { useQuery } from '../lib/queryCache';
 import { queryKeys } from '../lib/queryKeys';
 import { listMemberBirthdays } from '../repositories/birthdays';
+import { getPersonLessonMakeups } from '../repositories/lessonMakeups';
+import { getMemberRecord } from '../repositories/memberRecords';
+import { listMembershipAlerts } from '../repositories/membership';
+import { listPastoralNotes } from '../repositories/pastoralNotes';
 
 export const usePersonSensitive = (personId: string, enabled = true) =>
   useQuery(queryKeys.personSensitive(personId), () => getPersonSensitive(personId), { enabled: enabled && !!personId });
 
 export const useMemberBirthdays = () => useQuery(queryKeys.memberBirthdays, listMemberBirthdays);
+
+export const usePersonMakeups = (personId: string, enabled = true) =>
+  useQuery(queryKeys.personMakeups(personId), () => getPersonLessonMakeups(personId), {
+    enabled: enabled && !!personId,
+  });
+
+export const useMemberRecord = (personId: string) =>
+  useQuery(queryKeys.memberRecord(personId), () => getMemberRecord(personId), { enabled: !!personId });
+
+export const usePastoralNotes = (personId: string) =>
+  useQuery(queryKeys.pastoralNotes(personId), () => listPastoralNotes(personId), { enabled: !!personId });
+
+export const useMembershipAlerts = (personId: string) =>
+  useQuery(queryKeys.membershipAlerts(personId), () => listMembershipAlerts([personId]), { enabled: !!personId });

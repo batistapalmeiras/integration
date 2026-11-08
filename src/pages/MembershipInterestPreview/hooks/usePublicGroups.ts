@@ -1,9 +1,8 @@
-// React
-import { useEffect, useState } from 'react';
 // Libs
 import { MultiSelectOption } from 'bp-kit';
 // Local
-import { listPublicMinistryNames, listPublicSmallGroups, SmallGroupOption } from '../../../repositories/publicForms';
+import { usePublicMinistryNames, usePublicSmallGroups } from '../../../queries/public';
+import { SmallGroupOption } from '../../../repositories/publicForms';
 
 export function smallGroupLabel(group: SmallGroupOption): string {
   return group.leaders?.length ? `${group.name} — ${group.leaders.join(', ')}` : group.name;
@@ -20,17 +19,11 @@ function ministryOptions(names: string[]): MultiSelectOption[] {
 }
 
 export function usePublicGroups() {
-  const [ministries, setMinistries] = useState<MultiSelectOption[]>([]);
-  const [smallGroups, setSmallGroups] = useState<SmallGroupOption[] | null>(null);
-
-  useEffect(() => {
-    listPublicMinistryNames()
-      .then((names) => setMinistries(ministryOptions(names)))
-      .catch(() => setMinistries([]));
-    listPublicSmallGroups()
-      .then(setSmallGroups)
-      .catch(() => setSmallGroups([]));
-  }, []);
-
-  return { ministries, smallGroups };
+  const ministryNames = usePublicMinistryNames();
+  const smallGroups = usePublicSmallGroups();
+  return {
+    ministries: ministryOptions(ministryNames.data ?? []),
+    smallGroups: smallGroups.error ? [] : (smallGroups.data ?? null),
+    loadError: !!ministryNames.error || !!smallGroups.error,
+  };
 }

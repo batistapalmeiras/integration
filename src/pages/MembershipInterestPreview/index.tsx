@@ -29,7 +29,7 @@ export function MembershipInterestPreviewPage() {
   const [phone, setPhone] = useState('');
   const [readChapters, setReadChapters] = useState<string[]>([]);
   const [returnToReview, setReturnToReview] = useState(false);
-  const { ministries, smallGroups } = usePublicGroups();
+  const { ministries, smallGroups, loadError } = usePublicGroups();
 
   const stepRef = useRef(0);
   const phoneRef = useRef('');
@@ -112,7 +112,9 @@ export function MembershipInterestPreviewPage() {
               onChapterRead={(id) => setReadChapters((current) => (current.includes(id) ? current : [...current, id]))}
             />
           )}
-          {screen === 4 && <ServeStep control={control} ministries={ministries} smallGroups={smallGroups} />}
+          {screen === 4 && (
+            <ServeStep control={control} ministries={ministries} smallGroups={smallGroups} loadError={loadError} />
+          )}
 
           <ActionBar>
             {screen > 0 && !returnToReview && (

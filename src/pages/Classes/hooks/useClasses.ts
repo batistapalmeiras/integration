@@ -78,7 +78,11 @@ export function useClasses() {
   };
 
   const updateLessonDates = async (lessonDates: [string, string, string, string]) => {
-    await saveLessonDates(lessons.map((lesson, index) => ({ id: lesson.id, date: lessonDates[index] })));
+    if (!cohort) return;
+    await saveLessonDates(
+      cohort.id,
+      lessons.map((lesson, index) => ({ number: lesson.number, date: lessonDates[index] })),
+    );
     await refreshBoard();
   };
 

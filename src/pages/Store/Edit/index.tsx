@@ -18,7 +18,8 @@ export function EditStoreItemPage() {
 
   const item = items.find((i) => i.id === id);
 
-  if (!item) return <Empty title="Item não encontrado" description="" />;
+  if (!item)
+    return <Empty title="Item não encontrado" description="Ele pode ter sido removido. Volte para a lista da Loja." />;
 
   const confirmRemove = () =>
     open(

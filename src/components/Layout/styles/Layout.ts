@@ -94,7 +94,9 @@ export const SideNavAreaToggle = styled.button<{ $open: boolean }>`
     transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
   }
 
-  &:hover { color: ${({ theme }) => theme.colors.ink}; }
+  &:hover {
+    color: ${({ theme }) => theme.colors.ink};
+  }
 `;
 
 export const SideNavLink = styled(Link)<{ $active: boolean; $nested?: boolean }>`
@@ -113,14 +115,19 @@ export const SideNavLink = styled(Link)<{ $active: boolean; $nested?: boolean }>
   background: ${({ theme, $active }) => ($active ? theme.colors.surfaceSoft : 'transparent')};
   border-left: 2px solid ${({ theme, $active }) => ($active ? theme.colors.primary : 'transparent')};
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 
   svg {
     flex-shrink: 0;
     stroke-width: ${({ $active }) => ($active ? 2 : 1.5)};
   }
 
-  &:hover { background: ${({ theme }) => theme.colors.surfaceSoft}; color: ${({ theme }) => theme.colors.ink}; }
+  &:hover {
+    background: ${({ theme }) => theme.colors.surfaceSoft};
+    color: ${({ theme }) => theme.colors.ink};
+  }
 `;
 
 export const SideNavGroupToggle = styled.button<{ $open: boolean }>`
@@ -140,7 +147,9 @@ export const SideNavGroupToggle = styled.button<{ $open: boolean }>`
   color: ${({ theme }) => theme.colors.muted};
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 
   svg {
     flex-shrink: 0;
@@ -153,7 +162,10 @@ export const SideNavGroupToggle = styled.button<{ $open: boolean }>`
     transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
   }
 
-  &:hover { background: ${({ theme }) => theme.colors.surfaceSoft}; color: ${({ theme }) => theme.colors.ink}; }
+  &:hover {
+    background: ${({ theme }) => theme.colors.surfaceSoft};
+    color: ${({ theme }) => theme.colors.ink};
+  }
 `;
 
 export const SideFooter = styled.div`
@@ -193,8 +205,12 @@ export const DropdownItem = styled.button`
   text-align: left;
   transition: background 0.15s;
 
-  &:hover { background: ${({ theme }) => theme.colors.surfaceSoft}; }
-  &.danger { color: ${({ theme }) => theme.colors.primaryErrorText}; }
+  &:hover {
+    background: ${({ theme }) => theme.colors.surfaceSoft};
+  }
+  &.danger {
+    color: ${({ theme }) => theme.colors.primaryErrorText};
+  }
 `;
 
 export const BottomBar = styled.nav`
@@ -286,6 +302,8 @@ export const SideNavCount = styled.span`
 
 export const Main = styled.main<{ $hasBottomBar: boolean }>`
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: ${({ theme }) => theme.colors.canvas};
 
   @media (max-width: 744px) {
@@ -307,7 +325,8 @@ export const ModuleBar = styled(Link)`
     display: flex;
     align-items: center;
     gap: ${({ theme }) => theme.spacing.xs};
-    padding: calc(${({ theme }) => theme.spacing.md} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.md};
+    padding: calc(${({ theme }) => theme.spacing.md} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base}
+      ${({ theme }) => theme.spacing.md};
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -321,13 +340,18 @@ export const ModuleBar = styled(Link)`
 `;
 
 export const MainInner = styled.div`
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.xl} ${({ theme }) => theme.spacing.xl};
   animation: ${fadeUp} 0.25s ease;
 
   @media (max-width: 744px) {
-    padding: calc(${({ theme }) => theme.spacing.lg} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.lg};
+    padding: calc(${({ theme }) => theme.spacing.lg} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base}
+      ${({ theme }) => theme.spacing.lg};
   }
 
   @media ${SIDEMENU_MEDIA} {

@@ -1,8 +1,8 @@
 // Libs
-import { Skeleton } from 'bp-kit';
+import { Button, Empty, Skeleton } from 'bp-kit';
 // Local
-import { Layout } from '../Layout';
 import { ForcedChangePasswordPage } from '../../pages/ChangePassword';
+import { Layout } from '../Layout';
 import { useMustChangePassword } from './useMustChangePassword';
 
 interface Props {
@@ -10,9 +10,19 @@ interface Props {
 }
 
 export function PasswordGate({ children }: Props) {
-  const { mustChange, loading, recheck } = useMustChangePassword();
+  const { mustChange, loading, failed, recheck } = useMustChangePassword();
 
   if (loading) return <Skeleton $h="320px" />;
+  if (failed) {
+    return (
+      <Layout>
+        <Empty title="Não foi possível verificar sua conta" description="Confira sua conexão e tente novamente." />
+        <Button type="button" variant="primary" onClick={recheck}>
+          Tentar novamente
+        </Button>
+      </Layout>
+    );
+  }
   if (mustChange) {
     return (
       <Layout>

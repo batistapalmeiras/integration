@@ -24,6 +24,9 @@ export const queryKeys = {
   personIntegrationClass: (id: string) => ['person', id, 'integration-class'] as const,
   personSensitive: (id: string) => ['person', id, 'sensitive'] as const,
   personMakeups: (id: string) => ['person', id, 'makeups'] as const,
+  memberRecord: (id: string) => ['person', id, 'record'] as const,
+  pastoralNotes: (id: string) => ['person', id, 'pastoral-notes'] as const,
+  membershipAlerts: (id: string) => ['person', id, 'membership-alerts'] as const,
 
   coffeeBoard: ['coffee', 'board'] as const,
   coffeeHistory: ['coffee', 'history'] as const,
@@ -35,6 +38,11 @@ export const queryKeys = {
   cohortNames: ['cohorts', 'names'] as const,
   cohortsReport: ['cohorts', 'report'] as const,
   cohortRoster: (id: string) => ['cohorts', 'roster', id] as const,
+
+  publicCohortSchedule: ['public', 'cohort-schedule'] as const,
+  publicMinistryNames: ['public', 'ministry-names'] as const,
+  publicSmallGroups: ['public', 'small-groups'] as const,
+  mustChangePassword: (userId: string) => ['profile', userId, 'must-change-password'] as const,
 
   smallGroups: ['reference', 'small-groups'] as const,
   ministries: ['reference', 'ministries'] as const,

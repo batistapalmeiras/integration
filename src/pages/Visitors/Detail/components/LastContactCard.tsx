@@ -5,7 +5,8 @@ import { Button, Card, RadioGroup, Typography } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Local
 import { ContactResult, RESULT_LABELS } from '../../../../features/visitors';
-import { Actions, CardHeader } from '../styles';
+import { CardHeader } from '../styles';
+import { FormActions } from '../../../../components/FormLayout';
 
 const RESULT_OPTIONS = Object.entries(RESULT_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -46,8 +47,14 @@ export function LastContactCard({ result, onSave }: Props) {
 
       {editing ? (
         <>
-          <RadioGroup label="Resultado" name="lastContactResult" options={RESULT_OPTIONS} value={value} onChange={(v) => setValue(v as ContactResult)} />
-          <Actions>
+          <RadioGroup
+            label="Resultado"
+            name="lastContactResult"
+            options={RESULT_OPTIONS}
+            value={value}
+            onChange={(v) => setValue(v as ContactResult)}
+          />
+          <FormActions>
             <Button size="sm" variant="secondary" type="button" onClick={() => setEditing(false)} disabled={saving}>
               Cancelar
             </Button>
@@ -61,7 +68,7 @@ export function LastContactCard({ result, onSave }: Props) {
                 </>
               )}
             </Button>
-          </Actions>
+          </FormActions>
         </>
       ) : (
         <Typography type="p">{RESULT_LABELS[result]}</Typography>

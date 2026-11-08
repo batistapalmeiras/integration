@@ -1,5 +1,5 @@
 // React
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -10,8 +10,6 @@ import { Check, Save, UserRound } from 'lucide-react';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { LessonMakeup } from '../../../domain/lessonMakeups';
-import { getPersonLessonMakeups } from '../../../repositories/lessonMakeups';
 import { communityRequirements } from '../../../domain/membership';
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
@@ -19,22 +17,20 @@ import { useVisitorProfile } from '../../../features/visitors';
 import { CommunityFields } from '../components/CommunityFields';
 import { ConfirmMemberModal } from '../Detail/components/ConfirmMemberModal';
 import { buildCommunitySchema, CommunityFormValues } from '../validators';
-import { usePersonSensitive } from '../../../queries/person';
+import { usePersonMakeups, usePersonSensitive } from '../../../queries/person';
 import { useMinistries, useSmallGroups } from '../../../queries/reference';
 import {
-  Actions,
-  Content,
   DetailLabel,
   DetailRow,
   DetailsList,
   DetailValue,
   Form,
   InfoTabBar,
-  SectionDivider,
   SectionStack,
   SensitiveBlock,
   SensitiveValue,
 } from '../Detail/styles';
+import { FormActions, FormContent, SectionDivider } from '../../../components/FormLayout';
 import { InfoEntry, integrationEntries, makeupEntries, membershipEntries } from './sensitive';
 
 type InfoTab = 'general' | 'integration' | 'membership' | 'makeup';
@@ -64,14 +60,11 @@ export function VisitorInfoPage() {
   const canSeeSensitive = hasRole(user?.role, LEADERSHIP_ROLES);
   const canSeeMakeups = hasRole(user?.role, TEACHING_ROLES);
   const sensitive = usePersonSensitive(id ?? '', canSeeSensitive).data ?? null;
-  const [makeups, setMakeups] = useState<LessonMakeup[]>([]);
+  const makeups = usePersonMakeups(id ?? '', canSeeMakeups).data ?? [];
   const requirements = communityRequirements(sensitive);
   const requirementsRef = useRef(requirements);
   requirementsRef.current = requirements;
 
-  useEffect(() => {
-    if (canSeeMakeups && id) getPersonLessonMakeups(id).then(setMakeups);
-  }, [canSeeMakeups, id]);
   const canEditCommunity = user?.role === UserRole.Pastor && person?.status === 'member';
   const smallGroups = useSmallGroups(canEditCommunity).data ?? [];
   const ministries = useMinistries(canEditCommunity).data ?? [];
@@ -133,7 +126,7 @@ export function VisitorInfoPage() {
     );
 
   return (
-    <Content>
+    <FormContent>
       <PageHeader
         title="Detalhes"
         subtitle={person.name}
@@ -172,12 +165,12 @@ export function VisitorInfoPage() {
       {(current === 'integration' || current === 'membership') && <EntryList entries={entriesFor(current)} />}
 
       {current === 'membership' && showConfirmMember && (
-        <Actions>
+        <FormActions>
           <Button variant="primary" onClick={openConfirmMember}>
             <Check size={16} />
             Confirmar como membro
           </Button>
-        </Actions>
+        </FormActions>
       )}
 
       {current === 'makeup' && (
@@ -203,7 +196,7 @@ export function VisitorInfoPage() {
             ministries={ministries}
           />
 
-          <Actions>
+          <FormActions>
             <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
               {isSubmitting ? (
                 'Salvando...'
@@ -214,12 +207,12 @@ export function VisitorInfoPage() {
                 </>
               )}
             </Button>
-          </Actions>
+          </FormActions>
         </Form>
       )}
 
       {modal}
-    </Content>
+    </FormContent>
   );
 }
 

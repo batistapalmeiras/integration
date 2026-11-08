@@ -1,10 +1,9 @@
 // React
-import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, Select, Skeleton, text, Textarea, TextInput, Typography, useToast } from 'bp-kit';
+import { Button, Empty, Form, Select, Skeleton, text, Textarea, TextInput, Typography, useToast } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
@@ -18,29 +17,22 @@ import {
   MemberRecord,
   MEMBERSHIP_STATUS_LABELS,
 } from '../../domain/memberRecords';
-import { getMemberRecord, saveMemberRecord } from '../../repositories/memberRecords';
-import { PastoralNote } from '../../domain/pastoralNotes';
-import { listPastoralNotes } from '../../repositories/pastoralNotes';
+import { errorMessage } from '../../lib/queryCache';
+import { useMemberRecord, usePastoralNotes } from '../../queries/person';
+import { saveMemberRecord } from '../../repositories/memberRecords';
 import { PHONE_PLACEHOLDER, YES_NO_OPTIONS } from '../../domain/text';
-import { Actions, Content, Form, SectionDivider } from '../Visitors/Detail/styles';
+import { FormActions, FormContent, SectionDivider } from '../../components/FormLayout';
 import { memberRecordSchema } from './schema';
 
 export function MemberRecordPage() {
   const { id = '' } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { show: showToast, toast } = useToast();
-  const [record, setRecord] = useState<MemberRecord | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [pastoralNotes, setPastoralNotes] = useState<PastoralNote[]>([]);
-
-  useEffect(() => {
-    getMemberRecord(id)
-      .then(setRecord)
-      .catch((e) => setLoadError(e instanceof Error ? e.message : String(e)));
-    listPastoralNotes(id)
-      .then(setPastoralNotes)
-      .catch(() => setPastoralNotes([]));
-  }, [id]);
+  const recordQuery = useMemberRecord(id);
+  const notesQuery = usePastoralNotes(id);
+  const record = recordQuery.data ?? null;
+  const loadError = errorMessage(recordQuery.error);
+  const pastoralNotes = notesQuery.data ?? [];
 
   const {
     control,
@@ -61,7 +53,7 @@ export function MemberRecordPage() {
   });
 
   return (
-    <Content>
+    <FormContent>
       <PageHeader title="Ficha do membro" subtitle={record.name} back />
       <MembershipAlerts personId={id} />
 
@@ -179,6 +171,9 @@ export function MemberRecordPage() {
         </SectionDivider>
         <Textarea label="Observações" control={control} name="publicNotes" rows={4} />
 
+        {!!notesQuery.error && (
+          <Typography type="caption">Não foi possível carregar as anotações dos líderes.</Typography>
+        )}
         {pastoralNotes.length > 0 && (
           <>
             <SectionDivider>
@@ -197,7 +192,7 @@ export function MemberRecordPage() {
           </>
         )}
 
-        <Actions>
+        <FormActions>
           <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
             {isSubmitting ? (
               'Salvando...'
@@ -208,9 +203,9 @@ export function MemberRecordPage() {
               </>
             )}
           </Button>
-        </Actions>
+        </FormActions>
       </Form>
       {toast}
-    </Content>
+    </FormContent>
   );
 }

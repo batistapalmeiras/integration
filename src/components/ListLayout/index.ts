@@ -2,13 +2,9 @@
 import styled from 'styled-components';
 
 export const PageFlexWrap = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 64px - 56px - env(safe-area-inset-bottom) - ${({ theme }) => theme.spacing.sm} - ${({ theme }) => theme.spacing.lg});
-
-  @media (min-width: 745px) {
-    min-height: calc(100vh - ${({ theme }) => theme.spacing.xl} - ${({ theme }) => theme.spacing.xl});
-  }
 `;
 
 export const PageFlexBody = styled.div`

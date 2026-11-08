@@ -2,7 +2,8 @@
 import { Button, InfoBox, Skeleton, Typography } from 'bp-kit';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { useCohortSchedule } from '../hooks/useCohortSchedule';
+import { LOAD_RETRY_MESSAGE } from '../../../domain/text';
+import { useActiveCohortSchedule } from '../../../queries/public';
 import { ConfirmationList, StepStack } from '../styles';
 
 interface Props {
@@ -10,15 +11,15 @@ interface Props {
 }
 
 export function IntroStep({ onContinue }: Props) {
-  const { schedule, loading } = useCohortSchedule();
+  const { data: schedule, loading, error } = useActiveCohortSchedule();
   const hasActiveCohort = !loading && !!schedule && schedule.lesson_dates?.length > 0;
 
   return (
     <StepStack>
       <Typography type="p">Seja bem-vindo(a) à Igreja Batista Palmeiras!</Typography>
       <Typography type="p">
-        É um privilégio ter você conosco. A Classe de Integração é o passo fundamental para quem deseja conhecer
-        nossa identidade e fazer parte da nossa família.
+        É um privilégio ter você conosco. A Classe de Integração é o passo fundamental para quem deseja conhecer nossa
+        identidade e fazer parte da nossa família.
       </Typography>
 
       <Typography type="h5">Informações importantes</Typography>
@@ -26,7 +27,8 @@ export function IntroStep({ onContinue }: Props) {
         <strong>Pré-requisito:</strong> o participante deve ser frequentador regular dos nossos cultos.
       </Typography>
       <Typography type="p">
-        <strong>Duração:</strong> O curso é composto por 4 encontros presenciais. É permitido no máximo 1 falta, sendo necessário reposição.
+        <strong>Duração:</strong> O curso é composto por 4 encontros presenciais. É permitido no máximo 1 falta, sendo
+        necessário reposição.
       </Typography>
 
       {loading && <Skeleton $h="80px" />}
@@ -46,7 +48,9 @@ export function IntroStep({ onContinue }: Props) {
         </>
       )}
 
-      {!loading && !hasActiveCohort && (
+      {!loading && !!error && <InfoBox variant="warning">{LOAD_RETRY_MESSAGE}</InfoBox>}
+
+      {!loading && !error && !hasActiveCohort && (
         <InfoBox variant="warning">
           Não há nenhuma turma de Integração ativa no momento. Fale com a Equipe de Integração para saber quando a
           próxima começa.

@@ -1,11 +1,11 @@
 // React
 import { Control, Controller, useWatch } from 'react-hook-form';
 // Libs
-import { Checkbox, MultiSelect, MultiSelectOption, Select, Textarea, TextInput } from 'bp-kit';
+import { Checkbox, InfoBox, MultiSelect, MultiSelectOption, Select, Textarea, TextInput } from 'bp-kit';
 // Local
 import { SmallGroupOption } from '../../../repositories/publicForms';
 import { smallGroupLabel } from '../hooks/usePublicGroups';
-import { YES_NO_OPTIONS } from '../../../domain/text';
+import { LOAD_RETRY_MESSAGE, YES_NO_OPTIONS } from '../../../domain/text';
 import { WANTS_SMALL_GROUP_OPTIONS } from '../options';
 import { MembershipFormValues } from '../schema';
 import { Hint } from '../styles';
@@ -16,15 +16,17 @@ interface Props {
   control: Control<MembershipFormValues>;
   ministries: MultiSelectOption[];
   smallGroups: SmallGroupOption[] | null;
+  loadError: boolean;
 }
 
-export function ServeStep({ control, ministries, smallGroups }: Props) {
+export function ServeStep({ control, ministries, smallGroups, loadError }: Props) {
   const noMinistryInterest = useWatch({ control, name: 'noMinistryInterest' });
   const wantsSmallGroup = useWatch({ control, name: 'wantsSmallGroup' });
   const secretSociety = useWatch({ control, name: 'secretSociety' });
 
   return (
     <>
+      {loadError && <InfoBox variant="warning">{LOAD_RETRY_MESSAGE}</InfoBox>}
       <Controller
         control={control}
         name="ministryInterests"

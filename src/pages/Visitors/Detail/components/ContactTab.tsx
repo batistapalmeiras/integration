@@ -7,7 +7,8 @@ import { Check } from 'lucide-react';
 // Local
 import { RESULT_LABELS } from '../../../../features/visitors';
 import { ContactAttemptFormValues, contactAttemptSchema } from '../../validators';
-import { Actions, Form } from '../styles';
+import { Form } from '../styles';
+import { FormActions } from '../../../../components/FormLayout';
 
 const RESULT_OPTIONS = Object.entries(RESULT_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -33,11 +34,17 @@ export function ContactTab({ onSubmit }: Props) {
         control={control}
         name="result"
         render={({ field }) => (
-          <RadioGroup label="Resultado" name="result" options={RESULT_OPTIONS} value={field.value} onChange={field.onChange} />
+          <RadioGroup
+            label="Resultado"
+            name="result"
+            options={RESULT_OPTIONS}
+            value={field.value}
+            onChange={field.onChange}
+          />
         )}
       />
 
-      <Actions>
+      <FormActions>
         <Button type="submit" variant="primary" disabled={isSubmitting}>
           {isSubmitting ? (
             'Salvando...'
@@ -48,7 +55,7 @@ export function ContactTab({ onSubmit }: Props) {
             </>
           )}
         </Button>
-      </Actions>
+      </FormActions>
     </Form>
   );
 }

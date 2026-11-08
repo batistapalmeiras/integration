@@ -229,7 +229,9 @@ export function CommunityGroupDetailPage() {
         </FieldGroup>
       )}
 
-      {people.length === 0 && <Empty title="Ninguém vinculado ainda" description="" />}
+      {people.length === 0 && (
+        <Empty title="Ninguém vinculado ainda" description="Use o botão acima para adicionar pessoas." />
+      )}
 
       {people.length > 0 && (
         <TableWrapper>

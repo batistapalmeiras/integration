@@ -1,5 +1,4 @@
 // React
-import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 // Libs
@@ -17,7 +16,8 @@ import {
 import { Send } from 'lucide-react';
 // Local
 import { ActionBar, ErrorMsg, Form } from '../../../components/PublicPage/styles';
-import { listPublicMinistryNames } from '../../../repositories/publicForms';
+import { LOAD_RETRY_MESSAGE } from '../../../domain/text';
+import { usePublicMinistryNames } from '../../../queries/public';
 import { ENTRY_TYPE_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
 import { MembershipInterestFormValues, membershipInterestSchema } from '../validators/schema';
 
@@ -32,13 +32,8 @@ interface Props {
 }
 
 export function InterestFormStep({ name, submitting, submitError, onSubmit }: Props) {
-  const [ministries, setMinistries] = useState<MultiSelectOption[]>([]);
-
-  useEffect(() => {
-    listPublicMinistryNames()
-      .then((names) => setMinistries(names.map((name) => ({ value: name, label: name }))))
-      .catch(() => setMinistries([]));
-  }, []);
+  const ministryNames = usePublicMinistryNames();
+  const ministries: MultiSelectOption[] = (ministryNames.data ?? []).map((name) => ({ value: name, label: name }));
 
   const {
     control,
@@ -127,6 +122,7 @@ export function InterestFormStep({ name, submitting, submitError, onSubmit }: Pr
           />
         )}
       />
+      {!!ministryNames.error && <ErrorMsg>{LOAD_RETRY_MESSAGE}</ErrorMsg>}
       <Controller
         control={control}
         name="noMinistryInterest"

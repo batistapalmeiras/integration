@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, Form, ModalActions, ModalTitle, Select, text } from 'bp-kit';
+import { Button, Form, InfoBox, ModalActions, ModalTitle, Select, text } from 'bp-kit';
 import { UserPlus } from 'lucide-react';
 import { z } from 'zod';
+// Local
+import { errorMessage } from '../../lib/queryCache';
 
 const schema = z.object({
   personId: z.string().min(1, text.validation.selectRequired('a pessoa')),
@@ -25,7 +27,8 @@ interface Props<T extends Candidate> {
 }
 
 export function EnrollPersonModal<T extends Candidate>({ title, loadCandidates, close, onEnroll }: Props<T>) {
-  const [candidates, setCandidates] = useState<T[]>([]);
+  const [candidates, setCandidates] = useState<T[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
@@ -33,11 +36,17 @@ export function EnrollPersonModal<T extends Candidate>({ title, loadCandidates, 
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { personId: '' } });
 
   useEffect(() => {
-    loadCandidates().then(setCandidates);
+    let active = true;
+    loadCandidates()
+      .then((list) => active && setCandidates(list))
+      .catch((e) => active && setLoadError(errorMessage(e)));
+    return () => {
+      active = false;
+    };
   }, [loadCandidates]);
 
   const submit = handleSubmit(async (values) => {
-    const person = candidates.find((c) => c.id === values.personId);
+    const person = candidates?.find((c) => c.id === values.personId);
     if (!person) return;
     await onEnroll(person);
     close();
@@ -48,13 +57,14 @@ export function EnrollPersonModal<T extends Candidate>({ title, loadCandidates, 
       <ModalTitle onClose={close}>{title}</ModalTitle>
       <Form onSubmit={submit}>
         <Select label="Pessoa" control={control} name="personId">
-          <option value="">Selecione…</option>
-          {candidates.map((person) => (
+          <option value="">{candidates === null && !loadError ? 'Carregando…' : 'Selecione…'}</option>
+          {(candidates ?? []).map((person) => (
             <option key={person.id} value={person.id}>
               {person.name}
             </option>
           ))}
         </Select>
+        {loadError && <InfoBox variant="warning">{loadError}</InfoBox>}
 
         <ModalActions>
           <Button type="submit" variant="primary" disabled={isSubmitting}>

@@ -42,7 +42,7 @@ export async function getPersonLessonMakeups(personId: string): Promise<LessonMa
       'confirmed_at, notes, attendance:lesson_attendance!inner(enrollment:enrollments!inner(person_id), lesson:lessons(number, cohort:cohorts(name)))',
     )
     .eq('attendance.enrollment.person_id', personId);
-  if (error) return [];
+  if (error) throw error;
 
   return ((data ?? []) as unknown as LessonMakeupRow[])
     .map((row) => ({

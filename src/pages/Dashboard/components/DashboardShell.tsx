@@ -11,6 +11,8 @@ import { NAV_ITEMS, navAreasFor } from '../../../routes/navigation';
 // Local
 import { EnterArea, Page } from '../styles';
 
+const ProfileIcon = NAV_ITEMS.profile.icon;
+
 const SAO_PAULO = { timeZone: 'America/Sao_Paulo' } as const;
 
 function greeting(): string {
@@ -52,7 +54,7 @@ export function DashboardShell({ loading, error, children }: Props) {
         action={
           singleArea && (
             <Button variant="secondary" onClick={() => navigate(NAV_ITEMS.profile.path)}>
-              <NAV_ITEMS.profile.icon size={16} />
+              <ProfileIcon size={16} />
               Meu perfil
             </Button>
           )

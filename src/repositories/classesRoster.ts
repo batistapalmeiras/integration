@@ -156,22 +156,15 @@ export async function listCohortNames(): Promise<string[]> {
 }
 
 export async function createCohort(name: string, lessonDates: string[]): Promise<string> {
-  const { data, error } = await supabase.from('cohorts').insert({ name }).select('id').single();
+  const { data, error } = await supabase.rpc('create_cohort', { p_name: name, p_lesson_dates: lessonDates });
   if (error) throw error;
-  const cohortId = data.id as string;
-  const { error: lessonsError } = await supabase
-    .from('lessons')
-    .insert(lessonDates.map((date, index) => ({ cohort_id: cohortId, number: index + 1, date })));
-  if (lessonsError) throw lessonsError;
-  return cohortId;
+  return data as string;
 }
 
-export async function updateLessonDates(lessons: { id: string; date: string }[]): Promise<void> {
-  const results = await Promise.all(
-    lessons.map((lesson) => supabase.from('lessons').update({ date: lesson.date }).eq('id', lesson.id)),
-  );
-  const failed = results.find((result) => result.error);
-  if (failed?.error) throw failed.error;
+export async function updateLessonDates(cohortId: string, lessons: { number: number; date: string }[]): Promise<void> {
+  const dates = [...lessons].sort((a, b) => a.number - b.number).map((lesson) => lesson.date);
+  const { error } = await supabase.rpc('set_lesson_dates', { p_cohort_id: cohortId, p_lesson_dates: dates });
+  if (error) throw error;
 }
 
 export async function closeCohort(cohortId: string): Promise<void> {

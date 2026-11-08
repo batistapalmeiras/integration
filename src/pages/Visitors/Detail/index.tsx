@@ -7,11 +7,11 @@ import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { useVisitorDetail } from '../../../features/visitors';
+import { FormContent } from '../../../components/FormLayout';
 import { NextStep } from './components/NextStep';
 import { PersonCard } from './components/PersonCard';
 import { PersonDetailsCard } from './components/PersonDetailsCard';
 import { ProgressStepper } from './components/ProgressStepper';
-import { Content } from './styles';
 
 export function VisitorDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +23,7 @@ export function VisitorDetailPage() {
   if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
 
   return (
-    <Content>
+    <FormContent>
       <PageHeader title={person.name} subtitle={person.status === 'member' ? 'Membro' : 'Visitante'} back />
 
       {person.status !== 'member' && <ProgressStepper status={person.status} />}
@@ -38,6 +38,6 @@ export function VisitorDetailPage() {
       />
 
       <NextStep detail={detail} onContactRegistered={() => navigate(AppRoute.Visitors)} />
-    </Content>
+    </FormContent>
   );
 }

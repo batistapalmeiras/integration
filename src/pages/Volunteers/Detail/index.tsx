@@ -28,7 +28,7 @@ import { PageHeader } from '../../../components/PageHeader';
 import { AppRoute } from '../../../routes/paths';
 import { assignableRoles } from '../../../domain/volunteers';
 import { hasRole, LEADERSHIP_ROLES, UserRole } from '../../../types/enums';
-import { Content } from '../../Visitors/Detail/styles';
+import { FormContent } from '../../../components/FormLayout';
 import { RoleOptions } from '../components/RoleOptions';
 import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
 
@@ -119,12 +119,10 @@ export function VolunteerDetailPage() {
     );
 
   return (
-    <Content>
+    <FormContent>
       <PageHeader title={volunteer.name} subtitle="Editar voluntário" back />
 
-      {!canEdit && (
-        <InfoBox variant="info">Só o Pastor pode editar contas de Administrador ou Pastor.</InfoBox>
-      )}
+      {!canEdit && <InfoBox variant="info">Só o Pastor pode editar contas de Administrador ou Pastor.</InfoBox>}
 
       <Form onSubmit={submit}>
         <TextInput
@@ -170,6 +168,6 @@ export function VolunteerDetailPage() {
 
       {toast}
       {modal}
-    </Content>
+    </FormContent>
   );
 }

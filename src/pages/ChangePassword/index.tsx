@@ -8,7 +8,7 @@ import { z } from 'zod';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
-import { Content } from '../Visitors/Detail/styles';
+import { FormContent } from '../../components/FormLayout';
 import { clearMustChangePassword } from '../../repositories/profiles';
 
 const schema = z
@@ -46,12 +46,19 @@ export function ForcedChangePasswordPage({ onDone }: Props) {
       setError('password', { message: err });
       return;
     }
-    if (user) await clearMustChangePassword(user.id).catch(() => undefined);
+    if (user) {
+      try {
+        await clearMustChangePassword(user.id);
+      } catch {
+        setError('password', { message: 'Senha alterada, mas não foi possível concluir. Tente novamente.' });
+        return;
+      }
+    }
     onDone();
   });
 
   return (
-    <Content>
+    <FormContent>
       <PageHeader title="Troque sua senha" subtitle="Por segurança, defina uma senha só sua antes de continuar." />
       <Form onSubmit={submit}>
         <TextInput
@@ -80,6 +87,6 @@ export function ForcedChangePasswordPage({ onDone }: Props) {
         </Button>
       </Form>
       {toast}
-    </Content>
+    </FormContent>
   );
 }
