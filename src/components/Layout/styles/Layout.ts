@@ -97,13 +97,14 @@ export const SideNavAreaToggle = styled.button<{ $open: boolean }>`
   &:hover { color: ${({ theme }) => theme.colors.ink}; }
 `;
 
-export const SideNavLink = styled(Link)<{ $active: boolean }>`
+export const SideNavLink = styled(Link)<{ $active: boolean; $nested?: boolean }>`
   flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
   height: 42px;
   padding: 0 ${({ theme }) => theme.spacing.md};
+  padding-left: ${({ theme, $nested }) => ($nested ? `calc(${theme.spacing.md} + 26px)` : theme.spacing.md)};
   border-radius: ${({ theme }) => theme.rounded.sm};
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.navLink.fontSize};
@@ -117,6 +118,39 @@ export const SideNavLink = styled(Link)<{ $active: boolean }>`
   svg {
     flex-shrink: 0;
     stroke-width: ${({ $active }) => ($active ? 2 : 1.5)};
+  }
+
+  &:hover { background: ${({ theme }) => theme.colors.surfaceSoft}; color: ${({ theme }) => theme.colors.ink}; }
+`;
+
+export const SideNavGroupToggle = styled.button<{ $open: boolean }>`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  height: 42px;
+  padding: 0 ${({ theme }) => theme.spacing.md};
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: ${({ theme }) => theme.rounded.sm};
+  background: transparent;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.navLink.fontSize};
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.muted};
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  svg {
+    flex-shrink: 0;
+    stroke-width: 1.5;
+  }
+
+  svg:last-child {
+    margin-left: auto;
+    transition: transform 0.15s;
+    transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
   }
 
   &:hover { background: ${({ theme }) => theme.colors.surfaceSoft}; color: ${({ theme }) => theme.colors.ink}; }

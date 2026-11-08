@@ -1,5 +1,5 @@
 // React
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 // Libs
 import { useMediaQuery } from 'bp-kit';
 import { ChevronDown, ChevronLeft, LogOut, User } from 'lucide-react';
@@ -9,6 +9,7 @@ import {
   activeNavPath,
   areaItems,
   findNavArea,
+  isNavGroup,
   MORE_TAB_ICON,
   MORE_TAB_LABEL,
   NAV_ITEMS,
@@ -40,6 +41,7 @@ import {
   SideNavArea,
   SideNavAreaToggle,
   SideNavCount,
+  SideNavGroupToggle,
   SideNavLink,
   SideUserInfo,
   SideUserName,
@@ -54,14 +56,37 @@ interface ILayoutProps {
 
 export function Layout({ children }: ILayoutProps) {
   const { user, navigate, handleLogout, isExactTab, pathname, membershipCount } = useLayout();
-  const [closedAreas, setClosedAreas] = useState<string[]>([]);
-
-  const toggleArea = (title: string) =>
-    setClosedAreas((closed) => (closed.includes(title) ? closed.filter((t) => t !== title) : [...closed, title]));
-
   const navAreas = navAreasFor(user?.role);
   const navPaths = [NAV_ITEMS.dashboard.path, ...navAreas.flatMap((area) => areaItems(area).map((item) => item.path))];
   const activePath = activeNavPath(pathname, navPaths);
+  const activeArea =
+    navAreas.find((area) => areaItems(area).some((item) => item.path === activePath)) ??
+    findNavArea(navAreas, pathname);
+  const activeGroup = activeArea?.more
+    .filter(isNavGroup)
+    .find((group) => group.items.some((item) => item.path === activePath));
+  const activeKeys = [activeArea?.id, activeGroup && `${activeArea?.id}/${activeGroup.id}`].filter(
+    (key): key is string => !!key,
+  );
+  const activeKeysSignature = activeKeys.join('|');
+
+  const [openKeys, setOpenKeys] = useState<string[]>(activeKeys);
+  const [lastActiveKeys, setLastActiveKeys] = useState(activeKeysSignature);
+  if (activeKeysSignature !== lastActiveKeys) {
+    setLastActiveKeys(activeKeysSignature);
+    setOpenKeys(activeKeys);
+  }
+
+  const toggleKey = (key: string) =>
+    setOpenKeys((open) => (open.includes(key) ? open.filter((openKey) => openKey !== key) : [...open, key]));
+
+  const renderNavLink = (item: NavItem, nested = false) => (
+    <SideNavLink key={item.path} to={item.path} $active={activePath === item.path} $nested={nested}>
+      <item.icon size={18} />
+      {item.label}
+      {item.path === AppRoute.Membership && membershipCount > 0 && <SideNavCount>{membershipCount}</SideNavCount>}
+    </SideNavLink>
+  );
   const hasSidebar = useMediaQuery(SIDEMENU_MEDIA);
   const isSidebarDestination = navPaths.includes(pathname);
 
@@ -100,28 +125,40 @@ export function Layout({ children }: ILayoutProps) {
             {NAV_ITEMS.dashboard.label}
           </SideNavLink>
           {navAreas.map((area) => {
-            const open = !closedAreas.includes(area.title);
+            const open = openKeys.includes(area.id);
             return (
               <SideNavArea key={area.title}>
                 <SideNavAreaToggle
                   type="button"
                   $open={open}
                   aria-expanded={open}
-                  onClick={() => toggleArea(area.title)}
+                  onClick={() => toggleKey(area.id)}
                 >
                   {area.title}
                   <ChevronDown size={14} />
                 </SideNavAreaToggle>
+                {open && area.tabs.map((item) => renderNavLink(item))}
                 {open &&
-                  areaItems(area).map((item) => (
-                    <SideNavLink key={item.path} to={item.path} $active={activePath === item.path}>
-                      <item.icon size={18} />
-                      {item.label}
-                      {item.path === AppRoute.Membership && membershipCount > 0 && (
-                        <SideNavCount>{membershipCount}</SideNavCount>
-                      )}
-                    </SideNavLink>
-                  ))}
+                  area.more.map((entry) => {
+                    if (!isNavGroup(entry)) return renderNavLink(entry);
+                    const key = `${area.id}/${entry.id}`;
+                    const groupOpen = openKeys.includes(key);
+                    return (
+                      <Fragment key={key}>
+                        <SideNavGroupToggle
+                          type="button"
+                          $open={groupOpen}
+                          aria-expanded={groupOpen}
+                          onClick={() => toggleKey(key)}
+                        >
+                          <entry.icon size={18} />
+                          {entry.label}
+                          <ChevronDown size={14} />
+                        </SideNavGroupToggle>
+                        {groupOpen && entry.items.map((item) => renderNavLink(item, true))}
+                      </Fragment>
+                    );
+                  })}
               </SideNavArea>
             );
           })}

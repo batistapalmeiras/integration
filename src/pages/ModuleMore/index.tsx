@@ -5,8 +5,10 @@ import { useAuthCtx } from 'bp-kit';
 // Components
 import { MenuOptionCard, OptionsGrid } from '../../components/MenuOptions';
 import { PageHeader } from '../../components/PageHeader';
-import { findNavAreaById, navAreasFor } from '../../routes/navigation';
+import { findNavAreaById, isNavGroup, MORE_TAB_LABEL, NavItem, navAreasFor } from '../../routes/navigation';
 import { AppRoute } from '../../routes/paths';
+// Local
+import { GroupSection, GroupTitle } from './styles';
 
 interface Props {
   areaId: string;
@@ -21,12 +23,24 @@ export function ModuleMorePage({ areaId }: Props) {
 
   return (
     <div>
-      <PageHeader title={area.title} />
+      <PageHeader title={MORE_TAB_LABEL} />
       <OptionsGrid>
-        {area.more.map((item) => (
-          <MenuOptionCard key={item.path} icon={item.icon} label={item.label} onClick={() => navigate(item.path)} />
-        ))}
+        {area.more
+          .filter((entry): entry is NavItem => !isNavGroup(entry))
+          .map((item) => (
+            <MenuOptionCard key={item.path} icon={item.icon} label={item.label} onClick={() => navigate(item.path)} />
+          ))}
       </OptionsGrid>
+      {area.more.filter(isNavGroup).map((group) => (
+        <GroupSection key={group.id} aria-labelledby={`group-${group.id}`}>
+          <GroupTitle id={`group-${group.id}`}>{group.label}</GroupTitle>
+          <OptionsGrid>
+            {group.items.map((item) => (
+              <MenuOptionCard key={item.path} icon={item.icon} label={item.label} onClick={() => navigate(item.path)} />
+            ))}
+          </OptionsGrid>
+        </GroupSection>
+      ))}
     </div>
   );
 }

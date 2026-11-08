@@ -8,6 +8,7 @@ import {
   FileBarChart,
   GraduationCap,
   HeartHandshake,
+  History,
   LayoutDashboard,
   LucideIcon,
   Menu,
@@ -50,14 +51,37 @@ export const NAV_ITEMS = {
   profile: { label: 'Perfil', path: AppRoute.Profile, icon: User },
 } satisfies Record<string, NavItem>;
 
+export interface NavGroup {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  items: NavItem[];
+}
+
+export type NavEntry = NavItem | NavGroup;
+
+export function isNavGroup(entry: NavEntry): entry is NavGroup {
+  return 'items' in entry;
+}
+
 interface NavArea {
   id: string;
   title: string;
   icon: LucideIcon;
   tabs: NavItem[];
-  more: NavItem[];
+  more: NavEntry[];
   morePath?: AppRoute;
 }
+
+const HISTORY_GROUP: NavGroup = {
+  id: 'history',
+  label: 'Histórico',
+  icon: History,
+  items: [
+    { ...NAV_ITEMS.coffeeHistory, label: 'Cafés' },
+    { ...NAV_ITEMS.cohortHistory, label: 'Turmas' },
+  ],
+};
 
 export const PASTOR_NAV_AREAS: NavArea[] = [
   {
@@ -73,7 +97,7 @@ export const PASTOR_NAV_AREAS: NavArea[] = [
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
-    more: [NAV_ITEMS.people, NAV_ITEMS.cohortHistory, NAV_ITEMS.coffeeHistory, NAV_ITEMS.reports],
+    more: [NAV_ITEMS.people, HISTORY_GROUP, NAV_ITEMS.reports],
     morePath: AppRoute.IntegrationMore,
   },
 ];
@@ -98,8 +122,7 @@ const ADMIN_NAV_AREAS: NavArea[] = [
       NAV_ITEMS.people,
       NAV_ITEMS.members,
       NAV_ITEMS.volunteers,
-      NAV_ITEMS.cohortHistory,
-      NAV_ITEMS.coffeeHistory,
+      HISTORY_GROUP,
       NAV_ITEMS.reports,
     ],
     morePath: AppRoute.IntegrationMore,
@@ -131,7 +154,7 @@ export const MORE_TAB_LABEL = 'Mais';
 export const MORE_TAB_ICON = Menu;
 
 export function areaItems(area: NavArea): NavItem[] {
-  return [...area.tabs, ...area.more];
+  return [...area.tabs, ...area.more.flatMap((entry) => (isNavGroup(entry) ? entry.items : [entry]))];
 }
 
 function areaTabPaths(area: NavArea): string[] {
