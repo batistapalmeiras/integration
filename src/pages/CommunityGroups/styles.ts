@@ -8,12 +8,6 @@ export const Stack = styled.div`
   gap: ${({ theme }) => theme.spacing.xl};
 `;
 
-export const HeaderActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
-`;
-
 export const FieldGroup = styled(Card)`
   display: flex;
   flex-direction: column;
@@ -36,6 +30,22 @@ export const LeaderRow = styled.div<{ $readOnly?: boolean }>`
   background: ${({ theme }) => theme.colors.canvas};
   border: 1px solid ${({ theme }) => theme.colors.hairline};
   border-radius: ${({ theme }) => theme.rounded.full};
+`;
+
+export const DangerZone = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-top: ${({ theme }) => theme.spacing.lg};
+  padding-top: ${({ theme }) => theme.spacing.lg};
+  border-top: 1px solid ${({ theme }) => theme.colors.hairline};
+`;
+
+export const NameCell = styled.span`
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
 `;
 
 export const CountPill = styled.span`

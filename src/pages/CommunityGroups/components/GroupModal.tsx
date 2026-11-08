@@ -1,58 +1,76 @@
 // React
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Resolver, useForm } from 'react-hook-form';
 // Libs
-import { Button, Form, ModalActions, ModalTitle, MultiSelect, TextInput, text } from 'bp-kit';
-import { Save } from 'lucide-react';
+import { Button, Form, ModalActions, ModalTitle, MultiSelect, TextInput, Typography, text } from 'bp-kit';
+import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
-import { useMemberNames } from '../../../queries/reference';
+import { SelectField } from '../../../components/SelectField';
+import { CommunityGroup, GroupInput, WEEK_DAY_LABELS, WeekDay } from '../../../domain/communityGroups';
+import { toOptions } from '../../../domain/text';
+import { DangerZone } from '../styles';
 
-const schema = z.object({
-  name: z.string().min(1, text.validation.required('o nome')),
-});
-type FormValues = z.infer<typeof schema>;
+const WEEK_DAY_OPTIONS = toOptions(WEEK_DAY_LABELS);
+
+interface FormValues {
+  name: string;
+  meetingDay: WeekDay | '';
+}
+
+const schemaFor = (smallGroup: boolean) =>
+  z.object({
+    name: z.string().min(1, text.validation.required('o nome')),
+    meetingDay: z.string().refine((value) => !smallGroup || value in WEEK_DAY_LABELS, 'Selecione o dia do PG'),
+  });
 
 interface Props {
   title: string;
   fieldLabel: string;
-  initialName?: string;
-  initialLeaders?: string[];
-  initialHosts?: string[];
-  hasHosts?: boolean;
+  group?: CommunityGroup;
+  smallGroup?: boolean;
+  groupMembers?: string[];
+  onDelete?: () => void;
   close: () => void;
-  onSave: (name: string, leaders: string[], hosts: string[]) => Promise<void>;
+  onSave: (input: GroupInput) => Promise<void>;
 }
 
 export function GroupModal({
   title,
   fieldLabel,
-  initialName,
-  initialLeaders,
-  initialHosts,
-  hasHosts,
+  group,
+  smallGroup = false,
+  groupMembers,
+  onDelete,
   close,
   onSave,
 }: Props) {
-  const [leaders, setLeaders] = useState<string[]>(initialLeaders ?? []);
-  const [hosts, setHosts] = useState<string[]>(initialHosts ?? []);
-  const memberNames = (useMemberNames().data ?? []).map((member) => member.name);
+  const members = groupMembers ?? [];
+  const inGroup = (names: string[] = []) => names.filter((name) => members.includes(name));
+  const [leaders, setLeaders] = useState<string[]>(inGroup(group?.leaders));
+  const [hosts, setHosts] = useState<string[]>(inGroup(group?.hosts));
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { name: initialName ?? '' },
+    resolver: zodResolver(schemaFor(smallGroup)) as Resolver<FormValues>,
+    defaultValues: { name: group?.name ?? '', meetingDay: group?.meetingDay ?? '' },
   });
 
-  const options = [...new Set([...memberNames, ...(initialLeaders ?? []), ...(initialHosts ?? [])])]
+  const options = [...members]
     .sort((a, b) => a.localeCompare(b, 'pt-BR'))
     .map((name) => ({ value: name, label: name }));
+  const canPickPeople = options.length > 0;
 
   const submit = handleSubmit(async (values) => {
-    await onSave(values.name.trim(), leaders, hosts);
+    await onSave({
+      name: values.name.trim(),
+      leaders,
+      hosts,
+      meetingDay: values.meetingDay === '' ? null : values.meetingDay,
+    });
     close();
   });
 
@@ -60,24 +78,36 @@ export function GroupModal({
     <>
       <ModalTitle onClose={close}>{title}</ModalTitle>
       <Form onSubmit={submit}>
-        <TextInput label={fieldLabel} control={control} name="name" placeholder={fieldLabel} />
+        <TextInput label={`Nome do ${fieldLabel}`} control={control} name="name" placeholder={fieldLabel} />
 
-        <MultiSelect
-          label="Líder(es)"
-          options={options}
-          value={leaders}
-          onChange={setLeaders}
-          placeholder="Buscar membro…"
-        />
+        {smallGroup && <SelectField control={control} name="meetingDay" label="Dia do PG" options={WEEK_DAY_OPTIONS} />}
 
-        {hasHosts && (
+        {canPickPeople && (
+          <MultiSelect
+            label="Líder(es)"
+            options={options}
+            value={leaders}
+            onChange={setLeaders}
+            placeholder="Buscar pessoa da lista…"
+          />
+        )}
+
+        {smallGroup && canPickPeople && (
           <MultiSelect
             label="Anfitrião(ões)"
             options={options}
             value={hosts}
             onChange={setHosts}
-            placeholder="Buscar membro…"
+            placeholder="Buscar pessoa da lista…"
           />
+        )}
+
+        {!canPickPeople && (
+          <Typography type="caption">
+            {smallGroup
+              ? 'Líderes e anfitriões precisam fazer parte do PG. Adicione as pessoas ao PG e depois escolha quem lidera e quem recebe.'
+              : 'Líderes precisam fazer parte do ministério. Adicione as pessoas ao ministério e depois escolha quem lidera.'}
+          </Typography>
         )}
 
         <ModalActions>
@@ -93,6 +123,16 @@ export function GroupModal({
           </Button>
         </ModalActions>
       </Form>
+
+      {group && (
+        <DangerZone>
+          <Button type="button" variant="danger" fullWidth onClick={onDelete} disabled={!onDelete}>
+            <Trash2 size={16} />
+            Excluir {fieldLabel}
+          </Button>
+          {onDelete && <Typography type="caption">Essa ação não pode ser desfeita.</Typography>}
+        </DangerZone>
+      )}
     </>
   );
 }

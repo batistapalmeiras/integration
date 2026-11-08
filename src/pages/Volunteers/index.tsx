@@ -1,16 +1,29 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, Skeleton, Typography, text, useAuthCtx, useModal } from 'bp-kit';
+import {
+  Button,
+  Empty,
+  ModalActions,
+  ModalTitle,
+  Skeleton,
+  Typography,
+  text,
+  useAuthCtx,
+  useModal,
+  useToast,
+} from 'bp-kit';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
-import { ADMIN_MANAGEABLE_ROLES, groupRolesByModule, UserRole } from '../../types/enums';
+import { assignableRoles, canChangeRole } from '../../domain/volunteerRoles';
+import { groupRolesByModule, ROLE_LABELS, UserRole } from '../../types/enums';
 import { AddVolunteerModal } from './components/AddVolunteerModal';
+import { DraggableVolunteer, RoleBoard, RoleDropZone } from './components/RoleBoard';
 import { useVolunteers } from './hooks/useVolunteers';
-import { EmptySectionHint, ModuleSection, ModuleTitle, Section, Sections } from './styles';
+import { EmptySectionHint, ModuleSection, ModuleTitle, Sections } from './styles';
 import { VolunteerRow } from './types';
 
 const ROLE_SECTION_LABELS: Record<UserRole, string> = {
@@ -25,11 +38,44 @@ const MODULE_GROUPS = groupRolesByModule([UserRole.Pastor, UserRole.Admin, UserR
 export function VolunteersPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const { volunteers, loading, error, addVolunteer } = useVolunteers();
+  const { volunteers, loading, error, addVolunteer, changeRole } = useVolunteers();
   const { open, close, modal } = useModal('drawer');
+  const { show: showToast, toast } = useToast();
 
-  const isPastor = user?.role === UserRole.Pastor;
-  const allowedRoles = isPastor ? Object.values(UserRole) : ADMIN_MANAGEABLE_ROLES;
+  const allowedRoles = assignableRoles(user?.role);
+  const actor = { id: user?.id ?? '', role: user?.role ?? '' };
+  const canMove = (volunteer: VolunteerRow, target: UserRole) => canChangeRole(actor, volunteer, target);
+  const canDrag = (volunteer: VolunteerRow) => allowedRoles.some((role) => canMove(volunteer, role));
+
+  const confirmMove = (volunteer: VolunteerRow, target: UserRole) =>
+    open(
+      <>
+        <ModalTitle onClose={close}>
+          Mover {volunteer.name} para {ROLE_SECTION_LABELS[target]}?
+        </ModalTitle>
+        <Typography type="p">
+          {volunteer.name} deixa de ser {ROLE_LABELS[volunteer.role]} e passa a ter as permissões de{' '}
+          {ROLE_LABELS[target]}.
+        </Typography>
+        <ModalActions>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={async () => {
+              try {
+                await changeRole(volunteer.id, target);
+                close();
+              } catch (e) {
+                close();
+                showToast(e instanceof Error ? e.message : 'Não foi possível mudar a permissão.');
+              }
+            }}
+          >
+            Mover
+          </Button>
+        </ModalActions>
+      </>,
+    );
 
   const openAddModal = () => open(<AddVolunteerModal close={close} onAdd={addVolunteer} allowedRoles={allowedRoles} />);
 
@@ -52,12 +98,22 @@ export function VolunteersPage() {
         </thead>
         <tbody>
           {rows.map((volunteer) => (
-            <Tr key={volunteer.id} $clickable onClick={() => navigate(`${AppRoute.Volunteers}/${volunteer.id}`)}>
-              <Td data-label={text.fields.name}>
-                {volunteer.name}
-                {!volunteer.active && ' (desabilitado)'}
-              </Td>
-            </Tr>
+            <DraggableVolunteer key={volunteer.id} volunteer={volunteer} enabled={canDrag(volunteer)}>
+              {({ ref, dragProps, isDragging }) => (
+                <Tr
+                  ref={ref}
+                  {...dragProps}
+                  $clickable
+                  style={{ opacity: isDragging ? 0.4 : 1, touchAction: canDrag(volunteer) ? 'pan-y' : undefined }}
+                  onClick={() => navigate(`${AppRoute.Volunteers}/${volunteer.id}`)}
+                >
+                  <Td data-label={text.fields.name}>
+                    {volunteer.name}
+                    {!volunteer.active && ' (desabilitado)'}
+                  </Td>
+                </Tr>
+              )}
+            </DraggableVolunteer>
           ))}
         </tbody>
       </Table>
@@ -66,11 +122,7 @@ export function VolunteersPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Voluntários"
-        back
-        action={<Button onClick={openAddModal}>Adicionar</Button>}
-      />
+      <PageHeader title="Voluntários" back action={<Button onClick={openAddModal}>Adicionar</Button>} />
 
       {loading && <Skeleton $h="240px" />}
       {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
@@ -80,26 +132,29 @@ export function VolunteersPage() {
       )}
 
       {!loading && !error && volunteers.length > 0 && (
-        <Sections>
-          {modules.map((group) => (
-            <ModuleSection key={group.module} aria-labelledby={`module-${group.module}`}>
-              <ModuleTitle id={`module-${group.module}`}>{group.label}</ModuleTitle>
-              {group.sections.map((section) => (
-                <Section key={section.role}>
-                  <Typography type="label">{section.label}</Typography>
-                  {section.volunteers.length > 0 ? (
-                    renderTable(section.volunteers)
-                  ) : (
-                    <EmptySectionHint>Nenhum voluntário cadastrado.</EmptySectionHint>
-                  )}
-                </Section>
-              ))}
-            </ModuleSection>
-          ))}
-        </Sections>
+        <RoleBoard canMove={canMove} onMove={confirmMove}>
+          <Sections>
+            {modules.map((group) => (
+              <ModuleSection key={group.module} aria-labelledby={`module-${group.module}`}>
+                <ModuleTitle id={`module-${group.module}`}>{group.label}</ModuleTitle>
+                {group.sections.map((section) => (
+                  <RoleDropZone key={section.role} role={section.role}>
+                    <Typography type="label">{section.label}</Typography>
+                    {section.volunteers.length > 0 ? (
+                      renderTable(section.volunteers)
+                    ) : (
+                      <EmptySectionHint>Nenhum voluntário cadastrado.</EmptySectionHint>
+                    )}
+                  </RoleDropZone>
+                ))}
+              </ModuleSection>
+            ))}
+          </Sections>
+        </RoleBoard>
       )}
 
       {modal}
+      {toast}
     </div>
   );
 }

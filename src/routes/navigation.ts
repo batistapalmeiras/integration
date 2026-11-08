@@ -20,6 +20,7 @@ import {
   UsersRound,
 } from 'lucide-react';
 // Local
+import { UserRole } from '../types/enums';
 import { AppRoute } from './paths';
 
 export interface NavItem {
@@ -55,7 +56,7 @@ interface NavArea {
   icon: LucideIcon;
   tabs: NavItem[];
   more: NavItem[];
-  morePath: AppRoute;
+  morePath?: AppRoute;
 }
 
 export const PASTOR_NAV_AREAS: NavArea[] = [
@@ -77,6 +78,55 @@ export const PASTOR_NAV_AREAS: NavArea[] = [
   },
 ];
 
+export const INTEGRATION_TEAM_NAV_AREAS: NavArea[] = [
+  {
+    id: 'integration',
+    title: 'Integração',
+    icon: Sprout,
+    tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.people],
+    more: [],
+  },
+];
+
+const ADMIN_NAV_AREAS: NavArea[] = [
+  {
+    id: 'integration',
+    title: 'Integração',
+    icon: Sprout,
+    tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
+    more: [
+      NAV_ITEMS.people,
+      NAV_ITEMS.members,
+      NAV_ITEMS.volunteers,
+      NAV_ITEMS.cohortHistory,
+      NAV_ITEMS.coffeeHistory,
+      NAV_ITEMS.reports,
+    ],
+    morePath: AppRoute.IntegrationMore,
+  },
+];
+
+const TEACHER_NAV_AREAS: NavArea[] = [
+  {
+    id: 'integration',
+    title: 'Integração',
+    icon: Sprout,
+    tabs: [NAV_ITEMS.classes, NAV_ITEMS.people],
+    more: [],
+  },
+];
+
+const NAV_AREAS_BY_ROLE: Record<UserRole, NavArea[]> = {
+  [UserRole.Pastor]: PASTOR_NAV_AREAS,
+  [UserRole.Admin]: ADMIN_NAV_AREAS,
+  [UserRole.IntegrationTeam]: INTEGRATION_TEAM_NAV_AREAS,
+  [UserRole.Teacher]: TEACHER_NAV_AREAS,
+};
+
+export function navAreasFor(role: string | undefined): NavArea[] {
+  return NAV_AREAS_BY_ROLE[role as UserRole] ?? [];
+}
+
 export const MORE_TAB_LABEL = 'Mais';
 export const MORE_TAB_ICON = Menu;
 
@@ -85,15 +135,15 @@ export function areaItems(area: NavArea): NavItem[] {
 }
 
 function areaTabPaths(area: NavArea): string[] {
-  return [...area.tabs.map((item) => item.path), area.morePath];
+  return [...area.tabs.map((item) => item.path), ...(area.morePath ? [area.morePath] : [])];
 }
 
-export function findPastorArea(pathname: string): NavArea | undefined {
-  return PASTOR_NAV_AREAS.find((area) => areaTabPaths(area).includes(pathname));
+export function findNavArea(areas: NavArea[], pathname: string): NavArea | undefined {
+  return areas.find((area) => areaTabPaths(area).includes(pathname));
 }
 
-export function findPastorAreaById(id: string): NavArea | undefined {
-  return PASTOR_NAV_AREAS.find((area) => area.id === id);
+export function findNavAreaById(areas: NavArea[], id: string): NavArea | undefined {
+  return areas.find((area) => area.id === id);
 }
 
 export function activeNavPath(pathname: string, paths: string[]): string | null {

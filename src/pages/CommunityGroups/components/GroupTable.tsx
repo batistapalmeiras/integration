@@ -4,6 +4,7 @@ import { Button, Empty, Skeleton, text, useModal } from 'bp-kit';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
+import { GroupInput, WEEK_DAY_LABELS } from '../../../domain/communityGroups';
 import { GroupRow } from '../hooks/useCommunityGroupsList';
 import { GroupModal } from './GroupModal';
 import { CountPill } from '../styles';
@@ -14,12 +15,12 @@ interface Props {
   rows: GroupRow[];
   loading: boolean;
   error: string | null;
-  hasHosts?: boolean;
-  onAdd: (name: string, leaders: string[], hosts: string[]) => Promise<void>;
+  smallGroup?: boolean;
+  onAdd: (input: GroupInput) => Promise<void>;
   onRowClick: (id: string) => void;
 }
 
-export function GroupTable({ title, fieldLabel, rows, loading, error, hasHosts, onAdd, onRowClick }: Props) {
+export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup, onAdd, onRowClick }: Props) {
   const { open, close, modal } = useModal('drawer');
 
   const openAdd = () =>
@@ -27,7 +28,7 @@ export function GroupTable({ title, fieldLabel, rows, loading, error, hasHosts, 
       <GroupModal
         title={`Novo ${fieldLabel.toLowerCase()}`}
         fieldLabel={fieldLabel}
-        hasHosts={hasHosts}
+        smallGroup={smallGroup}
         close={close}
         onSave={onAdd}
       />,
@@ -49,6 +50,7 @@ export function GroupTable({ title, fieldLabel, rows, loading, error, hasHosts, 
             <thead>
               <tr>
                 <Th>Nome</Th>
+                {smallGroup && <Th>Dia</Th>}
                 <Th>Pessoas</Th>
               </tr>
             </thead>
@@ -56,6 +58,7 @@ export function GroupTable({ title, fieldLabel, rows, loading, error, hasHosts, 
               {rows.map((row) => (
                 <Tr key={row.id} $clickable onClick={() => onRowClick(row.id)}>
                   <Td data-label="Nome">{row.name}</Td>
+                  {smallGroup && <Td data-label="Dia">{row.meetingDay ? WEEK_DAY_LABELS[row.meetingDay] : '—'}</Td>}
                   <Td data-label="Pessoas">
                     <CountPill>{row.peopleCount}</CountPill>
                   </Td>

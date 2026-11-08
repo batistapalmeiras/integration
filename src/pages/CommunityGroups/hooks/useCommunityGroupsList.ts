@@ -3,17 +3,14 @@ import {
   CommunityGroupWithCount,
   createMinistry,
   createSmallGroup,
-  deleteMinistry,
-  deleteSmallGroup,
+  GroupInput,
   listMinistriesWithCounts,
   listSmallGroupsWithCounts,
-  updateMinistry,
-  updateSmallGroup,
 } from '../../../domain/communityGroups';
 import { errorMessage, invalidateQueries, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 
-export type GroupRow = Pick<CommunityGroupWithCount, 'id' | 'name' | 'leaders' | 'peopleCount'>;
+export type GroupRow = Pick<CommunityGroupWithCount, 'id' | 'name' | 'leaders' | 'meetingDay' | 'peopleCount'>;
 
 type GroupType = 'small-groups' | 'ministries';
 
@@ -24,50 +21,21 @@ export function refreshGroupLists(type: GroupType): Promise<void> {
   ]).then(() => undefined);
 }
 
-function useGroupsList(type: GroupType, list: () => Promise<CommunityGroupWithCount[]>) {
+function useGroupsList(
+  type: GroupType,
+  list: () => Promise<CommunityGroupWithCount[]>,
+  create: (input: GroupInput) => Promise<void>,
+) {
   const query = useQuery(queryKeys.groupsWithCounts(type), list);
-  const afterChange = () => refreshGroupLists(type);
-  return { rows: (query.data ?? []) as GroupRow[], loading: query.loading, error: errorMessage(query.error), afterChange };
+
+  const add = async (input: GroupInput) => {
+    await create(input);
+    await refreshGroupLists(type);
+  };
+
+  return { rows: (query.data ?? []) as GroupRow[], loading: query.loading, error: errorMessage(query.error), add };
 }
 
-export function useMinistriesList() {
-  const { afterChange, ...state } = useGroupsList('ministries', listMinistriesWithCounts);
+export const useMinistriesList = () => useGroupsList('ministries', listMinistriesWithCounts, createMinistry);
 
-  const add = async (name: string, leaders: string[]) => {
-    await createMinistry(name, leaders);
-    await afterChange();
-  };
-
-  const edit = async (id: string, name: string, leaders: string[]) => {
-    await updateMinistry(id, name, leaders);
-    await afterChange();
-  };
-
-  const remove = async (id: string) => {
-    await deleteMinistry(id);
-    await afterChange();
-  };
-
-  return { ...state, add, edit, remove };
-}
-
-export function useSmallGroupsList() {
-  const { afterChange, ...state } = useGroupsList('small-groups', listSmallGroupsWithCounts);
-
-  const add = async (name: string, leaders: string[], hosts: string[]) => {
-    await createSmallGroup(name, leaders, hosts);
-    await afterChange();
-  };
-
-  const edit = async (id: string, name: string, leaders: string[], hosts: string[]) => {
-    await updateSmallGroup(id, name, leaders, hosts);
-    await afterChange();
-  };
-
-  const remove = async (id: string) => {
-    await deleteSmallGroup(id);
-    await afterChange();
-  };
-
-  return { ...state, add, edit, remove };
-}
+export const useSmallGroupsList = () => useGroupsList('small-groups', listSmallGroupsWithCounts, createSmallGroup);

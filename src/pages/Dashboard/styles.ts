@@ -8,14 +8,14 @@ export const Page = styled.div`
   container: dashboard / inline-size;
 `;
 
-export const Highlights = styled.div`
+export const Highlights = styled.div<{ $count: number; $minCardWidth: number }>`
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(${({ $count }) => $count}, minmax(0, 1fr));
   gap: ${({ theme }) => theme.spacing.md};
   margin-top: ${({ theme }) => theme.spacing.md};
 
-  @container dashboard (max-width: 960px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  @container dashboard (max-width: ${({ $count, $minCardWidth }) => $count * $minCardWidth}px) {
+    grid-template-columns: repeat(${({ $count }) => Math.ceil($count / 2)}, minmax(0, 1fr));
   }
 
   @container dashboard (max-width: 600px) {
@@ -35,14 +35,14 @@ export const StatRow = styled.div`
   }
 `;
 
-export const StatText = styled.div`
+export const StatText = styled.div<{ $singleLine?: boolean }>`
   flex: 1;
   min-width: 0;
 
   p {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
+    white-space: ${({ $singleLine }) => ($singleLine ? 'nowrap' : 'normal')};
+    overflow: ${({ $singleLine }) => ($singleLine ? 'hidden' : 'visible')};
+    text-overflow: ${({ $singleLine }) => ($singleLine ? 'ellipsis' : 'clip')};
   }
 `;
 
@@ -160,4 +160,15 @@ export const BirthdayHeading = styled.div`
   > a {
     margin-top: 0;
   }
+`;
+
+export const EnterArea = styled.div`
+  margin-top: ${({ theme }) => theme.spacing.xl};
+`;
+
+export const SpacedSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xs};
+  margin-top: ${({ theme }) => theme.spacing.xl};
 `;

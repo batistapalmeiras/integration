@@ -1,12 +1,26 @@
 // Libs
 import { supabase } from '../lib/supabase';
 
+export type WeekDay = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+
+export const WEEK_DAY_LABELS: Record<WeekDay, string> = {
+  monday: 'Segunda-feira',
+  tuesday: 'Terça-feira',
+  wednesday: 'Quarta-feira',
+  thursday: 'Quinta-feira',
+  friday: 'Sexta-feira',
+  saturday: 'Sábado',
+};
+
 export interface CommunityGroup {
   id: string;
   name: string;
   leaders: string[];
   hosts: string[];
+  meetingDay: WeekDay | null;
 }
+
+export type GroupInput = Pick<CommunityGroup, 'name' | 'leaders' | 'hosts' | 'meetingDay'>;
 
 export interface PersonInGroup {
   id: string;
@@ -15,14 +29,41 @@ export interface PersonInGroup {
 
 type Table = 'ministries' | 'small_groups';
 
-const hasHosts = (table: Table) => table === 'small_groups';
+const isSmallGroups = (table: Table) => table === 'small_groups';
 
-function toGroup(table: Table, row: { id: string; name: string; leaders: string[] | null; hosts?: string[] | null }): CommunityGroup {
-  return { id: row.id, name: row.name, leaders: row.leaders ?? [], hosts: hasHosts(table) ? row.hosts ?? [] : [] };
+const groupColumns = (table: Table) =>
+  isSmallGroups(table) ? 'id, name, leaders, hosts, meeting_day' : 'id, name, leaders';
+
+interface GroupRecord {
+  id: string;
+  name: string;
+  leaders: string[] | null;
+  hosts?: string[] | null;
+  meeting_day?: WeekDay | null;
+}
+
+function toGroup(table: Table, row: GroupRecord): CommunityGroup {
+  const smallGroup = isSmallGroups(table);
+  return {
+    id: row.id,
+    name: row.name,
+    leaders: row.leaders ?? [],
+    hosts: smallGroup ? row.hosts ?? [] : [],
+    meetingDay: smallGroup ? row.meeting_day ?? null : null,
+  };
+}
+
+function toPayload(table: Table, input: GroupInput): Record<string, unknown> {
+  const payload: Record<string, unknown> = { name: input.name, leaders: input.leaders };
+  if (isSmallGroups(table)) {
+    payload.hosts = input.hosts;
+    payload.meeting_day = input.meetingDay;
+  }
+  return payload;
 }
 
 async function listGroups(table: Table): Promise<CommunityGroup[]> {
-  const columns = hasHosts(table) ? 'id, name, leaders, hosts' : 'id, name, leaders';
+  const columns = groupColumns(table);
   const { data, error } = await supabase.from(table).select(columns).order('name');
   if (error) throw error;
   return (data ?? []).map((row) => toGroup(table, row as never));
@@ -33,27 +74,23 @@ export interface CommunityGroupWithCount extends CommunityGroup {
 }
 
 async function listGroupsWithCounts(table: Table): Promise<CommunityGroupWithCount[]> {
-  const columns = hasHosts(table) ? 'id, name, leaders, hosts, people(count)' : 'id, name, leaders, person_ministries(count)';
+  const columns = `${groupColumns(table)}, ${isSmallGroups(table) ? 'people(count)' : 'person_ministries(count)'}`;
   const { data, error } = await supabase.from(table).select(columns).order('name');
   if (error) throw error;
   return (data ?? []).map((row) => {
     const counted = row as unknown as { people?: { count: number }[]; person_ministries?: { count: number }[] };
-    const peopleCount = (hasHosts(table) ? counted.people : counted.person_ministries)?.[0]?.count ?? 0;
+    const peopleCount = (isSmallGroups(table) ? counted.people : counted.person_ministries)?.[0]?.count ?? 0;
     return { ...toGroup(table, row as never), peopleCount };
   });
 }
 
-async function createGroup(table: Table, name: string, leaders: string[], hosts: string[]): Promise<void> {
-  const payload: Record<string, unknown> = { name, leaders };
-  if (hasHosts(table)) payload.hosts = hosts;
-  const { error } = await supabase.from(table).insert(payload);
+async function createGroup(table: Table, input: GroupInput): Promise<void> {
+  const { error } = await supabase.from(table).insert(toPayload(table, input));
   if (error) throw error;
 }
 
-async function updateGroup(table: Table, id: string, name: string, leaders: string[], hosts: string[]): Promise<void> {
-  const payload: Record<string, unknown> = { name, leaders };
-  if (hasHosts(table)) payload.hosts = hosts;
-  const { error } = await supabase.from(table).update(payload).eq('id', id);
+async function updateGroup(table: Table, id: string, input: GroupInput): Promise<void> {
+  const { error } = await supabase.from(table).update(toPayload(table, input)).eq('id', id);
   if (error) throw error;
 }
 
@@ -138,27 +175,23 @@ export async function setPersonMinistries(personId: string, ministryIds: string[
 }
 
 async function getGroup(table: Table, id: string): Promise<CommunityGroup> {
-  const columns = hasHosts(table) ? 'id, name, leaders, hosts' : 'id, name, leaders';
-  const { data, error } = await supabase.from(table).select(columns).eq('id', id).single();
+  const { data, error } = await supabase.from(table).select(groupColumns(table)).eq('id', id).single();
   if (error) throw error;
   return toGroup(table, data as never);
 }
 
 export const listMinistries = () => listGroups('ministries');
 export const listMinistriesWithCounts = () => listGroupsWithCounts('ministries');
-export const createMinistry = (name: string, leaders: string[]) => createGroup('ministries', name, leaders, []);
-export const updateMinistry = (id: string, name: string, leaders: string[]) =>
-  updateGroup('ministries', id, name, leaders, []);
+export const createMinistry = (input: GroupInput) => createGroup('ministries', input);
+export const updateMinistry = (id: string, input: GroupInput) => updateGroup('ministries', id, input);
 export const deleteMinistry = (id: string) => deleteGroup('ministries', id);
 export const listPeopleInMinistry = listMinistryPeople;
 export const getMinistry = (id: string) => getGroup('ministries', id);
 
 export const listSmallGroups = () => listGroups('small_groups');
 export const listSmallGroupsWithCounts = () => listGroupsWithCounts('small_groups');
-export const createSmallGroup = (name: string, leaders: string[], hosts: string[]) =>
-  createGroup('small_groups', name, leaders, hosts);
-export const updateSmallGroup = (id: string, name: string, leaders: string[], hosts: string[]) =>
-  updateGroup('small_groups', id, name, leaders, hosts);
+export const createSmallGroup = (input: GroupInput) => createGroup('small_groups', input);
+export const updateSmallGroup = (id: string, input: GroupInput) => updateGroup('small_groups', id, input);
 export const deleteSmallGroup = (id: string) => deleteGroup('small_groups', id);
 export const listPeopleInSmallGroup = (id: string) => listSmallGroupPeople(id);
 export const getSmallGroup = (id: string) => getGroup('small_groups', id);

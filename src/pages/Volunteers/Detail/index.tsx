@@ -26,7 +26,8 @@ import { z } from 'zod';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
-import { ADMIN_MANAGEABLE_ROLES, hasRole, LEADERSHIP_ROLES, UserRole } from '../../../types/enums';
+import { assignableRoles } from '../../../domain/volunteerRoles';
+import { hasRole, LEADERSHIP_ROLES, UserRole } from '../../../types/enums';
 import { Content } from '../../Visitors/Detail/styles';
 import { RoleOptions } from '../components/RoleOptions';
 import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
@@ -49,9 +50,7 @@ export function VolunteerDetailPage() {
     useVolunteerDetail(id ?? '');
 
   const isPastor = user?.role === UserRole.Pastor;
-  const roleOptions = isPastor
-    ? Object.values(UserRole)
-    : Array.from(new Set([...ADMIN_MANAGEABLE_ROLES, ...(volunteer ? [volunteer.role] : [])]));
+  const roleOptions = Array.from(new Set([...assignableRoles(user?.role), ...(volunteer ? [volunteer.role] : [])]));
 
   const isSelf = volunteer?.id === user?.id;
   const isTargetPrivileged = hasRole(volunteer?.role, LEADERSHIP_ROLES);

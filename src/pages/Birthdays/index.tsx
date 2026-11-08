@@ -10,13 +10,11 @@ import { List, ListChevron, ListGrow, ListItem } from '../../components/List';
 import { PageHeader } from '../../components/PageHeader';
 import { TonePill } from '../../components/StatusPill';
 import {
-  BirthdayMonth,
   birthdayAgeLabel,
   birthdayMonth,
   birthdaysInMonth,
   birthdaysListText,
   isBirthdayToday,
-  shiftBirthdayMonth,
 } from '../../domain/birthdays';
 import { monthName, todayKey } from '../../domain/dates';
 import { errorMessage } from '../../lib/queryCache';
@@ -26,7 +24,6 @@ import { AppRoute } from '../../routes/paths';
 import { Detail, Name, RowButton } from './styles';
 
 const MONTH_PARAM = 'month';
-const YEAR_PARAM = 'year';
 
 function parseInteger(value: string | null, min: number, max: number): number | null {
   const number = Number(value);
@@ -41,20 +38,16 @@ export function BirthdaysPage() {
 
   const today = todayKey();
   const currentYear = Number(today.slice(0, 4));
-  const selected: BirthdayMonth = {
-    year: parseInteger(searchParams.get(YEAR_PARAM), 1900, 2999) ?? currentYear,
-    month: parseInteger(searchParams.get(MONTH_PARAM), 1, 12) ?? birthdayMonth(today),
-  };
-  const selectMonth = ({ year, month }: BirthdayMonth) =>
-    setSearchParams({ [MONTH_PARAM]: String(month), [YEAR_PARAM]: String(year) }, { replace: true });
+  const month = parseInteger(searchParams.get(MONTH_PARAM), 1, 12) ?? birthdayMonth(today);
+  const selectMonth = (next: number) => setSearchParams({ [MONTH_PARAM]: String(next) }, { replace: true });
 
-  const label = monthName(selected.month);
-  const birthdays = birthdaysInMonth(data ?? [], selected.month);
+  const label = monthName(month);
+  const birthdays = birthdaysInMonth(data ?? [], month);
   const count = birthdays.length;
   const caption = loading ? undefined : count === 1 ? '1 aniversariante' : `${count} aniversariantes`;
 
   const copyList = async () => {
-    const list = birthdaysListText(birthdays, selected, label.toLowerCase(), maskPhone);
+    const list = birthdaysListText(birthdays, currentYear, label.toLowerCase(), maskPhone);
     try {
       await navigator.clipboard.writeText(list);
       showToast('Lista copiada.');
@@ -66,7 +59,7 @@ export function BirthdaysPage() {
   return (
     <div>
       <PageHeader
-        title={`Aniversariantes ${selected.year}`}
+        title={`Aniversariantes ${currentYear}`}
         back
         actionAlign="end"
         action={
@@ -83,8 +76,8 @@ export function BirthdaysPage() {
         caption={caption}
         previousLabel="Mês anterior"
         nextLabel="Próximo mês"
-        onPrevious={() => selectMonth(shiftBirthdayMonth(selected, -1))}
-        onNext={() => selectMonth(shiftBirthdayMonth(selected, 1))}
+        onPrevious={month > 1 ? () => selectMonth(month - 1) : undefined}
+        onNext={month < 12 ? () => selectMonth(month + 1) : undefined}
       />
 
       {loading && <Skeleton $h="240px" />}
@@ -98,8 +91,8 @@ export function BirthdaysPage() {
       {!loading && !error && count > 0 && (
         <List>
           {birthdays.map((birthday) => {
-            const isToday = selected.year === currentYear && isBirthdayToday(birthday.birthDate, today);
-            const age = birthdayAgeLabel(birthday.birthDate, selected.year, today);
+            const isToday = isBirthdayToday(birthday.birthDate, today);
+            const age = birthdayAgeLabel(birthday.birthDate, currentYear, today);
             return (
               <ListItem key={birthday.personId} $selected={isToday}>
                 <RowButton type="button" onClick={() => navigate(`${AppRoute.Members}/${birthday.personId}/ficha`)}>

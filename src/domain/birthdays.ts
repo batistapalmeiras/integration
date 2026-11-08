@@ -5,11 +5,6 @@ export interface MemberBirthday {
   phone: string | null;
 }
 
-export interface BirthdayMonth {
-  year: number;
-  month: number;
-}
-
 const MAX_AGE = 120;
 
 export const birthdayMonth = (birthDate: string) => Number(birthDate.slice(5, 7));
@@ -44,14 +39,9 @@ export function birthdayAgeLabel(birthDate: string, year: number, today: string)
   return `${passed ? 'Completou' : 'Completa'} ${age} anos`;
 }
 
-export function shiftBirthdayMonth({ year, month }: BirthdayMonth, delta: number): BirthdayMonth {
-  const index = year * 12 + (month - 1) + delta;
-  return { year: Math.floor(index / 12), month: (index % 12) + 1 };
-}
-
 export function birthdaysListText(
   birthdays: MemberBirthday[],
-  { year }: BirthdayMonth,
+  year: number,
   monthLabel: string,
   formatPhone: (phone: string) => string,
 ): string {

@@ -16,7 +16,7 @@ export function SmallGroupsPage() {
       rows={rows}
       loading={loading}
       error={error}
-      hasHosts
+      smallGroup
       onAdd={add}
       onRowClick={(id) => navigate(`${AppRoute.CommunityGroups}/pgs/${id}`)}
     />

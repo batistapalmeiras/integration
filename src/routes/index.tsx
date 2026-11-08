@@ -6,7 +6,6 @@ import { AuthProvider, ChangePasswordPage } from 'bp-kit';
 import { Layout } from '../components/Layout';
 import { PasswordGate } from '../components/PasswordGate';
 import { QueryCacheReset } from '../components/QueryCacheReset';
-import { AdminPage } from '../pages/Admin';
 import { BirthdaysPage } from '../pages/Birthdays';
 import { ClassesPage } from '../pages/Classes';
 import { CoffeePage } from '../pages/Coffee';
@@ -14,9 +13,8 @@ import { CommunityGroupDetailPage } from '../pages/CommunityGroups/Detail';
 import { MinistriesPage } from '../pages/CommunityGroups/Ministries';
 import { SmallGroupsPage } from '../pages/CommunityGroups/SmallGroups';
 import { DashboardPage } from '../pages/Dashboard';
-import { ForgotPasswordPage } from '../pages/ForgotPassword';
 import { IntegrationSignupPage } from '../pages/IntegrationSignup';
-import { LoginPage } from '../pages/Login';
+import { AuthPages, ForgotPasswordPage, LoginPage, ResetPasswordPage } from '../pages/Auth';
 import { MakeupAttendancePage } from '../pages/MakeupAttendance';
 import { MemberPendenciesPage } from '../pages/MemberPendencies';
 import { MemberRecordPage } from '../pages/MemberRecord';
@@ -32,7 +30,6 @@ import { CoffeeHistoryPage } from '../pages/Reports/components/CoffeeHistoryPage
 import { CoffeeRosterPage } from '../pages/Reports/components/CoffeeRosterPage';
 import { CohortRosterPage } from '../pages/Reports/components/CohortRosterPage';
 import { CohortsListPage } from '../pages/Reports/components/CohortsListPage';
-import { ResetPasswordPage } from '../pages/ResetPassword';
 import { StorePage } from '../pages/Store';
 import { EditStoreItemPage } from '../pages/Store/Edit';
 import { StoreItemsProvider } from '../pages/Store/hooks/StoreItemsProvider';
@@ -57,9 +54,11 @@ export function AppRouter() {
       <AuthProvider client={supabase}>
         <QueryCacheReset />
         <Routes>
-          <Route path={AppRoute.Login} element={<LoginPage />} />
-          <Route path={AppRoute.ForgotPassword} element={<ForgotPasswordPage />} />
-          <Route path={AppRoute.ResetPassword} element={<ResetPasswordPage />} />
+          <Route element={<AuthPages />}>
+            <Route path={AppRoute.Login} element={<LoginPage />} />
+            <Route path={AppRoute.ForgotPassword} element={<ForgotPasswordPage />} />
+            <Route path={AppRoute.ResetPassword} element={<ResetPasswordPage />} />
+          </Route>
           <Route path={AppRoute.IntegrationSignup} element={<IntegrationSignupPage />} />
           <Route path={`${AppRoute.MakeupAttendance}/:token`} element={<MakeupAttendancePage />} />
           <Route path={AppRoute.MembershipInterest} element={<MembershipInterestPage />} />
@@ -74,11 +73,7 @@ export function AppRouter() {
                     <Routes>
                     <Route
                       path={AppRoute.Dashboard}
-                      element={
-                        <ProtectedRoute roles={[UserRole.Pastor]}>
-                          <DashboardPage />
-                        </ProtectedRoute>
-                      }
+                      element={<DashboardPage />}
                     />
                     <Route
                       path={AppRoute.ChurchMore}
@@ -91,7 +86,7 @@ export function AppRouter() {
                     <Route
                       path={AppRoute.IntegrationMore}
                       element={
-                        <ProtectedRoute roles={[UserRole.Pastor]}>
+                        <ProtectedRoute roles={LEADERSHIP_ROLES}>
                           <ModuleMorePage areaId="integration" />
                         </ProtectedRoute>
                       }
@@ -158,8 +153,6 @@ export function AppRouter() {
                         </ProtectedRoute>
                       }
                     />
-                    <Route path={AppRoute.Admin} element={<AdminPage />} />
-                    <Route path={AppRoute.Settings} element={<AdminPage />} />
                     <Route
                       path={AppRoute.Members}
                       element={

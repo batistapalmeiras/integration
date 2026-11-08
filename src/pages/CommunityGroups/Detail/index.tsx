@@ -8,12 +8,13 @@ import {
   ModalActions,
   ModalTitle,
   Skeleton,
+  StatusBadge,
   Typography,
   text,
   useModal,
   useToast,
 } from 'bp-kit';
-import { Plus, Trash2, UserMinus } from 'lucide-react';
+import { Pencil, Plus, Trash2, UserMinus } from 'lucide-react';
 // Components
 import { PageHeader } from '../../../components/PageHeader';
 // Local
@@ -21,7 +22,9 @@ import { AddButton } from '../../../components/AddButton';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import {
   CommunityGroup,
+  GroupInput,
   PersonInGroup,
+  WEEK_DAY_LABELS,
   addPeopleToMinistry,
   addPeopleToSmallGroup,
   deleteMinistry,
@@ -41,7 +44,7 @@ import { refreshGroupLists } from '../hooks/useCommunityGroupsList';
 import { AppRoute } from '../../../routes/paths';
 import { AddMembersModal } from '../components/AddMembersModal';
 import { GroupModal } from '../components/GroupModal';
-import { FieldGroup, HeaderActions, LeaderList, LeaderRow, Stack } from '../styles';
+import { FieldGroup, LeaderList, LeaderRow, NameCell, Stack } from '../styles';
 
 type GroupType = 'ministerios' | 'pgs';
 
@@ -78,9 +81,15 @@ export function CommunityGroupDetailPage() {
   if (loading) return <Skeleton $h="320px" />;
   if (error || !group) return <Empty title={`${label} não encontrado`} description={error ?? ''} />;
 
-  const save = async (name: string, leaders: string[], hosts: string[]) => {
-    if (isPg) await updateSmallGroup(group.id, name, leaders, hosts);
-    else await updateMinistry(group.id, name, leaders);
+  const memberNames = people.map((person) => person.name);
+  const roleOf = (name: string) =>
+    [group.leaders.includes(name) && 'Líder', group.hosts.includes(name) && 'Anfitrião'].filter(
+      (role): role is string => !!role,
+    );
+
+  const save = async (input: GroupInput) => {
+    if (isPg) await updateSmallGroup(group.id, input);
+    else await updateMinistry(group.id, input);
     close();
     await load();
   };
@@ -90,10 +99,10 @@ export function CommunityGroupDetailPage() {
       <GroupModal
         title={`Editar ${group.name}`}
         fieldLabel={label}
-        initialName={group.name}
-        initialLeaders={group.leaders}
-        initialHosts={group.hosts}
-        hasHosts={isPg}
+        group={group}
+        smallGroup={isPg}
+        groupMembers={memberNames}
+        onDelete={people.length === 0 ? openDelete : undefined}
         close={close}
         onSave={save}
       />,
@@ -121,9 +130,10 @@ export function CommunityGroupDetailPage() {
   const openRemovePerson = (person: PersonInGroup) =>
     open(
       <>
-        <ModalTitle onClose={close}>Remover {person.name} de {group.name}?</ModalTitle>
+        <ModalTitle onClose={close}>Remover {person.name}?</ModalTitle>
         <Typography type="p">
-          A pessoa continua cadastrada; só deixa de fazer parte deste {label.toLowerCase()}.
+          O cadastro não é apagado. A pessoa apenas deixa de participar deste {label.toLowerCase()}
+          {roleOf(person.name).length > 0 && ` e deixa de ser ${roleOf(person.name).join(' e ').toLowerCase()}`}.
         </Typography>
         <ModalActions>
           <Button
@@ -133,6 +143,13 @@ export function CommunityGroupDetailPage() {
               try {
                 if (isPg) await removePersonFromSmallGroup(person.id);
                 else await removePersonFromMinistry(group.id, person.id);
+                if (roleOf(person.name).length > 0) {
+                  await (isPg ? updateSmallGroup : updateMinistry)(group.id, {
+                    ...group,
+                    leaders: group.leaders.filter((name) => name !== person.name),
+                    hosts: group.hosts.filter((name) => name !== person.name),
+                  });
+                }
                 close();
                 await load();
               } catch (e) {
@@ -179,23 +196,13 @@ export function CommunityGroupDetailPage() {
     <Stack>
       <PageHeader
         title={group.name}
-        subtitle={label}
+        subtitle={isPg && group.meetingDay ? `${label} · ${WEEK_DAY_LABELS[group.meetingDay]}` : label}
         back
         action={
-          <HeaderActions>
-            <Button variant="secondary" onClick={openEdit}>
-              Editar
-            </Button>
-            <Button
-              variant="danger"
-              onClick={openDelete}
-              disabled={people.length > 0}
-              title={people.length > 0 ? `${people.length} pessoa(s) vinculada(s)` : 'Excluir'}
-            >
-              <Trash2 size={16} />
-              Excluir
-            </Button>
-          </HeaderActions>
+          <Button variant="secondary" onClick={openEdit}>
+            <Pencil size={16} />
+            Editar
+          </Button>
         }
       />
 
@@ -239,7 +246,16 @@ export function CommunityGroupDetailPage() {
             <tbody>
               {people.map((person) => (
                 <Tr key={person.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
-                  <Td data-label={text.fields.name}>{person.name}</Td>
+                  <Td data-label={text.fields.name}>
+                    <NameCell>
+                      {person.name}
+                      {roleOf(person.name).map((role) => (
+                        <StatusBadge key={role} tone="success">
+                          {role}
+                        </StatusBadge>
+                      ))}
+                    </NameCell>
+                  </Td>
                   <Td $shrink>
                     <IconButton
                       icon={<UserMinus size={14} />}

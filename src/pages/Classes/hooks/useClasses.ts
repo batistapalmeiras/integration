@@ -55,7 +55,7 @@ export function useClasses() {
   const refreshBoard = () => fetchQuery(queryKeys.cohortBoard, fetchCohortBoard);
 
   const cohorts = useMemo(() => (board ? sortByFirstLesson(board.cohorts) : []), [board]);
-  const selected = cohorts.find((c) => c.cohort.id === selectedCohortIdState) ?? cohorts[0] ?? null;
+  const selected = cohorts.find((c) => c.cohort.id === selectedCohortIdState) ?? cohorts.at(-1) ?? null;
   const selectedCohortId = selected?.cohort.id ?? null;
   const cohort = (selected?.cohort as Cohort | undefined) ?? null;
   const lessons = (selected?.lessons as Lesson[] | undefined) ?? [];

@@ -5,7 +5,7 @@ import { ProfilePage as SharedProfilePage, useAuthCtx } from 'bp-kit';
 import { useIsNavDestination } from '../../components/Layout/navDestination';
 // Local
 import { AppRoute } from '../../routes/paths';
-import { hasRole, LEADERSHIP_ROLES, ROLE_LABELS, UserRole } from '../../types/enums';
+import { ROLE_LABELS, UserRole } from '../../types/enums';
 
 export function ProfilePage() {
   const { user, logout } = useAuthCtx();
@@ -22,7 +22,7 @@ export function ProfilePage() {
       roleLabel={user ? ROLE_LABELS[user.role as UserRole] : undefined}
       changePasswordPath={AppRoute.ChangePassword}
       onLogout={handleLogout}
-      back={hasRole(user?.role, LEADERSHIP_ROLES) && !isNavDestination}
+      back={!isNavDestination}
     />
   );
 }

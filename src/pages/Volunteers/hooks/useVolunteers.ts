@@ -24,5 +24,20 @@ export function useVolunteers() {
     await invalidateQueries(queryKeys.volunteers);
   };
 
-  return { volunteers: query.data ?? [], loading: query.loading, error: errorMessage(query.error), addVolunteer };
+  const changeRole = async (id: string, role: UserRole) => {
+    const { error } = await supabase.from('profiles').update({ role }).eq('id', id);
+    if (error) throw error;
+    await Promise.all([
+      invalidateQueries(queryKeys.volunteers),
+      invalidateQueries(queryKeys.volunteer(id), { refetchActive: false }),
+    ]);
+  };
+
+  return {
+    volunteers: query.data ?? [],
+    loading: query.loading,
+    error: errorMessage(query.error),
+    addVolunteer,
+    changeRole,
+  };
 }

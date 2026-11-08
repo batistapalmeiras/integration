@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Chip, Empty, Pagination, SearchInput, Skeleton, text } from 'bp-kit';
+import { Button, Chip, Empty, Pagination, SearchInput, Skeleton, Tab, TabBar, text } from 'bp-kit';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
@@ -10,7 +10,7 @@ import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
 import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META } from '../../types/person';
-import { useVisitors, VISIBLE_STATUSES } from './hooks/useVisitors';
+import { QUEUE_STATUSES, useVisitors } from './hooks/useVisitors';
 import { PaginationWrap, QueueChips, RowButton, RowText, SearchRow } from './styles';
 
 export function VisitorsPage() {
@@ -25,6 +25,10 @@ export function VisitorsPage() {
     setPage,
     search,
     setSearch,
+    view,
+    setView,
+    queueCount,
+    archivedCount,
     statusFilter,
     setStatusFilter,
     hasFilter,
@@ -50,32 +54,44 @@ export function VisitorsPage() {
 
       {!loading && !error && (
         <>
+          <TabBar>
+            <Tab $active={view === 'queue'} onClick={() => setView('queue')}>
+              Na fila ({queueCount})
+            </Tab>
+            <Tab $active={view === 'archived'} onClick={() => setView('archived')}>
+              Arquivados ({archivedCount})
+            </Tab>
+          </TabBar>
           <SearchRow>
             <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
           </SearchRow>
-          <QueueChips role="group" aria-label="Filtrar por status">
-            {VISIBLE_STATUSES.map((status) => (
-              <Chip
-                key={status}
-                type="button"
-                aria-pressed={statusFilter.includes(status)}
-                $active={statusFilter.includes(status)}
-                onClick={() => toggleStatus(status)}
-              >
-                {STATUS_META[status].label}
-              </Chip>
-            ))}
-          </QueueChips>
+          {view === 'queue' && (
+            <QueueChips role="group" aria-label="Filtrar por status">
+              {QUEUE_STATUSES.map((status) => (
+                <Chip
+                  key={status}
+                  type="button"
+                  aria-pressed={statusFilter.includes(status)}
+                  $active={statusFilter.includes(status)}
+                  onClick={() => toggleStatus(status)}
+                >
+                  {STATUS_META[status].label}
+                </Chip>
+              ))}
+            </QueueChips>
+          )}
         </>
       )}
 
       {!loading && !error && rows.length === 0 && (
         <Empty
-          title="Nenhum visitante encontrado"
+          title={view === 'queue' ? 'Ninguém na fila' : 'Nenhum visitante arquivado'}
           description={
             hasFilter
               ? 'Nenhum visitante encontrado para os filtros aplicados.'
-              : 'Cadastre o primeiro visitante pelo botão acima.'
+              : view === 'queue'
+                ? 'Os visitantes que precisam de contato aparecem aqui.'
+                : ''
           }
         />
       )}

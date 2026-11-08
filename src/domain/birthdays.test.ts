@@ -6,7 +6,6 @@ import {
   birthdaysListText,
   isBirthdayToday,
   MemberBirthday,
-  shiftBirthdayMonth,
   upcomingBirthdaysThisMonth,
 } from './birthdays';
 
@@ -80,18 +79,10 @@ describe('birthdayAgeLabel', () => {
   });
 });
 
-describe('shiftBirthdayMonth', () => {
-  it('crosses the turn of the year both ways', () => {
-    expect(shiftBirthdayMonth({ year: 2026, month: 12 }, 1)).toEqual({ year: 2027, month: 1 });
-    expect(shiftBirthdayMonth({ year: 2026, month: 1 }, -1)).toEqual({ year: 2025, month: 12 });
-    expect(shiftBirthdayMonth({ year: 2026, month: 6 }, 1)).toEqual({ year: 2026, month: 7 });
-  });
-});
-
 describe('birthdaysListText', () => {
   it('lists date, name and phone under a heading, with a blank line between people', () => {
     const list = [birthday('Ana', '1985-11-03', '11988887777'), birthday('Davi', '1995-11-07')];
-    const text = birthdaysListText(list, { year: 2026, month: 11 }, 'novembro', (phone) => `+${phone}`);
+    const text = birthdaysListText(list, 2026, 'novembro', (phone) => `+${phone}`);
     expect(text).toBe(
       ['Aniversariantes de novembro de 2026', '03/11 · Ana · +11988887777', '07/11 · Davi · sem celular'].join('\n\n'),
     );

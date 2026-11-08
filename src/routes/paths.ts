@@ -10,8 +10,6 @@ export enum AppRoute {
   People = '/pessoas',
   Coffee = '/cafe-de-boas-vindas',
   Classes = '/turma',
-  Admin = '/menu',
-  Settings = '/configuracoes',
   Volunteers = '/voluntarios',
   Reports = '/relatorios',
   Profile = '/perfil',
