@@ -1,6 +1,3 @@
-// Fully removes a volunteer: deletes their Supabase Auth login (needs the
-// service-role key, hence this function) — the `profiles` row goes with it
-// via `on delete cascade`.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -44,9 +41,6 @@ Deno.serve(async (req) => {
 
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-  // Admin's own reach stops at integration_team/teacher — only Pastor
-  // manages Admin/Pastor accounts. Looked up via the service-role client
-  // since the target may sit outside what the caller's own RLS view shows.
   if (callerProfile.role === 'admin') {
     const { data: targetProfile } = await adminClient.from('profiles').select('role').eq('id', id).single();
     if (!targetProfile || !['integration_team', 'teacher'].includes(targetProfile.role)) {

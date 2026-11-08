@@ -1,8 +1,3 @@
-// Creates a volunteer's login (Supabase Auth) and their `profiles` row in
-// one request, so the admin never has to open the Supabase dashboard or
-// handle a UUID by hand. Runs server-side only — this is the one place the
-// service-role key is allowed to exist, since it must never reach the
-// frontend bundle.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -25,9 +20,6 @@ Deno.serve(async (req) => {
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-  // Verify the caller is an admin using their own token — RLS still applies
-  // on this client, so a non-admin simply won't have a 'profiles' row with
-  // role='admin' to find.
   const callerClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
   });
@@ -48,8 +40,6 @@ Deno.serve(async (req) => {
     return json({ error: 'Dados incompletos' }, 400);
   }
 
-  // Admin's own reach stops at integration_team/teacher — only Pastor
-  // manages Admin/Pastor accounts.
   if (callerProfile.role === 'admin' && !['integration_team', 'teacher'].includes(role)) {
     return json({ error: 'Administradores só podem cadastrar Equipe de Integração ou Professores' }, 403);
   }
@@ -65,13 +55,10 @@ Deno.serve(async (req) => {
     return json({ error: createError?.message ?? 'Erro ao criar usuário' }, 400);
   }
 
-  // Starts with the shared default password — force them to set their own
-  // on first login, cleared by ProfilePage's "Alterar senha" once they do.
   const { error: profileError } = await adminClient
     .from('profiles')
     .insert({ id: created.user.id, name, role, must_change_password: true });
   if (profileError) {
-    // Don't leave an orphaned auth user behind if the profile insert fails.
     await adminClient.auth.admin.deleteUser(created.user.id);
     return json({ error: profileError.message }, 400);
   }

@@ -1,5 +1,3 @@
-// Changes a volunteer's Auth login email (needs the service-role key, hence
-// this function) — same admin-only pattern as create/delete-volunteer.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -42,8 +40,6 @@ Deno.serve(async (req) => {
 
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-  // Admin's own reach stops at integration_team/teacher (except their own
-  // account) — only Pastor manages Admin/Pastor accounts.
   if (callerProfile.role === 'admin' && id !== user.id) {
     const { data: targetProfile } = await adminClient.from('profiles').select('role').eq('id', id).single();
     if (!targetProfile || !['integration_team', 'teacher'].includes(targetProfile.role)) {

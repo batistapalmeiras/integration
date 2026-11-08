@@ -1,7 +1,3 @@
-// Returns a volunteer's current Auth email so the edit form can show it —
-// `profiles` has no email column, and auth.users isn't readable from the
-// frontend, so this (like create/delete-volunteer) is the one place the
-// service-role key is allowed to exist.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -42,9 +38,6 @@ Deno.serve(async (req) => {
   const { id } = await req.json();
   if (!id) return json({ error: 'Dados incompletos' }, 400);
 
-  // Viewing is open to Admin for anyone (matches the Volunteers list showing
-  // every role) — only editing is scoped to integration_team/teacher, see
-  // update-volunteer-email.
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
   const { data, error: getError } = await adminClient.auth.admin.getUserById(id);
   if (getError || !data.user) return json({ error: getError?.message ?? 'Usuário não encontrado' }, 400);
