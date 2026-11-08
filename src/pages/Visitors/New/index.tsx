@@ -9,9 +9,10 @@ import { Save } from 'lucide-react';
 // Components
 import { PageHeader } from '../../../components/PageHeader';
 // Local
-import { findPersonByPhone, reactivatePerson } from '../../../features/visitors';
+import { reactivatePerson } from '../../../features/visitors';
+import { findPersonByPhone } from '../../../repositories/people';
 import { AppRoute } from '../../../routes/paths';
-import { useCreatePerson } from '../hooks';
+import { useCreatePerson } from '../hooks/useCreatePerson';
 import { CreateVisitorFormValues, createVisitorSchema } from '../validators';
 import { VisitorForm, VisitorFormActions } from '../components/VisitorForm';
 import { ExistingPersonModal } from './components/ExistingPersonModal';

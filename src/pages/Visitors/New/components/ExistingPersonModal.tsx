@@ -34,7 +34,7 @@ export function ExistingPersonModal({ person, close, onReactivate, onOpen }: Pro
               {person.name}
             </Typography>
             <Typography type="caption" as="span">
-              {maskPhone(person.phone)}
+              {person.phone ? maskPhone(person.phone) : '—'}
             </Typography>
           </ExistingName>
           <StatusPill person={person} compact />

@@ -1,6 +1,6 @@
 // Local
 import { supabase } from '../lib/supabase';
-import { UserRole } from '../types/enums';
+import { toUserRole, UserRole } from '../types/enums';
 
 export interface VolunteerRow {
   id: string;
@@ -18,11 +18,16 @@ export interface NewVolunteer {
 
 const VOLUNTEER_COLUMNS = 'id,name,role,active';
 
+const toVolunteer = (row: Omit<VolunteerRow, 'role'> & { role: string }): VolunteerRow => ({
+  ...row,
+  role: toUserRole(row.role),
+});
+
 async function invokeFunction<T = unknown>(name: string, body: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke(name, { body });
   if (error) throw error;
   if (data?.error) throw new Error(data.error);
-  return data as T;
+  return data;
 }
 
 export async function countActiveVolunteers(): Promise<number> {
@@ -37,13 +42,13 @@ export async function countActiveVolunteers(): Promise<number> {
 export async function listVolunteers(): Promise<VolunteerRow[]> {
   const { data, error } = await supabase.from('profiles').select(VOLUNTEER_COLUMNS).order('name');
   if (error) throw error;
-  return (data ?? []) as VolunteerRow[];
+  return (data ?? []).map(toVolunteer);
 }
 
 export async function getVolunteer(id: string): Promise<VolunteerRow> {
   const { data, error } = await supabase.from('profiles').select(VOLUNTEER_COLUMNS).eq('id', id).single();
   if (error) throw error;
-  return data as VolunteerRow;
+  return toVolunteer(data);
 }
 
 export async function getVolunteerEmail(id: string): Promise<string | null> {
@@ -70,7 +75,7 @@ export async function updateVolunteer(
     .select(VOLUNTEER_COLUMNS)
     .single();
   if (error) throw error;
-  return data as VolunteerRow;
+  return toVolunteer(data);
 }
 
 export async function updateVolunteerEmail(id: string, email: string): Promise<void> {

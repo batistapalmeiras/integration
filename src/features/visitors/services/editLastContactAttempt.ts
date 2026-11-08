@@ -1,7 +1,7 @@
 // Local
 import { statusAfterContact } from '../domain/contactAttempt';
 import { ContactResult, Person } from '../domain/types';
-import { insertStatusHistory, updateContactAttemptResult, updatePersonStatus } from '../infra/peopleRepository';
+import { insertStatusHistory, updateContactAttemptResult, updatePersonStatus } from '../../../repositories/people';
 import { fieldsAfterContact, hasAttendedCoffee, placeAfterContact } from './contactFollowUp';
 
 export async function editLastContactAttempt(
@@ -13,7 +13,10 @@ export async function editLastContactAttempt(
   await updateContactAttemptResult(attemptId, result);
 
   const toStatus = statusAfterContact(result, await hasAttendedCoffee(person.id));
-  const updated = await updatePersonStatus(person.id, toStatus, { coffee_retry_used: false, ...fieldsAfterContact(toStatus) });
+  const updated = await updatePersonStatus(person.id, toStatus, {
+    coffee_retry_used: false,
+    ...fieldsAfterContact(toStatus),
+  });
   await insertStatusHistory({
     personId: person.id,
     fromStatus: person.status,

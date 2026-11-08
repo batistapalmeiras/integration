@@ -1,34 +1,38 @@
 // Local
 import {
-  ActiveCohort,
   CohortBoard,
-  CohortBoardAttendance,
-  CohortBoardEnrollment,
   CohortLesson,
   CohortWithLessons,
   EnrollablePerson,
   PersonIntegrationClass,
+  toCohortStatus,
 } from '../domain/classesRoster';
 import { AppRoute } from '../routes/paths';
 import { selectUpcomingCohort } from '../domain/cohortSchedule';
 import { supabase } from '../lib/supabase';
+import { toPersonStatus } from '../types/person';
 import { fromIntegration } from './integrationPeople';
 
 const COHORT_WITH_LESSONS = 'id, name, status, lessons(id, cohort_id, number, date)';
 
-interface CohortRow extends ActiveCohort {
+interface CohortRow {
+  id: string;
+  name: string;
+  status: string;
   lessons: CohortLesson[];
 }
 
-function toCohortWithLessons(row: CohortRow): CohortWithLessons {
-  const { lessons, ...cohort } = row;
-  return { cohort, lessons: [...(lessons ?? [])].sort((a, b) => a.number - b.number) };
+function toCohortWithLessons({ lessons, status, ...cohort }: CohortRow): CohortWithLessons {
+  return {
+    cohort: { ...cohort, status: toCohortStatus(status) },
+    lessons: [...(lessons ?? [])].sort((a, b) => a.number - b.number),
+  };
 }
 
 async function listOpenCohorts(): Promise<CohortWithLessons[]> {
   const { data, error } = await supabase.from('cohorts').select(COHORT_WITH_LESSONS).eq('status', 'active');
   if (error) throw error;
-  return ((data ?? []) as unknown as CohortRow[]).map(toCohortWithLessons);
+  return (data ?? []).map(toCohortWithLessons);
 }
 
 export async function getUpcomingCohortWithLessons(): Promise<CohortWithLessons | null> {
@@ -37,12 +41,6 @@ export async function getUpcomingCohortWithLessons(): Promise<CohortWithLessons 
 
 export async function hasUpcomingCohort(): Promise<boolean> {
   return !!(await getUpcomingCohortWithLessons());
-}
-
-interface PersonEnrollmentRow {
-  id: string;
-  cohort: CohortRow | null;
-  lesson_attendance: { id: string; lesson_id: string; attended: boolean }[];
 }
 
 export async function getPersonIntegrationClass(personId: string): Promise<PersonIntegrationClass | null> {
@@ -55,7 +53,7 @@ export async function getPersonIntegrationClass(personId: string): Promise<Perso
     .maybeSingle();
   if (error) throw error;
 
-  const row = data as unknown as PersonEnrollmentRow | null;
+  const row = data;
   if (!row?.cohort) return null;
 
   const attendanceByLesson: Record<string, { id: string; attended: boolean }> = {};
@@ -85,13 +83,15 @@ export async function listEnrollablePeople(cohortId: string): Promise<Enrollable
     .select('person_id')
     .eq('cohort_id', cohortId);
   if (enrolledError) throw enrolledError;
-  const enrolledIds = new Set((enrolled ?? []).map((e) => e.person_id as string));
+  const enrolledIds = new Set((enrolled ?? []).map((row) => row.person_id));
 
   const { data, error } = await fromIntegration(supabase.from('people').select('id, name, status'))
     .eq('status', 'pending_signup')
     .order('name');
   if (error) throw error;
-  return (data ?? []).filter((p) => !enrolledIds.has(p.id as string)) as EnrollablePerson[];
+  return (data ?? [])
+    .filter((person) => !enrolledIds.has(person.id))
+    .map((person) => ({ ...person, status: toPersonStatus(person.status) }));
 }
 
 export async function enrollPerson(personId: string, cohortId: string): Promise<void> {
@@ -116,7 +116,7 @@ export async function getMakeupLink(enrollmentId: string, lessonId: string): Pro
       .select('id')
       .single();
     if (insertError) throw insertError;
-    id = created.id as string;
+    id = created.id;
   }
 
   return `${window.location.origin}${AppRoute.MakeupAttendance}/${id}`;
@@ -144,21 +144,21 @@ export async function fetchCohortBoard(): Promise<CohortBoard> {
 
   return {
     cohorts,
-    enrollments: (enrollments.data ?? []) as unknown as CohortBoardEnrollment[],
-    attendance: (attendance.data ?? []) as unknown as CohortBoardAttendance[],
+    enrollments: enrollments.data ?? [],
+    attendance: attendance.data ?? [],
   };
 }
 
 export async function listCohortNames(): Promise<string[]> {
   const { data, error } = await supabase.from('cohorts').select('name').order('name');
   if (error) throw error;
-  return (data ?? []).map((c) => c.name as string);
+  return (data ?? []).map((cohort) => cohort.name);
 }
 
 export async function createCohort(name: string, lessonDates: string[]): Promise<string> {
   const { data, error } = await supabase.rpc('create_cohort', { p_name: name, p_lesson_dates: lessonDates });
   if (error) throw error;
-  return data as string;
+  return data;
 }
 
 export async function updateLessonDates(cohortId: string, lessons: { number: number; date: string }[]): Promise<void> {

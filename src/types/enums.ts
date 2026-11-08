@@ -1,3 +1,6 @@
+// Local
+import { keyParser } from '../lib/parse';
+
 export enum UserRole {
   Admin = 'admin',
   IntegrationTeam = 'integration_team',
@@ -31,7 +34,11 @@ const ROLE_MODULE: Record<UserRole, SystemModule> = {
 
 export function groupRolesByModule(roles: UserRole[]): { module: SystemModule; label: string; roles: UserRole[] }[] {
   return Object.values(SystemModule)
-    .map((module) => ({ module, label: MODULE_LABELS[module], roles: roles.filter((role) => ROLE_MODULE[role] === module) }))
+    .map((module) => ({
+      module,
+      label: MODULE_LABELS[module],
+      roles: roles.filter((role) => ROLE_MODULE[role] === module),
+    }))
     .filter((group) => group.roles.length > 0);
 }
 
@@ -45,3 +52,5 @@ export const STAFF_ROLES = [UserRole.IntegrationTeam, UserRole.Teacher, ...LEADE
 export function hasRole(role: string | undefined, roles: UserRole[]): boolean {
   return roles.includes(role as UserRole);
 }
+
+export const toUserRole = keyParser(ROLE_LABELS, 'Papel');

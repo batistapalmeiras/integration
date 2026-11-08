@@ -10,7 +10,7 @@ import {
   insertStatusHistory,
   updatePersonFields,
   updatePersonStatus,
-} from '../infra/peopleRepository';
+} from '../../../repositories/people';
 import { Person, PersonStatus, UpdatePersonInput } from '../domain/types';
 
 const MEMBERSHIP_PENDING: PersonStatus = 'membership_pending';

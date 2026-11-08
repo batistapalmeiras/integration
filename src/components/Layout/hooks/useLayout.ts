@@ -6,7 +6,7 @@ import { useAuthCtx } from 'bp-kit';
 import { useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { AppRoute } from '../../../routes/paths';
-import { hasRole, LEADERSHIP_ROLES } from '../../../types/enums';
+import { canAccess } from '../../../routes/table';
 import { countMembershipPending } from '../../../repositories/membership';
 
 export function useLayout() {
@@ -14,7 +14,7 @@ export function useLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const showMembership = hasRole(user?.role, LEADERSHIP_ROLES);
+  const showMembership = canAccess(user?.role, AppRoute.Membership);
 
   const membershipCount =
     useQuery(queryKeys.membershipPendingCount, countMembershipPending, { enabled: showMembership }).data ?? 0;

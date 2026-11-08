@@ -1,4 +1,4 @@
-export { STATUS_META, type Person, type PersonStatus, type StatusTone } from '../../../types/person';
+export type { Person, PersonStatus } from '../../../types/person';
 
 export type ContactResult = 'accepted' | 'declined' | 'no_response';
 

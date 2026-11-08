@@ -2,7 +2,6 @@
 import {
   COFFEE_LIST_STATUSES,
   CoffeeBoard,
-  CoffeeBoardAttendance,
   CoffeeEventRef,
   currentCoffeeAttendance,
   EnrollableCoffeePerson,
@@ -35,7 +34,7 @@ export async function getUpcomingCoffeeRoster(): Promise<{ eventDate: string; ro
     .select('person:people!inner(status, signup_window_from)')
     .eq('coffee_event_id', future.id);
   if (error) throw error;
-  const rows = (data ?? []) as unknown as { person: { status: string; signup_window_from: string | null } | null }[];
+  const rows = data ?? [];
   return {
     eventDate: future.event_date,
     rosterCount: rows.filter((row) => isSeatedInUpcomingCoffee(row.person)).length,
@@ -45,7 +44,7 @@ export async function getUpcomingCoffeeRoster(): Promise<{ eventDate: string; ro
 export async function insertCoffeeEvent(eventDate: string): Promise<string> {
   const { data, error } = await supabase.from('coffee_events').insert({ event_date: eventDate }).select('id').single();
   if (error) throw error;
-  return data.id as string;
+  return data.id;
 }
 
 export async function updateCoffeeEventDate(id: string, eventDate: string): Promise<void> {
@@ -71,7 +70,7 @@ export async function getPersonAttendedCoffeeDate(personId: string): Promise<str
     .eq('attended', true);
   if (error) throw error;
 
-  const rows = (data ?? []) as unknown as { coffee_event: { event_date: string } }[];
+  const rows = data ?? [];
   if (rows.length === 0) return null;
   return (
     rows
@@ -84,7 +83,7 @@ export async function getPersonAttendedCoffeeDate(personId: string): Promise<str
 export async function placeInCoffee(personId: string, eventId: string): Promise<string> {
   const { data, error } = await supabase.rpc('place_in_coffee', { p_person_id: personId, p_coffee_event_id: eventId });
   if (error) throw error;
-  return data as string;
+  return data;
 }
 
 export async function attachToNextWelcomeCoffee(personId: string): Promise<void> {
@@ -100,12 +99,7 @@ export async function getCoffeeAttendanceForPerson(personId: string): Promise<Pe
     .eq('person_id', personId);
   if (error) throw error;
 
-  const rows = (data ?? []) as unknown as {
-    id: string;
-    attended: boolean;
-    person_id: string;
-    coffee_event: { event_date: string } | null;
-  }[];
+  const rows = data ?? [];
   const [current] = currentCoffeeAttendance(rows);
   return current
     ? { id: current.id, attended: current.attended, eventDate: current.coffee_event?.event_date ?? '' }
@@ -118,20 +112,20 @@ export async function listEnrollableCoffeePeople(eventId: string): Promise<Enrol
     .select('person_id')
     .eq('coffee_event_id', eventId);
   if (attendingError) throw attendingError;
-  const attendingIds = new Set((attending ?? []).map((a) => a.person_id as string));
+  const attendingIds = new Set((attending ?? []).map((row) => row.person_id));
 
   const { data, error } = await fromIntegration(supabase.from('people').select('id, name'))
     .in('status', ['initial_contact', 'retry_contact'])
     .order('name');
   if (error) throw error;
-  return (data ?? []).filter((p) => !attendingIds.has(p.id as string)) as EnrollableCoffeePerson[];
+  return (data ?? []).filter((p) => !attendingIds.has(p.id));
 }
 
 export async function markCoffeeAttended(attendanceId: string, personId: string, actorId?: string): Promise<void> {
   const { error } = await supabase.rpc('mark_coffee_attended', {
     p_attendance_id: attendanceId,
     p_person_id: personId,
-    p_actor_id: actorId ?? null,
+    p_actor_id: actorId,
   });
   if (error) throw error;
 }
@@ -293,7 +287,7 @@ async function fetchBoard(onlyPeopleInProgress: boolean): Promise<CoffeeBoard> {
 
   return {
     events: (events.data ?? []) as CoffeeBoard['events'],
-    attendance: (attendance.data ?? []) as unknown as CoffeeBoardAttendance[],
+    attendance: attendance.data ?? [],
   };
 }
 

@@ -59,7 +59,7 @@ const toEligibility = (row: LessonsProgressRow): MembershipEligibility => ({
 export async function getActiveCohortSchedule(): Promise<CohortSchedule | null> {
   const { data, error } = await supabase.rpc('get_active_cohort_schedule');
   if (error) throw error;
-  return ((data ?? []) as CohortSchedule[])[0] ?? null;
+  return (data ?? [])[0] ?? null;
 }
 
 export async function checkWelcomeCoffeePhone(phone: string): Promise<string> {
@@ -83,13 +83,13 @@ export async function submitIntegrationSignup(
     })
     .single();
   if (error) throw error;
-  return data as CohortSchedule;
+  return data;
 }
 
 export async function getMakeupAttendanceContext(token: string): Promise<MakeupAttendanceContext> {
   const { data, error } = await supabase.rpc('get_makeup_attendance_context', { p_token: token }).single();
   if (error) throw error;
-  return data as MakeupAttendanceContext;
+  return data;
 }
 
 export async function submitMakeupAttendance(token: string, notes: string | null): Promise<void> {
@@ -121,7 +121,7 @@ export async function submitMembershipInterest(
     })
     .single();
   if (error) throw error;
-  return toEligibility(data as LessonsProgressRow);
+  return toEligibility(data);
 }
 
 export async function listPublicMinistryNames(): Promise<string[]> {
@@ -133,5 +133,5 @@ export async function listPublicMinistryNames(): Promise<string[]> {
 export async function listPublicSmallGroups(): Promise<SmallGroupOption[]> {
   const { data, error } = await supabase.rpc('list_small_groups');
   if (error) throw error;
-  return (data ?? []) as SmallGroupOption[];
+  return data ?? [];
 }

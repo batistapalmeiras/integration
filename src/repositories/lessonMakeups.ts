@@ -2,17 +2,6 @@
 import { LessonMakeup, MakeupNote } from '../domain/lessonMakeups';
 import { supabase } from '../lib/supabase';
 
-interface LessonMakeupRow {
-  confirmed_at: string | null;
-  notes: string | null;
-  attendance: { lesson: { number: number; cohort: { name: string } } };
-}
-
-interface MakeupNoteRow extends LessonMakeupRow {
-  notes: string;
-  attendance: LessonMakeupRow['attendance'] & { enrollment: { person: { id: string; name: string } } };
-}
-
 export async function listRecentMakeupNotes(limit: number): Promise<MakeupNote[]> {
   const { data, error } = await supabase
     .from('lesson_makeups')
@@ -25,7 +14,7 @@ export async function listRecentMakeupNotes(limit: number): Promise<MakeupNote[]
     .limit(limit);
   if (error) throw error;
 
-  return ((data ?? []) as unknown as MakeupNoteRow[]).map((row) => ({
+  return (data ?? []).map((row) => ({
     personId: row.attendance.enrollment.person.id,
     personName: row.attendance.enrollment.person.name,
     lessonNumber: row.attendance.lesson.number,
@@ -44,7 +33,7 @@ export async function getPersonLessonMakeups(personId: string): Promise<LessonMa
     .eq('attendance.enrollment.person_id', personId);
   if (error) throw error;
 
-  return ((data ?? []) as unknown as LessonMakeupRow[])
+  return (data ?? [])
     .map((row) => ({
       lessonNumber: row.attendance.lesson.number,
       cohortName: row.attendance.lesson.cohort.name,

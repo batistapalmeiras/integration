@@ -1,5 +1,5 @@
 // React
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -31,6 +31,7 @@ import {
   SensitiveValue,
 } from '../Detail/styles';
 import { FormActions, FormContent, SectionDivider } from '../../../components/FormLayout';
+import { useLatest } from '../../../lib/useLatest';
 import { InfoEntry, integrationEntries, makeupEntries, membershipEntries } from './sensitive';
 
 type InfoTab = 'general' | 'integration' | 'membership' | 'makeup';
@@ -62,8 +63,7 @@ export function VisitorInfoPage() {
   const sensitive = usePersonSensitive(id ?? '', canSeeSensitive).data ?? null;
   const makeups = usePersonMakeups(id ?? '', canSeeMakeups).data ?? [];
   const requirements = communityRequirements(sensitive);
-  const requirementsRef = useRef(requirements);
-  requirementsRef.current = requirements;
+  const requirementsRef = useLatest(requirements);
 
   const canEditCommunity = user?.role === UserRole.Pastor && person?.status === 'member';
   const smallGroups = useSmallGroups(canEditCommunity).data ?? [];

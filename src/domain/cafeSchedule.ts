@@ -89,7 +89,7 @@ export interface CoffeeBoardAttendance {
   person: {
     id: string;
     name: string;
-    phone: string;
+    phone: string | null;
     status: string;
     class_invite_sent_at: string | null;
     signup_window_from?: string | null;

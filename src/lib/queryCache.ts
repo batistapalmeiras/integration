@@ -1,7 +1,8 @@
 // React
-import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 // Local
 import { PIPELINE_ROOTS, queryKeys } from './queryKeys';
+import { useLatest } from './useLatest';
 
 type QueryKey = readonly unknown[];
 
@@ -86,7 +87,8 @@ export function setQueryData<T>(key: QueryKey, updater: T | ((current: T | undef
   notify(entry);
 }
 
-const startsWith = (key: QueryKey, prefix: QueryKey) => prefix.every((part, index) => hashKey([part]) === hashKey([key[index]]));
+const startsWith = (key: QueryKey, prefix: QueryKey) =>
+  prefix.every((part, index) => hashKey([part]) === hashKey([key[index]]));
 
 export function invalidateQueries(
   match: QueryKey | ((key: QueryKey) => boolean),
@@ -130,11 +132,14 @@ interface QueryOptions {
   staleTime?: number;
 }
 
-export function useQuery<T>(key: QueryKey, fetcher: () => Promise<T>, { enabled = true, staleTime = DEFAULT_STALE_TIME }: QueryOptions = {}) {
+export function useQuery<T>(
+  key: QueryKey,
+  fetcher: () => Promise<T>,
+  { enabled = true, staleTime = DEFAULT_STALE_TIME }: QueryOptions = {},
+) {
   const hash = hashKey(key);
   const entry = getEntry(key);
-  const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
+  const fetcherRef = useLatest(fetcher);
 
   const subscribe = useCallback(
     (listener: () => void) => {
@@ -154,7 +159,10 @@ export function useQuery<T>(key: QueryKey, fetcher: () => Promise<T>, { enabled 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hash, enabled]);
 
-  const refetch = useCallback(() => fetchQuery(entry.key, () => fetcherRef.current()) as Promise<T>, [entry]);
+  const refetch = useCallback(
+    () => fetchQuery(entry.key, () => fetcherRef.current()) as Promise<T>,
+    [entry, fetcherRef],
+  );
 
   return {
     data: entry.data as T | undefined,

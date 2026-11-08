@@ -46,5 +46,6 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['tests/**/*.test.{ts,tsx}'],
     setupFiles: ['./tests/setup.ts'],
+    server: { deps: { inline: ['bp-kit'] } },
   },
 });

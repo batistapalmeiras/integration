@@ -15,7 +15,7 @@ import { queryKeys } from '../../../lib/queryKeys';
 import { useHasUpcomingCoffeeEvent, useHasUpcomingCohort } from '../../../queries/reference';
 import { editLastContactAttempt as editLastContactAttemptUseCase } from '../services/editLastContactAttempt';
 import { registerContactAttempt as registerContactAttemptUseCase } from '../services/registerContactAttempt';
-import { fetchLastContactAttempt } from '../infra/peopleRepository';
+import { fetchLastContactAttempt } from '../../../repositories/people';
 import { ContactResult, PersonStatus } from '../domain/types';
 import { useVisitorProfile } from './useVisitorProfile';
 

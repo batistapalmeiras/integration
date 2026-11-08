@@ -1,6 +1,7 @@
 // React
 import { ComponentType, lazy } from 'react';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function lazyPage<Module extends Record<Key, ComponentType<any>>, Key extends keyof Module>(
   load: () => Promise<Module>,
   key: Key,

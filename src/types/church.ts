@@ -1,3 +1,6 @@
+// Local
+import { keyParser, optional } from '../lib/parse';
+
 export type EntryType = 'baptism' | 'transfer_letter' | 'acclamation' | 'reconciliation';
 
 export const ENTRY_TYPE_LABELS: Record<EntryType, string> = {
@@ -20,3 +23,5 @@ export const WANTS_SMALL_GROUP_LABELS: Record<WantsSmallGroup, string> = {
   not_now: 'Não',
   already: 'Já faço',
 };
+
+export const toEntryType = optional(keyParser(ENTRY_TYPE_LABELS, 'Tipo de entrada'));

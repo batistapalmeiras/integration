@@ -6,14 +6,14 @@ import { PersonStatus, STATUS_META } from '../../../types/person';
 // Local
 import { Detail, PanelTitle, Section, StageGrid, StatRow, StatText } from '../styles';
 
-export interface FunnelStage {
+interface FunnelStage {
   status: PersonStatus;
   owner: string;
 }
 
 export type FunnelCounts = Partial<Record<PersonStatus, number>>;
 
-export const INTEGRATION_FUNNEL: FunnelStage[] = [
+const INTEGRATION_FUNNEL: FunnelStage[] = [
   { status: 'initial_contact', owner: 'Equipe de Integração' },
   { status: 'retry_contact', owner: 'Equipe de Integração' },
   { status: 'welcome_coffee', owner: 'Equipe de Integração' },

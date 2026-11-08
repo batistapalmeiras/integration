@@ -1,10 +1,14 @@
 // Local
 import { PersonStatus } from '../types/person';
 
-export interface ActiveCohort {
+export type CohortStatus = 'active' | 'closed';
+
+export const toCohortStatus = (value: string): CohortStatus => (value === 'closed' ? 'closed' : 'active');
+
+interface ActiveCohort {
   id: string;
   name: string;
-  status: 'active' | 'closed';
+  status: CohortStatus;
 }
 
 export interface CohortLesson {
@@ -30,13 +34,13 @@ export interface EnrollablePerson {
   status: PersonStatus;
 }
 
-export interface CohortBoardEnrollment {
+interface CohortBoardEnrollment {
   id: string;
   cohort_id: string;
   person: { id: string; name: string; status: string; membership_interest_sent_at: string | null };
 }
 
-export interface CohortBoardAttendance {
+interface CohortBoardAttendance {
   id: string;
   enrollment_id: string;
   lesson_id: string;
@@ -49,7 +53,7 @@ export interface CohortBoard {
   attendance: CohortBoardAttendance[];
 }
 
-export interface LessonRef {
+interface LessonRef {
   number: number;
   date: string;
 }

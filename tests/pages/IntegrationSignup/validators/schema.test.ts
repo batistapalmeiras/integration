@@ -1,12 +1,9 @@
 // Local
-import { SignupFormValues, signupFormSchema, toSignupAnswers } from '../../../../src/pages/IntegrationSignup/validators/schema';
-
-vi.mock('../../../../src/lib/supabase', () => ({ supabase: {} }));
-vi.mock('bp-kit', () => ({
-  text: { validation: { required: (what: string) => `Informe ${what}` } },
-  formatCPF: (value: string) => value,
-  maskPhone: (value: string) => value,
-}));
+import {
+  SignupFormValues,
+  signupFormSchema,
+  toSignupAnswers,
+} from '../../../../src/pages/IntegrationSignup/validators/schema';
 
 const complete: SignupFormValues = {
   name: 'Ana Lima',

@@ -1,6 +1,11 @@
 // Local
-import { EntryType } from '../types/church';
-import { MEMBERSHIP_ALERT_LABELS, MembershipAlert, MembershipAlertCode } from '../domain/membership';
+import { EntryType, toEntryType } from '../types/church';
+import {
+  MEMBERSHIP_ALERT_LABELS,
+  MembershipAlert,
+  MembershipAlertCode,
+  toMembershipAlertCode,
+} from '../domain/membership';
 import { supabase } from '../lib/supabase';
 
 export async function listMembershipAlerts(personIds: string[]): Promise<MembershipAlert[]> {
@@ -11,7 +16,18 @@ export async function listMembershipAlerts(personIds: string[]): Promise<Members
     .in('person_id', personIds)
     .order('code', { ascending: false });
   if (error) throw error;
-  return (data ?? []) as MembershipAlert[];
+  return (data ?? []).flatMap((row) =>
+    row.person_id && row.code
+      ? [
+          {
+            person_id: row.person_id,
+            code: toMembershipAlertCode(row.code),
+            answer: row.answer,
+            resolved: !!row.resolved,
+          },
+        ]
+      : [],
+  );
 }
 
 export async function setMembershipAlertResolved(
@@ -44,23 +60,6 @@ export interface MembershipQueueRow {
   reviewReasons: string[];
 }
 
-export interface PendingPersonRow {
-  id: string;
-  name: string;
-  entry_type: EntryType | null;
-  statute_agreed_at: string | null;
-}
-
-export interface SensitiveRow {
-  person_id: string;
-  origin_church: string | null;
-}
-
-export interface EnrollmentRow {
-  person_id: string;
-  cohort: { name: string } | null;
-}
-
 export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
   const { data: people, error: peopleError } = await supabase
     .from('people')
@@ -68,7 +67,7 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
     .eq('status', 'membership_pending');
   if (peopleError) throw peopleError;
 
-  const pending = (people ?? []) as PendingPersonRow[];
+  const pending = (people ?? []).map((person) => ({ ...person, entry_type: toEntryType(person.entry_type) }));
   const ids = pending.map((person) => person.id);
   if (ids.length === 0) return [];
 
@@ -84,9 +83,9 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
   const failure = sensitive.error ?? enrollments.error;
   if (failure) throw failure;
 
-  const sensitiveById = new Map(((sensitive.data ?? []) as SensitiveRow[]).map((row) => [row.person_id, row]));
+  const sensitiveById = new Map((sensitive.data ?? []).map((row) => [row.person_id, row]));
   const cohortById = new Map<string, string>();
-  for (const row of (enrollments.data ?? []) as unknown as EnrollmentRow[]) {
+  for (const row of enrollments.data ?? []) {
     if (row.cohort && !cohortById.has(row.person_id)) cohortById.set(row.person_id, row.cohort.name);
   }
 

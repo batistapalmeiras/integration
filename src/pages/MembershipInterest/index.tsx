@@ -18,7 +18,7 @@ import { MembershipInterestFormValues } from './validators/schema';
 export function MembershipInterestPage() {
   const [identity, setIdentity] = useState(() => loadVisitorIdentity());
   const [step, setStep] = useState<InterestStep>('phone');
-  const [autoChecking, setAutoChecking] = useState(true);
+  const [autoChecking, setAutoChecking] = useState(() => identity !== null);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [eligibility, setEligibility] = useState<MembershipEligibility | null>(null);
@@ -26,10 +26,7 @@ export function MembershipInterestPage() {
   const { submit, submitting, submitError } = useMembershipInterest();
 
   useEffect(() => {
-    if (!identity) {
-      setAutoChecking(false);
-      return;
-    }
+    if (!identity) return;
 
     check(identity.phone).then((result) => {
       if (result) {

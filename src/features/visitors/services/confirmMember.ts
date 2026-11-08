@@ -1,7 +1,7 @@
 // Local
 import { setPersonMinistries } from '../../../repositories/communityGroups';
 import { Person } from '../domain/types';
-import { insertStatusHistory, updatePersonStatus } from '../infra/peopleRepository';
+import { insertStatusHistory, updatePersonStatus } from '../../../repositories/people';
 
 export async function confirmMember(
   person: Person,

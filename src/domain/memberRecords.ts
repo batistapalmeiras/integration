@@ -1,4 +1,5 @@
 // Local
+import { keyParser } from '../lib/parse';
 import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membership';
 import { toOptions, YesNo } from './text';
 
@@ -108,3 +109,7 @@ export interface MemberRecord {
   acceptsVisits: YesNo | '';
   legacyStatus: string;
 }
+
+export const toMembershipStatus = keyParser(MEMBERSHIP_STATUS_LABELS, 'Situação de membresia');
+
+export const toPendencyField = keyParser(PENDENCY_LABELS, 'Pendência');

@@ -1,7 +1,7 @@
 // Local
 import { resolveContactAttemptOutcome } from '../domain/contactAttempt';
 import { ContactResult, Person } from '../domain/types';
-import { insertContactAttempt, insertStatusHistory, updatePersonStatus } from '../infra/peopleRepository';
+import { insertContactAttempt, insertStatusHistory, updatePersonStatus } from '../../../repositories/people';
 import { fieldsAfterContact, hasAttendedCoffee, placeAfterContact } from './contactFollowUp';
 
 export async function registerContactAttempt(person: Person, result: ContactResult, actorId?: string): Promise<Person> {

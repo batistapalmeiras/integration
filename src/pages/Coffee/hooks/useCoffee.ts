@@ -5,6 +5,7 @@ import { useAuthCtx } from 'bp-kit';
 // Local
 import {
   CoffeeBoard,
+  CoffeeBoardAttendance,
   CoffeePresence,
   coffeePresence,
   countQueuedFrom,
@@ -33,11 +34,19 @@ import { runPipelineMaintenance } from '../../../repositories/integrationPeople'
 import { errorMessage, fetchQuery, setQueryData, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { todayKey } from '../../../domain/dates';
-import { comparePeopleByPipeline } from '../../../types/person';
+import { comparePeopleByPipeline, toPersonStatus } from '../../../types/person';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
 const PAGE_SIZE = 10;
 const MAX_EVENTS = 2;
+
+type AttendeeState = Pick<AttendeeRow, 'coffee_event_id' | 'presence' | 'presenceEditable' | 'returning'>;
+
+function toAttendee(row: CoffeeBoardAttendance, state: AttendeeState): AttendeeRow[] {
+  if (!row.person) return [];
+  const { id, person_id, attended } = row;
+  return [{ id, person_id, attended, ...state, person: { ...row.person, status: toPersonStatus(row.person.status) } }];
+}
 
 function buildAttendees(board: CoffeeBoard, selected: CoffeeEvent, open: CoffeeEvent[]): AttendeeRow[] {
   const current = currentCoffeeAttendance(board.attendance);
@@ -46,22 +55,20 @@ function buildAttendees(board: CoffeeBoard, selected: CoffeeEvent, open: CoffeeE
   const seated = current
     .filter((a) => a.coffee_event_id === selected.id && !isReturningToSignup(a.person))
     .filter((a) => isListedInCoffee(a.person, selected.event_date, todayKey()))
-    .map((a) => {
+    .flatMap((a) => {
       const { presence, editable } = coffeePresence(a, latest.get(a.person_id));
-      return { ...a, presence, presenceEditable: editable, returning: false } as unknown as AttendeeRow;
+      return toAttendee(a, {
+        coffee_event_id: a.coffee_event_id,
+        presence,
+        presenceEditable: editable,
+        returning: false,
+      });
     });
   const returning = isUpcoming
     ? current
         .filter((a) => isReturningToSignup(a.person))
-        .map(
-          (a) =>
-            ({
-              ...a,
-              coffee_event_id: selected.id,
-              presence: null,
-              presenceEditable: false,
-              returning: true,
-            }) as unknown as AttendeeRow,
+        .flatMap((a) =>
+          toAttendee(a, { coffee_event_id: selected.id, presence: null, presenceEditable: false, returning: true }),
         )
     : [];
   return [...seated, ...returning].sort((a, b) => comparePeopleByPipeline(a.person, b.person));

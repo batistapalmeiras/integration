@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { parseTypedDate, todayKey } from '../../domain/dates';
 import { MaritalStatusOption } from '../../domain/memberRecords';
 
-export interface MembershipFormValues {
+export type MembershipFormValues = {
   name: string;
   gender: 'male' | 'female' | '';
   cpf: string;
@@ -34,7 +34,7 @@ export interface MembershipFormValues {
   secretSociety: 'yes' | 'no' | '';
   secretSocietyName: string;
   membershipNote: string;
-}
+};
 
 export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   name: '',
@@ -89,7 +89,10 @@ const personalSchema = z.object({
   ),
   gender: choice(['male', 'female'], 'Selecione o sexo'),
   cpf: required('seu CPF').refine(whenFilled(isValidCpf), text.validation.cpfInvalid),
-  birthDate: required('sua data de nascimento').refine(whenFilled(pastDate), 'Data inválida. Use o formato dd/mm/aaaa.'),
+  birthDate: required('sua data de nascimento').refine(
+    whenFilled(pastDate),
+    'Data inválida. Use o formato dd/mm/aaaa.',
+  ),
   maritalStatus: choice(['single', 'married', 'divorced', 'widowed', 'stable_union'], 'Selecione o estado civil'),
   motherName: z.string(),
   fatherName: z.string(),
@@ -108,13 +111,19 @@ function addressSchema(identificationPhone: string) {
         (value) => !isSamePhone(value, identificationPhone),
         'Informe um número diferente do que você usou para entrar',
       ),
-    zip: required('o CEP').refine(whenFilled((value) => onlyDigits(value).length === 8), 'O CEP tem 8 dígitos'),
+    zip: required('o CEP').refine(
+      whenFilled((value) => onlyDigits(value).length === 8),
+      'O CEP tem 8 dígitos',
+    ),
     street: required('a rua'),
     number: required('o número'),
     complement: z.string(),
     neighborhood: required('o bairro'),
     city: required('a cidade'),
-    state: required('o estado').refine(whenFilled((value) => /^[A-Za-z]{2}$/.test(value.trim())), 'Use a sigla, ex.: MG'),
+    state: required('o estado').refine(
+      whenFilled((value) => /^[A-Za-z]{2}$/.test(value.trim())),
+      'Use a sigla, ex.: MG',
+    ),
   });
 }
 
@@ -162,6 +171,8 @@ const serveSchema = z
     when: () => true,
   });
 
-export function stepSchemas(identificationPhone: string) {
+type StepSchema = z.ZodType<Record<string, unknown>, Record<string, unknown>>;
+
+export function stepSchemas(identificationPhone: string): StepSchema[] {
   return [personalSchema, addressSchema(identificationPhone), journeySchema, statuteSchema, serveSchema];
 }

@@ -16,7 +16,7 @@ export function ProtectedRoute({ children, roles }: Props) {
 
   if (loading) return null;
   if (!user) return <Navigate to={AppRoute.Login} replace />;
-  if (roles && !(roles as string[]).includes(user.role)) return <Navigate to={AppRoute.Login} replace />;
+  if (roles && !(roles as string[]).includes(user.role)) return <Navigate to={AppRoute.Dashboard} replace />;
 
   return <>{children}</>;
 }

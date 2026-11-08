@@ -11,6 +11,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
+import { keyParser } from '../lib/parse';
 
 export type PersonStatus =
   | 'initial_contact'
@@ -25,7 +26,7 @@ export type PersonStatus =
 export interface Person {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
   age: number | null;
   email: string | null;
   status: PersonStatus;
@@ -128,3 +129,5 @@ export function comparePeopleByPipeline(a: PipelineSortInput, b: PipelineSortInp
     a.name.localeCompare(b.name, 'pt-BR')
   );
 }
+
+export const toPersonStatus = keyParser(STATUS_META, 'Status de pessoa');

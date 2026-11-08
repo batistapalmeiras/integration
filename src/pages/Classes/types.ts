@@ -1,9 +1,11 @@
+// Local
+import { CohortStatus } from '../../domain/classesRoster';
 import { Person } from '../../types/person';
 
 export interface Cohort {
   id: string;
   name: string;
-  status: 'active' | 'closed';
+  status: CohortStatus;
 }
 
 export interface Lesson {

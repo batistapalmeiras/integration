@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Send } from 'lucide-react';
 // Local
 import { PublicPage } from '../../components/PublicPage';
 import { ActionBar, Form, PageHeading, PageLead, PageTitle } from '../../components/PublicPage/styles';
+import { useLatest } from '../../lib/useLatest';
 import { AddressStep } from './components/AddressStep';
 import { DoneStep } from './components/DoneStep';
 import { IdentificationStep } from './components/IdentificationStep';
@@ -32,10 +33,18 @@ export function MembershipInterestPreviewPage() {
   const { ministries, smallGroups, loadError } = usePublicGroups();
 
   const stepRef = useRef(0);
-  const phoneRef = useRef('');
-  phoneRef.current = phone;
-  const resolver: Resolver<MembershipFormValues> = (values, context, options) =>
-    zodResolver(stepSchemas(phoneRef.current)[stepRef.current] as never)(values, context, options as never) as never;
+  const phoneRef = useLatest(phone);
+  const resolver: Resolver<MembershipFormValues> = async (values, context, options) => {
+    const stepSchema = stepSchemas(phoneRef.current)[stepRef.current];
+    const { criteriaMode, fields, names, shouldUseNativeValidation } = options;
+    const { errors } = await zodResolver(stepSchema, undefined, { raw: true })(values, context, {
+      criteriaMode,
+      fields,
+      names,
+      shouldUseNativeValidation,
+    });
+    return Object.keys(errors).length > 0 ? { values: {}, errors } : { values, errors: {} };
+  };
 
   const { control, setValue, handleSubmit, getValues, reset } = useForm<MembershipFormValues>({
     resolver,
@@ -101,7 +110,7 @@ export function MembershipInterestPreviewPage() {
       )}
 
       {typeof screen === 'number' && (
-        <Form onSubmit={submitStep(screen)} noValidate>
+        <Form onSubmit={(event: FormEvent<HTMLFormElement>) => submitStep(screen)(event)} noValidate>
           {screen === 0 && <PersonalStep control={control} />}
           {screen === 1 && <AddressStep control={control} setValue={setValue} />}
           {screen === 2 && <JourneyStep control={control} />}

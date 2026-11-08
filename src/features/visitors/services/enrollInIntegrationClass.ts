@@ -1,6 +1,6 @@
 // Local
 import { PersonStatus } from '../domain/types';
-import { insertStatusHistory, updatePersonStatus } from '../infra/peopleRepository';
+import { insertStatusHistory, updatePersonStatus } from '../../../repositories/people';
 
 export async function enrollInIntegrationClass(
   person: { id: string; status: PersonStatus },

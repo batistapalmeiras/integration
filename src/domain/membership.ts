@@ -1,3 +1,6 @@
+// Local
+import { keyParser } from '../lib/parse';
+
 export type MembershipAlertCode = 'secret_society' | 'baptism';
 
 export const MEMBERSHIP_ALERT_LABELS: Record<MembershipAlertCode, string> = {
@@ -33,3 +36,5 @@ export function communityRequirements(answers: CommunityAnswers | null): Communi
 export function hasCompletedLessons(lessonsAttended: number, lessonsTotal: number): boolean {
   return lessonsTotal > 0 && lessonsAttended >= lessonsTotal;
 }
+
+export const toMembershipAlertCode = keyParser(MEMBERSHIP_ALERT_LABELS, 'Pendência de membresia');

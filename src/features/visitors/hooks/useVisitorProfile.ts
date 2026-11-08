@@ -5,7 +5,7 @@ import { setPersonMinistries } from '../../../repositories/communityGroups';
 import { useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { confirmMember as confirmMemberUseCase } from '../services/confirmMember';
-import { fetchPersonProfileSummary, PersonProfileSummary } from '../infra/peopleRepository';
+import { fetchPersonProfileSummary, PersonProfileSummary } from '../../../repositories/people';
 import { usePerson } from './usePerson';
 
 const EMPTY_PROFILE: PersonProfileSummary = {

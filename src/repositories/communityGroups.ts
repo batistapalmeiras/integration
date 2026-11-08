@@ -8,67 +8,88 @@ import {
   WeekDay,
 } from '../domain/communityGroups';
 import { supabase } from '../lib/supabase';
+import { TableInsert, TableRow } from '../lib/database.types';
 
 type Table = 'ministries' | 'small_groups';
 
 const isSmallGroups = (table: Table) => table === 'small_groups';
 
-const groupColumns = (table: Table) =>
-  isSmallGroups(table) ? 'id, name, leaders, hosts, meeting_day' : 'id, name, leaders';
+const WEEK_DAYS: WeekDay[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-interface GroupRecord {
-  id: string;
-  name: string;
-  leaders: string[] | null;
-  hosts?: string[] | null;
-  meeting_day?: WeekDay | null;
-}
+const toWeekDay = (value: string | null): WeekDay | null => WEEK_DAYS.find((day) => day === value) ?? null;
 
-function toGroup(table: Table, row: GroupRecord): CommunityGroup {
-  const smallGroup = isSmallGroups(table);
-  return {
-    id: row.id,
-    name: row.name,
-    leaders: row.leaders ?? [],
-    hosts: smallGroup ? (row.hosts ?? []) : [],
-    meetingDay: smallGroup ? (row.meeting_day ?? null) : null,
-  };
-}
+const fromMinistry = (row: Pick<TableRow<'ministries'>, 'id' | 'name' | 'leaders'>): CommunityGroup => ({
+  id: row.id,
+  name: row.name,
+  leaders: row.leaders ?? [],
+  hosts: [],
+  meetingDay: null,
+});
 
-function toPayload(table: Table, input: GroupInput): Record<string, unknown> {
-  const payload: Record<string, unknown> = { name: input.name, leaders: input.leaders };
-  if (isSmallGroups(table)) {
-    payload.hosts = input.hosts;
-    payload.meeting_day = input.meetingDay;
-  }
-  return payload;
-}
+const fromSmallGroup = (
+  row: Pick<TableRow<'small_groups'>, 'id' | 'name' | 'leaders' | 'hosts' | 'meeting_day'>,
+): CommunityGroup => ({
+  id: row.id,
+  name: row.name,
+  leaders: row.leaders ?? [],
+  hosts: row.hosts ?? [],
+  meetingDay: toWeekDay(row.meeting_day),
+});
+
+const ministryPayload = (input: GroupInput): TableInsert<'ministries'> => ({
+  name: input.name,
+  leaders: input.leaders,
+});
+
+const smallGroupPayload = (input: GroupInput): TableInsert<'small_groups'> => ({
+  name: input.name,
+  leaders: input.leaders,
+  hosts: input.hosts,
+  meeting_day: input.meetingDay,
+});
 
 async function listGroups(table: Table): Promise<CommunityGroup[]> {
-  const columns = groupColumns(table);
-  const { data, error } = await supabase.from(table).select(columns).order('name');
+  if (isSmallGroups(table)) {
+    const { data, error } = await supabase
+      .from('small_groups')
+      .select('id, name, leaders, hosts, meeting_day')
+      .order('name');
+    if (error) throw error;
+    return data.map(fromSmallGroup);
+  }
+  const { data, error } = await supabase.from('ministries').select('id, name, leaders').order('name');
   if (error) throw error;
-  return (data ?? []).map((row) => toGroup(table, row as never));
+  return data.map(fromMinistry);
 }
 
 async function listGroupsWithCounts(table: Table): Promise<CommunityGroupWithCount[]> {
-  const columns = `${groupColumns(table)}, ${isSmallGroups(table) ? 'people(count)' : 'person_ministries(count)'}`;
-  const { data, error } = await supabase.from(table).select(columns).order('name');
+  if (isSmallGroups(table)) {
+    const { data, error } = await supabase
+      .from('small_groups')
+      .select('id, name, leaders, hosts, meeting_day, people(count)')
+      .order('name');
+    if (error) throw error;
+    return data.map((row) => ({ ...fromSmallGroup(row), peopleCount: row.people[0]?.count ?? 0 }));
+  }
+  const { data, error } = await supabase
+    .from('ministries')
+    .select('id, name, leaders, person_ministries(count)')
+    .order('name');
   if (error) throw error;
-  return (data ?? []).map((row) => {
-    const counted = row as unknown as { people?: { count: number }[]; person_ministries?: { count: number }[] };
-    const peopleCount = (isSmallGroups(table) ? counted.people : counted.person_ministries)?.[0]?.count ?? 0;
-    return { ...toGroup(table, row as never), peopleCount };
-  });
+  return data.map((row) => ({ ...fromMinistry(row), peopleCount: row.person_ministries[0]?.count ?? 0 }));
 }
 
 async function createGroup(table: Table, input: GroupInput): Promise<void> {
-  const { error } = await supabase.from(table).insert(toPayload(table, input));
+  const { error } = isSmallGroups(table)
+    ? await supabase.from('small_groups').insert(smallGroupPayload(input))
+    : await supabase.from('ministries').insert(ministryPayload(input));
   if (error) throw error;
 }
 
 async function updateGroup(table: Table, id: string, input: GroupInput): Promise<void> {
-  const { error } = await supabase.from(table).update(toPayload(table, input)).eq('id', id);
+  const { error } = isSmallGroups(table)
+    ? await supabase.from('small_groups').update(smallGroupPayload(input)).eq('id', id)
+    : await supabase.from('ministries').update(ministryPayload(input)).eq('id', id);
   if (error) throw error;
 }
 
@@ -81,7 +102,7 @@ export async function listMembers({ withoutSmallGroup = false } = {}): Promise<P
   const query = supabase.from('people').select('id, name').eq('status', 'member');
   const { data, error } = await (withoutSmallGroup ? query.is('small_group_id', null) : query).order('name');
   if (error) throw error;
-  return (data ?? []) as PersonInGroup[];
+  return data ?? [];
 }
 
 export async function getCommunityOverview(): Promise<CommunityOverview> {
@@ -124,7 +145,7 @@ export async function removePersonFromMinistry(ministryId: string, personId: str
 async function listSmallGroupPeople(id: string): Promise<PersonInGroup[]> {
   const { data, error } = await supabase.from('people').select('id, name').eq('small_group_id', id).order('name');
   if (error) throw error;
-  return (data ?? []) as PersonInGroup[];
+  return data ?? [];
 }
 
 async function listMinistryPeople(id: string): Promise<PersonInGroup[]> {
@@ -133,9 +154,7 @@ async function listMinistryPeople(id: string): Promise<PersonInGroup[]> {
     .select('person:people(id, name)')
     .eq('ministry_id', id);
   if (error) throw error;
-  return ((data ?? []) as unknown as { person: PersonInGroup }[])
-    .map((row) => row.person)
-    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  return (data ?? []).map((row) => row.person).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 }
 
 export async function setPersonMinistries(personId: string, ministryIds: string[]): Promise<void> {
@@ -149,9 +168,18 @@ export async function setPersonMinistries(personId: string, ministryIds: string[
 }
 
 async function getGroup(table: Table, id: string): Promise<CommunityGroup> {
-  const { data, error } = await supabase.from(table).select(groupColumns(table)).eq('id', id).single();
+  if (isSmallGroups(table)) {
+    const { data, error } = await supabase
+      .from('small_groups')
+      .select('id, name, leaders, hosts, meeting_day')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return fromSmallGroup(data);
+  }
+  const { data, error } = await supabase.from('ministries').select('id, name, leaders').eq('id', id).single();
   if (error) throw error;
-  return toGroup(table, data as never);
+  return fromMinistry(data);
 }
 
 export const listMinistries = () => listGroups('ministries');

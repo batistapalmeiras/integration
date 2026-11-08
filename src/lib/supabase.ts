@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 // Local
 import { markPipelineStale } from './queryCache';
+import { Database } from './database.types';
 
 const JWT_CLOCK_RETRY_DELAY_MS = 1500;
 const AUTH_PATH = '/auth/v1/';
@@ -32,10 +33,14 @@ async function freshAccessToken(rejectedToken: string | null): Promise<string | 
   if (current && current !== rejectedToken) return current;
 
   const { data: refreshed, error } = await supabase.auth.refreshSession();
-  return error ? null : refreshed.session?.access_token ?? null;
+  return error ? null : (refreshed.session?.access_token ?? null);
 }
 
-async function retryWithFreshSession(input: FetchInput, init: RequestInit | undefined, rejected: Response): Promise<Response> {
+async function retryWithFreshSession(
+  input: FetchInput,
+  init: RequestInit | undefined,
+  rejected: Response,
+): Promise<Response> {
   const token = await freshAccessToken(bearerToken(init));
   if (!token) return rejected;
 
@@ -79,7 +84,7 @@ const fetchAndTrackWrites: typeof fetch = async (input, init) => {
   return response;
 };
 
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY,
   { global: { fetch: fetchAndTrackWrites } },

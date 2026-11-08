@@ -7,8 +7,10 @@ import {
   MemberRecord,
   MembershipStatus,
   PendencyField,
+  toMembershipStatus,
+  toPendencyField,
 } from '../domain/memberRecords';
-import { EntryType } from '../types/church';
+import { EntryType, toEntryType } from '../types/church';
 import { YesNo } from '../domain/text';
 import { supabase } from '../lib/supabase';
 
@@ -36,7 +38,19 @@ export async function listMemberPendencies(filters: {
   const from = (filters.page - 1) * filters.pageSize;
   const { data, count, error } = await query.range(from, from + filters.pageSize - 1);
   if (error) throw error;
-  return { rows: (data ?? []) as MemberPendency[], total: count ?? 0 };
+  const rows = (data ?? []).flatMap((row) =>
+    row.person_id && row.name && row.membership_status
+      ? [
+          {
+            person_id: row.person_id,
+            name: row.name,
+            membership_status: toMembershipStatus(row.membership_status),
+            missing_fields: (row.missing_fields ?? []).map(toPendencyField),
+          },
+        ]
+      : [],
+  );
+  return { rows, total: count ?? 0 };
 }
 
 export async function countMembers(): Promise<number> {
@@ -119,7 +133,7 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
     name: member.name,
     phone: member.phone ? maskPhone(member.phone) : '',
     email: member.email ?? '',
-    membershipStatus: member.membership_status as MembershipStatus,
+    membershipStatus: toMembershipStatus(member.membership_status ?? ''),
     birthDate: sensitive.data?.birth_date ?? '',
     childrenCount: profileRow.children_count == null ? '' : String(profileRow.children_count),
     readsEmail: toYesNo(profileRow.reads_email),
@@ -176,5 +190,9 @@ export async function listMemberRows(): Promise<MemberRow[]> {
     .eq('status', 'member')
     .order('name', { ascending: true });
   if (error) throw error;
-  return (data ?? []) as MemberRow[];
+  return (data ?? []).map((row) => ({
+    ...row,
+    entry_type: toEntryType(row.entry_type),
+    membership_status: toMembershipStatus(row.membership_status ?? ''),
+  }));
 }

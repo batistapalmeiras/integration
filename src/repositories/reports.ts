@@ -1,6 +1,7 @@
 // Local
-import { comparePeopleByPipeline, PersonStatus } from '../types/person';
+import { comparePeopleByPipeline, PersonStatus, toPersonStatus } from '../types/person';
 import { supabase } from '../lib/supabase';
+import { CohortStatus, toCohortStatus } from '../domain/classesRoster';
 import { countIntegrationPeopleByStatus } from './integrationPeople';
 
 export async function listAnnualYears(): Promise<number[]> {
@@ -11,18 +12,10 @@ export async function listAnnualYears(): Promise<number[]> {
   return Array.from(years).sort((a, b) => b - a);
 }
 
-export interface AnnualCountsRow {
-  initial_contact: number;
-  welcome_coffee: number;
-  integration: number;
-  member: number;
-  archived: number;
-}
-
 export async function loadAnnualCounts(year: number): Promise<AnnualCounts> {
   const { data, error } = await supabase.rpc('annual_pipeline_counts', { p_year: year }).single();
   if (error) throw error;
-  const row = data as AnnualCountsRow;
+  const row = data;
   return {
     initialContact: Number(row.initial_contact),
     welcomeCoffee: Number(row.welcome_coffee),
@@ -42,7 +35,7 @@ export async function listCohortsReport(): Promise<CohortRow[]> {
   return (data ?? []).map((c) => ({
     id: c.id,
     name: c.name,
-    status: c.status,
+    status: toCohortStatus(c.status),
     createdAt: c.created_at,
     enrollmentCount: (c.enrollments as { count: number }[] | null)?.[0]?.count ?? 0,
   }));
@@ -73,12 +66,12 @@ export async function loadCohortRoster(cohortId: string): Promise<CohortRosterDa
   if (failure) throw failure;
 
   const cohortData = cohortResult.data;
-  const enrollments = (enrollmentsResult.data ?? []) as unknown as {
-    id: string;
-    person: { id: string; name: string; status: PersonStatus };
-  }[];
+  if (!cohortData) throw new Error('Turma não encontrada.');
+  const enrollments = enrollmentsResult.data ?? [];
   const attendedByEnrollment = new Map(
-    (summaryResult.data ?? []).map((s) => [s.enrollment_id as string, s.lessons_attended as number]),
+    (summaryResult.data ?? []).flatMap((summary) =>
+      summary.enrollment_id ? [[summary.enrollment_id, summary.lessons_attended ?? 0] as const] : [],
+    ),
   );
   const totalLessons = (lessonsResult.data ?? []).length || 4;
 
@@ -86,7 +79,7 @@ export async function loadCohortRoster(cohortId: string): Promise<CohortRosterDa
     cohort: {
       id: cohortData.id,
       name: cohortData.name,
-      status: cohortData.status,
+      status: toCohortStatus(cohortData.status),
       createdAt: cohortData.created_at,
       enrollmentCount: enrollments.length,
     },
@@ -95,7 +88,7 @@ export async function loadCohortRoster(cohortId: string): Promise<CohortRosterDa
         enrollmentId: enrollment.id,
         personId: enrollment.person.id,
         name: enrollment.person.name,
-        status: enrollment.person.status,
+        status: toPersonStatus(enrollment.person.status),
         lessonsAttended: attendedByEnrollment.get(enrollment.id) ?? 0,
         totalLessons,
       }))
@@ -106,12 +99,12 @@ export async function loadCohortRoster(cohortId: string): Promise<CohortRosterDa
 export interface CohortRow {
   id: string;
   name: string;
-  status: 'active' | 'closed';
+  status: CohortStatus;
   createdAt: string;
   enrollmentCount: number;
 }
 
-export interface CohortRosterRow {
+interface CohortRosterRow {
   enrollmentId: string;
   personId: string;
   name: string;

@@ -7,7 +7,7 @@ import { IconBadge } from '../../../components/MenuOptions';
 // Local
 import { CardLink, HighlightValue, Highlights, StatRow, StatText } from '../styles';
 
-export interface Highlight {
+interface Highlight {
   label: string;
   value: number;
   icon: ComponentType<{ size?: number }>;
