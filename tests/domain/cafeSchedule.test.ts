@@ -5,6 +5,7 @@ import {
   coffeePresence,
   countQueuedFrom,
   currentCoffeeAttendance,
+  isSeatedInUpcomingCoffee,
   selectOpenCoffeeEvents,
   upcomingCoffeeEvent,
 } from '../../src/domain/cafeSchedule';
@@ -241,5 +242,38 @@ describe('coffeeHistory for the café still to come', () => {
       { personId: 'Geovane', name: 'Geovane', presence: 'invited' },
       { personId: 'Liese', name: 'Liese', presence: 'awaiting_contact' },
     ]);
+  });
+
+  it('leaves out whoever was archived while still enrolled', () => {
+    const [nov] = coffeeHistory(
+      {
+        events: [{ id: 'nov', event_date: '2026-11-08', event_time: '17:30:00' }],
+        attendance: [
+          row('Bruna', 'nov', '2026-11-08', false, 'welcome_coffee'),
+          row('Liese', 'nov', '2026-11-08', false, 'archived'),
+        ],
+      },
+      '2026-11-08',
+    );
+
+    expect(nov.people.map((person) => person.personId)).toEqual(['Bruna']);
+  });
+});
+
+describe('isSeatedInUpcomingCoffee', () => {
+  it('counts someone still waiting on the café', () => {
+    expect(isSeatedInUpcomingCoffee({ status: 'welcome_coffee' })).toBe(true);
+  });
+
+  it('leaves out someone archived while still enrolled', () => {
+    expect(isSeatedInUpcomingCoffee({ status: 'archived' })).toBe(false);
+  });
+
+  it('leaves out someone who came back with the class invite already sent', () => {
+    expect(isSeatedInUpcomingCoffee({ status: 'pending_signup', signup_window_from: '2026-10-31' })).toBe(false);
+  });
+
+  it('leaves out a seat with no person', () => {
+    expect(isSeatedInUpcomingCoffee(null)).toBe(false);
   });
 });
