@@ -1,15 +1,5 @@
 // Local
-import { supabase } from '../lib/supabase';
 import { ADMIN_MANAGEABLE_ROLES, UserRole } from '../types/enums';
-
-export async function countActiveVolunteers(): Promise<number> {
-  const { count, error } = await supabase
-    .from('profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('active', true);
-  if (error) throw error;
-  return count ?? 0;
-}
 
 interface RoleHolder {
   id: string;
@@ -30,4 +20,8 @@ export function canChangeRole(actor: RoleHolder, volunteer: RoleHolder, target: 
     roles.includes(volunteer.role as UserRole) &&
     roles.includes(target)
   );
+}
+
+export function defaultVolunteerPassword(): string {
+  return `BatistaPalmeiras@${new Date().getFullYear()}`;
 }

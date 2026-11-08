@@ -1,8 +1,12 @@
 // React
 import { useEffect, useState } from 'react';
 // Local
-import { supabase } from '../../../lib/supabase';
-import { MakeupAttendanceContext } from '../types';
+import { errorMessage } from '../../../lib/queryCache';
+import {
+  getMakeupAttendanceContext,
+  MakeupAttendanceContext,
+  submitMakeupAttendance,
+} from '../../../repositories/publicForms';
 
 export function useMakeupAttendance(token: string) {
   const [context, setContext] = useState<MakeupAttendanceContext | null>(null);
@@ -13,33 +17,23 @@ export function useMakeupAttendance(token: string) {
   const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
-    supabase
-      .rpc('get_makeup_attendance_context', { p_token: token })
-      .single()
-      .then(({ data, error }) => {
-        if (error) {
-          setLoadError(error.message);
-        } else {
-          setContext(data as MakeupAttendanceContext);
-        }
-        setLoading(false);
-      });
+    getMakeupAttendanceContext(token)
+      .then(setContext)
+      .catch((e) => setLoadError(errorMessage(e)))
+      .finally(() => setLoading(false));
   }, [token]);
 
   const submit = async (notes: string | undefined) => {
     setSubmitting(true);
     setSubmitError(null);
-
-    const { error } = await supabase.rpc('submit_makeup_attendance', { p_token: token, p_notes: notes ?? null });
-
-    setSubmitting(false);
-
-    if (error) {
-      setSubmitError(error.message);
-      return;
+    try {
+      await submitMakeupAttendance(token, notes ?? null);
+      setConfirmed(true);
+    } catch (e) {
+      setSubmitError(errorMessage(e));
+    } finally {
+      setSubmitting(false);
     }
-
-    setConfirmed(true);
   };
 
   return { context, loadError, loading, submit, submitting, submitError, confirmed };

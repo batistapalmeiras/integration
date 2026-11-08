@@ -4,6 +4,7 @@ import { text } from 'bp-kit';
 // Local
 import { MARITAL_STATUS_OPTION_LABELS, MaritalStatusOption } from '../../../domain/memberRecords';
 import { YES_NO_LABELS, YesNo } from '../../../domain/text';
+import { IntegrationSignupAnswers } from '../../../repositories/publicForms';
 
 export const phoneStepSchema = z.object({
   phone: z.string().min(8, text.validation.required('um WhatsApp válido')),
@@ -50,16 +51,9 @@ export const signupFormSchema = z
     },
   );
 
-interface SignupAnswers {
-  previousChurch: string;
-  baptismInfo: string;
-  conversionTestimony: string;
-  maritalStatusStory: string;
-}
-
 const withDetail = (label: string, detail: string) => (filled(detail) ? `${label} — ${detail.trim()}` : label);
 
-export function toSignupAnswers(values: SignupFormValues): SignupAnswers {
+export function toSignupAnswers(values: SignupFormValues): IntegrationSignupAnswers {
   return {
     previousChurch: values.previousChurch.trim(),
     baptismInfo:

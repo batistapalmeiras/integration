@@ -1,9 +1,10 @@
 // Local
-import { getUpcomingCoffeeRoster } from '../../../domain/cafeSchedule';
-import { getUpcomingCohortWithLessons } from '../../../domain/classesRoster';
+import { getUpcomingCoffeeRoster } from '../../../repositories/cafeSchedule';
+import { getUpcomingCohortWithLessons } from '../../../repositories/classesRoster';
 import { firstLessonDate } from '../../../domain/cohortSchedule';
-import { countIntegrationPeopleByStatus } from '../../../domain/integrationPeople';
-import { listRecentMakeupNotes, MakeupNote } from '../../../domain/lessonMakeups';
+import { countIntegrationPeopleByStatus } from '../../../repositories/integrationPeople';
+import { MakeupNote } from '../../../domain/lessonMakeups';
+import { listRecentMakeupNotes } from '../../../repositories/lessonMakeups';
 import { UpcomingCoffee, UpcomingCohort } from '../components/AgendaPanel';
 import { FunnelCounts } from '../components/FunnelSection';
 

@@ -9,8 +9,6 @@ import {
   upcomingCoffeeEvent,
 } from '../../src/domain/cafeSchedule';
 
-vi.mock('../../src/lib/supabase', () => ({ supabase: {} }));
-
 const past = { id: 'past', event_date: '2026-09-13' };
 const today = { id: 'today', event_date: '2026-09-23' };
 const future = { id: 'future', event_date: '2026-09-27' };
@@ -116,7 +114,14 @@ describe('upcomingCoffeeEvent', () => {
 });
 
 describe('coffeeHistory', () => {
-  const row = (id: string, personId: string, eventId: string, eventDate: string, attended: boolean, status: string) => ({
+  const row = (
+    id: string,
+    personId: string,
+    eventId: string,
+    eventDate: string,
+    attended: boolean,
+    status: string,
+  ) => ({
     id,
     person_id: personId,
     coffee_event_id: eventId,
@@ -126,17 +131,20 @@ describe('coffeeHistory', () => {
   });
 
   it('lists cafés newest first, with who came, who missed and who is still enrolled', () => {
-    const history = coffeeHistory({
-      events: [
-        { id: 'sep', event_date: '2026-09-13', event_time: '17:30:00' },
-        { id: 'nov', event_date: '2026-11-08', event_time: '17:30:00' },
-      ],
-      attendance: [
-        row('1', 'Ana', 'sep', '2026-09-13', true, 'integration'),
-        row('2', 'Bia', 'sep', '2026-09-13', false, 'welcome_coffee'),
-        row('3', 'Bia', 'nov', '2026-11-08', false, 'welcome_coffee'),
-      ],
-    }, '2026-10-31');
+    const history = coffeeHistory(
+      {
+        events: [
+          { id: 'sep', event_date: '2026-09-13', event_time: '17:30:00' },
+          { id: 'nov', event_date: '2026-11-08', event_time: '17:30:00' },
+        ],
+        attendance: [
+          row('1', 'Ana', 'sep', '2026-09-13', true, 'integration'),
+          row('2', 'Bia', 'sep', '2026-09-13', false, 'welcome_coffee'),
+          row('3', 'Bia', 'nov', '2026-11-08', false, 'welcome_coffee'),
+        ],
+      },
+      '2026-10-31',
+    );
 
     expect(history.map((event) => event.id)).toEqual(['nov', 'sep']);
     expect(history[1].people).toEqual([
@@ -147,13 +155,16 @@ describe('coffeeHistory', () => {
   });
 
   it('tells an archived person apart from a past café nobody marked', () => {
-    const history = coffeeHistory({
-      events: [{ id: 'oct', event_date: '2026-10-04', event_time: '17:30:00' }],
-      attendance: [
-        row('1', 'Iuri', 'oct', '2026-10-04', false, 'archived'),
-        row('2', 'Lia', 'oct', '2026-10-04', false, 'welcome_coffee'),
-      ],
-    }, '2026-10-31');
+    const history = coffeeHistory(
+      {
+        events: [{ id: 'oct', event_date: '2026-10-04', event_time: '17:30:00' }],
+        attendance: [
+          row('1', 'Iuri', 'oct', '2026-10-04', false, 'archived'),
+          row('2', 'Lia', 'oct', '2026-10-04', false, 'welcome_coffee'),
+        ],
+      },
+      '2026-10-31',
+    );
 
     expect(history[0].people.map((person) => person.presence)).toEqual(['archived', 'unmarked']);
   });
@@ -165,24 +176,47 @@ describe('countQueuedFrom', () => {
     person_id: personId,
     coffee_event_id: 'sep',
     attended: true,
-    person: { id: personId, name: personId, phone: '', status, class_invite_sent_at: null, signup_window_from: signupWindowFrom },
+    person: {
+      id: personId,
+      name: personId,
+      phone: '',
+      status,
+      class_invite_sent_at: null,
+      signup_window_from: signupWindowFrom,
+    },
     coffee_event: { event_date: '2026-09-13' },
   });
 
   it('keeps a café open for whoever still waits on it, but not for someone who came back later', () => {
-    expect(countQueuedFrom([seat('ana', 'pending_signup', null), seat('geovane', 'pending_signup', '2026-10-31')])).toEqual({
+    expect(
+      countQueuedFrom([seat('ana', 'pending_signup', null), seat('geovane', 'pending_signup', '2026-10-31')]),
+    ).toEqual({
       sep: 1,
     });
   });
 });
 
 describe('coffeeHistory for the café still to come', () => {
-  const row = (personId: string, eventId: string, eventDate: string, attended: boolean, status: string, signupWindowFrom: string | null = null) => ({
+  const row = (
+    personId: string,
+    eventId: string,
+    eventDate: string,
+    attended: boolean,
+    status: string,
+    signupWindowFrom: string | null = null,
+  ) => ({
     id: personId + eventId,
     person_id: personId,
     coffee_event_id: eventId,
     attended,
-    person: { id: personId, name: personId, phone: '', status, class_invite_sent_at: null, signup_window_from: signupWindowFrom },
+    person: {
+      id: personId,
+      name: personId,
+      phone: '',
+      status,
+      class_invite_sent_at: null,
+      signup_window_from: signupWindowFrom,
+    },
     coffee_event: { event_date: eventDate },
   });
 

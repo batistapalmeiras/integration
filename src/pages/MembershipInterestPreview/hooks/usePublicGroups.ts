@@ -3,13 +3,7 @@ import { useEffect, useState } from 'react';
 // Libs
 import { MultiSelectOption } from 'bp-kit';
 // Local
-import { supabase } from '../../../lib/supabase';
-
-export interface SmallGroupOption {
-  id: string;
-  name: string;
-  leaders: string[];
-}
+import { listPublicMinistryNames, listPublicSmallGroups, SmallGroupOption } from '../../../repositories/publicForms';
 
 export function smallGroupLabel(group: SmallGroupOption): string {
   return group.leaders?.length ? `${group.name} — ${group.leaders.join(', ')}` : group.name;
@@ -30,10 +24,12 @@ export function usePublicGroups() {
   const [smallGroups, setSmallGroups] = useState<SmallGroupOption[] | null>(null);
 
   useEffect(() => {
-    supabase
-      .rpc('list_ministries')
-      .then(({ data }) => setMinistries(ministryOptions(((data ?? []) as { name: string }[]).map((m) => m.name))));
-    supabase.rpc('list_small_groups').then(({ data, error }) => setSmallGroups(error ? [] : ((data ?? []) as SmallGroupOption[])));
+    listPublicMinistryNames()
+      .then((names) => setMinistries(ministryOptions(names)))
+      .catch(() => setMinistries([]));
+    listPublicSmallGroups()
+      .then(setSmallGroups)
+      .catch(() => setSmallGroups([]));
   }, []);
 
   return { ministries, smallGroups };

@@ -1,7 +1,9 @@
 // Local
-import { CohortProgress, cohortsProgress, fetchCohortBoard } from '../../../domain/classesRoster';
+import { CohortProgress, cohortsProgress } from '../../../domain/classesRoster';
+import { fetchCohortBoard } from '../../../repositories/classesRoster';
 import { todayKey } from '../../../domain/dates';
-import { listRecentMakeupNotes, MakeupNote } from '../../../domain/lessonMakeups';
+import { MakeupNote } from '../../../domain/lessonMakeups';
+import { listRecentMakeupNotes } from '../../../repositories/lessonMakeups';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 

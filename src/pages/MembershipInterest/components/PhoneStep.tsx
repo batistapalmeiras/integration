@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
 import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
 import { useCheckPhone } from '../hooks/useCheckPhone';
-import { MembershipEligibility } from '../types';
+import { MembershipEligibility } from '../../../repositories/publicForms';
 
 const phoneStepSchema = z.object({
   phone: z.string().min(8, text.validation.required('um WhatsApp válido')),
@@ -28,7 +28,11 @@ export function PhoneStep({ onFound }: Props) {
 
   const onSubmit = handleSubmit(async ({ phone }) => {
     const result = await check(phone);
-    if (result) onFound(phone, result.name, result.alreadySubmitted, { lessonsAttended: result.lessonsAttended, lessonsTotal: result.lessonsTotal });
+    if (result)
+      onFound(phone, result.name, result.alreadySubmitted, {
+        lessonsAttended: result.lessonsAttended,
+        lessonsTotal: result.lessonsTotal,
+      });
   });
 
   return (

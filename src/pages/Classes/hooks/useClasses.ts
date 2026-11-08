@@ -3,18 +3,18 @@ import { useMemo, useState } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
+import { CohortBoard, CohortWithLessons, EnrollablePerson } from '../../../domain/classesRoster';
 import {
-  CohortBoard,
-  CohortWithLessons,
-  EnrollablePerson,
+  closeCohort as closeCohortRow,
+  createCohort as createCohortWithLessons,
   enrollPerson as enrollPersonRow,
   fetchCohortBoard,
   toggleLessonAttendance,
-} from '../../../domain/classesRoster';
+  updateLessonDates as saveLessonDates,
+} from '../../../repositories/classesRoster';
 import { enrollInIntegrationClass } from '../../../features/visitors';
 import { errorMessage, fetchQuery, setQueryData, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
-import { supabase } from '../../../lib/supabase';
 import { useUpcomingCoffeeEventDate } from '../../../queries/reference';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { firstLessonDate } from '../../../domain/cohortSchedule';
@@ -25,9 +25,7 @@ import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 const MAX_COHORTS = 2;
 
 function sortByFirstLesson(list: CohortWithLessons[]): CohortWithLessons[] {
-  return [...list].sort((a, b) =>
-    (firstLessonDate(a.lessons) ?? '').localeCompare(firstLessonDate(b.lessons) ?? ''),
-  );
+  return [...list].sort((a, b) => (firstLessonDate(a.lessons) ?? '').localeCompare(firstLessonDate(b.lessons) ?? ''));
 }
 
 function buildEnrollments(board: CohortBoard, cohortId: string): EnrollmentRow[] {
@@ -75,37 +73,18 @@ export function useClasses() {
     const lessonDates = weeklyLessonDates(firstDate);
     const name = `Turma ${formatDate(firstDate)}`;
 
-    const { data: newCohort, error: cohortError } = await supabase
-      .from('cohorts')
-      .insert({ name })
-      .select()
-      .single();
-    if (cohortError) throw cohortError;
-
-    const { error: lessonsError } = await supabase.from('lessons').insert(
-      lessonDates.map((date, index) => ({ cohort_id: newCohort.id, number: index + 1, date })),
-    );
-    if (lessonsError) throw lessonsError;
-
-    setSelectedCohortIdState(newCohort.id as string);
+    setSelectedCohortIdState(await createCohortWithLessons(name, lessonDates));
     await refreshBoard();
   };
 
   const updateLessonDates = async (lessonDates: [string, string, string, string]) => {
-    const results = await Promise.all(
-      lessons.map((lesson, index) =>
-        supabase.from('lessons').update({ date: lessonDates[index] }).eq('id', lesson.id),
-      ),
-    );
-    const failed = results.find((r) => r.error);
-    if (failed?.error) throw failed.error;
+    await saveLessonDates(lessons.map((lesson, index) => ({ id: lesson.id, date: lessonDates[index] })));
     await refreshBoard();
   };
 
   const closeCohort = async () => {
     if (!cohort) return;
-    const { error: closeError } = await supabase.from('cohorts').update({ status: 'closed' }).eq('id', cohort.id);
-    if (closeError) throw closeError;
+    await closeCohortRow(cohort.id);
     setSelectedCohortIdState(null);
     await refreshBoard();
   };
@@ -120,7 +99,9 @@ export function useClasses() {
   const replaceAttendance = (row: LessonAttendance) =>
     setQueryData<CohortBoard>(queryKeys.cohortBoard, (current) => {
       const value = current as CohortBoard;
-      const others = value.attendance.filter((a) => !(a.enrollment_id === row.enrollment_id && a.lesson_id === row.lesson_id));
+      const others = value.attendance.filter(
+        (a) => !(a.enrollment_id === row.enrollment_id && a.lesson_id === row.lesson_id),
+      );
       return { ...value, attendance: [...others, row] };
     });
 

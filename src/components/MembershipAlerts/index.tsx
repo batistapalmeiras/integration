@@ -3,12 +3,8 @@ import { useEffect, useState } from 'react';
 // Libs
 import { Checkbox } from 'bp-kit';
 // Local
-import {
-  listMembershipAlerts,
-  MEMBERSHIP_ALERT_LABELS,
-  MembershipAlert,
-  setMembershipAlertResolved,
-} from '../../domain/membership';
+import { MEMBERSHIP_ALERT_LABELS, MembershipAlert } from '../../domain/membership';
+import { listMembershipAlerts, setMembershipAlertResolved } from '../../repositories/membership';
 import { AlertAnswer, AlertItem, AlertNote, AlertSection, AlertSectionTitle, AlertTitle } from './styles';
 
 interface Props {
@@ -21,7 +17,9 @@ export function MembershipAlerts({ personId }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    listMembershipAlerts([personId]).then(setAlerts).catch((e) => setError(e instanceof Error ? e.message : String(e)));
+    listMembershipAlerts([personId])
+      .then(setAlerts)
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [personId]);
 
   if (alerts.length === 0 && !error) return null;

@@ -35,7 +35,8 @@ import {
 } from '../../components/List';
 import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { StatusPill } from '../../components/StatusPill';
-import { canMarkCoffeeAttendance, listEnrollableCoffeePeople } from '../../domain/cafeSchedule';
+import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
+import { listEnrollableCoffeePeople } from '../../repositories/cafeSchedule';
 import { formatDate, todayKey, weekdayLabel } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES } from '../../types/enums';
@@ -86,7 +87,8 @@ export function CoffeePage() {
       />,
     );
   const openEnrollModal = () =>
-    selectedEventId && open(
+    selectedEventId &&
+    open(
       <EnrollPersonModal
         title="Adicionar pessoa ao café"
         loadCandidates={() => listEnrollableCoffeePeople(selectedEventId)}

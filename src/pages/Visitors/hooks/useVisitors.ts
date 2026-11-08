@@ -3,21 +3,13 @@ import { useEffect, useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
-import { supabase } from '../../../lib/supabase';
 import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
-import { comparePeopleByPipeline } from '../../../types/person';
 import { visitorFilters, VisitorView } from '../persistence';
 import { Person } from '../../../features/visitors';
+import { listVisitors } from '../../../repositories/people';
+import { VISITOR_QUEUE_STATUSES } from '../../../types/person';
 
-export const QUEUE_STATUSES: Person['status'][] = ['initial_contact', 'retry_contact'];
-const VISIBLE_STATUSES: Person['status'][] = [...QUEUE_STATUSES, 'archived'];
 const PAGE_SIZE = 10;
-
-async function listVisitors(): Promise<Person[]> {
-  const { data, error } = await supabase.from('people').select('*').in('status', VISIBLE_STATUSES);
-  if (error) throw error;
-  return (data as Person[]).sort(comparePeopleByPipeline);
-}
 
 export function useVisitors() {
   const query = useQuery(queryKeys.visitors, listVisitors);
@@ -28,7 +20,7 @@ export function useVisitors() {
   const { search, setSearch: setSearchState, debouncedSearch } = useDebouncedSearch(saved.search ?? '');
   const [view, setViewState] = useState<VisitorView>(saved.view ?? 'queue');
   const [statusFilter, setStatusFilterState] = useState<Person['status'][]>(() =>
-    (saved.statusFilter ?? []).filter((status) => QUEUE_STATUSES.includes(status)),
+    (saved.statusFilter ?? []).filter((status) => VISITOR_QUEUE_STATUSES.includes(status)),
   );
 
   useEffect(() => {
@@ -52,7 +44,7 @@ export function useVisitors() {
 
   const matchesSearch = (person: Person) =>
     !debouncedSearch || person.name.toLowerCase().includes(debouncedSearch.toLowerCase());
-  const queue = rows.filter((person) => QUEUE_STATUSES.includes(person.status));
+  const queue = rows.filter((person) => VISITOR_QUEUE_STATUSES.includes(person.status));
   const archived = rows.filter((person) => person.status === 'archived');
   const filtered = (view === 'queue' ? queue : archived).filter(
     (person) =>

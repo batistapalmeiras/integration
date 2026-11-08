@@ -7,8 +7,8 @@ import {
   ModalActions,
   ModalTitle,
   Skeleton,
-  Typography,
   text,
+  Typography,
   useAuthCtx,
   useModal,
   useToast,
@@ -20,11 +20,11 @@ import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { assignableRoles, canChangeRole } from '../../domain/volunteers';
 import { groupRolesByModule, ROLE_LABELS, UserRole } from '../../types/enums';
+import { VolunteerRow } from '../../repositories/volunteers';
 import { AddVolunteerModal } from './components/AddVolunteerModal';
 import { DraggableVolunteer, RoleBoard, RoleDropZone } from './components/RoleBoard';
 import { useVolunteers } from './hooks/useVolunteers';
 import { EmptySectionHint, ModuleSection, ModuleTitle, Sections } from './styles';
-import { VolunteerRow } from './types';
 
 const ROLE_SECTION_LABELS: Record<UserRole, string> = {
   [UserRole.Pastor]: 'Pastores',

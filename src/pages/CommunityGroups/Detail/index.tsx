@@ -9,8 +9,8 @@ import {
   ModalTitle,
   Skeleton,
   StatusBadge,
-  Typography,
   text,
+  Typography,
   useModal,
   useToast,
 } from 'bp-kit';
@@ -20,11 +20,8 @@ import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AddButton } from '../../../components/AddButton';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
+import { CommunityGroup, GroupInput, PersonInGroup, WEEK_DAY_LABELS } from '../../../domain/communityGroups';
 import {
-  CommunityGroup,
-  GroupInput,
-  PersonInGroup,
-  WEEK_DAY_LABELS,
   addPeopleToMinistry,
   addPeopleToSmallGroup,
   deleteMinistry,
@@ -37,7 +34,7 @@ import {
   removePersonFromSmallGroup,
   updateMinistry,
   updateSmallGroup,
-} from '../../../domain/communityGroups';
+} from '../../../repositories/communityGroups';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { refreshGroupLists } from '../hooks/useCommunityGroupsList';
@@ -71,7 +68,7 @@ export function CommunityGroupDetailPage() {
   const group = query.data?.group ?? null;
   const people = query.data?.people ?? [];
   const loading = query.loading;
-  const error = query.error ? errorMessage(query.error) ?? 'Erro ao carregar.' : null;
+  const error = query.error ? (errorMessage(query.error) ?? 'Erro ao carregar.') : null;
 
   const load = async () => {
     await refreshGroupLists(groupType);

@@ -15,7 +15,7 @@ import {
 // Local
 import { UserRole } from '../../../types/enums';
 import { DragChip, DropZone } from '../styles';
-import { VolunteerRow } from '../types';
+import { VolunteerRow } from '../../../repositories/volunteers';
 
 const LONG_PRESS_MS = 250;
 const DRAG_DISTANCE_PX = 8;

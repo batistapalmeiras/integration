@@ -14,13 +14,13 @@ import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { formatTimestampDate } from '../../domain/dates';
 import {
   GENDER_LABELS,
-  getMemberRecord,
   MARITAL_STATUS_LABELS,
-  MEMBERSHIP_STATUS_LABELS,
   MemberRecord,
-  saveMemberRecord,
+  MEMBERSHIP_STATUS_LABELS,
 } from '../../domain/memberRecords';
-import { listPastoralNotes, PastoralNote } from '../../domain/pastoralNotes';
+import { getMemberRecord, saveMemberRecord } from '../../repositories/memberRecords';
+import { PastoralNote } from '../../domain/pastoralNotes';
+import { listPastoralNotes } from '../../repositories/pastoralNotes';
 import { PHONE_PLACEHOLDER, YES_NO_OPTIONS } from '../../domain/text';
 import { Actions, Content, Form, SectionDivider } from '../Visitors/Detail/styles';
 import { memberRecordSchema } from './schema';
@@ -78,7 +78,13 @@ export function MemberRecordPage() {
           <Typography type="h6">Contato</Typography>
         </SectionDivider>
         <TextInput label="Celular" control={control} name="phone" mask="phone" placeholder={PHONE_PLACEHOLDER} />
-        <TextInput label={text.fields.email} control={control} name="email" type="email" placeholder={text.fields.emailPlaceholder} />
+        <TextInput
+          label={text.fields.email}
+          control={control}
+          name="email"
+          type="email"
+          placeholder={text.fields.emailPlaceholder}
+        />
         <TextInput
           label="Outro telefone para contato"
           control={control}
@@ -182,7 +188,9 @@ export function MemberRecordPage() {
               {pastoralNotes.map((note) => (
                 <ListItem key={note.id}>
                   <Typography type="p">{note.body}</Typography>
-                  <Typography type="caption">Importada do sistema antigo em {formatTimestampDate(note.createdAt)}</Typography>
+                  <Typography type="caption">
+                    Importada do sistema antigo em {formatTimestampDate(note.createdAt)}
+                  </Typography>
                 </ListItem>
               ))}
             </List>

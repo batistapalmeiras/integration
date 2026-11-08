@@ -1,6 +1,7 @@
 // Local
-import { CommunityOverview, getCommunityOverview } from '../../../domain/communityGroups';
-import { countMembers } from '../../../domain/memberRecords';
+import { CommunityOverview } from '../../../domain/communityGroups';
+import { getCommunityOverview } from '../../../repositories/communityGroups';
+import { countMembers } from '../../../repositories/memberRecords';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { IntegrationOverview, loadIntegrationOverview } from './integrationOverview';

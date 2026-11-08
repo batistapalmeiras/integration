@@ -11,7 +11,7 @@ import { ArrowSwitcher } from '../../components/ArrowSwitcher';
 import { EnrollPersonModal } from '../../components/EnrollPersonModal';
 import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { PeopleCount } from '../../components/PeopleCount';
-import { listEnrollablePeople } from '../../domain/classesRoster';
+import { listEnrollablePeople } from '../../repositories/classesRoster';
 import { lastLessonDate } from '../../domain/cohortSchedule';
 import { todayKey } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
@@ -52,7 +52,8 @@ export function ClassesPage() {
   const openEditModal = () =>
     open(<EditCohortModal lessons={lessons} close={close} onSave={updateLessonDates} onCloseCohort={closeCohort} />);
   const openEnrollModal = () =>
-    cohort && open(
+    cohort &&
+    open(
       <EnrollPersonModal
         title="Adicionar pessoa à turma"
         loadCandidates={() => listEnrollablePeople(cohort.id)}

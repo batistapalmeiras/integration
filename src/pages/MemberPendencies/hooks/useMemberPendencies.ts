@@ -1,7 +1,8 @@
 // React
 import { useState } from 'react';
 // Local
-import { listMemberPendencies, PendencyField } from '../../../domain/memberRecords';
+import { PendencyField } from '../../../domain/memberRecords';
+import { listMemberPendencies } from '../../../repositories/memberRecords';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';

@@ -6,7 +6,7 @@ import { Button, Form, InfoBox, ModalActions, ModalTitle, Select, text, TextInpu
 import { UserPlus } from 'lucide-react';
 // Local
 import { UserRole } from '../../../types/enums';
-import { getDefaultVolunteerPassword } from '../domain';
+import { defaultVolunteerPassword } from '../../../domain/volunteers';
 import { AddVolunteerFormValues, addVolunteerSchema } from '../validators';
 import { RoleOptions } from './RoleOptions';
 
@@ -40,9 +40,15 @@ export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
     <>
       <ModalTitle onClose={close}>Adicionar voluntário</ModalTitle>
       <Form onSubmit={submit}>
-        <InfoBox variant="info">A senha inicial será {getDefaultVolunteerPassword()} — repasse ao voluntário.</InfoBox>
+        <InfoBox variant="info">A senha inicial será {defaultVolunteerPassword()} — repasse ao voluntário.</InfoBox>
         <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />
-        <TextInput label={text.fields.email} control={control} name="email" type="email" placeholder="nome@exemplo.com" />
+        <TextInput
+          label={text.fields.email}
+          control={control}
+          name="email"
+          type="email"
+          placeholder="nome@exemplo.com"
+        />
         <Select label="Cargo" control={control} name="role">
           <option value="">Selecione…</option>
           <RoleOptions roles={allowedRoles} />

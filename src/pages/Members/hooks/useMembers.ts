@@ -3,30 +3,13 @@ import { useEffect, useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
-import { supabase } from '../../../lib/supabase';
 import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
 import { MembershipStatus } from '../../../domain/memberRecords';
 import { EntryType } from '../../../types/church';
 import { membersFilters } from '../persistence';
+import { listMemberRows } from '../../../repositories/memberRecords';
 
 const PAGE_SIZE = 10;
-
-interface MemberRow {
-  id: string;
-  name: string;
-  entry_type: EntryType | null;
-  membership_status: MembershipStatus;
-}
-
-async function listMemberRows(): Promise<MemberRow[]> {
-  const { data, error } = await supabase
-    .from('people')
-    .select('id, name, entry_type, membership_status')
-    .eq('status', 'member')
-    .order('name', { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as MemberRow[];
-}
 
 export function useMembers() {
   const query = useQuery(queryKeys.members, listMemberRows);
@@ -43,10 +26,12 @@ export function useMembers() {
     membersFilters.save({ search, membershipStatusFilter, entryTypeFilter });
   }, [search, membershipStatusFilter, entryTypeFilter]);
 
-  const resetPage = <T,>(setter: (value: T) => void) => (value: T) => {
-    setter(value);
-    setPage(1);
-  };
+  const resetPage =
+    <T>(setter: (value: T) => void) =>
+    (value: T) => {
+      setter(value);
+      setPage(1);
+    };
 
   const filtered = members.filter(
     (member) =>

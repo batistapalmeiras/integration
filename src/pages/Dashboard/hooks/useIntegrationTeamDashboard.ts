@@ -1,6 +1,9 @@
 // Local
-import { getUpcomingCoffeeRoster } from '../../../domain/cafeSchedule';
-import { countIntegrationPeopleByStatus, countIntegrationPeopleCreatedSince } from '../../../domain/integrationPeople';
+import { getUpcomingCoffeeRoster } from '../../../repositories/cafeSchedule';
+import {
+  countIntegrationPeopleByStatus,
+  countIntegrationPeopleCreatedSince,
+} from '../../../repositories/integrationPeople';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { UpcomingCoffee } from '../components/AgendaPanel';

@@ -1,5 +1,15 @@
 // Libs
-import { Archive, ClipboardList, Clock, Coffee, GraduationCap, PhoneCall, RotateCcw, Send, UserCheck } from 'lucide-react';
+import {
+  Archive,
+  ClipboardList,
+  Clock,
+  Coffee,
+  GraduationCap,
+  PhoneCall,
+  RotateCcw,
+  Send,
+  UserCheck,
+} from 'lucide-react';
 import type { ComponentType } from 'react';
 
 export type PersonStatus =
@@ -50,7 +60,11 @@ export const STATUS_META: Record<
   archived: { label: 'Arquivado', tone: 'danger', icon: Archive },
 };
 
-export const INTEGRATION_STATUSES = (Object.keys(STATUS_META) as PersonStatus[]).filter((status) => status !== 'member');
+export const VISITOR_QUEUE_STATUSES: PersonStatus[] = ['initial_contact', 'retry_contact'];
+
+export const INTEGRATION_STATUSES = (Object.keys(STATUS_META) as PersonStatus[]).filter(
+  (status) => status !== 'member',
+);
 
 const AWAITING_REPLY_META = {
   label: 'Aguardando Retorno',

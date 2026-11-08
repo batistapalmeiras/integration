@@ -10,14 +10,15 @@ import { Check, Save, UserRound } from 'lucide-react';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { LessonMakeup, getPersonLessonMakeups } from '../../../domain/lessonMakeups';
+import { LessonMakeup } from '../../../domain/lessonMakeups';
+import { getPersonLessonMakeups } from '../../../repositories/lessonMakeups';
 import { communityRequirements } from '../../../domain/membership';
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
 import { useVisitorProfile } from '../../../features/visitors';
 import { CommunityFields } from '../components/CommunityFields';
 import { ConfirmMemberModal } from '../Detail/components/ConfirmMemberModal';
-import { CommunityFormValues, buildCommunitySchema } from '../validators';
+import { buildCommunitySchema, CommunityFormValues } from '../validators';
 import { usePersonSensitive } from '../../../queries/person';
 import { useMinistries, useSmallGroups } from '../../../queries/reference';
 import {
@@ -101,13 +102,18 @@ export function VisitorInfoPage() {
   const current = tabs.some((t) => t.key === tab) ? tab : 'general';
 
   const entriesFor = (key: InfoTab): InfoEntry[] =>
-    key === 'integration' ? integrationEntries(sensitive) : key === 'membership' ? membershipEntries(person, sensitive) : [];
+    key === 'integration'
+      ? integrationEntries(sensitive)
+      : key === 'membership'
+        ? membershipEntries(person, sensitive)
+        : [];
 
   const rows = [
     profileCohortName && { label: 'Turma', value: profileCohortName },
     profileCoffeeDate && { label: 'Café', value: formatDate(profileCoffeeDate) },
     !canEditCommunity && profileSmallGroupName && { label: 'Pequeno Grupo', value: profileSmallGroupName },
-    !canEditCommunity && profileMinistryNames.length > 0 && { label: 'Ministérios', value: profileMinistryNames.join(', ') },
+    !canEditCommunity &&
+      profileMinistryNames.length > 0 && { label: 'Ministérios', value: profileMinistryNames.join(', ') },
   ].filter((row): row is { label: string; value: string } => !!row);
 
   const submit = handleSubmit((values) => updateCommunity(values.smallGroupIds[0] ?? null, values.ministryIds));

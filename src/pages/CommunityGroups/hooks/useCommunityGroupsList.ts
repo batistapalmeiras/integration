@@ -1,12 +1,11 @@
 // Local
+import { CommunityGroupWithCount, GroupInput } from '../../../domain/communityGroups';
 import {
-  CommunityGroupWithCount,
   createMinistry,
   createSmallGroup,
-  GroupInput,
   listMinistriesWithCounts,
   listSmallGroupsWithCounts,
-} from '../../../domain/communityGroups';
+} from '../../../repositories/communityGroups';
 import { errorMessage, invalidateQueries, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 

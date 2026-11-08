@@ -5,7 +5,8 @@ import { Pencil } from 'lucide-react';
 import { GENDER_LABELS, MARITAL_STATUS_OPTION_LABELS } from '../../../domain/memberRecords';
 import { YES_NO_LABELS } from '../../../domain/text';
 import { ENTRY_TYPE_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
-import { SmallGroupOption, smallGroupLabel } from '../hooks/usePublicGroups';
+import { SmallGroupOption } from '../../../repositories/publicForms';
+import { smallGroupLabel } from '../hooks/usePublicGroups';
 import { LAST_CHURCH_PROMPTS, STEP_TITLES } from '../options';
 import { MembershipFormValues } from '../schema';
 import { ReviewHeader, ReviewItem, ReviewList, ReviewSection, ReviewTitle } from '../styles';
@@ -24,7 +25,11 @@ function label<K extends string>(labels: Record<K, string>, value: K | ''): stri
 
 function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[] | null): Row[][] {
   const smallGroup = smallGroups?.find((group) => group.id === values.smallGroupId);
-  const filled = (parts: string[], separator: string) => parts.map((part) => part.trim()).filter(Boolean).join(separator);
+  const filled = (parts: string[], separator: string) =>
+    parts
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join(separator);
   const address = filled(
     [
       filled([filled([values.street, values.number], ', '), values.complement], ' — '),

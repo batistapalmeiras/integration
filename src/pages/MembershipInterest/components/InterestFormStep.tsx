@@ -3,11 +3,21 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 // Libs
-import { Button, Checkbox, DatePicker, MultiSelectOption, MultiSelect, RadioGroup, Textarea, TextInput, Typography } from 'bp-kit';
+import {
+  Button,
+  Checkbox,
+  DatePicker,
+  MultiSelect,
+  MultiSelectOption,
+  RadioGroup,
+  Textarea,
+  TextInput,
+  Typography,
+} from 'bp-kit';
 import { Send } from 'lucide-react';
 // Local
 import { ActionBar, ErrorMsg, Form } from '../../../components/PublicPage/styles';
-import { supabase } from '../../../lib/supabase';
+import { listPublicMinistryNames } from '../../../repositories/publicForms';
 import { ENTRY_TYPE_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
 import { MembershipInterestFormValues, membershipInterestSchema } from '../validators/schema';
 
@@ -25,9 +35,9 @@ export function InterestFormStep({ name, submitting, submitError, onSubmit }: Pr
   const [ministries, setMinistries] = useState<MultiSelectOption[]>([]);
 
   useEffect(() => {
-    supabase
-      .rpc('list_ministries')
-      .then(({ data }) => setMinistries(((data ?? []) as { name: string }[]).map((m) => ({ value: m.name, label: m.name }))));
+    listPublicMinistryNames()
+      .then((names) => setMinistries(names.map((name) => ({ value: name, label: name }))))
+      .catch(() => setMinistries([]));
   }, []);
 
   const {
@@ -53,9 +63,9 @@ export function InterestFormStep({ name, submitting, submitError, onSubmit }: Pr
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Typography type="p">
-        Olá, {name}! Preencha os dados abaixo para demonstrar seu desejo em fazer parte da nossa família. Sugerimos
-        que você leia o estatuto da igreja antes de continuar — para ter acesso ao texto completo, basta pedir ao Pr.
-        Ismael Arêdes.
+        Olá, {name}! Preencha os dados abaixo para demonstrar seu desejo em fazer parte da nossa família. Sugerimos que
+        você leia o estatuto da igreja antes de continuar — para ter acesso ao texto completo, basta pedir ao Pr. Ismael
+        Arêdes.
       </Typography>
 
       <DatePicker

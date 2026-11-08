@@ -1,8 +1,8 @@
 // React
 import { useState } from 'react';
 // Local
-import { supabase } from '../../../lib/supabase';
-import { MembershipEligibility } from '../types';
+import { errorMessage } from '../../../lib/queryCache';
+import { MembershipEligibility, submitMembershipInterest } from '../../../repositories/publicForms';
 import { MembershipInterestFormValues } from '../validators/schema';
 
 export function useMembershipInterest() {
@@ -12,27 +12,22 @@ export function useMembershipInterest() {
   const submit = async (phone: string, values: MembershipInterestFormValues): Promise<MembershipEligibility | null> => {
     setSubmitting(true);
     setSubmitError(null);
-
-    const { data, error } = await supabase.rpc('submit_membership_interest', {
-      p_phone: phone,
-      p_birth_date: values.birthDate,
-      p_entry_type: values.entryType,
-      p_origin_church: values.originChurch || null,
-      p_ministry_interests: values.noMinistryInterest ? [] : values.ministryInterests,
-      p_secret_society: values.secretSociety,
-      p_wants_small_group: values.wantsSmallGroup,
-      p_membership_note: values.membershipNote || null,
-    }).single();
-
-    setSubmitting(false);
-
-    if (error) {
-      setSubmitError(error.message);
+    try {
+      return await submitMembershipInterest(phone, {
+        birthDate: values.birthDate,
+        entryType: values.entryType,
+        originChurch: values.originChurch || null,
+        ministryInterests: values.noMinistryInterest ? [] : values.ministryInterests,
+        secretSociety: values.secretSociety,
+        wantsSmallGroup: values.wantsSmallGroup,
+        membershipNote: values.membershipNote || null,
+      });
+    } catch (e) {
+      setSubmitError(errorMessage(e));
       return null;
+    } finally {
+      setSubmitting(false);
     }
-
-    const row = data as { lessons_attended: number; lessons_total: number };
-    return { lessonsAttended: row.lessons_attended, lessonsTotal: row.lessons_total };
   };
 
   return { submit, submitting, submitError };

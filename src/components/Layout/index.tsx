@@ -13,8 +13,8 @@ import {
   MORE_TAB_ICON,
   MORE_TAB_LABEL,
   NAV_ITEMS,
-  NavItem,
   navAreasFor,
+  NavItem,
 } from '../../routes/navigation';
 import { homeRouteFor } from '../../routes/HomeRedirect';
 import { AppRoute } from '../../routes/paths';
@@ -22,6 +22,7 @@ import { ROLE_LABELS } from '../../types/enums';
 // Local
 import { useLayout } from './hooks';
 import { NavDestinationContext } from './navDestination';
+import { closedSideNavKeys } from './persistence';
 import {
   BottomBar,
   BottomTab,
@@ -30,13 +31,13 @@ import {
   Main,
   MainInner,
   ModuleBar,
-  SIDEMENU_MEDIA,
   SideBrand,
   SideBrandLink,
   SideBrandLogo,
   SideBrandName,
   SideFooter,
   SideMenu,
+  SIDEMENU_MEDIA,
   SideNav,
   SideNavArea,
   SideNavAreaToggle,
@@ -59,26 +60,19 @@ export function Layout({ children }: ILayoutProps) {
   const navAreas = navAreasFor(user?.role);
   const navPaths = [NAV_ITEMS.dashboard.path, ...navAreas.flatMap((area) => areaItems(area).map((item) => item.path))];
   const activePath = activeNavPath(pathname, navPaths);
-  const activeArea =
-    navAreas.find((area) => areaItems(area).some((item) => item.path === activePath)) ??
-    findNavArea(navAreas, pathname);
-  const activeGroup = activeArea?.more
-    .filter(isNavGroup)
-    .find((group) => group.items.some((item) => item.path === activePath));
-  const activeKeys = [activeArea?.id, activeGroup && `${activeArea?.id}/${activeGroup.id}`].filter(
-    (key): key is string => !!key,
-  );
-  const activeKeysSignature = activeKeys.join('|');
+  const [closedKeys, setClosedKeys] = useState<string[]>(() => closedSideNavKeys.load() ?? []);
+  const isOpen = (key: string) => !closedKeys.includes(key);
 
-  const [openKeys, setOpenKeys] = useState<string[]>(activeKeys);
-  const [lastActiveKeys, setLastActiveKeys] = useState(activeKeysSignature);
-  if (activeKeysSignature !== lastActiveKeys) {
-    setLastActiveKeys(activeKeysSignature);
-    setOpenKeys(activeKeys);
-  }
+  const toggleKey = (key: string) => {
+    const next = isOpen(key) ? [...closedKeys, key] : closedKeys.filter((closedKey) => closedKey !== key);
+    setClosedKeys(next);
+    closedSideNavKeys.save(next);
+  };
 
-  const toggleKey = (key: string) =>
-    setOpenKeys((open) => (open.includes(key) ? open.filter((openKey) => openKey !== key) : [...open, key]));
+  const toggleArea = (areaId: string) => {
+    const isLastOpenArea = isOpen(areaId) && !navAreas.some((area) => area.id !== areaId && isOpen(area.id));
+    if (!isLastOpenArea) toggleKey(areaId);
+  };
 
   const renderNavLink = (item: NavItem, nested = false) => (
     <SideNavLink key={item.path} to={item.path} $active={activePath === item.path} $nested={nested}>
@@ -125,15 +119,10 @@ export function Layout({ children }: ILayoutProps) {
             {NAV_ITEMS.dashboard.label}
           </SideNavLink>
           {navAreas.map((area) => {
-            const open = openKeys.includes(area.id);
+            const open = isOpen(area.id);
             return (
               <SideNavArea key={area.title}>
-                <SideNavAreaToggle
-                  type="button"
-                  $open={open}
-                  aria-expanded={open}
-                  onClick={() => toggleKey(area.id)}
-                >
+                <SideNavAreaToggle type="button" $open={open} aria-expanded={open} onClick={() => toggleArea(area.id)}>
                   {area.title}
                   <ChevronDown size={14} />
                 </SideNavAreaToggle>
@@ -142,7 +131,7 @@ export function Layout({ children }: ILayoutProps) {
                   area.more.map((entry) => {
                     if (!isNavGroup(entry)) return renderNavLink(entry);
                     const key = `${area.id}/${entry.id}`;
-                    const groupOpen = openKeys.includes(key);
+                    const groupOpen = isOpen(key);
                     return (
                       <Fragment key={key}>
                         <SideNavGroupToggle

@@ -2,14 +2,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, Form, TextInput, text, useAuthCtx, useToast } from 'bp-kit';
+import { Button, Form, text, TextInput, useAuthCtx, useToast } from 'bp-kit';
 import { Save } from 'lucide-react';
 import { z } from 'zod';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
 import { Content } from '../Visitors/Detail/styles';
-import { supabase } from '../../lib/supabase';
+import { clearMustChangePassword } from '../../repositories/profiles';
 
 const schema = z
   .object({
@@ -46,7 +46,7 @@ export function ForcedChangePasswordPage({ onDone }: Props) {
       setError('password', { message: err });
       return;
     }
-    if (user) await supabase.from('profiles').update({ must_change_password: false }).eq('id', user.id);
+    if (user) await clearMustChangePassword(user.id).catch(() => undefined);
     onDone();
   });
 
@@ -54,7 +54,13 @@ export function ForcedChangePasswordPage({ onDone }: Props) {
     <Content>
       <PageHeader title="Troque sua senha" subtitle="Por segurança, defina uma senha só sua antes de continuar." />
       <Form onSubmit={submit}>
-        <TextInput label="Nova senha" control={control} name="password" type="password" placeholder="Mínimo 6 caracteres" />
+        <TextInput
+          label="Nova senha"
+          control={control}
+          name="password"
+          type="password"
+          placeholder="Mínimo 6 caracteres"
+        />
         <TextInput
           label="Confirmar nova senha"
           control={control}

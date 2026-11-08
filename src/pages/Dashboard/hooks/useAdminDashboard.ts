@@ -1,5 +1,5 @@
 // Local
-import { countActiveVolunteers } from '../../../domain/volunteers';
+import { countActiveVolunteers } from '../../../repositories/volunteers';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { IntegrationOverview, loadIntegrationOverview } from './integrationOverview';

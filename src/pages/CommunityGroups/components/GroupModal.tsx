@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, useForm } from 'react-hook-form';
 // Libs
-import { Button, Form, ModalActions, ModalTitle, MultiSelect, TextInput, Typography, text } from 'bp-kit';
+import { Button, Form, ModalActions, ModalTitle, MultiSelect, text, TextInput, Typography } from 'bp-kit';
 import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
@@ -102,11 +102,10 @@ export function GroupModal({
           />
         )}
 
-        {!canPickPeople && (
+        {!canPickPeople && smallGroup && (
           <Typography type="caption">
-            {smallGroup
-              ? 'Líderes e anfitriões precisam fazer parte do PG. Adicione as pessoas ao PG e depois escolha quem lidera e quem recebe.'
-              : 'Líderes precisam fazer parte do ministério. Adicione as pessoas ao ministério e depois escolha quem lidera.'}
+            Líderes e anfitriões precisam fazer parte do PG. Adicione as pessoas ao PG e depois escolha quem lidera e
+            quem recebe.
           </Typography>
         )}
 
@@ -130,7 +129,6 @@ export function GroupModal({
             <Trash2 size={16} />
             Excluir {fieldLabel}
           </Button>
-          {onDelete && <Typography type="caption">Essa ação não pode ser desfeita.</Typography>}
         </DangerZone>
       )}
     </>

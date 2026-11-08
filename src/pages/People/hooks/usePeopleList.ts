@@ -3,57 +3,15 @@ import { useEffect, useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
-import { supabase } from '../../../lib/supabase';
 import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
 import { useCohortNames } from '../../../queries/reference';
-import { comparePeopleByPipeline, INTEGRATION_STATUSES, PersonStatus } from '../../../types/person';
-import { PersonRow } from '../types';
+import { INTEGRATION_STATUSES, PersonStatus } from '../../../types/person';
 import { peopleFilters } from '../persistence';
+import { listPeople } from '../../../repositories/people';
 
 const PAGE_SIZE = 10;
 
-interface ReportFilters {
-  statusFilter: PersonStatus[];
-  cohortFilter: string;
-  search: string;
-}
-
-async function listPeople({ statusFilter, cohortFilter, search }: ReportFilters): Promise<PersonRow[]> {
-  let cohortPersonIds: string[] | null = null;
-  if (cohortFilter !== 'all') {
-    const { data, error } = await supabase
-      .from('enrollments')
-      .select('person_id, cohort:cohorts!inner(name)')
-      .eq('cohort.name', cohortFilter);
-    if (error) throw error;
-    cohortPersonIds = (data ?? []).map((r) => r.person_id as string);
-    if (cohortPersonIds.length === 0) return [];
-  }
-
-  let query = supabase
-    .from('people')
-    .select('id,name,status,whatsapp_opened_at,class_invite_sent_at,membership_interest_sent_at')
-    .in('status', statusFilter.length > 0 ? statusFilter : INTEGRATION_STATUSES);
-  if (search) query = query.ilike('name', `%${search}%`);
-  if (cohortPersonIds) query = query.in('id', cohortPersonIds);
-
-  const { data, error } = await query;
-  if (error) throw error;
-
-  return (data ?? [])
-    .map((p) => ({
-      id: p.id as string,
-      name: p.name as string,
-      status: p.status as PersonStatus,
-      whatsapp_opened_at: p.whatsapp_opened_at as string | null,
-      class_invite_sent_at: p.class_invite_sent_at as string | null,
-      membership_interest_sent_at: p.membership_interest_sent_at as string | null,
-    }))
-    .sort(comparePeopleByPipeline);
-}
-
 export function usePeopleList() {
-
   const [saved] = useState(() => peopleFilters.load() ?? {});
   const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>(() =>
     (saved.statusFilter ?? []).filter((status) => INTEGRATION_STATUSES.includes(status)),

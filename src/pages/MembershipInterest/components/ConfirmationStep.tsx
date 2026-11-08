@@ -2,7 +2,7 @@
 import { InfoBox, Typography } from 'bp-kit';
 // Local
 import { hasCompletedLessons } from '../../../domain/membership';
-import { MembershipEligibility } from '../types';
+import { MembershipEligibility } from '../../../repositories/publicForms';
 
 interface Props {
   eligibility: MembershipEligibility | null;
@@ -14,9 +14,7 @@ export function ConfirmationStep({ eligibility }: Props) {
 
   return (
     <>
-      <InfoBox variant="info">
-        Olá! Recebemos sua ficha de interesse em se tornar membro da nossa igreja.
-      </InfoBox>
+      <InfoBox variant="info">Olá! Recebemos sua ficha de interesse em se tornar membro da nossa igreja.</InfoBox>
 
       <Typography type="p">Agora, é necessário aguardar a próxima reunião do Conselho Administrativo.</Typography>
 

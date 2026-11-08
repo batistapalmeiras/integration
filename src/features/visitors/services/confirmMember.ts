@@ -1,5 +1,5 @@
 // Local
-import { setPersonMinistries } from '../../../domain/communityGroups';
+import { setPersonMinistries } from '../../../repositories/communityGroups';
 import { Person } from '../domain/types';
 import { insertStatusHistory, updatePersonStatus } from '../infra/peopleRepository';
 

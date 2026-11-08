@@ -1,14 +1,20 @@
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
-import { setPersonMinistries } from '../../../domain/communityGroups';
+import { setPersonMinistries } from '../../../repositories/communityGroups';
 import { useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { confirmMember as confirmMemberUseCase } from '../services/confirmMember';
 import { fetchPersonProfileSummary, PersonProfileSummary } from '../infra/peopleRepository';
 import { usePerson } from './usePerson';
 
-const EMPTY_PROFILE: PersonProfileSummary = { coffeeDate: null, cohortName: null, smallGroupName: null, ministryNames: [], ministryIds: [] };
+const EMPTY_PROFILE: PersonProfileSummary = {
+  coffeeDate: null,
+  cohortName: null,
+  smallGroupName: null,
+  ministryNames: [],
+  ministryIds: [],
+};
 
 export function useVisitorProfile(id: string) {
   const { user } = useAuthCtx();

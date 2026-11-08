@@ -1,6 +1,3 @@
-// Local
-import { supabase } from '../lib/supabase';
-
 export interface PersonSensitive {
   attending_since: string | null;
   previous_church: string | null;
@@ -13,14 +10,4 @@ export interface PersonSensitive {
   secret_society: string | null;
   wants_small_group: string | null;
   membership_note: string | null;
-}
-
-export async function getPersonSensitive(personId: string): Promise<PersonSensitive | null> {
-  const { data, error } = await supabase
-    .from('person_sensitive')
-    .select('*')
-    .eq('person_id', personId)
-    .maybeSingle();
-  if (error) return null;
-  return (data as PersonSensitive | null) ?? null;
 }

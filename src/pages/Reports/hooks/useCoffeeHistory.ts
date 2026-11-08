@@ -1,7 +1,8 @@
 // React
 import { useMemo } from 'react';
 // Local
-import { coffeeHistory, fetchCoffeeHistoryBoard } from '../../../domain/cafeSchedule';
+import { coffeeHistory } from '../../../domain/cafeSchedule';
+import { fetchCoffeeHistoryBoard } from '../../../repositories/cafeSchedule';
 import { todayKey } from '../../../domain/dates';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';

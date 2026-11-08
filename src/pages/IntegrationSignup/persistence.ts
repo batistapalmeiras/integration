@@ -1,6 +1,7 @@
 // Local
 import { storedValue } from '../../lib/storage';
-import { CohortSchedule, SignupStep } from './types';
+import { CohortSchedule } from '../../repositories/publicForms';
+import { SignupStep } from './types';
 import { SignupFormValues } from './validators/schema';
 
 interface SignupProgress {

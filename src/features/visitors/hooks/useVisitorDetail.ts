@@ -7,8 +7,9 @@ import {
   markClassInviteNoResponse,
   markCoffeeAttended,
   markCoffeeNotAttended,
-} from '../../../domain/cafeSchedule';
-import { getMakeupLink, getPersonIntegrationClass, PersonIntegrationClass, toggleLessonAttendance } from '../../../domain/classesRoster';
+} from '../../../repositories/cafeSchedule';
+import { PersonIntegrationClass } from '../../../domain/classesRoster';
+import { getMakeupLink, getPersonIntegrationClass, toggleLessonAttendance } from '../../../repositories/classesRoster';
 import { setQueryData, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { useHasUpcomingCoffeeEvent, useHasUpcomingCohort } from '../../../queries/reference';
@@ -42,7 +43,7 @@ export function useVisitorDetail(id: string) {
   const coffeeQuery = useQuery(queryKeys.personCoffeeAttendance(id, status), () => getCoffeeAttendanceForPerson(id), {
     enabled: inCoffeeStage,
   });
-  const coffeeAttendance = inCoffeeStage ? coffeeQuery.data ?? null : null;
+  const coffeeAttendance = inCoffeeStage ? (coffeeQuery.data ?? null) : null;
   const hasCohort = useHasUpcomingCohort(inCoffeeStage).data ?? null;
   const hasCoffeeEvent = useHasUpcomingCoffeeEvent(CONTACT_PANEL_STAGES.includes(status as PersonStatus)).data ?? null;
 
@@ -52,7 +53,7 @@ export function useVisitorDetail(id: string) {
     async () => (await fetchLastContactAttempt(id)) as ContactAttemptRecord | null,
     { enabled: inContactStage },
   );
-  const lastAttempt = inContactStage ? lastAttemptQuery.data ?? null : null;
+  const lastAttempt = inContactStage ? (lastAttemptQuery.data ?? null) : null;
 
   const integrationQuery = useQuery(queryKeys.personIntegrationClass(id), () => getPersonIntegrationClass(id), {
     enabled: status === 'integration',

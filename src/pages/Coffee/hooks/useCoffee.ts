@@ -6,30 +6,32 @@ import { useAuthCtx } from 'bp-kit';
 import {
   CoffeeBoard,
   CoffeePresence,
-  STATUS_AFTER_PRESENCE,
-  EnrollableCoffeePerson,
   coffeePresence,
   countQueuedFrom,
   currentCoffeeAttendance,
-  placeInCoffee,
+  EnrollableCoffeePerson,
+  isListedInCoffee,
+  isReturningToSignup,
+  latestCoffeeDateByPerson,
+  selectOpenCoffeeEvents,
+  STATUS_AFTER_PRESENCE,
+  upcomingCoffeeEvent,
+} from '../../../domain/cafeSchedule';
+import {
+  deleteCoffeeEvent,
   fetchCoffeeBoard,
   insertCoffeeEvent,
-  latestCoffeeDateByPerson,
   markCoffeeAttended,
   markCoffeeAttendedAfterMiss,
   markCoffeeCanceled,
   markCoffeeNotAttended,
-  selectOpenCoffeeEvents,
+  placeInCoffee,
   unmarkCoffeePresence,
-  upcomingCoffeeEvent,
-  isListedInCoffee,
-  isReturningToSignup,
   updateCoffeeEventDate,
-} from '../../../domain/cafeSchedule';
-import { runPipelineMaintenance } from '../../../domain/integrationPeople';
+} from '../../../repositories/cafeSchedule';
+import { runPipelineMaintenance } from '../../../repositories/integrationPeople';
 import { errorMessage, fetchQuery, setQueryData, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
-import { supabase } from '../../../lib/supabase';
 import { todayKey } from '../../../domain/dates';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { AttendeeRow, CoffeeEvent } from '../types';
@@ -53,7 +55,13 @@ function buildAttendees(board: CoffeeBoard, selected: CoffeeEvent, open: CoffeeE
         .filter((a) => isReturningToSignup(a.person))
         .map(
           (a) =>
-            ({ ...a, coffee_event_id: selected.id, presence: null, presenceEditable: false, returning: true }) as unknown as AttendeeRow,
+            ({
+              ...a,
+              coffee_event_id: selected.id,
+              presence: null,
+              presenceEditable: false,
+              returning: true,
+            }) as unknown as AttendeeRow,
         )
     : [];
   return [...seated, ...returning].sort((a, b) => comparePeopleByPipeline(a.person, b.person));
@@ -110,8 +118,7 @@ export function useCoffee() {
 
   const deleteSelectedEvent = async () => {
     if (!selectedEventId) return;
-    const { error: deleteError } = await supabase.from('coffee_events').delete().eq('id', selectedEventId);
-    if (deleteError) throw deleteError;
+    await deleteCoffeeEvent(selectedEventId);
     selectEvent(null);
     await refreshAfterEventChange();
   };
@@ -123,12 +130,7 @@ export function useCoffee() {
     await refreshBoard();
   };
 
-  const changePresence = async (
-    attendanceId: string,
-    personId: string,
-    from: CoffeePresence,
-    to: CoffeePresence,
-  ) => {
+  const changePresence = async (attendanceId: string, personId: string, from: CoffeePresence, to: CoffeePresence) => {
     const personStatus = STATUS_AFTER_PRESENCE[from ?? 'none'];
     if (to === 'came') {
       if (from === 'missed') await markCoffeeAttendedAfterMiss(attendanceId, personId, user?.id);

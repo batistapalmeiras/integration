@@ -6,12 +6,13 @@ import { LinkButton, Skeleton } from 'bp-kit';
 import { PublicPage } from '../../components/PublicPage';
 import { ErrorMsg } from '../../components/PublicPage/styles';
 import { clearVisitorIdentity, loadVisitorIdentity, saveVisitorIdentity } from '../../lib/visitorIdentity';
+import { MembershipEligibility } from '../../repositories/publicForms';
 import { ConfirmationStep } from './components/ConfirmationStep';
 import { InterestFormStep } from './components/InterestFormStep';
 import { PhoneStep } from './components/PhoneStep';
 import { useCheckPhone } from './hooks/useCheckPhone';
 import { useMembershipInterest } from './hooks/useMembershipInterest';
-import { InterestStep, MembershipEligibility } from './types';
+import { InterestStep } from './types';
 import { MembershipInterestFormValues } from './validators/schema';
 
 export function MembershipInterestPage() {
@@ -44,7 +45,12 @@ export function MembershipInterestPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleFound = (foundPhone: string, foundName: string, alreadySubmitted: boolean, found: MembershipEligibility) => {
+  const handleFound = (
+    foundPhone: string,
+    foundName: string,
+    alreadySubmitted: boolean,
+    found: MembershipEligibility,
+  ) => {
     saveVisitorIdentity({ phone: foundPhone, name: foundName });
     setPhone(foundPhone);
     setName(foundName);

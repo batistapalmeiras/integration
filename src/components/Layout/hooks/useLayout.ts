@@ -5,18 +5,9 @@ import { useAuthCtx } from 'bp-kit';
 // Local
 import { useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
-import { supabase } from '../../../lib/supabase';
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES } from '../../../types/enums';
-
-async function countMembershipPending(): Promise<number> {
-  const { count, error } = await supabase
-    .from('people')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'membership_pending');
-  if (error) throw error;
-  return count ?? 0;
-}
+import { countMembershipPending } from '../../../repositories/membership';
 
 export function useLayout() {
   const { user, logout } = useAuthCtx();
@@ -25,7 +16,8 @@ export function useLayout() {
 
   const showMembership = hasRole(user?.role, LEADERSHIP_ROLES);
 
-  const membershipCount = useQuery(queryKeys.membershipPendingCount, countMembershipPending, { enabled: showMembership }).data ?? 0;
+  const membershipCount =
+    useQuery(queryKeys.membershipPendingCount, countMembershipPending, { enabled: showMembership }).data ?? 0;
 
   const handleLogout = async () => {
     await logout();

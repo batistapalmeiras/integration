@@ -1,5 +1,9 @@
 // Local
-import { attachToNextWelcomeCoffee, getPersonAttendedCoffeeDate, leaveOpenCoffeeSeat } from '../../../domain/cafeSchedule';
+import {
+  attachToNextWelcomeCoffee,
+  getPersonAttendedCoffeeDate,
+  leaveOpenCoffeeSeat,
+} from '../../../repositories/cafeSchedule';
 import { todayKey } from '../../../domain/dates';
 import { PersonStatus } from '../domain/types';
 

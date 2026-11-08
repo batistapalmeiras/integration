@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
-import { supabase } from '../../lib/supabase';
+import { getMustChangePassword } from '../../repositories/profiles';
 
 export function useMustChangePassword() {
   const { user } = useAuthCtx();
@@ -17,8 +17,7 @@ export function useMustChangePassword() {
       setLoading(false);
       return;
     }
-    const { data } = await supabase.from('profiles').select('must_change_password').eq('id', userId).single();
-    setMustChange(data?.must_change_password ?? false);
+    setMustChange(await getMustChangePassword(userId).catch(() => false));
     setLoading(false);
   }, [userId]);
 

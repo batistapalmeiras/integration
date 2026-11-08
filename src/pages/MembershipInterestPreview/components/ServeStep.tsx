@@ -3,7 +3,8 @@ import { Control, Controller, useWatch } from 'react-hook-form';
 // Libs
 import { Checkbox, MultiSelect, MultiSelectOption, Select, Textarea, TextInput } from 'bp-kit';
 // Local
-import { SmallGroupOption, smallGroupLabel } from '../hooks/usePublicGroups';
+import { SmallGroupOption } from '../../../repositories/publicForms';
+import { smallGroupLabel } from '../hooks/usePublicGroups';
 import { YES_NO_OPTIONS } from '../../../domain/text';
 import { WANTS_SMALL_GROUP_OPTIONS } from '../options';
 import { MembershipFormValues } from '../schema';

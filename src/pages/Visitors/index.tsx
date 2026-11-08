@@ -9,9 +9,9 @@ import { List, ListChevron, ListGrow, ListHeader, ListItem, ListSlot, ListStatus
 import { PeopleCount } from '../../components/PeopleCount';
 import { StatusPill } from '../../components/StatusPill';
 import { AppRoute } from '../../routes/paths';
-import { PersonStatus, STATUS_META } from '../../types/person';
+import { PersonStatus, STATUS_META, VISITOR_QUEUE_STATUSES } from '../../types/person';
 import { PaginationWrap } from '../../components/ListLayout';
-import { QUEUE_STATUSES, useVisitors } from './hooks/useVisitors';
+import { useVisitors } from './hooks/useVisitors';
 import { QueueChips, RowButton, RowText, SearchRow } from './styles';
 
 export function VisitorsPage() {
@@ -68,7 +68,7 @@ export function VisitorsPage() {
           </SearchRow>
           {view === 'queue' && (
             <QueueChips role="group" aria-label="Filtrar por status">
-              {QUEUE_STATUSES.map((status) => (
+              {VISITOR_QUEUE_STATUSES.map((status) => (
                 <Chip
                   key={status}
                   type="button"

@@ -2,7 +2,7 @@
 import { InfoBox, Typography } from 'bp-kit';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { CohortSchedule } from '../types';
+import { CohortSchedule } from '../../../repositories/publicForms';
 import { ConfirmationList, StepStack } from '../styles';
 
 interface Props {
@@ -23,8 +23,7 @@ export function ConfirmationStep({ result }: Props) {
         ))}
       </ConfirmationList>
       <InfoBox variant="info">
-        Reforçamos que é necessário estar presente nas 4 aulas para se tornar membro. Esperamos
-        você!
+        Reforçamos que é necessário estar presente nas 4 aulas para se tornar membro. Esperamos você!
       </InfoBox>
     </StepStack>
   );
