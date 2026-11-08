@@ -1,7 +1,6 @@
 // Local
+import { storedValue } from '../../../lib/storage';
 import { PersonStatus } from '../../../types/person';
-
-const STORAGE_KEY = 'people-report-filters';
 
 interface PeopleFilters {
   statusFilter: PersonStatus[];
@@ -9,19 +8,4 @@ interface PeopleFilters {
   search: string;
 }
 
-export function loadSavedFilters(): PeopleFilters | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as PeopleFilters;
-  } catch {
-    return null;
-  }
-}
-
-export function saveFilters(filters: PeopleFilters) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
-  } catch {
-  }
-}
+export const peopleReportFilters = storedValue<Partial<PeopleFilters>>('people-report-filters');

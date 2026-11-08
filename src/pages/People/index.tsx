@@ -4,7 +4,7 @@ import { useAuthCtx } from 'bp-kit';
 import { PageHeader } from '../../components/PageHeader';
 // Local
 import { hasRole, LEADERSHIP_ROLES } from '../../types/enums';
-import { PageFlexWrap } from '../Reports/styles';
+import { PageFlexWrap } from '../../components/ListLayout';
 import { PeopleSection } from '../Reports/components/PeopleSection';
 
 export function PeoplePage() {

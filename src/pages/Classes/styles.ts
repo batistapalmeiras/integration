@@ -5,10 +5,6 @@ import { ListGrow } from '../../components/List';
 
 export { Form } from 'bp-kit';
 
-export const PaginationWrap = styled.div`
-  margin-top: ${({ theme }) => theme.spacing.lg};
-`;
-
 export const CountBadge = styled.span<{ $eligible: boolean }>`
   display: inline-flex;
   align-items: center;

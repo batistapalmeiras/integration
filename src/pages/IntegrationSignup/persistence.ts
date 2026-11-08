@@ -1,8 +1,7 @@
 // Local
+import { storedValue } from '../../lib/storage';
 import { CohortSchedule, SignupStep } from './types';
 import { SignupFormValues } from './validators/schema';
-
-const STORAGE_KEY = 'integration-signup-progress';
 
 interface SignupProgress {
   step: SignupStep;
@@ -12,18 +11,4 @@ interface SignupProgress {
   result?: CohortSchedule;
 }
 
-export function loadSignupProgress(): SignupProgress | null {
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as SignupProgress) : null;
-  } catch {
-    return null;
-  }
-}
-
-export function saveSignupProgress(progress: SignupProgress) {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  } catch {
-  }
-}
+export const signupProgress = storedValue<SignupProgress>('integration-signup-progress', 'session');

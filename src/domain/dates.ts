@@ -34,3 +34,15 @@ export function monthName(month: number): string {
 export function shortMonthName(month: number): string {
   return new Date(2000, month - 1, 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
 }
+
+export function toDateKey(date: Date): string {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+export function parseDateKey(value: string): Date {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}

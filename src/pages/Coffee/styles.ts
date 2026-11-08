@@ -43,10 +43,6 @@ export const IconAction = styled.button<{ $tone?: 'positive' | 'negative' }>`
   }
 `;
 
-export const PaginationWrap = styled.div`
-  margin-top: ${({ theme }) => theme.spacing.lg};
-`;
-
 export const Hint = styled.p`
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};

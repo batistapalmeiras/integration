@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
+import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
 import { useCohortNames } from '../../../queries/reference';
 import { comparePeopleByPipeline, INTEGRATION_STATUSES, PersonStatus } from '../../../types/person';
 import { PersonReportRow } from '../types';
-import { loadSavedFilters, saveFilters } from './persistence';
+import { peopleReportFilters } from './persistence';
 
 const PAGE_SIZE = 10;
-const SEARCH_DEBOUNCE_MS = 300;
 
 interface ReportFilters {
   statusFilter: PersonStatus[];
@@ -54,21 +54,16 @@ async function listReportPeople({ statusFilter, cohortFilter, search }: ReportFi
 
 export function usePeopleReport() {
 
+  const [saved] = useState(() => peopleReportFilters.load() ?? {});
   const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>(() =>
-    (loadSavedFilters()?.statusFilter ?? []).filter((status) => INTEGRATION_STATUSES.includes(status)),
+    (saved.statusFilter ?? []).filter((status) => INTEGRATION_STATUSES.includes(status)),
   );
-  const [cohortFilter, setCohortFilterState] = useState<string>(() => loadSavedFilters()?.cohortFilter ?? 'all');
-  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
-  const [debouncedSearch, setDebouncedSearch] = useState(() => (loadSavedFilters()?.search ?? '').trim());
+  const [cohortFilter, setCohortFilterState] = useState<string>(saved.cohortFilter ?? 'all');
+  const { search, setSearch: setSearchState, debouncedSearch } = useDebouncedSearch(saved.search ?? '');
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timeout);
-  }, [search]);
-
-  useEffect(() => {
-    saveFilters({ statusFilter, cohortFilter, search });
+    peopleReportFilters.save({ statusFilter, cohortFilter, search });
   }, [statusFilter, cohortFilter, search]);
 
   const filters = { statusFilter, cohortFilter, search: debouncedSearch };

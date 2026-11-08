@@ -6,11 +6,10 @@ import { AlertTriangle } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
-import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { NameCell, NameText, ReviewFlag, Subline, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { isReviewPendency, PENDENCY_LABELS, PendencyField } from '../../domain/memberRecords';
 import { AppRoute } from '../../routes/paths';
-import { NameCell, NameText, ReviewFlag, Subline } from '../Membership/styles';
-import { PageFlexBody, PageFlexWrap, PaginationWrap, SearchFiltersRow } from '../Reports/styles';
+import { PageFlexBody, PageFlexWrap, PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 // Local
 import { useMemberPendencies } from './hooks/useMemberPendencies';
 

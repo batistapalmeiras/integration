@@ -12,7 +12,7 @@ import { MEMBERSHIP_STATUS_LABELS } from '../../domain/memberRecords';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { ENTRY_TYPE_LABELS } from '../../types/church';
-import { PaginationWrap, SearchFiltersRow } from '../Reports/styles';
+import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
 import { useMembers } from './hooks/useMembers';
 

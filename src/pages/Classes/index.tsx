@@ -8,15 +8,16 @@ import { PageHeader } from '../../components/PageHeader';
 // Local
 import { AddButton } from '../../components/AddButton';
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';
+import { EnrollPersonModal } from '../../components/EnrollPersonModal';
 import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { PeopleCount } from '../../components/PeopleCount';
+import { listEnrollablePeople } from '../../domain/classesRoster';
 import { lastLessonDate } from '../../domain/cohortSchedule';
 import { todayKey } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES } from '../../types/enums';
 import { CreateCohortModal } from './components/CreateCohortModal';
 import { EditCohortModal } from './components/EditCohortModal';
-import { EnrollPersonModal } from './components/EnrollPersonModal';
 import { LessonAttendanceList } from './components/LessonAttendanceList';
 import { useClasses } from './hooks';
 
@@ -51,7 +52,14 @@ export function ClassesPage() {
   const openEditModal = () =>
     open(<EditCohortModal lessons={lessons} close={close} onSave={updateLessonDates} onCloseCohort={closeCohort} />);
   const openEnrollModal = () =>
-    cohort && open(<EnrollPersonModal cohortId={cohort.id} close={close} onEnroll={enrollPerson} />);
+    cohort && open(
+      <EnrollPersonModal
+        title="Adicionar pessoa à turma"
+        loadCandidates={() => listEnrollablePeople(cohort.id)}
+        close={close}
+        onEnroll={enrollPerson}
+      />,
+    );
 
   const openCohortMenu = () =>
     open(

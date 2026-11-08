@@ -18,7 +18,8 @@ import { supabase } from '../../../lib/supabase';
 import { useUpcomingCoffeeEventDate } from '../../../queries/reference';
 import { comparePeopleByPipeline } from '../../../types/person';
 import { firstLessonDate } from '../../../domain/cohortSchedule';
-import { formatDate, weeklyLessonDates } from '../domain';
+import { formatDate } from '../../../domain/dates';
+import { weeklyLessonDates } from '../domain';
 import { Cohort, EnrollmentRow, Lesson, LessonAttendance } from '../types';
 
 const MAX_COHORTS = 2;

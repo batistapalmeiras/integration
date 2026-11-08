@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
+import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
 import { comparePeopleByPipeline } from '../../../types/person';
-import { loadSavedFilters, saveFilters, VisitorView } from '../persistence';
+import { visitorFilters, VisitorView } from '../persistence';
 import { Person } from '../../../features/visitors';
 
 export const QUEUE_STATUSES: Person['status'][] = ['initial_contact', 'retry_contact'];
 const VISIBLE_STATUSES: Person['status'][] = [...QUEUE_STATUSES, 'archived'];
 const PAGE_SIZE = 10;
-const SEARCH_DEBOUNCE_MS = 300;
 
 async function listVisitors(): Promise<Person[]> {
   const { data, error } = await supabase.from('people').select('*').in('status', VISIBLE_STATUSES);
@@ -24,20 +24,15 @@ export function useVisitors() {
   const rows = query.data ?? [];
   const [page, setPage] = useState(1);
 
-  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
-  const [debouncedSearch, setDebouncedSearch] = useState(() => (loadSavedFilters()?.search ?? '').trim());
-  const [view, setViewState] = useState<VisitorView>(() => loadSavedFilters()?.view ?? 'queue');
+  const [saved] = useState(() => visitorFilters.load() ?? {});
+  const { search, setSearch: setSearchState, debouncedSearch } = useDebouncedSearch(saved.search ?? '');
+  const [view, setViewState] = useState<VisitorView>(saved.view ?? 'queue');
   const [statusFilter, setStatusFilterState] = useState<Person['status'][]>(() =>
-    (loadSavedFilters()?.statusFilter ?? []).filter((status) => QUEUE_STATUSES.includes(status)),
+    (saved.statusFilter ?? []).filter((status) => QUEUE_STATUSES.includes(status)),
   );
 
   useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timeout);
-  }, [search]);
-
-  useEffect(() => {
-    saveFilters({ view, search, statusFilter });
+    visitorFilters.save({ view, search, statusFilter });
   }, [view, search, statusFilter]);
 
   const setSearch = (value: string) => {

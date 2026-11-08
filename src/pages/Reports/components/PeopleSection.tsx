@@ -9,7 +9,7 @@ import { StatusPill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { AppRoute } from '../../../routes/paths';
 import { usePeopleReport } from '../hooks';
-import { PageFlexBody, PaginationWrap, SearchFiltersRow } from '../styles';
+import { PageFlexBody, PaginationWrap, SearchFiltersRow } from '../../../components/ListLayout';
 import { PeopleFiltersModal } from './PeopleFiltersModal';
 
 export function PeopleSection() {

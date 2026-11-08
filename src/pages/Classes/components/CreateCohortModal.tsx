@@ -7,7 +7,7 @@ import { Button, DatePicker, Form, InfoBox, ModalActions, ModalTitle, text } fro
 import { Plus } from 'lucide-react';
 import { z } from 'zod';
 // Local
-import { formatDate } from '../domain';
+import { formatDate, parseDateKey, toDateKey } from '../../../domain/dates';
 
 interface Props {
   close: () => void;
@@ -70,16 +70,4 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
       </Form>
     </>
   );
-}
-
-function toDateKey(date: Date): string {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function parseDateKey(value: string): Date {
-  const [y, m, d] = value.split('-').map(Number);
-  return new Date(y, m - 1, d);
 }

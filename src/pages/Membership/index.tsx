@@ -6,13 +6,12 @@ import { AlertTriangle } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
-import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { NameCell, NameText, ReviewFlag, Subline, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { formatTimestampDate } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
 import { ENTRY_TYPE_LABELS } from '../../types/church';
 // Local
 import { useMembershipQueue } from './hooks/useMembershipQueue';
-import { NameCell, NameText, ReviewFlag, Subline } from './styles';
 
 export function MembershipPage() {
   const navigate = useNavigate();

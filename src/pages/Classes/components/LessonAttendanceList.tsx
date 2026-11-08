@@ -8,7 +8,7 @@ import { StatusPill } from '../../../components/StatusPill';
 import { currentLesson } from '../../../domain/cohortSchedule';
 import { todayKey } from '../../../domain/dates';
 import { hasCompletedLessons } from '../../../domain/membershipEligibility';
-import { formatDate } from '../domain';
+import { formatDate } from '../../../domain/dates';
 import { EnrollmentRow, Lesson } from '../types';
 import { CountBadge, LessonTab, LessonTabs, NameHeading, PresenceHeading, StudentText } from '../styles';
 

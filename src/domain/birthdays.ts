@@ -9,7 +9,7 @@ const MAX_AGE = 120;
 
 export const birthdayMonth = (birthDate: string) => Number(birthDate.slice(5, 7));
 
-export const birthdayDay = (birthDate: string) => Number(birthDate.slice(8, 10));
+const birthdayDay = (birthDate: string) => Number(birthDate.slice(8, 10));
 
 export function birthdaysInMonth(birthdays: MemberBirthday[], month: number): MemberBirthday[] {
   return birthdays

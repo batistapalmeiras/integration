@@ -7,7 +7,7 @@ import { Button, DatePicker, Form, ModalActions, ModalTitle, Typography, text } 
 import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
-import { formatDate } from '../domain';
+import { formatDate } from '../../../domain/dates';
 import { Hint } from '../styles';
 
 const schema = z.object({ eventDate: z.string().min(1, text.validation.required('a data')) });

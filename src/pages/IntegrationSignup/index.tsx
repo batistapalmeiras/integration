@@ -12,12 +12,12 @@ import { PhoneStep } from './components/PhoneStep';
 import { SignupFormStep } from './components/SignupFormStep';
 import { useCheckPhone } from './hooks/useCheckPhone';
 import { useIntegrationSignup } from './hooks/useIntegrationSignup';
-import { loadSignupProgress, saveSignupProgress } from './persistence';
+import { signupProgress } from './persistence';
 import { SignupStep } from './types';
 import { SignupFormValues } from './validators/schema';
 
 export function IntegrationSignupPage() {
-  const [saved] = useState(() => loadSignupProgress());
+  const [saved] = useState(() => signupProgress.load());
   const [step, setStep] = useState<SignupStep>(saved?.step ?? 'intro');
   const [phone, setPhone] = useState(saved?.phone ?? '');
   const [name, setName] = useState(saved?.name ?? '');
@@ -27,7 +27,7 @@ export function IntegrationSignupPage() {
   const { submit, submitting, error, result } = useIntegrationSignup(saved?.result ?? null);
 
   useEffect(() => {
-    saveSignupProgress({ step, phone, name, formValues, result: result ?? undefined });
+    signupProgress.save({ step, phone, name, formValues, result: result ?? undefined });
   }, [step, phone, name, formValues, result]);
 
   const continueFromIntro = async () => {

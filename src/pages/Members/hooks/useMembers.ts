@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { supabase } from '../../../lib/supabase';
+import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
 import { MembershipStatus } from '../../../domain/memberRecords';
 import { EntryType } from '../../../types/church';
-import { loadSavedFilters, saveFilters } from '../persistence';
+import { membersFilters } from '../persistence';
 
 const PAGE_SIZE = 10;
-const SEARCH_DEBOUNCE_MS = 300;
 
 interface MemberRow {
   id: string;
@@ -32,22 +32,15 @@ export function useMembers() {
   const query = useQuery(queryKeys.members, listMemberRows);
   const members = query.data ?? [];
   const [page, setPage] = useState(1);
-  const [search, setSearchState] = useState(() => loadSavedFilters()?.search ?? '');
-  const [debouncedSearch, setDebouncedSearch] = useState(() => (loadSavedFilters()?.search ?? '').trim().toLowerCase());
+  const [saved] = useState(() => membersFilters.load() ?? {});
+  const { search, setSearch: setSearchState, debouncedSearch } = useDebouncedSearch(saved.search ?? '');
   const [membershipStatusFilter, setMembershipStatusFilterState] = useState<MembershipStatus[]>(
-    () => loadSavedFilters()?.membershipStatusFilter ?? [],
+    saved.membershipStatusFilter ?? [],
   );
-  const [entryTypeFilter, setEntryTypeFilterState] = useState<EntryType[]>(
-    () => loadSavedFilters()?.entryTypeFilter ?? [],
-  );
+  const [entryTypeFilter, setEntryTypeFilterState] = useState<EntryType[]>(saved.entryTypeFilter ?? []);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timeout);
-  }, [search]);
-
-  useEffect(() => {
-    saveFilters({ search, membershipStatusFilter, entryTypeFilter });
+    membersFilters.save({ search, membershipStatusFilter, entryTypeFilter });
   }, [search, membershipStatusFilter, entryTypeFilter]);
 
   const resetPage = <T,>(setter: (value: T) => void) => (value: T) => {
@@ -57,7 +50,7 @@ export function useMembers() {
 
   const filtered = members.filter(
     (member) =>
-      (!debouncedSearch || member.name.toLowerCase().includes(debouncedSearch)) &&
+      (!debouncedSearch || member.name.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
       (membershipStatusFilter.length === 0 || membershipStatusFilter.includes(member.membership_status)) &&
       (entryTypeFilter.length === 0 || (!!member.entry_type && entryTypeFilter.includes(member.entry_type))),
   );

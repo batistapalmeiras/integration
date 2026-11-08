@@ -1,10 +1,6 @@
 // Libs
 import styled from 'styled-components';
 
-export const PaginationWrap = styled.div`
-  margin-top: ${({ theme }) => theme.spacing.lg};
-`;
-
 export const SearchRow = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.md};
 `;

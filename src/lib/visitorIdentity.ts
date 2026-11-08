@@ -1,4 +1,6 @@
-const STORAGE_KEY = 'visitor-identity';
+// Local
+import { storedValue } from './storage';
+
 const LEGACY_MEMBERSHIP_KEY = 'membership-interest-phone';
 
 interface VisitorIdentity {
@@ -6,29 +8,32 @@ interface VisitorIdentity {
   name?: string;
 }
 
-export function loadVisitorIdentity(): VisitorIdentity | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as VisitorIdentity;
+const identity = storedValue<VisitorIdentity>('visitor-identity');
 
-    const legacyPhone = localStorage.getItem(LEGACY_MEMBERSHIP_KEY);
-    return legacyPhone ? { phone: legacyPhone } : null;
+function legacyPhone(): string | null {
+  try {
+    return localStorage.getItem(LEGACY_MEMBERSHIP_KEY);
   } catch {
     return null;
   }
 }
 
-export function saveVisitorIdentity(identity: VisitorIdentity): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(identity));
-  } catch {
-  }
+export function loadVisitorIdentity(): VisitorIdentity | null {
+  const saved = identity.load();
+  if (saved) return saved;
+  const phone = legacyPhone();
+  return phone ? { phone } : null;
+}
+
+export function saveVisitorIdentity(value: VisitorIdentity): void {
+  identity.save(value);
 }
 
 export function clearVisitorIdentity(): void {
+  identity.clear();
   try {
-    localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LEGACY_MEMBERSHIP_KEY);
   } catch {
+    return;
   }
 }

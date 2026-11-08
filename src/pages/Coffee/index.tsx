@@ -20,6 +20,7 @@ import { PageHeader } from '../../components/PageHeader';
 // Local
 import { AddButton } from '../../components/AddButton';
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';
+import { EnrollPersonModal } from '../../components/EnrollPersonModal';
 import { PeopleCount } from '../../components/PeopleCount';
 import {
   List,
@@ -34,16 +35,15 @@ import {
 } from '../../components/List';
 import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { StatusPill } from '../../components/StatusPill';
-import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
-import { todayKey, weekdayLabel } from '../../domain/dates';
+import { canMarkCoffeeAttendance, listEnrollableCoffeePeople } from '../../domain/cafeSchedule';
+import { formatDate, todayKey, weekdayLabel } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES } from '../../types/enums';
 import { CreateEventModal } from './components/CreateEventModal';
-import { EnrollPersonModal } from './components/EnrollPersonModal';
-import { formatDate } from './domain';
 import { useCoffee } from './hooks';
 import { AttendeeRow } from './types';
-import { IconAction, PaginationWrap, PersonLink, RowActions } from './styles';
+import { PaginationWrap } from '../../components/ListLayout';
+import { IconAction, PersonLink, RowActions } from './styles';
 
 export function CoffeePage() {
   const navigate = useNavigate();
@@ -86,7 +86,14 @@ export function CoffeePage() {
       />,
     );
   const openEnrollModal = () =>
-    selectedEventId && open(<EnrollPersonModal eventId={selectedEventId} close={close} onEnroll={enrollPerson} />);
+    selectedEventId && open(
+      <EnrollPersonModal
+        title="Adicionar pessoa ao café"
+        loadCandidates={() => listEnrollableCoffeePeople(selectedEventId)}
+        close={close}
+        onEnroll={enrollPerson}
+      />,
+    );
 
   const openEventMenu = () =>
     open(
