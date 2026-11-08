@@ -3,14 +3,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, Form, Select, Skeleton, text, Textarea, TextInput, Typography, useToast } from 'bp-kit';
+import {
+  Button,
+  DatePicker,
+  Empty,
+  Form,
+  Select,
+  Skeleton,
+  text,
+  Textarea,
+  TextInput,
+  Typography,
+  useToast,
+} from 'bp-kit';
 import { Save } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
 import { List, ListItem } from '../../components/List';
 import { MembershipAlerts } from '../../components/MembershipAlerts';
-import { formatTimestampDate } from '../../domain/dates';
+import { formatTimestampDate, isFutureDate } from '../../domain/dates';
 import {
   GENDER_LABELS,
   MARITAL_STATUS_LABELS,
@@ -107,7 +119,7 @@ export function MemberRecordPage() {
           <Typography type="h6">Dados pessoais</Typography>
         </SectionDivider>
         <TextInput label={text.fields.name} control={control} name="name" placeholder={text.fields.fullName} />
-        <TextInput label="Nascimento" control={control} name="birthDate" type="date" />
+        <DatePicker label="Nascimento" control={control} name="birthDate" isDateDisabled={isFutureDate} />
         <Select label="Sexo" control={control} name="gender">
           <option value="">Não informado</option>
           {Object.entries(GENDER_LABELS).map(([value, label]) => (
@@ -137,14 +149,14 @@ export function MemberRecordPage() {
         <TextInput label="Nome do pai" control={control} name="fatherName" />
         <TextInput label="Nome da mãe" control={control} name="motherName" />
         <TextInput label="Cônjuge" control={control} name="spouseName" />
-        <TextInput label="Data de casamento" control={control} name="weddingDate" type="date" />
+        <DatePicker label="Data de casamento" control={control} name="weddingDate" isDateDisabled={isFutureDate} />
         <TextInput label="Quantidade de filhos" control={control} name="childrenCount" inputMode="numeric" />
         <Textarea label="Nomes dos filhos" control={control} name="childrenNames" rows={2} />
 
         <SectionDivider>
           <Typography type="h6">Vida na igreja</Typography>
         </SectionDivider>
-        <TextInput label="Data de batismo" control={control} name="baptismDate" type="date" />
+        <DatePicker label="Data de batismo" control={control} name="baptismDate" isDateDisabled={isFutureDate} />
         <TextInput label="Igreja do batismo" control={control} name="baptismChurch" />
         <Textarea label="Experiência em ministérios" control={control} name="ministryBackground" rows={3} />
         <TextInput label="Situação no sistema antigo" control={control} name="legacyStatus" disabled />

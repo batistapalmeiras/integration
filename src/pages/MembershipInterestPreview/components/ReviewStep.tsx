@@ -10,6 +10,7 @@ import { smallGroupLabel } from '../hooks/usePublicGroups';
 import { LAST_CHURCH_PROMPTS, STEP_TITLES } from '../options';
 import { MembershipFormValues } from '../schema';
 import { ReviewHeader, ReviewItem, ReviewList, ReviewSection, ReviewTitle } from '../styles';
+import { formatDate } from '../../../domain/dates';
 
 interface Props {
   values: MembershipFormValues;
@@ -45,7 +46,7 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
       ['Nome completo', values.name],
       ['Sexo', label(GENDER_LABELS, values.gender)],
       ['CPF', values.cpf],
-      ['Data de nascimento', values.birthDate],
+      ['Data de nascimento', values.birthDate && formatDate(values.birthDate)],
       ['Estado civil', label(MARITAL_STATUS_OPTION_LABELS, values.maritalStatus)],
       ['Nome da mãe', values.motherName],
       ['Nome do pai', values.fatherName],
@@ -60,7 +61,7 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
       ...(values.entryType !== 'baptism'
         ? ([
             ['Igreja de batismo', values.baptismChurch],
-            ['Data do batismo', values.baptismDate],
+            ['Data do batismo', values.baptismDate && formatDate(values.baptismDate)],
           ] as Row[])
         : []),
       [values.entryType ? LAST_CHURCH_PROMPTS[values.entryType].review : 'Igreja anterior', values.lastChurch],

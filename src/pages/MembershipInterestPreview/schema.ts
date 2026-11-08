@@ -2,7 +2,7 @@
 import { isCompletePhone, isSamePhone, isValidCpf, onlyDigits, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
-import { parseTypedDate, todayKey } from '../../domain/dates';
+import { todayKey } from '../../domain/dates';
 import { MaritalStatusOption } from '../../domain/memberRecords';
 
 export type MembershipFormValues = {
@@ -78,8 +78,7 @@ const choice = <T extends string>(values: readonly [T, ...T[]], message: string)
     .refine((value) => (!ENFORCE_REQUIRED && value === '') || (values as readonly string[]).includes(value), message);
 
 function pastDate(value: string): boolean {
-  const key = parseTypedDate(value);
-  return !!key && key >= '1900-01-01' && key <= todayKey();
+  return value >= '1900-01-01' && value <= todayKey();
 }
 
 const personalSchema = z.object({
@@ -89,10 +88,7 @@ const personalSchema = z.object({
   ),
   gender: choice(['male', 'female'], 'Selecione o sexo'),
   cpf: required('seu CPF').refine(whenFilled(isValidCpf), text.validation.cpfInvalid),
-  birthDate: required('sua data de nascimento').refine(
-    whenFilled(pastDate),
-    'Data inválida. Use o formato dd/mm/aaaa.',
-  ),
+  birthDate: required('sua data de nascimento').refine(whenFilled(pastDate), 'Escolha uma data que já passou.'),
   maritalStatus: choice(['single', 'married', 'divorced', 'widowed', 'stable_union'], 'Selecione o estado civil'),
   motherName: z.string(),
   fatherName: z.string(),
@@ -130,7 +126,7 @@ function addressSchema(identificationPhone: string) {
 const journeySchema = z.object({
   entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
   baptismChurch: z.string(),
-  baptismDate: z.string().refine(whenFilled(pastDate), 'Data inválida. Use o formato dd/mm/aaaa.'),
+  baptismDate: z.string().refine(whenFilled(pastDate), 'Escolha uma data que já passou.'),
   lastChurch: required('o nome da igreja'),
 });
 

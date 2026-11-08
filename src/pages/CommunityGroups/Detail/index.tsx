@@ -8,7 +8,6 @@ import {
   ModalActions,
   ModalTitle,
   Skeleton,
-  StatusBadge,
   text,
   Typography,
   useModal,
@@ -19,6 +18,7 @@ import { Pencil, Plus, Trash2, UserMinus } from 'lucide-react';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AddButton } from '../../../components/AddButton';
+import { TonePill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { CommunityGroup, GroupInput, PersonInGroup, WEEK_DAY_LABELS } from '../../../domain/communityGroups';
 import {
@@ -249,9 +249,9 @@ export function CommunityGroupDetailPage() {
                     <NameCell>
                       {person.name}
                       {roleOf(person.name).map((role) => (
-                        <StatusBadge key={role} tone="success">
+                        <TonePill key={role} $tone="success">
                           {role}
-                        </StatusBadge>
+                        </TonePill>
                       ))}
                     </NameCell>
                   </Td>

@@ -1,13 +1,14 @@
 // React
 import { Control } from 'react-hook-form';
 // Libs
-import { TextInput } from 'bp-kit';
+import { DatePicker, TextInput } from 'bp-kit';
 // Local
 import { FieldPair } from '../../../components/PublicPage/styles';
 import { MARITAL_STATUS_OPTIONS } from '../../../domain/memberRecords';
 import { GENDER_OPTIONS } from '../options';
 import { MembershipFormValues } from '../schema';
 import { SelectField } from '../../../components/SelectField';
+import { isFutureDate } from '../../../domain/dates';
 
 interface Props {
   control: Control<MembershipFormValues>;
@@ -26,14 +27,7 @@ export function PersonalStep({ control }: Props) {
           inputMode="numeric"
           placeholder="000.000.000-00"
         />
-        <TextInput
-          label="Data de nascimento"
-          control={control}
-          name="birthDate"
-          mask="date"
-          inputMode="numeric"
-          placeholder="dd/mm/aaaa"
-        />
+        <DatePicker label="Data de nascimento" control={control} name="birthDate" isDateDisabled={isFutureDate} />
       </FieldPair>
       <FieldPair>
         <SelectField control={control} name="gender" label="Sexo" options={GENDER_OPTIONS} />

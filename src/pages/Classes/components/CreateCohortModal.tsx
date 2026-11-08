@@ -3,11 +3,11 @@ import { useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, DatePicker, Form, InfoBox, ModalActions, ModalTitle, text } from 'bp-kit';
+import { Button, DatePicker, Form, InfoBox, ModalActions, ModalTitle, text, parseDateKey, toDateKey } from 'bp-kit';
 import { Plus } from 'lucide-react';
 import { z } from 'zod';
 // Local
-import { formatDate, parseDateKey, toDateKey } from '../../../domain/dates';
+import { formatDate } from '../../../domain/dates';
 
 interface Props {
   close: () => void;
@@ -44,7 +44,9 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
       <ModalTitle onClose={close}>Nova turma de integração</ModalTitle>
       <Form onSubmit={submit}>
         {minDate && (
-          <InfoBox variant="info">A 1ª aula precisa ser em ou depois de {formatDate(minDate)}, data do café agendado.</InfoBox>
+          <InfoBox variant="info">
+            A 1ª aula precisa ser em ou depois de {formatDate(minDate)}, data do café agendado.
+          </InfoBox>
         )}
 
         <DatePicker
@@ -52,7 +54,7 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
           control={control}
           name="firstDate"
           isDateDisabled={minDate ? (date) => toDateKey(date) < minDate : undefined}
-          initialMonth={minDate ? parseDateKey(minDate) : undefined}
+          initialMonth={minDate ? (parseDateKey(minDate) ?? undefined) : undefined}
         />
 
         <ModalActions>
