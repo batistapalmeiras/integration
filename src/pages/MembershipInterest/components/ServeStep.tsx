@@ -8,7 +8,6 @@ import { smallGroupLabel } from '../hooks/usePublicGroups';
 import { LOAD_RETRY_MESSAGE, YES_NO_OPTIONS } from '../../../domain/text';
 import { WANTS_SMALL_GROUP_OPTIONS } from '../options';
 import { MembershipFormValues } from '../schema';
-import { Hint } from '../styles';
 import { SelectField } from '../../../components/SelectField';
 import { ChoiceField } from './ChoiceField';
 
@@ -61,7 +60,9 @@ export function ServeStep({ control, ministries, smallGroups, loadError }: Props
         label="Você deseja fazer parte de um dos nossos Pequenos Grupos?"
         options={WANTS_SMALL_GROUP_OPTIONS}
       />
-      {wantsSmallGroup === 'yes' && <Hint>Que bom! Nossos líderes entrarão em contato com você.</Hint>}
+      {wantsSmallGroup === 'yes' && (
+        <InfoBox variant="success">Que bom! Nossos líderes entrarão em contato com você.</InfoBox>
+      )}
       {wantsSmallGroup === 'already' && (
         <Select label="Qual PG você frequenta?" control={control} name="smallGroupId">
           <option value="">{smallGroups === null ? 'Carregando…' : 'Selecione o PG'}</option>
