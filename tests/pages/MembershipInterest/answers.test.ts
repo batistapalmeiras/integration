@@ -109,7 +109,7 @@ describe('toMembershipFormAnswers', () => {
       entryType: 'baptism',
       baptismDate: '2001-05-06',
       ministryInterests: ['Louvor'],
-      noMinistryInterest: true,
+      wantsToServe: 'no',
       wantsSmallGroup: 'yes',
       smallGroupId: 'pg-1',
       secretSociety: 'no',

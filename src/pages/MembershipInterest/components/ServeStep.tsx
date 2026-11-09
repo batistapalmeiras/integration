@@ -1,12 +1,12 @@
 // React
 import { Control, Controller, useWatch } from 'react-hook-form';
 // Libs
-import { Checkbox, InfoBox, MultiSelect, MultiSelectOption, Select, Textarea, TextInput } from 'bp-kit';
+import { InfoBox, MultiSelect, MultiSelectOption, Select, Textarea, TextInput } from 'bp-kit';
 // Local
 import { SmallGroupOption } from '../../../repositories/publicForms';
 import { smallGroupLabel } from '../hooks/usePublicGroups';
 import { LOAD_RETRY_MESSAGE, YES_NO_OPTIONS } from '../../../domain/text';
-import { WANTS_SMALL_GROUP_OPTIONS } from '../options';
+import { WANTS_SMALL_GROUP_OPTIONS, WANTS_TO_SERVE_OPTIONS } from '../options';
 import { MembershipFormValues } from '../schema';
 import { SelectField } from '../../../components/SelectField';
 import { ChoiceField } from './ChoiceField';
@@ -19,40 +19,36 @@ interface Props {
 }
 
 export function ServeStep({ control, ministries, smallGroups, loadError }: Props) {
-  const noMinistryInterest = useWatch({ control, name: 'noMinistryInterest' });
+  const wantsToServe = useWatch({ control, name: 'wantsToServe' });
   const wantsSmallGroup = useWatch({ control, name: 'wantsSmallGroup' });
   const secretSociety = useWatch({ control, name: 'secretSociety' });
 
   return (
     <>
       {loadError && <InfoBox variant="warning">{LOAD_RETRY_MESSAGE}</InfoBox>}
-      <Controller
+      <SelectField
         control={control}
-        name="ministryInterests"
-        render={({ field, fieldState }) => (
-          <MultiSelect
-            label="Em qual(is) ministério(s) deseja servir? Marque até 3."
-            options={ministries}
-            value={field.value}
-            onChange={field.onChange}
-            max={3}
-            disabled={noMinistryInterest}
-            placeholder="Buscar ministério…"
-            error={fieldState.error?.message}
-          />
-        )}
+        name="wantsToServe"
+        label="Você deseja servir em algum dos nossos ministérios?"
+        options={WANTS_TO_SERVE_OPTIONS}
       />
-      <Controller
-        control={control}
-        name="noMinistryInterest"
-        render={({ field }) => (
-          <Checkbox
-            label="Não posso ou não desejo servir agora"
-            checked={field.value}
-            onChange={(e) => field.onChange(e.target.checked)}
-          />
-        )}
-      />
+      {wantsToServe === 'yes' && (
+        <Controller
+          control={control}
+          name="ministryInterests"
+          render={({ field, fieldState }) => (
+            <MultiSelect
+              label="Em qual(is) ministério(s)? Marque até 3."
+              options={ministries}
+              value={field.value}
+              onChange={field.onChange}
+              max={3}
+              placeholder="Buscar ministério…"
+              error={fieldState.error?.message}
+            />
+          )}
+        />
+      )}
 
       <SelectField
         control={control}

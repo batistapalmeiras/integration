@@ -187,6 +187,11 @@ export const ReviewHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.sm};
+
+  & > button {
+    width: auto;
+    flex-shrink: 0;
+  }
 `;
 
 export const ReviewTitle = styled.h3`
@@ -198,12 +203,13 @@ export const ReviewTitle = styled.h3`
 
 export const ReviewList = styled.dl`
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base};
 `;
 
-export const ReviewItem = styled.div`
+export const ReviewItem = styled.div<{ $wide?: boolean }>`
+  grid-column: ${({ $wide }) => ($wide ? '1 / -1' : 'auto')};
   display: flex;
   flex-direction: column;
   gap: 2px;

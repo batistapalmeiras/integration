@@ -55,7 +55,7 @@ export function MembershipInterestPage() {
 
   const { control, setValue, handleSubmit, getValues, reset, watch } = useForm<MembershipFormValues>({
     resolver,
-    defaultValues: saved?.values ?? EMPTY_MEMBERSHIP_FORM,
+    defaultValues: { ...EMPTY_MEMBERSHIP_FORM, ...saved?.values },
   });
 
   useEffect(() => {

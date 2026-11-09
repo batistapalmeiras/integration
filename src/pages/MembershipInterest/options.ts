@@ -5,6 +5,12 @@ import { ENTRY_TYPE_DESCRIPTIONS, ENTRY_TYPE_LABELS, EntryType, WANTS_SMALL_GROU
 
 export const GENDER_OPTIONS = toOptions(GENDER_LABELS);
 export const WANTS_SMALL_GROUP_OPTIONS = toOptions(WANTS_SMALL_GROUP_LABELS);
+
+export const WANTS_TO_SERVE_LABELS = {
+  yes: 'Sim',
+  no: 'Não posso ou não desejo servir agora',
+};
+export const WANTS_TO_SERVE_OPTIONS = toOptions(WANTS_TO_SERVE_LABELS);
 export const ENTRY_TYPE_OPTIONS = (Object.entries(ENTRY_TYPE_LABELS) as [EntryType, string][]).map(([value, label]) => ({
   value,
   label,

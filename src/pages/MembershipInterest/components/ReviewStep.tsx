@@ -7,7 +7,7 @@ import { YES_NO_LABELS } from '../../../domain/text';
 import { ENTRY_TYPE_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
 import { SmallGroupOption } from '../../../repositories/publicForms';
 import { smallGroupLabel } from '../hooks/usePublicGroups';
-import { LAST_CHURCH_PROMPTS, STEP_TITLES } from '../options';
+import { LAST_CHURCH_PROMPTS, STEP_TITLES, WANTS_TO_SERVE_LABELS } from '../options';
 import { MembershipFormValues } from '../schema';
 import { ReviewHeader, ReviewItem, ReviewList, ReviewSection, ReviewTitle } from '../styles';
 import { formatDate } from '../../../domain/dates';
@@ -18,7 +18,7 @@ interface Props {
   onEdit: (step: number) => void;
 }
 
-type Row = [label: string, value: string];
+type Row = [label: string, value: string, wide?: boolean];
 
 function label<K extends string>(labels: Record<K, string>, value: K | ''): string {
   return value ? labels[value] : '';
@@ -54,7 +54,7 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
     [
       ['E-mail', values.email],
       ['Outro telefone', values.otherPhone],
-      ['Endereço', address],
+      ['Endereço', address, true],
     ],
     [
       ['Forma de entrada', label(ENTRY_TYPE_LABELS, values.entryType)],
@@ -70,7 +70,8 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
     [
       [
         'Ministérios',
-        values.noMinistryInterest ? 'Não pode ou não deseja servir agora' : values.ministryInterests.join(', '),
+        values.wantsToServe === 'no' ? WANTS_TO_SERVE_LABELS.no : values.ministryInterests.join(', '),
+        true,
       ],
       [
         'Pequeno Grupo',
@@ -84,7 +85,7 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
           ? `Sim — ${values.secretSocietyName}`
           : label(YES_NO_LABELS, values.secretSociety),
       ],
-      ['Mensagem', values.membershipNote],
+      ['Mensagem', values.membershipNote, true],
     ],
   ];
 }
@@ -102,8 +103,8 @@ export function ReviewStep({ values, smallGroups, onEdit }: Props) {
             </LinkButton>
           </ReviewHeader>
           <ReviewList>
-            {rows.map(([rowLabel, value]) => (
-              <ReviewItem key={rowLabel}>
+            {rows.map(([rowLabel, value, wide]) => (
+              <ReviewItem key={rowLabel} $wide={wide}>
                 <dt>{rowLabel}</dt>
                 <dd>{value.trim() || 'Não informado'}</dd>
               </ReviewItem>

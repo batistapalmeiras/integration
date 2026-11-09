@@ -5,6 +5,7 @@ const GUTTER = '20px';
 const CARD_PADDING = '40px';
 
 export const Shell = styled.div`
+  display: flow-root;
   min-height: 100dvh;
   background: ${({ theme }) => theme.colors.canvas};
   font-family: ${({ theme }) => theme.typography.fontFamily};

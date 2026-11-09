@@ -28,7 +28,7 @@ export type MembershipFormValues = {
   lastChurch: string;
   statuteAgreed: boolean;
   ministryInterests: string[];
-  noMinistryInterest: boolean;
+  wantsToServe: 'yes' | 'no' | '';
   wantsSmallGroup: 'yes' | 'not_now' | 'already' | '';
   smallGroupId: string;
   secretSociety: 'yes' | 'no' | '';
@@ -59,7 +59,7 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   lastChurch: '',
   statuteAgreed: false,
   ministryInterests: [],
-  noMinistryInterest: false,
+  wantsToServe: '',
   wantsSmallGroup: '',
   smallGroupId: '',
   secretSociety: '',
@@ -134,8 +134,8 @@ const statuteSchema = z.object({
 
 const serveSchema = z
   .object({
+    wantsToServe: choice(['yes', 'no'], 'Selecione uma opção'),
     ministryInterests: z.array(z.string()),
-    noMinistryInterest: z.boolean(),
     wantsSmallGroup: choice(['yes', 'not_now', 'already'], 'Selecione uma opção'),
     smallGroupId: z.string(),
     secretSociety: choice(['yes', 'no'], 'Selecione uma opção'),
@@ -147,8 +147,8 @@ const serveSchema = z
     path: ['ministryInterests'],
     when: () => true,
   })
-  .refine((values) => values.noMinistryInterest || values.ministryInterests.length > 0, {
-    message: 'Selecione ao menos 1 ministério, ou marque que não deseja servir agora',
+  .refine((values) => values.wantsToServe !== 'yes' || values.ministryInterests.length > 0, {
+    message: 'Selecione ao menos 1 ministério',
     path: ['ministryInterests'],
     when: () => true,
   })
