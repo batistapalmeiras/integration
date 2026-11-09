@@ -98,7 +98,6 @@ export interface MemberRecord {
   addressState: string;
   addressReference: string;
   cpf: string;
-  publicNotes: string;
   birthplace: string;
   birthState: string;
   education: string;

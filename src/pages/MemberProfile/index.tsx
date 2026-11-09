@@ -22,6 +22,7 @@ import {
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
+import { NotesPanel } from './components/NotesPanel';
 import {
   Columns,
   Community,
@@ -32,9 +33,6 @@ import {
   Fields,
   FieldValue,
   HeroText,
-  NoteBody,
-  NoteDate,
-  Notes,
   Panel,
   PanelHeader,
   PanelTitle,
@@ -122,21 +120,7 @@ export function MemberProfilePage() {
                 ]
               : [renderPanel(section)],
           )}
-          {pastoralNotes.length > 0 && (
-            <Panel aria-label="Anotações dos líderes">
-              <PanelHeader>
-                <PanelTitle>Anotações dos líderes</PanelTitle>
-              </PanelHeader>
-              <Notes>
-                {pastoralNotes.map((note) => (
-                  <li key={note.id}>
-                    <NoteBody>{note.body}</NoteBody>
-                    <NoteDate>Importada do sistema antigo em {formatTimestampDate(note.createdAt)}</NoteDate>
-                  </li>
-                ))}
-              </Notes>
-            </Panel>
-          )}
+          <NotesPanel personId={id} notes={pastoralNotes} />
         </div>
       </Columns>
 

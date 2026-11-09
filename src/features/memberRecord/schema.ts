@@ -26,7 +26,6 @@ export const memberRecordSchema = z
     addressState: optional,
     addressReference: optional,
     cpf: z.string().refine((value) => value === '' || isValidCpf(value), text.validation.cpfInvalid),
-    publicNotes: optional,
     birthplace: optional,
     birthState: z
       .string()

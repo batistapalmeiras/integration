@@ -6,7 +6,7 @@ import { BaseInput, Button, IconButton, LinkButton, Select } from 'bp-kit';
 import { Plus, Trash2 } from 'lucide-react';
 // Local
 import { Relative } from '../../../repositories/family';
-import { ChildPicker, ChildRow, ChildRows } from '../styles';
+import { ItemPicker, ItemRow, ItemRows } from '../styles';
 
 interface Props {
   value: string[];
@@ -33,11 +33,11 @@ export function ChildrenField({ value, onChange, candidates, knownNames }: Props
   return (
     <BaseInput label="Filhos">
       {value.length > 0 && (
-        <ChildRows>
+        <ItemRows>
           {value.map((id) => {
             const name = knownNames.get(id) ?? '';
             return (
-              <ChildRow key={id}>
+              <ItemRow key={id}>
                 <span>{name}</span>
                 <IconButton
                   type="button"
@@ -49,14 +49,14 @@ export function ChildrenField({ value, onChange, candidates, knownNames }: Props
                   title="Remover"
                   onClick={() => onChange(value.filter((childId) => childId !== id))}
                 />
-              </ChildRow>
+              </ItemRow>
             );
           })}
-        </ChildRows>
+        </ItemRows>
       )}
 
       {picking ? (
-        <ChildPicker>
+        <ItemPicker>
           <Select label="Buscar membro" control={picker.control} name="childId" searchable>
             <option value="">Digite o nome…</option>
             {available.map((candidate) => (
@@ -68,7 +68,7 @@ export function ChildrenField({ value, onChange, candidates, knownNames }: Props
           <LinkButton type="button" onClick={() => setPicking(false)}>
             Cancelar
           </LinkButton>
-        </ChildPicker>
+        </ItemPicker>
       ) : (
         <Button type="button" variant="secondary" onClick={() => setPicking(true)}>
           <Plus size={16} />

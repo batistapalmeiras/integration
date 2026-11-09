@@ -334,7 +334,6 @@ export type Database = {
           other_phone: string | null
           person_id: string
           profession: string | null
-          public_notes: string | null
           spouse_name: string | null
           wedding_date: string | null
           workplace: string | null
@@ -364,7 +363,6 @@ export type Database = {
           other_phone?: string | null
           person_id: string
           profession?: string | null
-          public_notes?: string | null
           spouse_name?: string | null
           wedding_date?: string | null
           workplace?: string | null
@@ -394,7 +392,6 @@ export type Database = {
           other_phone?: string | null
           person_id?: string
           profession?: string | null
-          public_notes?: string | null
           spouse_name?: string | null
           wedding_date?: string | null
           workplace?: string | null

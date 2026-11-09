@@ -157,27 +157,11 @@ export const FieldValue = styled.dd<{ $empty: boolean }>`
   }
 `;
 
-export const Notes = styled.ul`
-  margin: 0;
-  padding: 0;
-  list-style: none;
+export const NoteText = styled.div`
   display: flex;
   flex-direction: column;
-
-  & > li {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: ${({ theme }) => theme.spacing.md} 0;
-  }
-
-  & > li:first-child {
-    padding-top: 0;
-  }
-
-  & > li + li {
-    border-top: 1px solid ${({ theme }) => theme.colors.hairline};
-  }
+  gap: 4px;
+  padding: ${({ theme }) => theme.spacing.sm} 0;
 `;
 
 export const NoteBody = styled.p`
@@ -213,7 +197,7 @@ export const LegacyNote = styled.div`
   background: ${({ theme }) => theme.colors.surfaceSoft};
 `;
 
-export const ChildRows = styled.ul`
+export const ItemRows = styled.ul`
   margin: 0;
   padding: 0;
   list-style: none;
@@ -221,7 +205,7 @@ export const ChildRows = styled.ul`
   border-radius: ${({ theme }) => theme.rounded.sm};
 `;
 
-export const ChildRow = styled.li`
+export const ItemRow = styled.li`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -237,7 +221,7 @@ export const ChildRow = styled.li`
     border-top: 1px solid ${({ theme }) => theme.colors.hairline};
   }
 
-  & > span {
+  & > :first-child {
     min-width: 0;
     overflow-wrap: anywhere;
   }
@@ -248,7 +232,7 @@ export const ChildRow = styled.li`
   }
 `;
 
-export const ChildPicker = styled.div`
+export const ItemPicker = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.xs};

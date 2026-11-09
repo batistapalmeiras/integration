@@ -93,7 +93,6 @@ const PROFILE_COLUMNS = {
   addressState: 'address_state',
   addressReference: 'address_reference',
   cpf: 'cpf',
-  publicNotes: 'public_notes',
   birthplace: 'birthplace',
   birthState: 'birth_state',
   education: 'education',

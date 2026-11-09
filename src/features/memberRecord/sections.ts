@@ -85,11 +85,6 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
       { name: 'addressReference', label: 'Ponto de referência', kind: 'text' },
     ],
   },
-  {
-    id: 'notes',
-    title: 'Observações',
-    fields: [{ name: 'publicNotes', label: 'Observações', kind: 'textarea', rows: 4 }],
-  },
 ];
 
 export function displayValue(record: MemberRecord, field: RecordField): string {

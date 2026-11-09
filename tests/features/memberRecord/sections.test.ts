@@ -27,7 +27,6 @@ const blank: MemberRecord = {
   addressState: '',
   addressReference: '',
   cpf: '',
-  publicNotes: '',
   birthplace: '',
   birthState: '',
   education: '',
