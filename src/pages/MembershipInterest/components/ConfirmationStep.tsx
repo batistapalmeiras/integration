@@ -1,5 +1,6 @@
 // Libs
 import { InfoBox, Typography } from 'bp-kit';
+import { CheckCircle2 } from 'lucide-react';
 // Local
 import { hasCompletedLessons } from '../../../domain/membership';
 import { MembershipEligibility } from '../../../repositories/publicForms';
@@ -14,7 +15,9 @@ export function ConfirmationStep({ eligibility }: Props) {
 
   return (
     <>
-      <InfoBox variant="info">Olá! Recebemos sua ficha de interesse em se tornar membro da nossa igreja.</InfoBox>
+      <InfoBox variant="success" icon={CheckCircle2}>
+        Olá! Recebemos sua ficha de interesse em se tornar membro da nossa igreja.
+      </InfoBox>
 
       <Typography type="p">Agora, é necessário aguardar a próxima reunião do Conselho Administrativo.</Typography>
 
