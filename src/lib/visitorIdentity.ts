@@ -8,6 +8,11 @@ interface VisitorIdentity {
   name?: string;
 }
 
+export interface KnownVisitor {
+  phone: string;
+  name: string;
+}
+
 const identity = storedValue<VisitorIdentity>('visitor-identity');
 
 function legacyPhone(): string | null {
@@ -23,6 +28,11 @@ export function loadVisitorIdentity(): VisitorIdentity | null {
   if (saved) return saved;
   const phone = legacyPhone();
   return phone ? { phone } : null;
+}
+
+export function loadKnownVisitor(): KnownVisitor | null {
+  const saved = loadVisitorIdentity();
+  return saved?.name ? { phone: saved.phone, name: saved.name } : null;
 }
 
 export function saveVisitorIdentity(value: VisitorIdentity): void {

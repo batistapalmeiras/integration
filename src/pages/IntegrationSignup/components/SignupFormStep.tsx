@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, useForm, useWatch } from 'react-hook-form';
 // Libs
 import { Button, Textarea, TextInput } from 'bp-kit';
-import { Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 // Local
 import { ActionBar, Form } from '../../../components/PublicPage/styles';
 import { TeamContactError } from '../../../components/PublicPage/TeamContactError';
@@ -20,9 +20,18 @@ interface Props {
   initialValues?: Partial<SignupFormValues>;
   onSubmit: (values: SignupFormValues) => void;
   onValuesChange: (values: Partial<SignupFormValues>) => void;
+  onBack: () => void;
 }
 
-export function SignupFormStep({ name, submitting, error, initialValues, onSubmit, onValuesChange }: Props) {
+export function SignupFormStep({
+  name,
+  submitting,
+  error,
+  initialValues,
+  onSubmit,
+  onValuesChange,
+  onBack,
+}: Props) {
   const { control, handleSubmit, watch } = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema) as Resolver<SignupFormValues>,
     defaultValues: {
@@ -78,13 +87,17 @@ export function SignupFormStep({ name, submitting, error, initialValues, onSubmi
       {error && <TeamContactError message={error} />}
 
       <ActionBar>
-        <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
+        <Button type="button" variant="secondary" size="lg" onClick={onBack} disabled={submitting}>
+          <ArrowLeft size={16} />
+          Voltar
+        </Button>
+        <Button type="submit" variant="primary" size="lg" disabled={submitting}>
           {submitting ? (
             'Enviando...'
           ) : (
             <>
               <Check size={16} />
-              Confirmar inscrição
+              Confirmar
             </>
           )}
         </Button>

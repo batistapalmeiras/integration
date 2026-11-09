@@ -1,19 +1,15 @@
 // React
 import { useEffect, useState } from 'react';
-// Libs
-import { LinkButton, Skeleton } from 'bp-kit';
 // Local
 import { PublicPage } from '../../components/PublicPage';
-import { TeamContactError } from '../../components/PublicPage/TeamContactError';
-import { clearVisitorIdentity, loadVisitorIdentity, saveVisitorIdentity } from '../../lib/visitorIdentity';
+import { saveVisitorIdentity } from '../../lib/visitorIdentity';
 import { ConfirmationStep } from './components/ConfirmationStep';
 import { IntroStep } from './components/IntroStep';
 import { PhoneStep } from './components/PhoneStep';
 import { SignupFormStep } from './components/SignupFormStep';
-import { useCheckPhone } from './hooks/useCheckPhone';
 import { useIntegrationSignup } from './hooks/useIntegrationSignup';
 import { signupProgress } from './persistence';
-import { SignupStep } from './types';
+import { PROGRESS_STEPS, SignupStep } from './types';
 import { SignupFormValues } from './validators/schema';
 
 export function IntegrationSignupPage() {
@@ -22,46 +18,25 @@ export function IntegrationSignupPage() {
   const [phone, setPhone] = useState(saved?.phone ?? '');
   const [name, setName] = useState(saved?.name ?? '');
   const [formValues, setFormValues] = useState<Partial<SignupFormValues> | undefined>(saved?.formValues);
-  const [autoChecking, setAutoChecking] = useState(false);
-  const { check, error: autoCheckError } = useCheckPhone();
   const { submit, submitting, error, result } = useIntegrationSignup(saved?.result ?? null);
 
   useEffect(() => {
     signupProgress.save({ step, phone, name, formValues, result: result ?? undefined });
   }, [step, phone, name, formValues, result]);
 
-  const continueFromIntro = async () => {
-    const identity = loadVisitorIdentity();
-    if (!identity) {
-      setStep('phone');
-      return;
-    }
-
-    setAutoChecking(true);
-    const foundName = await check(identity.phone);
-    setAutoChecking(false);
-
-    if (!foundName) {
-      setStep('ineligible');
-      return;
-    }
-
-    setPhone(identity.phone);
-    setName(foundName);
-    setStep('form');
+  const goTo = (next: SignupStep) => {
+    setStep(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePhoneFound = (foundPhone: string, foundName: string) => {
     saveVisitorIdentity({ phone: foundPhone, name: foundName });
     setPhone(foundPhone);
     setName(foundName);
-    setStep('form');
+    goTo('form');
   };
 
-  const useAnotherPhone = () => {
-    clearVisitorIdentity();
-    setStep('phone');
-  };
+  const progressIndex = PROGRESS_STEPS.indexOf(step);
 
   const handleFormSubmit = async (values: SignupFormValues) => {
     setFormValues(values);
@@ -70,23 +45,15 @@ export function IntegrationSignupPage() {
   };
 
   return (
-    <PublicPage title="Classe de Integração">
-      {autoChecking && <Skeleton $h="120px" />}
+    <PublicPage
+      title="Classe de Integração"
+      progress={progressIndex >= 0 ? { current: progressIndex + 1, total: PROGRESS_STEPS.length } : undefined}
+    >
+      {step === 'intro' && <IntroStep onContinue={() => goTo('phone')} />}
 
-      {!autoChecking && step === 'intro' && <IntroStep onContinue={continueFromIntro} />}
+      {step === 'phone' && <PhoneStep onFound={handlePhoneFound} onBack={() => goTo('intro')} />}
 
-      {!autoChecking && step === 'ineligible' && (
-        <>
-          <TeamContactError message={autoCheckError} />
-          <LinkButton type="button" onClick={useAnotherPhone}>
-            Usar outro número
-          </LinkButton>
-        </>
-      )}
-
-      {!autoChecking && step === 'phone' && <PhoneStep onFound={handlePhoneFound} />}
-
-      {!autoChecking && step === 'form' && (
+      {step === 'form' && (
         <SignupFormStep
           name={name}
           submitting={submitting}
@@ -94,10 +61,11 @@ export function IntegrationSignupPage() {
           initialValues={formValues}
           onSubmit={handleFormSubmit}
           onValuesChange={setFormValues}
+          onBack={() => goTo('phone')}
         />
       )}
 
-      {!autoChecking && step === 'confirmation' && result && <ConfirmationStep result={result} />}
+      {step === 'confirmation' && result && <ConfirmationStep result={result} />}
     </PublicPage>
   );
 }

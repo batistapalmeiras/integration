@@ -2,12 +2,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, isCompletePhone, text, TextInput, Typography } from 'bp-kit';
+import { Button, isCompletePhone, maskPhone, text, Typography } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { Form } from '../../../components/PublicPage/styles';
 import { TeamContactError } from '../../../components/PublicPage/TeamContactError';
-import { PHONE_PLACEHOLDER } from '../../../domain/text';
+import { NotYouLink, useKnownVisitor, VisitorPhoneField } from '../../../components/PublicPage/VisitorPhoneField';
 import { MembershipInterestCheck } from '../../../repositories/publicForms';
 import { useCheckPhone } from '../hooks/useCheckPhone';
 
@@ -20,9 +20,10 @@ interface Props {
 }
 
 export function IdentificationStep({ onFound }: Props) {
-  const { control, handleSubmit } = useForm<z.infer<typeof identificationSchema>>({
+  const { known, forget } = useKnownVisitor();
+  const { control, handleSubmit, setValue } = useForm<z.infer<typeof identificationSchema>>({
     resolver: zodResolver(identificationSchema),
-    defaultValues: { phone: '' },
+    defaultValues: { phone: known ? maskPhone(known.phone) : '' },
   });
   const { check, checking, error } = useCheckPhone();
 
@@ -38,23 +39,24 @@ export function IdentificationStep({ onFound }: Props) {
         demonstre seu desejo de fazer parte da nossa família. Ela será analisada e aprovada pelo nosso Conselho
         Administrativo.
       </Typography>
-      <Typography type="p">
-        Para começar, digite o número de WhatsApp que você usou na inscrição da Integração. É por ele que a gente
-        encontra o seu cadastro.
-      </Typography>
-      <TextInput
-        label={text.fields.phone}
+      <VisitorPhoneField
         control={control}
-        name="phone"
-        mask="phone"
-        inputMode="numeric"
-        placeholder={PHONE_PLACEHOLDER}
-        autoFocus
+        known={known}
+        prompt="Para começar, digite o número de WhatsApp que você usou na inscrição da Integração. É por ele que a gente encontra o seu cadastro."
+        knownPrompt="Que bom ter você de volta! Toque em Começar para preencher sua ficha."
       />
       {error && <TeamContactError message={error} stage="class" />}
       <Button type="submit" variant="primary" size="lg" fullWidth disabled={checking}>
         {checking ? 'Verificando...' : 'Começar'}
       </Button>
+      {known && (
+        <NotYouLink
+          onClick={() => {
+            forget();
+            setValue('phone', '');
+          }}
+        />
+      )}
     </Form>
   );
 }

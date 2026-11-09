@@ -3,14 +3,14 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, useForm } from 'react-hook-form';
 // Libs
-import { Button, LinkButton, Skeleton } from 'bp-kit';
+import { Button, isSamePhone } from 'bp-kit';
 import { ArrowLeft, ArrowRight, Send } from 'lucide-react';
 // Local
 import { PublicPage } from '../../components/PublicPage';
 import { ActionBar, Form, PageHeading, PageLead, PageTitle } from '../../components/PublicPage/styles';
 import { TeamContactError } from '../../components/PublicPage/TeamContactError';
 import { useLatest } from '../../lib/useLatest';
-import { clearVisitorIdentity, loadVisitorIdentity, saveVisitorIdentity } from '../../lib/visitorIdentity';
+import { saveVisitorIdentity } from '../../lib/visitorIdentity';
 import { MembershipEligibility, MembershipInterestCheck } from '../../repositories/publicForms';
 import { prefilledForm } from './answers';
 import { AddressStep } from './components/AddressStep';
@@ -21,28 +21,25 @@ import { PersonalStep } from './components/PersonalStep';
 import { ReviewStep } from './components/ReviewStep';
 import { ServeStep } from './components/ServeStep';
 import { StatuteStep } from './components/StatuteStep';
-import { useCheckPhone } from './hooks/useCheckPhone';
 import { usePublicGroups } from './hooks/usePublicGroups';
 import { useSubmitMembershipForm } from './hooks/useSubmitMembershipForm';
 import { STEP_TITLES } from './options';
+import { membershipProgress, Screen } from './persistence';
 import { EMPTY_MEMBERSHIP_FORM, MembershipFormValues, stepSchemas } from './schema';
-
-type Screen = 'checking' | 'identification' | 'ineligible' | number | 'review' | 'done';
 
 const LAST_STEP = STEP_TITLES.length - 1;
 
 export function MembershipInterestPage() {
-  const [savedIdentity] = useState(() => loadVisitorIdentity());
-  const [screen, setScreen] = useState<Screen>(savedIdentity ? 'checking' : 'identification');
-  const [phone, setPhone] = useState('');
-  const [eligibility, setEligibility] = useState<MembershipEligibility | null>(null);
-  const [readChapters, setReadChapters] = useState<string[]>([]);
-  const [returnToReview, setReturnToReview] = useState(false);
+  const [saved] = useState(() => membershipProgress.load());
+  const [screen, setScreen] = useState<Screen>(saved?.screen ?? 'identification');
+  const [phone, setPhone] = useState(saved?.phone ?? '');
+  const [eligibility, setEligibility] = useState<MembershipEligibility | null>(saved?.eligibility ?? null);
+  const [readChapters, setReadChapters] = useState<string[]>(saved?.readChapters ?? []);
+  const [returnToReview, setReturnToReview] = useState(saved?.returnToReview ?? false);
   const { ministries, smallGroups, loadError } = usePublicGroups();
-  const { check, error: autoCheckError } = useCheckPhone();
   const { submit, submitting, submitError } = useSubmitMembershipForm();
 
-  const stepRef = useRef(0);
+  const stepRef = useRef(typeof saved?.screen === 'number' ? saved.screen : 0);
   const phoneRef = useLatest(phone);
   const resolver: Resolver<MembershipFormValues> = async (values, context, options) => {
     const stepSchema = stepSchemas(phoneRef.current)[stepRef.current];
@@ -56,10 +53,24 @@ export function MembershipInterestPage() {
     return Object.keys(errors).length > 0 ? { values: {}, errors } : { values, errors: {} };
   };
 
-  const { control, setValue, handleSubmit, getValues, reset } = useForm<MembershipFormValues>({
+  const { control, setValue, handleSubmit, getValues, reset, watch } = useForm<MembershipFormValues>({
     resolver,
-    defaultValues: EMPTY_MEMBERSHIP_FORM,
+    defaultValues: saved?.values ?? EMPTY_MEMBERSHIP_FORM,
   });
+
+  useEffect(() => {
+    const progress = () => ({
+      screen,
+      phone,
+      values: screen === 'done' ? undefined : getValues(),
+      readChapters,
+      returnToReview,
+      eligibility,
+    });
+    membershipProgress.save(progress());
+    const subscription = watch(() => membershipProgress.save(progress()));
+    return () => subscription.unsubscribe();
+  }, [screen, phone, readChapters, returnToReview, eligibility, getValues, watch]);
 
   const go = (next: Screen) => {
     if (typeof next === 'number') stepRef.current = next;
@@ -81,23 +92,8 @@ export function MembershipInterestPage() {
       go('done');
       return;
     }
-    reset(prefilledForm(found));
-    stepRef.current = 0;
-    setScreen(0);
-  };
-
-  useEffect(() => {
-    if (!savedIdentity) return;
-    check(savedIdentity.phone).then((found) => {
-      if (found) open(savedIdentity.phone, found);
-      else setScreen('ineligible');
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const useAnotherPhone = () => {
-    clearVisitorIdentity();
-    setScreen('identification');
+    if (!phone || !isSamePhone(phone, foundPhone)) reset(prefilledForm(found));
+    go(0);
   };
 
   const submitReview = async (e: FormEvent<HTMLFormElement>) => {
@@ -126,17 +122,6 @@ export function MembershipInterestPage() {
       title={title}
       progress={typeof screen === 'number' ? { current: screen + 1, total: STEP_TITLES.length } : undefined}
     >
-      {screen === 'checking' && <Skeleton $h="120px" />}
-
-      {screen === 'ineligible' && (
-        <>
-          <TeamContactError message={autoCheckError} stage="class" />
-          <LinkButton type="button" onClick={useAnotherPhone}>
-            Usar outro número
-          </LinkButton>
-        </>
-      )}
-
       {screen === 'identification' && <IdentificationStep onFound={open} />}
 
       {typeof screen === 'number' && (
@@ -156,8 +141,13 @@ export function MembershipInterestPage() {
           )}
 
           <ActionBar>
-            {screen > 0 && !returnToReview && (
-              <Button type="button" variant="secondary" size="lg" onClick={() => go(screen - 1)}>
+            {!returnToReview && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                onClick={() => go(screen > 0 ? screen - 1 : 'identification')}
+              >
                 <ArrowLeft size={16} />
                 Voltar
               </Button>
