@@ -587,6 +587,7 @@ export type Database = {
           status: string
           statute_agreed_at: string | null
           updated_at: string
+          visited_on: string | null
           whatsapp_opened_at: string | null
         }
         Insert: {
@@ -610,6 +611,7 @@ export type Database = {
           status?: string
           statute_agreed_at?: string | null
           updated_at?: string
+          visited_on?: string | null
           whatsapp_opened_at?: string | null
         }
         Update: {
@@ -633,6 +635,7 @@ export type Database = {
           status?: string
           statute_agreed_at?: string | null
           updated_at?: string
+          visited_on?: string | null
           whatsapp_opened_at?: string | null
         }
         Relationships: [
@@ -1082,6 +1085,15 @@ export type Database = {
         Returns: {
           id: string
           name: string
+        }[]
+      }
+      list_person_notes: {
+        Args: { p_person_id: string }
+        Returns: {
+          author_name: string
+          body: string
+          created_at: string
+          id: string
         }[]
       }
       list_small_groups: {

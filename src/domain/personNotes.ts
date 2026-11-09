@@ -1,4 +1,4 @@
-export interface PastoralNote {
+export interface PersonNote {
   id: string;
   body: string;
   createdAt: string;

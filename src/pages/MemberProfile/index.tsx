@@ -4,7 +4,9 @@ import { useParams } from 'react-router-dom';
 import { Empty, LinkButton, Skeleton, useModal } from 'bp-kit';
 import { HeartHandshake, LucideIcon, Pencil, UsersRound } from 'lucide-react';
 // Components
+import { NotesPanel } from '../../components/NotesPanel';
 import { PageHeader } from '../../components/PageHeader';
+import { Panel, PanelHeader, PanelTitle } from '../../components/Panel';
 // Local
 import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { TonePill } from '../../components/StatusPill';
@@ -16,13 +18,12 @@ import {
   useFamily,
   useMemberRecord,
   useMemberRecordInfo,
-  usePastoralNotes,
+  usePersonNotes,
   usePersonProfileSummary,
 } from '../../queries/person';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
-import { NotesPanel } from './components/NotesPanel';
 import {
   Columns,
   Community,
@@ -33,9 +34,6 @@ import {
   Fields,
   FieldValue,
   HeroText,
-  Panel,
-  PanelHeader,
-  PanelTitle,
   ProfileContent,
   RecordInfo,
   SideColumn,
@@ -57,7 +55,7 @@ export function MemberProfilePage() {
   const { open, close, modal } = useModal('drawer');
   const recordQuery = useMemberRecord(id);
   const summaryQuery = usePersonProfileSummary(id);
-  const notesQuery = usePastoralNotes(id);
+  const notesQuery = usePersonNotes(id);
   const family = useFamily(id).data;
   const info = useMemberRecordInfo(id).data;
   const record = recordQuery.data ?? null;
@@ -68,7 +66,7 @@ export function MemberProfilePage() {
 
   const smallGroup = summaryQuery.data?.smallGroupName ?? null;
   const ministries = summaryQuery.data?.ministryNames ?? [];
-  const pastoralNotes = notesQuery.data ?? [];
+  const notes = notesQuery.data ?? [];
 
   const edit = (section: RecordSection) =>
     open(<EditSectionModal personId={id} record={record} section={section} close={close} />);
@@ -120,7 +118,7 @@ export function MemberProfilePage() {
                 ]
               : [renderPanel(section)],
           )}
-          <NotesPanel personId={id} notes={pastoralNotes} />
+          <NotesPanel personId={id} notes={notes} />
         </div>
       </Columns>
 

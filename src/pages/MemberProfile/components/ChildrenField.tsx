@@ -6,7 +6,7 @@ import { BaseInput, Button, IconButton, LinkButton, Select } from 'bp-kit';
 import { Plus, Trash2 } from 'lucide-react';
 // Local
 import { Relative } from '../../../repositories/family';
-import { ItemPicker, ItemRow, ItemRows } from '../styles';
+import { ItemPicker, ItemRow, ItemRows } from '../../../components/Panel';
 
 interface Props {
   value: string[];

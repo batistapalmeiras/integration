@@ -14,11 +14,9 @@ import {
   Fields,
   FieldValue,
   LegacyNote,
-  Panel,
-  PanelHeader,
-  PanelTitle,
   RelativeLinks,
 } from '../styles';
+import { Panel, PanelHeader, PanelTitle } from '../../../components/Panel';
 
 interface Props {
   record: MemberRecord;

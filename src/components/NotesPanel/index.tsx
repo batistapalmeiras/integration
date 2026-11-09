@@ -15,19 +15,20 @@ import {
 } from 'bp-kit';
 import { Plus, Save, Trash2 } from 'lucide-react';
 // Local
-import { formatTimestampDate } from '../../../domain/dates';
-import { PastoralNote } from '../../../domain/pastoralNotes';
-import { invalidateQueries } from '../../../lib/queryCache';
-import { queryKeys } from '../../../lib/queryKeys';
-import { addPastoralNote, deletePastoralNote } from '../../../repositories/pastoralNotes';
-import { ItemPicker, ItemRow, ItemRows, NoteBody, NoteDate, NoteText, Panel, PanelHeader, PanelTitle } from '../styles';
+import { formatTimestampDate } from '../../domain/dates';
+import { PersonNote } from '../../domain/personNotes';
+import { invalidateQueries } from '../../lib/queryCache';
+import { queryKeys } from '../../lib/queryKeys';
+import { addPersonNote, deletePersonNote } from '../../repositories/personNotes';
+import { ItemPicker, ItemRow, ItemRows, Panel, PanelHeader, PanelTitle } from '../Panel';
+import { NoteBody, NoteDate, NoteText } from './styles';
 
 interface Props {
   personId: string;
-  notes: PastoralNote[];
+  notes: PersonNote[];
 }
 
-const noteOrigin = (note: PastoralNote) =>
+const noteOrigin = (note: PersonNote) =>
   `${note.authorName ?? 'Importada do sistema antigo'} · ${formatTimestampDate(note.createdAt)}`;
 
 export function NotesPanel({ personId, notes }: Props) {
@@ -38,13 +39,13 @@ export function NotesPanel({ personId, notes }: Props) {
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const refresh = () => invalidateQueries(queryKeys.pastoralNotes(personId));
+  const refresh = () => invalidateQueries(queryKeys.personNotes(personId));
 
   const save = async () => {
     if (!user || draft.trim() === '') return;
     setSaving(true);
     try {
-      await addPastoralNote(personId, draft, user.id);
+      await addPersonNote(personId, draft, user.id);
       await refresh();
       setDraft('');
       setWriting(false);
@@ -55,7 +56,7 @@ export function NotesPanel({ personId, notes }: Props) {
     }
   };
 
-  const confirmDelete = (note: PastoralNote) =>
+  const confirmDelete = (note: PersonNote) =>
     open(
       <>
         <ModalTitle onClose={close}>Apagar anotação?</ModalTitle>
@@ -66,7 +67,7 @@ export function NotesPanel({ personId, notes }: Props) {
             variant="danger"
             onClick={async () => {
               try {
-                await deletePastoralNote(note.id);
+                await deletePersonNote(note.id);
                 await refresh();
                 close();
               } catch (e) {

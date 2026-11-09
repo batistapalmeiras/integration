@@ -27,7 +27,7 @@ export const queryKeys = {
   memberRecord: (id: string) => ['person', id, 'record'] as const,
   personFamily: (id: string) => ['person', id, 'family'] as const,
   memberRecordInfo: (id: string) => ['person', id, 'record-info'] as const,
-  pastoralNotes: (id: string) => ['person', id, 'pastoral-notes'] as const,
+  personNotes: (id: string) => ['person', id, 'notes'] as const,
   membershipAlerts: (id: string) => ['person', id, 'membership-alerts'] as const,
 
   coffeeBoard: ['coffee', 'board'] as const,

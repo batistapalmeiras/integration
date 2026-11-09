@@ -7,7 +7,7 @@ import { getPersonLessonMakeups } from '../repositories/lessonMakeups';
 import { getFamily } from '../repositories/family';
 import { getMemberRecord, getMemberRecordInfo } from '../repositories/memberRecords';
 import { listMembershipAlerts } from '../repositories/membership';
-import { listPastoralNotes } from '../repositories/pastoralNotes';
+import { listPersonNotes } from '../repositories/personNotes';
 import { fetchPersonProfileSummary } from '../repositories/people';
 
 export const usePersonSensitive = (personId: string, enabled = true) =>
@@ -23,8 +23,8 @@ export const usePersonMakeups = (personId: string, enabled = true) =>
 export const useMemberRecord = (personId: string) =>
   useQuery(queryKeys.memberRecord(personId), () => getMemberRecord(personId), { enabled: !!personId });
 
-export const usePastoralNotes = (personId: string) =>
-  useQuery(queryKeys.pastoralNotes(personId), () => listPastoralNotes(personId), { enabled: !!personId });
+export const usePersonNotes = (personId: string) =>
+  useQuery(queryKeys.personNotes(personId), () => listPersonNotes(personId), { enabled: !!personId });
 
 export const useMembershipAlerts = (personId: string) =>
   useQuery(queryKeys.membershipAlerts(personId), () => listMembershipAlerts([personId]), { enabled: !!personId });

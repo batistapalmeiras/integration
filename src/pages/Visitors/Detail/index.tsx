@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Empty, Skeleton } from 'bp-kit';
 // Components
+import { NotesPanel } from '../../../components/NotesPanel';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { useVisitorDetail } from '../../../features/visitors';
+import { usePersonNotes } from '../../../queries/person';
 import { FormContent } from '../../../components/FormLayout';
 import { NextStep } from './components/NextStep';
 import { PersonCard } from './components/PersonCard';
@@ -18,6 +20,8 @@ export function VisitorDetailPage() {
   const navigate = useNavigate();
   const detail = useVisitorDetail(id ?? '');
   const { person, loading, error, profileCoffeeDate, profileCohortName } = detail;
+  const showNotes = !!person && person.status !== 'member';
+  const notes = usePersonNotes(showNotes ? person.id : '').data ?? [];
 
   if (loading) return <Skeleton $h="320px" />;
   if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
@@ -38,6 +42,8 @@ export function VisitorDetailPage() {
       />
 
       <NextStep detail={detail} onContactRegistered={() => navigate(AppRoute.Visitors)} />
+
+      {showNotes && <NotesPanel personId={person.id} notes={notes} />}
     </FormContent>
   );
 }
