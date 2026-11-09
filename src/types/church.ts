@@ -10,7 +10,8 @@ export const ENTRY_TYPE_LABELS: Record<EntryType, string> = {
   reconciliation: 'Reconciliação',
 };
 
-export const ENTRY_TYPE_DESCRIPTIONS: Partial<Record<EntryType, string>> = {
+export const ENTRY_TYPE_DESCRIPTIONS: Record<EntryType, string> = {
+  baptism: 'Para quem ainda não é batizado(a) e deseja se batizar na Igreja Batista Palmeiras.',
   transfer_letter: 'Para quem é membro de outra igreja Batista da Convenção Batista Brasileira.',
   acclamation: 'Para quem vem de uma igreja que não é Batista da Convenção Batista Brasileira.',
   reconciliation: 'Para quem foi desligado desta ou de outra igreja Batista e deseja voltar à comunhão.',
