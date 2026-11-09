@@ -6,6 +6,7 @@ import {
   MembershipAlertCode,
   toMembershipAlertCode,
 } from '../domain/membership';
+import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
 
 export async function listMembershipAlerts(personIds: string[]): Promise<MembershipAlert[]> {
@@ -101,5 +102,5 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
         .filter((alert) => alert.person_id === person.id && !alert.resolved)
         .map((alert) => MEMBERSHIP_ALERT_LABELS[alert.code]),
     }))
-    .sort((a, b) => (a.statuteAgreedAt ?? '9999').localeCompare(b.statuteAgreedAt ?? '9999'));
+    .sort(byName);
 }
