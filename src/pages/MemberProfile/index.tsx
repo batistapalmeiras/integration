@@ -12,7 +12,13 @@ import { formatTimestampDate } from '../../domain/dates';
 import { MemberRecord, MEMBERSHIP_STATUS_LABELS, MEMBERSHIP_STATUS_TONES } from '../../domain/memberRecords';
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
 import { errorMessage } from '../../lib/queryCache';
-import { useFamily, useMemberRecord, usePastoralNotes, usePersonProfileSummary } from '../../queries/person';
+import {
+  useFamily,
+  useMemberRecord,
+  useMemberRecordInfo,
+  usePastoralNotes,
+  usePersonProfileSummary,
+} from '../../queries/person';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
@@ -33,6 +39,7 @@ import {
   PanelHeader,
   PanelTitle,
   ProfileContent,
+  RecordInfo,
   SideColumn,
   StatusRow,
 } from './styles';
@@ -54,6 +61,7 @@ export function MemberProfilePage() {
   const summaryQuery = usePersonProfileSummary(id);
   const notesQuery = usePastoralNotes(id);
   const family = useFamily(id).data;
+  const info = useMemberRecordInfo(id).data;
   const record = recordQuery.data ?? null;
   const loadError = errorMessage(recordQuery.error);
 
@@ -131,6 +139,12 @@ export function MemberProfilePage() {
           )}
         </div>
       </Columns>
+
+      {info && (
+        <RecordInfo>
+          <span>Cadastrado em {formatTimestampDate(info.createdAt)}</span>
+        </RecordInfo>
+      )}
 
       {modal}
     </ProfileContent>

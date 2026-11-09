@@ -253,3 +253,13 @@ export const ChildPicker = styled.div`
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.xs};
 `;
+
+export const RecordInfo = styled.p`
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.base};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.muted};
+`;

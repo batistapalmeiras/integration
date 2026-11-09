@@ -42,7 +42,6 @@ function RecordFieldInput({ field, control }: FieldProps) {
           placeholder={field.placeholder}
           maxLength={field.maxLength}
           inputMode={field.numeric ? 'numeric' : undefined}
-          disabled={field.readOnly}
         />
       );
   }

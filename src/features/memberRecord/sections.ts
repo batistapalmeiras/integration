@@ -8,10 +8,9 @@ import {
   MemberRecord,
   MEMBERSHIP_STATUS_LABELS,
 } from '../../domain/memberRecords';
-import { YES_NO_LABELS } from '../../domain/text';
 
 type FieldKind =
-  | { kind: 'text'; placeholder?: string; maxLength?: number; numeric?: boolean; readOnly?: boolean }
+  | { kind: 'text'; placeholder?: string; maxLength?: number; numeric?: boolean }
   | { kind: 'phone' }
   | { kind: 'email' }
   | { kind: 'date' }
@@ -26,8 +25,6 @@ export interface RecordSection {
   fields: RecordField[];
 }
 
-const yesNo: FieldKind = { kind: 'select', labels: YES_NO_LABELS, emptyLabel: 'Não informado' };
-
 export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
   {
     id: 'membership',
@@ -41,9 +38,6 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
       { name: 'phone', label: 'Celular', kind: 'phone' },
       { name: 'email', label: text.fields.email, kind: 'email' },
       { name: 'otherPhone', label: 'Outro telefone para contato', kind: 'phone' },
-      { name: 'preferredContact', label: 'Forma de contato preferida', kind: 'text' },
-      { name: 'readsEmail', label: 'Lê e-mails da igreja?', ...yesNo },
-      { name: 'acceptsVisits', label: 'Aceita visitas?', ...yesNo },
     ],
   },
   {
@@ -75,8 +69,6 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
     fields: [
       { name: 'baptismDate', label: 'Data de batismo', kind: 'date' },
       { name: 'baptismChurch', label: 'Igreja do batismo', kind: 'text' },
-      { name: 'ministryBackground', label: 'Experiência em ministérios', kind: 'textarea', rows: 3 },
-      { name: 'legacyStatus', label: 'Situação no sistema antigo', kind: 'text', readOnly: true },
     ],
   },
   {

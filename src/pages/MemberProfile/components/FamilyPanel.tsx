@@ -36,13 +36,7 @@ function RelativeValue({ relative }: { relative: Relative | null }) {
 }
 
 export function FamilyPanel({ record, family, onEdit }: Props) {
-  const noChildren = family.children.length === 0;
-  const legacyFields: { name: keyof MemberRecord; label: string }[] = [
-    ...(family.spouse ? [] : [LEGACY_FAMILY_FIELDS.spouse]),
-    ...(family.father ? [] : [LEGACY_FAMILY_FIELDS.father]),
-    ...(family.mother ? [] : [LEGACY_FAMILY_FIELDS.mother]),
-    ...(noChildren ? [LEGACY_FAMILY_FIELDS.childrenNames, LEGACY_FAMILY_FIELDS.childrenCount] : []),
-  ];
+  const legacyFields = Object.values(LEGACY_FAMILY_FIELDS);
   const legacy = legacyFields
     .map((field) => ({ label: field.label, value: record[field.name].trim() }))
     .filter((field) => field.value !== '');

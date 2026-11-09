@@ -12,7 +12,6 @@ import {
 } from '../domain/memberRecords';
 import { EntryType, toEntryType } from '../types/church';
 import { nameFilter, phoneDigits } from '../domain/search';
-import { YesNo } from '../domain/text';
 import { supabase } from '../lib/supabase';
 
 interface MemberPendency {
@@ -30,7 +29,11 @@ interface MemberPendencyPage {
 async function personIdsByPhone(search: string): Promise<string[]> {
   const digits = phoneDigits(search);
   if (!digits) return [];
-  const { data, error } = await supabase.from('people').select('id').eq('status', 'member').ilike('phone', `%${digits}%`);
+  const { data, error } = await supabase
+    .from('people')
+    .select('id')
+    .eq('status', 'member')
+    .ilike('phone', `%${digits}%`);
   if (error) throw error;
   return (data ?? []).map((row) => row.id);
 }
@@ -103,16 +106,9 @@ const PROFILE_COLUMNS = {
   childrenNames: 'children_names',
   baptismDate: 'baptism_date',
   baptismChurch: 'baptism_church',
-  ministryBackground: 'ministry_background',
-  preferredContact: 'preferred_contact',
-  legacyStatus: 'legacy_status',
 } as const satisfies Partial<Record<keyof MemberRecord, string>>;
 
 type ProfileKey = keyof typeof PROFILE_COLUMNS;
-
-const toYesNo = (value: unknown): YesNo | '' => (value === true ? 'yes' : value === false ? 'no' : '');
-
-const fromYesNo = (value: YesNo | '') => (value === '' ? null : value === 'yes');
 
 const blankToNull = (value: string) => (value.trim() === '' ? null : value.trim());
 
@@ -149,9 +145,17 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
     membershipStatus: toMembershipStatus(member.membership_status ?? ''),
     birthDate: sensitive.data?.birth_date ?? '',
     childrenCount: profileRow.children_count == null ? '' : String(profileRow.children_count),
-    readsEmail: toYesNo(profileRow.reads_email),
-    acceptsVisits: toYesNo(profileRow.accepts_visits),
   };
+}
+
+export interface MemberRecordInfo {
+  createdAt: string;
+}
+
+export async function getMemberRecordInfo(personId: string): Promise<MemberRecordInfo> {
+  const { data, error } = await supabase.from('people').select('created_at').eq('id', personId).single();
+  if (error) throw error;
+  return { createdAt: data.created_at };
 }
 
 export async function saveMemberRecord(personId: string, record: MemberRecord): Promise<void> {
@@ -166,8 +170,6 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
   profile.address_zip = digitsOrNull(record.addressZip);
   profile.birth_state = blankToNull(record.birthState.toUpperCase());
   profile.children_count = record.childrenCount.trim() === '' ? null : Number(record.childrenCount);
-  profile.reads_email = fromYesNo(record.readsEmail);
-  profile.accepts_visits = fromYesNo(record.acceptsVisits);
 
   const results = await Promise.all([
     supabase
@@ -180,7 +182,7 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
         updated_at: new Date().toISOString(),
       })
       .eq('id', personId),
-    supabase.from('member_profiles').upsert({ person_id: personId, ...profile, updated_at: new Date().toISOString() }),
+    supabase.from('member_profiles').upsert({ person_id: personId, ...profile }),
     supabase
       .from('person_sensitive')
       .upsert({ person_id: personId, birth_date: blankToNull(record.birthDate), updated_at: new Date().toISOString() }),

@@ -44,11 +44,6 @@ export const memberRecordSchema = z
       .refine((value) => value.trim() === '' || /^\d{1,2}$/.test(value.trim()), 'Informe um número'),
     baptismDate: optional,
     baptismChurch: optional,
-    ministryBackground: optional,
-    preferredContact: optional,
-    readsEmail: z.enum(['yes', 'no', '']),
-    acceptsVisits: z.enum(['yes', 'no', '']),
-    legacyStatus: optional,
   })
   .refine((record) => !isSamePhone(record.otherPhone, record.phone), {
     path: ['otherPhone'],

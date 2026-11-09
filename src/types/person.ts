@@ -39,7 +39,7 @@ export interface Person {
   statute_agreed_at: string | null;
   coffee_retry_used: boolean;
   small_group_id: string | null;
-  legacy_id: number | null;
+  imported: boolean;
   membership_status: string | null;
   created_at: string;
   updated_at: string;

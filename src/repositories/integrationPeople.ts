@@ -2,8 +2,8 @@
 import { PersonStatus } from '../types/person';
 import { supabase } from '../lib/supabase';
 
-export function fromIntegration<Query extends { is(column: string, value: null): Query }>(query: Query): Query {
-  return query.is('legacy_id', null);
+export function fromIntegration<Query extends { eq(column: string, value: boolean): Query }>(query: Query): Query {
+  return query.eq('imported', false);
 }
 
 export async function countIntegrationPeopleByStatus(): Promise<Partial<Record<PersonStatus, number>>> {

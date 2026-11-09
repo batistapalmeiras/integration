@@ -26,6 +26,7 @@ export const queryKeys = {
   personMakeups: (id: string) => ['person', id, 'makeups'] as const,
   memberRecord: (id: string) => ['person', id, 'record'] as const,
   personFamily: (id: string) => ['person', id, 'family'] as const,
+  memberRecordInfo: (id: string) => ['person', id, 'record-info'] as const,
   pastoralNotes: (id: string) => ['person', id, 'pastoral-notes'] as const,
   membershipAlerts: (id: string) => ['person', id, 'membership-alerts'] as const,
 

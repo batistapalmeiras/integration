@@ -5,7 +5,7 @@ import { queryKeys } from '../lib/queryKeys';
 import { listMemberBirthdays } from '../repositories/birthdays';
 import { getPersonLessonMakeups } from '../repositories/lessonMakeups';
 import { getFamily } from '../repositories/family';
-import { getMemberRecord } from '../repositories/memberRecords';
+import { getMemberRecord, getMemberRecordInfo } from '../repositories/memberRecords';
 import { listMembershipAlerts } from '../repositories/membership';
 import { listPastoralNotes } from '../repositories/pastoralNotes';
 import { fetchPersonProfileSummary } from '../repositories/people';
@@ -34,3 +34,6 @@ export const usePersonProfileSummary = (personId: string) =>
 
 export const useFamily = (personId: string) =>
   useQuery(queryKeys.personFamily(personId), () => getFamily(personId), { enabled: !!personId });
+
+export const useMemberRecordInfo = (personId: string) =>
+  useQuery(queryKeys.memberRecordInfo(personId), () => getMemberRecordInfo(personId), { enabled: !!personId });

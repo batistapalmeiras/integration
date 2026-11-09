@@ -41,11 +41,6 @@ const blank: MemberRecord = {
   childrenCount: '',
   baptismDate: '',
   baptismChurch: '',
-  ministryBackground: '',
-  preferredContact: '',
-  readsEmail: '',
-  acceptsVisits: '',
-  legacyStatus: '',
 };
 
 const section = (id: string) => MEMBER_RECORD_SECTIONS.find((item) => item.id === id)!;
@@ -70,10 +65,10 @@ describe('member record sections', () => {
 
 describe('displayValue', () => {
   it('shows labels instead of codes and dates in the Brazilian format', () => {
-    const record: MemberRecord = { ...blank, birthDate: '1990-03-07', gender: 'female', readsEmail: 'no' };
+    const record: MemberRecord = { ...blank, birthDate: '1990-03-07', gender: 'female', maritalStatus: 'married' };
     expect(displayValue(record, field('birthDate'))).toBe('07/03/1990');
     expect(displayValue(record, field('gender'))).toBe('Feminino');
-    expect(displayValue(record, field('readsEmail'))).toBe('Não');
+    expect(displayValue(record, field('maritalStatus'))).toBe('Casado(a)');
     expect(displayValue(record, field('membershipStatus'))).toBe('Ativo');
   });
 

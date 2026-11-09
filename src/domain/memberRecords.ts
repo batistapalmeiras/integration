@@ -1,7 +1,7 @@
 // Local
 import { keyParser } from '../lib/parse';
 import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membership';
-import { toOptions, YesNo } from './text';
+import { toOptions } from './text';
 
 export type MembershipStatus = 'active' | 'pending_review' | 'inactive' | 'transferred' | 'removed' | 'deceased';
 
@@ -112,11 +112,6 @@ export interface MemberRecord {
   childrenCount: string;
   baptismDate: string;
   baptismChurch: string;
-  ministryBackground: string;
-  preferredContact: string;
-  readsEmail: YesNo | '';
-  acceptsVisits: YesNo | '';
-  legacyStatus: string;
 }
 
 export const toMembershipStatus = keyParser(MEMBERSHIP_STATUS_LABELS, 'Situação de membresia');

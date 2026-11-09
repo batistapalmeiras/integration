@@ -310,7 +310,6 @@ export type Database = {
       }
       member_profiles: {
         Row: {
-          accepts_visits: boolean | null
           address_city: string | null
           address_complement: string | null
           address_neighborhood: string | null
@@ -329,24 +328,18 @@ export type Database = {
           education: string | null
           father_name: string | null
           gender: string | null
-          legacy_status: string | null
           marital_status: string | null
-          ministry_background: string | null
           mother_name: string | null
           nationality: string | null
           other_phone: string | null
           person_id: string
-          preferred_contact: string | null
           profession: string | null
           public_notes: string | null
-          reads_email: boolean | null
           spouse_name: string | null
-          updated_at: string
           wedding_date: string | null
           workplace: string | null
         }
         Insert: {
-          accepts_visits?: boolean | null
           address_city?: string | null
           address_complement?: string | null
           address_neighborhood?: string | null
@@ -365,24 +358,18 @@ export type Database = {
           education?: string | null
           father_name?: string | null
           gender?: string | null
-          legacy_status?: string | null
           marital_status?: string | null
-          ministry_background?: string | null
           mother_name?: string | null
           nationality?: string | null
           other_phone?: string | null
           person_id: string
-          preferred_contact?: string | null
           profession?: string | null
           public_notes?: string | null
-          reads_email?: boolean | null
           spouse_name?: string | null
-          updated_at?: string
           wedding_date?: string | null
           workplace?: string | null
         }
         Update: {
-          accepts_visits?: boolean | null
           address_city?: string | null
           address_complement?: string | null
           address_neighborhood?: string | null
@@ -401,19 +388,14 @@ export type Database = {
           education?: string | null
           father_name?: string | null
           gender?: string | null
-          legacy_status?: string | null
           marital_status?: string | null
-          ministry_background?: string | null
           mother_name?: string | null
           nationality?: string | null
           other_phone?: string | null
           person_id?: string
-          preferred_contact?: string | null
           profession?: string | null
           public_notes?: string | null
-          reads_email?: boolean | null
           spouse_name?: string | null
-          updated_at?: string
           wedding_date?: string | null
           workplace?: string | null
         }
@@ -595,7 +577,7 @@ export type Database = {
           email: string | null
           entry_type: string | null
           id: string
-          legacy_id: number | null
+          imported: boolean
           membership_interest_sent_at: string | null
           membership_status: string | null
           ministry: string | null
@@ -618,7 +600,7 @@ export type Database = {
           email?: string | null
           entry_type?: string | null
           id?: string
-          legacy_id?: number | null
+          imported?: boolean
           membership_interest_sent_at?: string | null
           membership_status?: string | null
           ministry?: string | null
@@ -641,7 +623,7 @@ export type Database = {
           email?: string | null
           entry_type?: string | null
           id?: string
-          legacy_id?: number | null
+          imported?: boolean
           membership_interest_sent_at?: string | null
           membership_status?: string | null
           ministry?: string | null
@@ -789,7 +771,6 @@ export type Database = {
           created_at: string
           id: string
           must_change_password: boolean
-          name: string | null
           person_id: string
           role: string
         }
@@ -798,7 +779,6 @@ export type Database = {
           created_at?: string
           id: string
           must_change_password?: boolean
-          name?: string | null
           person_id: string
           role: string
         }
@@ -807,7 +787,6 @@ export type Database = {
           created_at?: string
           id?: string
           must_change_password?: boolean
-          name?: string | null
           person_id?: string
           role?: string
         }
