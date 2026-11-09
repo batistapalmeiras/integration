@@ -41,6 +41,7 @@ export interface Person {
   small_group_id: string | null;
   imported: boolean;
   membership_status: string | null;
+  visited_on: string | null;
   created_at: string;
   updated_at: string;
 }

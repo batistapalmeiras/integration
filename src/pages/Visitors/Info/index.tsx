@@ -102,6 +102,7 @@ export function VisitorInfoPage() {
         : [];
 
   const rows = [
+    person.visited_on && { label: 'Visitou em', value: formatDate(person.visited_on) },
     profileCohortName && { label: 'Turma', value: profileCohortName },
     profileCoffeeDate && { label: 'Café', value: formatDate(profileCoffeeDate) },
     !canEditCommunity && profileSmallGroupName && { label: 'Pequeno Grupo', value: profileSmallGroupName },
