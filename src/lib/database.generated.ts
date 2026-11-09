@@ -1062,13 +1062,6 @@ export type Database = {
           lesson_dates: string[]
         }[]
       }
-      integration_team_contacts: {
-        Args: never
-        Returns: {
-          name: string
-          phone: string
-        }[]
-      }
       get_makeup_attendance_context: {
         Args: { p_token: string }
         Returns: {
@@ -1178,22 +1171,6 @@ export type Database = {
           p_phone: string
           p_secret_society: string
           p_small_group_id: string
-          p_wants_small_group: string
-        }
-        Returns: {
-          lessons_attended: number
-          lessons_total: number
-        }[]
-      }
-      submit_membership_interest: {
-        Args: {
-          p_birth_date: string
-          p_entry_type: string
-          p_membership_note: string
-          p_ministry_interests: string[]
-          p_origin_church: string
-          p_phone: string
-          p_secret_society: string
           p_wants_small_group: string
         }
         Returns: {
