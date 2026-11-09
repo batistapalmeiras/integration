@@ -9,6 +9,7 @@ import { PasswordGate } from '../components/PasswordGate';
 import { QueryCacheReset } from '../components/QueryCacheReset';
 // Local
 import { supabase } from '../lib/supabase';
+import { memberProfileSource } from '../repositories/profiles';
 import { HomeRedirect } from './HomeRedirect';
 import { AuthPages, ForgotPasswordPage, LoginPage, ResetPasswordPage } from './pages';
 import { AppRoute } from './paths';
@@ -18,7 +19,7 @@ import { PRIVATE_ROUTES, PUBLIC_ROUTES } from './table';
 export function AppRouter() {
   return (
     <BrowserRouter>
-      <AuthProvider client={supabase}>
+      <AuthProvider client={supabase} profileSource={memberProfileSource}>
         <QueryCacheReset />
         <Suspense fallback={null}>
           <Routes>

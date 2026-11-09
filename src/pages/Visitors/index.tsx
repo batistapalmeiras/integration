@@ -64,7 +64,7 @@ export function VisitorsPage() {
             </Tab>
           </TabBar>
           <SearchRow>
-            <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+            <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
           </SearchRow>
           {view === 'queue' && (
             <QueueChips role="group" aria-label="Filtrar por status">

@@ -94,7 +94,7 @@ export function useCoffee() {
     return selectOpenCoffeeEvents(board.events as CoffeeEvent[], countQueuedFrom(current), todayKey());
   }, [board]);
 
-  const event = events.find((e) => e.id === selectedEventIdState) ?? events[0] ?? null;
+  const event = events.find((e) => e.id === selectedEventIdState) ?? events.at(-1) ?? null;
   const selectedEventId = event?.id ?? null;
 
   const allAttendees = useMemo(
@@ -159,6 +159,8 @@ export function useCoffee() {
   const undoPresence = (row: AttendeeRow, applied: 'came' | 'missed') =>
     changePresence(row.id, row.person.id, applied, row.presence);
 
+  const clearPresence = (row: AttendeeRow) => changePresence(row.id, row.person.id, row.presence, null);
+
   const markCanceled = async (personId: string) => {
     await markCoffeeCanceled(personId, user?.id);
     setQueryData<CoffeeBoard>(queryKeys.coffeeBoard, (current) => ({
@@ -192,6 +194,7 @@ export function useCoffee() {
     enrollPerson,
     setPresence,
     undoPresence,
+    clearPresence,
     markCanceled,
   };
 }

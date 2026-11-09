@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
+import { matchesNameOrPhone } from '../../../domain/search';
 import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
 import { visitorFilters, VisitorView } from '../persistence';
 import { Person } from '../../../features/visitors';
@@ -42,8 +43,7 @@ export function useVisitors() {
     setPage(1);
   };
 
-  const matchesSearch = (person: Person) =>
-    !debouncedSearch || person.name.toLowerCase().includes(debouncedSearch.toLowerCase());
+  const matchesSearch = (person: Person) => matchesNameOrPhone(person, debouncedSearch);
   const queue = rows.filter((person) => VISITOR_QUEUE_STATUSES.includes(person.status));
   const archived = rows.filter((person) => person.status === 'archived');
   const filtered = (view === 'queue' ? queue : archived).filter(

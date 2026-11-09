@@ -8,6 +8,7 @@ import {
   toPersonStatus,
   VISITOR_QUEUE_STATUSES,
 } from '../types/person';
+import { nameOrPhoneFilter } from '../domain/search';
 import { supabase } from '../lib/supabase';
 
 const toPerson = (row: TableRow<'people'>): Person => ({ ...row, status: toPersonStatus(row.status) });
@@ -42,7 +43,7 @@ export async function listPeople({ statusFilter, cohortFilter, search }: ReportF
     .from('people')
     .select('id,name,status,whatsapp_opened_at,class_invite_sent_at,membership_interest_sent_at')
     .in('status', statusFilter.length > 0 ? statusFilter : INTEGRATION_STATUSES);
-  if (search) query = query.ilike('name', `%${search}%`);
+  if (search) query = query.or(nameOrPhoneFilter(search));
   if (cohortPersonIds) query = query.in('id', cohortPersonIds);
 
   const { data, error } = await query;

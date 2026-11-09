@@ -195,3 +195,48 @@ export const ErrorMsg = styled.p`
   color: ${({ theme }) => theme.colors.primaryErrorText};
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
 `;
+
+export const ErrorBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+
+  & > ${ErrorMsg} {
+    margin: 0;
+  }
+`;
+
+export const ContactList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid ${({ theme }) => theme.colors.hairline};
+  border-radius: ${({ theme }) => theme.rounded.md};
+
+  & > li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${({ theme }) => theme.spacing.md};
+    padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.base};
+  }
+
+  & > li + li {
+    border-top: 1px solid ${({ theme }) => theme.colors.hairline};
+  }
+`;
+
+export const ContactName = styled.span`
+  min-width: 0;
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.ink};
+`;
+
+export const ContactLink = styled.a`
+  flex-shrink: 0;
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.primary};
+  text-decoration: none;
+`;

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
+import { matchesNameOrPhone } from '../../../domain/search';
 import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
 import { MembershipStatus } from '../../../domain/memberRecords';
 import { EntryType } from '../../../types/church';
@@ -35,7 +36,7 @@ export function useMembers() {
 
   const filtered = members.filter(
     (member) =>
-      (!debouncedSearch || member.name.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
+      matchesNameOrPhone(member, debouncedSearch) &&
       (membershipStatusFilter.length === 0 || membershipStatusFilter.includes(member.membership_status)) &&
       (entryTypeFilter.length === 0 || (!!member.entry_type && entryTypeFilter.includes(member.entry_type))),
   );

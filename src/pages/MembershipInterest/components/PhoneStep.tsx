@@ -6,7 +6,8 @@ import { Button, text, TextInput, Typography } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
-import { ErrorMsg, Form } from '../../../components/PublicPage/styles';
+import { Form } from '../../../components/PublicPage/styles';
+import { TeamContactError } from '../../../components/PublicPage/TeamContactError';
 import { useCheckPhone } from '../hooks/useCheckPhone';
 import { MembershipEligibility } from '../../../repositories/publicForms';
 
@@ -52,7 +53,7 @@ export function PhoneStep({ onFound }: Props) {
         autoFocus
       />
 
-      {error && <ErrorMsg>{error}</ErrorMsg>}
+      {error && <TeamContactError message={error} />}
 
       <Button type="submit" variant="primary" size="lg" fullWidth disabled={checking}>
         {checking ? 'Verificando...' : 'Continuar'}

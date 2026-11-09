@@ -1,5 +1,5 @@
 // Local
-import { memberRecordSchema } from '../../../src/pages/MemberRecord/schema';
+import { memberRecordSchema } from '../../../src/features/memberRecord/schema';
 
 const cpfError = (cpf: string) => memberRecordSchema.shape.cpf.safeParse(cpf).error?.issues[0]?.message ?? null;
 

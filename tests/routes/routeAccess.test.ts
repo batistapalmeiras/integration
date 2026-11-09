@@ -24,8 +24,8 @@ describe('route access', () => {
   });
 
   it('keeps member records and pastoral screens with the pastor', () => {
-    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/abc/ficha`)).toBe(true);
-    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/abc/ficha`)).toBe(false);
+    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/abc`)).toBe(true);
+    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/abc`)).toBe(false);
     expect(canAccess(UserRole.Admin, AppRoute.Birthdays)).toBe(false);
     expect(canAccess(UserRole.Teacher, AppRoute.Visitors)).toBe(false);
   });

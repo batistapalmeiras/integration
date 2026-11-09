@@ -11,6 +11,7 @@ import {
   toPendencyField,
 } from '../domain/memberRecords';
 import { EntryType, toEntryType } from '../types/church';
+import { nameFilter, phoneDigits } from '../domain/search';
 import { YesNo } from '../domain/text';
 import { supabase } from '../lib/supabase';
 
@@ -26,6 +27,14 @@ interface MemberPendencyPage {
   total: number;
 }
 
+async function personIdsByPhone(search: string): Promise<string[]> {
+  const digits = phoneDigits(search);
+  if (!digits) return [];
+  const { data, error } = await supabase.from('people').select('id').eq('status', 'member').ilike('phone', `%${digits}%`);
+  if (error) throw error;
+  return (data ?? []).map((row) => row.id);
+}
+
 export async function listMemberPendencies(filters: {
   field: PendencyField | null;
   search: string;
@@ -34,7 +43,11 @@ export async function listMemberPendencies(filters: {
 }): Promise<MemberPendencyPage> {
   let query = supabase.from('member_pendencies').select('*', { count: 'exact' }).order('name');
   if (filters.field) query = query.contains('missing_fields', [filters.field]);
-  if (filters.search) query = query.ilike('name', `%${filters.search}%`);
+  if (filters.search) {
+    const ids = await personIdsByPhone(filters.search);
+    const byName = nameFilter(filters.search);
+    query = query.or(ids.length > 0 ? `${byName},person_id.in.(${ids.join(',')})` : byName);
+  }
   const from = (filters.page - 1) * filters.pageSize;
   const { data, count, error } = await query.range(from, from + filters.pageSize - 1);
   if (error) throw error;
@@ -179,6 +192,7 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
 export interface MemberRow {
   id: string;
   name: string;
+  phone: string | null;
   entry_type: EntryType | null;
   membership_status: MembershipStatus;
 }
@@ -186,7 +200,7 @@ export interface MemberRow {
 export async function listMemberRows(): Promise<MemberRow[]> {
   const { data, error } = await supabase
     .from('people')
-    .select('id, name, entry_type, membership_status')
+    .select('id, name, phone, entry_type, membership_status')
     .eq('status', 'member')
     .order('name', { ascending: true });
   if (error) throw error;

@@ -28,7 +28,7 @@ export function MemberPendenciesPage() {
         <PeopleCount count={total} />
 
         <SearchFiltersRow>
-          <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+          <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
           <RawSelect
             aria-label="Pendência"
             size="sm"
@@ -72,7 +72,7 @@ export function MemberPendenciesPage() {
                       <Tr
                         key={row.person_id}
                         $clickable
-                        onClick={() => navigate(`${AppRoute.Members}/${row.person_id}/ficha`)}
+                        onClick={() => navigate(`${AppRoute.Members}/${row.person_id}`)}
                       >
                         <Td $truncate title={row.name}>
                           <NameCell>

@@ -56,7 +56,7 @@ export function EnrollPersonModal<T extends Candidate>({ title, loadCandidates, 
     <>
       <ModalTitle onClose={close}>{title}</ModalTitle>
       <Form onSubmit={submit}>
-        <Select label="Pessoa" control={control} name="personId">
+        <Select label="Pessoa" control={control} name="personId" searchable>
           <option value="">{candidates === null && !loadError ? 'Carregando…' : 'Selecione…'}</option>
           {(candidates ?? []).map((person) => (
             <option key={person.id} value={person.id}>

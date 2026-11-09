@@ -8,9 +8,9 @@ import { createVolunteer, listVolunteers, updateVolunteer } from '../../../repos
 export function useVolunteers() {
   const query = useQuery(queryKeys.volunteers, listVolunteers);
 
-  const addVolunteer = async (email: string, name: string, role: UserRole) => {
-    await createVolunteer({ email, password: defaultVolunteerPassword(), name, role });
-    await invalidateQueries(queryKeys.volunteers);
+  const addVolunteer = async (personId: string, role: UserRole) => {
+    await createVolunteer({ personId, password: defaultVolunteerPassword(), role });
+    await Promise.all([invalidateQueries(queryKeys.volunteers), invalidateQueries(queryKeys.volunteerCandidates)]);
   };
 
   const changeRole = async (id: string, role: UserRole) => {

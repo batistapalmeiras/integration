@@ -56,6 +56,17 @@ const toEligibility = (row: LessonsProgressRow): MembershipEligibility => ({
   lessonsTotal: row.lessons_total,
 });
 
+export interface TeamContact {
+  name: string;
+  phone: string;
+}
+
+export async function listIntegrationTeamContacts(): Promise<TeamContact[]> {
+  const { data, error } = await supabase.rpc('integration_team_contacts');
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getActiveCohortSchedule(): Promise<CohortSchedule | null> {
   const { data, error } = await supabase.rpc('get_active_cohort_schedule');
   if (error) throw error;

@@ -14,7 +14,7 @@ import {
   useModal,
   useToast,
 } from 'bp-kit';
-import { Archive, Check, Pencil, Plus, X, XCircle } from 'lucide-react';
+import { Archive, Check, Eraser, Pencil, Plus, X, XCircle } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
@@ -44,7 +44,9 @@ import { PaginationWrap } from '../../components/ListLayout';
 import { CreateEventModal } from './components/CreateEventModal';
 import { useCoffee } from './hooks';
 import { AttendeeRow } from './types';
-import { IconAction, PersonLink, RowActions } from './styles';
+import { IconAction, PersonLink, PresenceChoices, PresenceTag, RowActions } from './styles';
+
+const PRESENCE_LABELS: Record<'came' | 'missed', string> = { came: 'Veio', missed: 'Faltou' };
 
 export function CoffeePage() {
   const navigate = useNavigate();
@@ -68,6 +70,7 @@ export function CoffeePage() {
     enrollPerson,
     setPresence,
     undoPresence,
+    clearPresence,
     markCanceled,
   } = useCoffee();
   const { open, close, modal } = useModal('drawer');
@@ -175,6 +178,54 @@ export function CoffeePage() {
       onClick: () => undoPresence(attendance, presence).catch(showError),
     });
   };
+  const openChangePresence = (attendance: AttendeeRow) =>
+    open(
+      <>
+        <ModalTitle onClose={close}>Mudar a presença de {attendance.person.name}</ModalTitle>
+        <Typography type="p">
+          Hoje está marcado como <strong>{PRESENCE_LABELS[attendance.presence ?? 'came']}</strong>. Escolha a resposta
+          certa.
+        </Typography>
+        <PresenceChoices>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={attendance.presence === 'came'}
+            onClick={() => {
+              close();
+              markPresence(attendance, 'came');
+            }}
+          >
+            <Check size={16} />
+            Veio
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={attendance.presence === 'missed'}
+            onClick={() => {
+              close();
+              markPresence(attendance, 'missed');
+            }}
+          >
+            <X size={16} />
+            Faltou
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={async () => {
+              close();
+              await clearPresence(attendance).catch(showError);
+            }}
+          >
+            <Eraser size={16} />
+            Tirar a marcação
+          </Button>
+        </PresenceChoices>
+      </>,
+    );
+
   const canChangePresence = (attendance: AttendeeRow) =>
     attendance.presenceEditable && !attendance.person.class_invite_sent_at;
 
@@ -244,15 +295,29 @@ export function CoffeePage() {
                       </PersonLink>
                       {hasActions(attendance) ? (
                         <RowActions>
-                          <IconAction
-                            type="button"
-                            aria-label={`Cancelou: ${attendance.person.name} avisou que não vem`}
-                            title="Cancelou (avisou que não vem)"
-                            onClick={() => confirmCanceled(attendance.person.id, attendance.person.name)}
-                          >
-                            <Archive size={16} />
-                          </IconAction>
-                          {canMark && (
+                          {!(canMark && attendance.presence) && (
+                            <IconAction
+                              type="button"
+                              aria-label={`Cancelou: ${attendance.person.name} avisou que não vem`}
+                              title="Cancelou (avisou que não vem)"
+                              onClick={() => confirmCanceled(attendance.person.id, attendance.person.name)}
+                            >
+                              <Archive size={16} />
+                            </IconAction>
+                          )}
+                          {canMark && attendance.presence && (
+                            <PresenceTag
+                              $tone={attendance.presence === 'came' ? 'success' : 'danger'}
+                              aria-label={`${PRESENCE_LABELS[attendance.presence]}: ${attendance.person.name}. Toque para mudar`}
+                              title="Mudar a presença"
+                              onClick={() => openChangePresence(attendance)}
+                            >
+                              {attendance.presence === 'came' ? <Check size={12} /> : <X size={12} />}
+                              {PRESENCE_LABELS[attendance.presence]}
+                              <Pencil size={10} />
+                            </PresenceTag>
+                          )}
+                          {canMark && !attendance.presence && (
                             <>
                               <IconAction
                                 type="button"
@@ -278,16 +343,14 @@ export function CoffeePage() {
                           )}
                         </RowActions>
                       ) : (
-                        <>
-                          <ListStatusCell>
-                            <StatusPill person={attendance.person} compact />
-                          </ListStatusCell>
-                          <ListChevron
-                            label={`Abrir perfil de ${attendance.person.name}`}
-                            onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}
-                          />
-                        </>
+                        <ListStatusCell>
+                          <StatusPill person={attendance.person} compact />
+                        </ListStatusCell>
                       )}
+                      <ListChevron
+                        label={`Abrir perfil de ${attendance.person.name}`}
+                        onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}
+                      />
                     </ListItemRow>
                   </ListItem>
                 ))}

@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
     return json({ error: 'Apenas administradores ou o pastor podem cadastrar voluntários' }, 403);
   }
 
-  const { email, password, name, role } = await req.json();
-  if (!email || !password || !name || !role) {
+  const { personId, password, role } = await req.json();
+  if (!personId || !password || !role) {
     return json({ error: 'Dados incompletos' }, 400);
   }
 
@@ -46,8 +46,23 @@ Deno.serve(async (req) => {
 
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
+  const { data: person } = await adminClient
+    .from('people')
+    .select('id, email, status')
+    .eq('id', personId)
+    .single();
+  if (!person || person.status !== 'member') {
+    return json({ error: 'Só membros podem ser voluntários' }, 400);
+  }
+  if (!person.email) {
+    return json({ error: 'Cadastre o e-mail do membro antes, porque ele será o login' }, 400);
+  }
+
+  const { data: linked } = await adminClient.from('profiles').select('id').eq('person_id', personId).maybeSingle();
+  if (linked) return json({ error: 'Esse membro já é voluntário' }, 400);
+
   const { data: created, error: createError } = await adminClient.auth.admin.createUser({
-    email,
+    email: person.email,
     password,
     email_confirm: true,
   });
@@ -57,7 +72,7 @@ Deno.serve(async (req) => {
 
   const { error: profileError } = await adminClient
     .from('profiles')
-    .insert({ id: created.user.id, name, role, must_change_password: true });
+    .insert({ id: created.user.id, person_id: personId, role, must_change_password: true });
   if (profileError) {
     await adminClient.auth.admin.deleteUser(created.user.id);
     return json({ error: profileError.message }, 400);

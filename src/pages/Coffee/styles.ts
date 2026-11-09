@@ -1,5 +1,7 @@
 // Libs
 import styled from 'styled-components';
+// Local
+import { TonePill } from '../../components/StatusPill';
 
 export const PersonLink = styled.button`
   flex: 1;
@@ -49,4 +51,21 @@ export const Hint = styled.p`
   color: ${({ theme }) => theme.colors.muted};
   margin-top: 0;
   margin-bottom: ${({ theme }) => theme.spacing.md};
+`;
+
+export const PresenceTag = styled(TonePill).attrs({ as: 'button', type: 'button' })`
+  margin: 0;
+  line-height: inherit;
+  cursor: pointer;
+
+  svg:last-child {
+    opacity: 0.6;
+  }
+`;
+
+export const PresenceChoices = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-top: ${({ theme }) => theme.spacing.base};
 `;

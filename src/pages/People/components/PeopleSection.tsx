@@ -55,7 +55,7 @@ export function PeopleSection() {
       <PeopleCount count={totalCount} />
 
       <SearchFiltersRow>
-        <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+        <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
         <Button variant="secondary" size="sm" onClick={openFilters}>
           <SlidersHorizontal size={16} />
           Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}

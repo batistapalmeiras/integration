@@ -5,43 +5,37 @@ import { UserRole } from '../../../types/enums';
 import {
   deleteVolunteer,
   getVolunteer,
-  getVolunteerEmail,
-  updateVolunteer as saveVolunteer,
-  updateVolunteerEmail,
+  updateVolunteer,
+  updateVolunteerIdentity,
+  VolunteerIdentity,
   VolunteerRow,
 } from '../../../repositories/volunteers';
 
 export function useVolunteerDetail(id: string) {
-  const volunteerQuery = useQuery(queryKeys.volunteer(id), () => getVolunteer(id), { enabled: !!id });
-  const emailQuery = useQuery(queryKeys.volunteerEmail(id), () => getVolunteerEmail(id), { enabled: !!id });
+  const query = useQuery(queryKeys.volunteer(id), () => getVolunteer(id), { enabled: !!id });
 
-  const updateProfile = async (fields: Partial<Pick<VolunteerRow, 'name' | 'role' | 'active'>>) => {
-    setQueryData(queryKeys.volunteer(id), await saveVolunteer(id, fields));
+  const save = async (fields: Partial<Pick<VolunteerRow, 'role' | 'active'>>) => {
+    setQueryData(queryKeys.volunteer(id), await updateVolunteer(id, fields));
     invalidateQueries(queryKeys.volunteers, { refetchActive: false });
   };
 
-  const updateVolunteer = (name: string, role: UserRole) => updateProfile({ name, role });
-
-  const updateEmail = async (newEmail: string) => {
-    await updateVolunteerEmail(id, newEmail);
-    setQueryData(queryKeys.volunteerEmail(id), newEmail);
-  };
-
-  const setActive = (active: boolean) => updateProfile({ active });
-
   const removeVolunteer = async () => {
     await deleteVolunteer(id);
-    await invalidateQueries(queryKeys.volunteers, { refetchActive: false });
+    await Promise.all([
+      invalidateQueries(queryKeys.volunteers, { refetchActive: false }),
+      invalidateQueries(queryKeys.volunteerCandidates, { refetchActive: false }),
+    ]);
   };
 
   return {
-    volunteer: volunteerQuery.data ?? null,
-    email: emailQuery.data ?? null,
-    loading: volunteerQuery.loading || emailQuery.loading,
-    error: errorMessage(volunteerQuery.error),
-    updateVolunteer,
-    updateEmail,
-    setActive,
+    volunteer: query.data ?? null,
+    loading: query.loading,
+    error: errorMessage(query.error),
+    saveVolunteer: async (identity: VolunteerIdentity, role: UserRole) => {
+      await updateVolunteerIdentity(id, identity);
+      await save({ role });
+    },
+    setActive: (active: boolean) => save({ active }),
     removeVolunteer,
   };
 }

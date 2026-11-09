@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { LinkButton, Skeleton } from 'bp-kit';
 // Local
 import { PublicPage } from '../../components/PublicPage';
-import { ErrorMsg } from '../../components/PublicPage/styles';
+import { TeamContactError } from '../../components/PublicPage/TeamContactError';
 import { clearVisitorIdentity, loadVisitorIdentity, saveVisitorIdentity } from '../../lib/visitorIdentity';
 import { MembershipEligibility } from '../../repositories/publicForms';
 import { ConfirmationStep } from './components/ConfirmationStep';
@@ -74,7 +74,7 @@ export function MembershipInterestPage() {
 
       {!autoChecking && step === 'ineligible' && (
         <>
-          <ErrorMsg>{autoCheckError}</ErrorMsg>
+          <TeamContactError message={autoCheckError} />
           <LinkButton type="button" onClick={useAnotherPhone}>
             Usar outro número
           </LinkButton>

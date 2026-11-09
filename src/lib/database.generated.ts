@@ -512,6 +512,27 @@ export type Database = {
         }
         Relationships: []
       }
+      parent_links: {
+        Row: {
+          child_id: string
+          created_at: string
+          parent_id: string
+          role: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          parent_id: string
+          role: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          parent_id?: string
+          role?: string
+        }
+        Relationships: []
+      }
       pastoral_notes: {
         Row: {
           body: string
@@ -768,7 +789,8 @@ export type Database = {
           created_at: string
           id: string
           must_change_password: boolean
-          name: string
+          name: string | null
+          person_id: string
           role: string
         }
         Insert: {
@@ -776,7 +798,8 @@ export type Database = {
           created_at?: string
           id: string
           must_change_password?: boolean
-          name: string
+          name?: string | null
+          person_id: string
           role: string
         }
         Update: {
@@ -784,8 +807,49 @@ export type Database = {
           created_at?: string
           id?: string
           must_change_password?: boolean
-          name?: string
+          name?: string | null
+          person_id?: string
           role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "profiles_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "profiles_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spouse_links: {
+        Row: {
+          created_at: string
+          person_a_id: string
+          person_b_id: string
+        }
+        Insert: {
+          created_at?: string
+          person_a_id: string
+          person_b_id: string
+        }
+        Update: {
+          created_at?: string
+          person_a_id?: string
+          person_b_id?: string
         }
         Relationships: []
       }
@@ -974,6 +1038,14 @@ export type Database = {
         Args: { p_lesson_dates: string[]; p_name: string }
         Returns: string
       }
+      current_profile: {
+        Args: never
+        Returns: {
+          id: string
+          name: string
+          role: string
+        }[]
+      }
       current_role: { Args: never; Returns: string }
       find_membership_interest_person: {
         Args: { p_phone: string }
@@ -985,6 +1057,13 @@ export type Database = {
         Returns: {
           cohort_name: string
           lesson_dates: string[]
+        }[]
+      }
+      integration_team_contacts: {
+        Args: never
+        Returns: {
+          name: string
+          phone: string
         }[]
       }
       get_makeup_attendance_context: {
@@ -1041,6 +1120,16 @@ export type Database = {
         Args: { p_cohort_id: string; p_lesson_dates: string[] }
         Returns: undefined
       }
+      set_family: {
+        Args: {
+          p_child_ids?: string[]
+          p_father_id?: string
+          p_mother_id?: string
+          p_person_id: string
+          p_spouse_id?: string
+        }
+        Returns: undefined
+      }
       submit_integration_signup: {
         Args: {
           p_attending_since: string
@@ -1074,6 +1163,14 @@ export type Database = {
           lessons_attended: number
           lessons_total: number
         }[]
+      }
+      update_volunteer_identity: {
+        Args: { p_email: string; p_name: string; p_phone: string; p_profile_id: string }
+        Returns: undefined
+      }
+      update_own_identity: {
+        Args: { p_email: string; p_name: string }
+        Returns: undefined
       }
     }
     Enums: {

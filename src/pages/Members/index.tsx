@@ -60,7 +60,7 @@ export function MembersPage() {
       {!loading && !error && <PeopleCount count={totalCount} />}
 
       <SearchFiltersRow>
-        <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome…" />
+        <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
         <Button variant="secondary" size="sm" onClick={openFilters}>
           <SlidersHorizontal size={16} />
           Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
@@ -98,7 +98,7 @@ export function MembersPage() {
                   <Tr
                     key={member.id}
                     $clickable={canOpenRecord}
-                    onClick={canOpenRecord ? () => navigate(`${AppRoute.Members}/${member.id}/ficha`) : undefined}
+                    onClick={canOpenRecord ? () => navigate(`${AppRoute.Members}/${member.id}`) : undefined}
                   >
                     <Td $truncate title={member.name}>
                       {member.name}

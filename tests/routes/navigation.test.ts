@@ -28,6 +28,6 @@ describe('integration team module', () => {
 describe('active menu item', () => {
   it('picks the most specific path, so Pendências does not light up Membros', () => {
     expect(activeNavPath('/membros/pendencias', [AppRoute.Members, AppRoute.MemberPendencies])).toBe(AppRoute.MemberPendencies);
-    expect(activeNavPath('/membros/123/ficha', [AppRoute.Members, AppRoute.MemberPendencies])).toBe(AppRoute.Members);
+    expect(activeNavPath('/membros/123', [AppRoute.Members, AppRoute.MemberPendencies])).toBe(AppRoute.Members);
   });
 });

@@ -1,4 +1,5 @@
 // Local
+import { byName } from '../domain/text';
 import {
   CommunityGroup,
   CommunityGroupWithCount,
@@ -154,7 +155,7 @@ async function listMinistryPeople(id: string): Promise<PersonInGroup[]> {
     .select('person:people(id, name)')
     .eq('ministry_id', id);
   if (error) throw error;
-  return (data ?? []).map((row) => row.person).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  return (data ?? []).map((row) => row.person).sort(byName);
 }
 
 export async function setPersonMinistries(personId: string, ministryIds: string[]): Promise<void> {

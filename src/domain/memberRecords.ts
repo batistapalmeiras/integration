@@ -16,6 +16,15 @@ export const MEMBERSHIP_STATUS_LABELS: Record<MembershipStatus, string> = {
   deceased: 'Falecido',
 };
 
+export const MEMBERSHIP_STATUS_TONES: Record<MembershipStatus, 'success' | 'warning' | 'neutral'> = {
+  active: 'success',
+  pending_review: 'warning',
+  inactive: 'neutral',
+  transferred: 'neutral',
+  removed: 'neutral',
+  deceased: 'neutral',
+};
+
 export type Gender = 'male' | 'female';
 
 export const GENDER_LABELS: Record<Gender, string> = {

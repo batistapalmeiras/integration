@@ -95,7 +95,7 @@ export function BirthdaysPage() {
             const age = birthdayAgeLabel(birthday.birthDate, currentYear, today);
             return (
               <ListItem key={birthday.personId} $selected={isToday}>
-                <RowButton type="button" onClick={() => navigate(`${AppRoute.Members}/${birthday.personId}/ficha`)}>
+                <RowButton type="button" onClick={() => navigate(`${AppRoute.Members}/${birthday.personId}`)}>
                   <DateBadge date={birthday.birthDate} strong={isToday} />
                   <ListGrow>
                     <Name>{birthday.name}</Name>

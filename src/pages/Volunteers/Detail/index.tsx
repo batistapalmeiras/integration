@@ -16,6 +16,8 @@ import {
   text,
   TextInput,
   Typography,
+  maskPhone,
+  onlyDigits,
   useAuthCtx,
   useModal,
   useToast,
@@ -35,6 +37,7 @@ import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
 const schema = z.object({
   name: z.string().min(1, text.validation.required('o nome')),
   email: z.string().email(text.validation.emailInvalid),
+  phone: z.string().refine((value) => [0, 10, 11].includes(onlyDigits(value).length), text.validation.phoneIncomplete),
   role: z.nativeEnum(UserRole, { message: text.validation.selectRequired('o cargo') }),
 });
 
@@ -46,8 +49,7 @@ export function VolunteerDetailPage() {
   const { user } = useAuthCtx();
   const { show: showToast, toast } = useToast();
   const { open, close, modal } = useModal('drawer');
-  const { volunteer, email, loading, error, updateVolunteer, updateEmail, setActive, removeVolunteer } =
-    useVolunteerDetail(id ?? '');
+  const { volunteer, loading, error, saveVolunteer, setActive, removeVolunteer } = useVolunteerDetail(id ?? '');
 
   const isPastor = user?.role === UserRole.Pastor;
   const roleOptions = Array.from(new Set([...assignableRoles(user?.role), ...(volunteer ? [volunteer.role] : [])]));
@@ -63,23 +65,26 @@ export function VolunteerDetailPage() {
     formState: { isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    values: volunteer ? { name: volunteer.name, role: volunteer.role, email: email ?? '' } : undefined,
+    values: volunteer
+      ? {
+          name: volunteer.name,
+          role: volunteer.role,
+          email: volunteer.email ?? '',
+          phone: maskPhone(volunteer.phone ?? ''),
+        }
+      : undefined,
   });
 
   if (loading) return <Skeleton $h="320px" />;
   if (error || !volunteer) return <Empty title="Voluntário não encontrado" description={error ?? ''} />;
 
   const submit = handleSubmit(async (values) => {
-    await updateVolunteer(values.name, values.role);
-    if (values.email !== email) {
-      try {
-        await updateEmail(values.email);
-      } catch (e) {
-        showToast(e instanceof Error ? e.message : 'Não foi possível alterar o e-mail.');
-        return;
-      }
+    try {
+      await saveVolunteer({ name: values.name, email: values.email, phone: values.phone }, values.role);
+      showToast('Dados salvos.');
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Não foi possível salvar.');
     }
-    showToast('Dados salvos.');
   });
 
   const toggleActive = async () => {
@@ -138,6 +143,15 @@ export function VolunteerDetailPage() {
           name="email"
           type="email"
           placeholder={text.fields.emailPlaceholder}
+          disabled={!canEdit}
+        />
+        <TextInput
+          label={text.fields.phone}
+          control={control}
+          name="phone"
+          mask="phone"
+          inputMode="tel"
+          placeholder="(31) 99999-9999"
           disabled={!canEdit}
         />
         <Select label="Cargo" control={control} name="role">

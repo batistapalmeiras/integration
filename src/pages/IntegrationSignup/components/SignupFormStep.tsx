@@ -6,7 +6,8 @@ import { Resolver, useForm, useWatch } from 'react-hook-form';
 import { Button, Textarea, TextInput } from 'bp-kit';
 import { Check } from 'lucide-react';
 // Local
-import { ActionBar, ErrorMsg, Form } from '../../../components/PublicPage/styles';
+import { ActionBar, Form } from '../../../components/PublicPage/styles';
+import { TeamContactError } from '../../../components/PublicPage/TeamContactError';
 import { SelectField } from '../../../components/SelectField';
 import { MARITAL_STATUS_OPTIONS } from '../../../domain/memberRecords';
 import { YES_NO_OPTIONS } from '../../../domain/text';
@@ -74,7 +75,7 @@ export function SignupFormStep({ name, submitting, error, initialValues, onSubmi
         />
       )}
 
-      {error && <ErrorMsg>{error}</ErrorMsg>}
+      {error && <TeamContactError message={error} />}
 
       <ActionBar>
         <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>

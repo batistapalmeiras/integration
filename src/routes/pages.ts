@@ -38,7 +38,7 @@ export const PeoplePage = lazyPage(() => import('../pages/People'), 'PeoplePage'
 
 export const MembersPage = lazyPage(() => import('../pages/Members'), 'MembersPage');
 export const MemberPendenciesPage = lazyPage(() => import('../pages/MemberPendencies'), 'MemberPendenciesPage');
-export const MemberRecordPage = lazyPage(() => import('../pages/MemberRecord'), 'MemberRecordPage');
+export const MemberProfilePage = lazyPage(() => import('../pages/MemberProfile'), 'MemberProfilePage');
 export const BirthdaysPage = lazyPage(() => import('../pages/Birthdays'), 'BirthdaysPage');
 export const MinistriesPage = lazyPage(() => import('../pages/CommunityGroups/Ministries'), 'MinistriesPage');
 export const SmallGroupsPage = lazyPage(() => import('../pages/CommunityGroups/SmallGroups'), 'SmallGroupsPage');
