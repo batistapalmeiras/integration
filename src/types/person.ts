@@ -30,7 +30,6 @@ export interface Person {
   age: number | null;
   email: string | null;
   status: PersonStatus;
-  notes: string | null;
   whatsapp_opened_at: string | null;
   class_invite_sent_at: string | null;
   signup_window_from: string | null;

@@ -577,12 +577,9 @@ export type Database = {
           imported: boolean
           membership_interest_sent_at: string | null
           membership_status: string | null
-          ministry: string | null
           name: string
-          notes: string | null
           phone: string | null
           signup_window_from: string | null
-          small_group: string | null
           small_group_id: string | null
           status: string
           statute_agreed_at: string | null
@@ -601,12 +598,9 @@ export type Database = {
           imported?: boolean
           membership_interest_sent_at?: string | null
           membership_status?: string | null
-          ministry?: string | null
           name: string
-          notes?: string | null
           phone?: string | null
           signup_window_from?: string | null
-          small_group?: string | null
           small_group_id?: string | null
           status?: string
           statute_agreed_at?: string | null
@@ -625,12 +619,9 @@ export type Database = {
           imported?: boolean
           membership_interest_sent_at?: string | null
           membership_status?: string | null
-          ministry?: string | null
           name?: string
-          notes?: string | null
           phone?: string | null
           signup_window_from?: string | null
-          small_group?: string | null
           small_group_id?: string | null
           status?: string
           statute_agreed_at?: string | null
