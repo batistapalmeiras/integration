@@ -991,10 +991,37 @@ export type Database = {
       check_membership_interest_phone: {
         Args: { p_phone: string }
         Returns: {
+          address_city: string
+          address_complement: string
+          address_neighborhood: string
+          address_number: string
+          address_state: string
+          address_street: string
+          address_zip: string
           already_submitted: boolean
+          baptism_church: string
+          baptism_date: string
+          baptism_info: string
+          birth_date: string
+          cpf: string
+          email: string
+          entry_type: string
+          father_name: string
+          gender: string
           lessons_attended: number
           lessons_total: number
+          marital_status: string
+          marital_status_story: string
+          membership_note: string
+          ministry_interests: string[]
+          mother_name: string
+          origin_church: string
+          other_phone: string
           person_name: string
+          previous_church: string
+          secret_society: string
+          small_group_id: string
+          wants_small_group: string
         }[]
       }
       check_welcome_coffee_phone: {
@@ -1124,6 +1151,40 @@ export type Database = {
         Args: { p_notes: string; p_token: string }
         Returns: undefined
       }
+      submit_membership_form: {
+        Args: {
+          p_address_city: string
+          p_address_complement: string
+          p_address_neighborhood: string
+          p_address_number: string
+          p_address_state: string
+          p_address_street: string
+          p_address_zip: string
+          p_baptism_church: string
+          p_baptism_date: string
+          p_birth_date: string
+          p_cpf: string
+          p_email: string
+          p_entry_type: string
+          p_father_name: string
+          p_gender: string
+          p_last_church: string
+          p_marital_status: string
+          p_membership_note: string
+          p_ministry_interests: string[]
+          p_mother_name: string
+          p_name: string
+          p_other_phone: string
+          p_phone: string
+          p_secret_society: string
+          p_small_group_id: string
+          p_wants_small_group: string
+        }
+        Returns: {
+          lessons_attended: number
+          lessons_total: number
+        }[]
+      }
       submit_membership_interest: {
         Args: {
           p_birth_date: string
@@ -1143,6 +1204,13 @@ export type Database = {
       update_volunteer_identity: {
         Args: { p_email: string; p_name: string; p_phone: string; p_profile_id: string }
         Returns: undefined
+      }
+      team_contacts: {
+        Args: { p_stage: string }
+        Returns: {
+          name: string
+          phone: string
+        }[]
       }
       update_own_identity: {
         Args: { p_email: string; p_name: string }

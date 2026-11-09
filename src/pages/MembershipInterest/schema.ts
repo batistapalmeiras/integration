@@ -3,14 +3,14 @@ import { isCompletePhone, isSamePhone, isValidCpf, onlyDigits, text } from 'bp-k
 import { z } from 'zod';
 // Local
 import { todayKey } from '../../domain/dates';
-import { MaritalStatusOption } from '../../domain/memberRecords';
+import { MaritalStatus } from '../../domain/memberRecords';
 
 export type MembershipFormValues = {
   name: string;
   gender: 'male' | 'female' | '';
   cpf: string;
   birthDate: string;
-  maritalStatus: MaritalStatusOption | '';
+  maritalStatus: MaritalStatus | '';
   motherName: string;
   fatherName: string;
   email: string;
@@ -67,15 +67,11 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   membershipNote: '',
 };
 
-export const ENFORCE_REQUIRED = true;
-
 const required = (what: string) =>
-  z.string().refine((value) => !ENFORCE_REQUIRED || value.trim() !== '', text.validation.required(what));
+  z.string().refine((value) => value.trim() !== '', text.validation.required(what));
 const whenFilled = (check: (value: string) => boolean) => (value: string) => value.trim() === '' || check(value);
 const choice = <T extends string>(values: readonly [T, ...T[]], message: string) =>
-  z
-    .string()
-    .refine((value) => (!ENFORCE_REQUIRED && value === '') || (values as readonly string[]).includes(value), message);
+  z.string().refine((value) => (values as readonly string[]).includes(value), message);
 
 function pastDate(value: string): boolean {
   return value >= '1900-01-01' && value <= todayKey();
@@ -133,7 +129,7 @@ const journeySchema = z.object({
 const statuteSchema = z.object({
   statuteAgreed: z
     .boolean()
-    .refine((agreed) => !ENFORCE_REQUIRED || agreed, 'É necessário concordar com o Estatuto para continuar.'),
+    .refine((agreed) => agreed, 'É necessário concordar com o Estatuto para continuar.'),
 });
 
 const serveSchema = z
@@ -151,17 +147,17 @@ const serveSchema = z
     path: ['ministryInterests'],
     when: () => true,
   })
-  .refine((values) => !ENFORCE_REQUIRED || values.noMinistryInterest || values.ministryInterests.length > 0, {
+  .refine((values) => values.noMinistryInterest || values.ministryInterests.length > 0, {
     message: 'Selecione ao menos 1 ministério, ou marque que não deseja servir agora',
     path: ['ministryInterests'],
     when: () => true,
   })
-  .refine((values) => !ENFORCE_REQUIRED || values.wantsSmallGroup !== 'already' || values.smallGroupId !== '', {
+  .refine((values) => values.wantsSmallGroup !== 'already' || values.smallGroupId !== '', {
     message: 'Selecione o PG que você frequenta',
     path: ['smallGroupId'],
     when: () => true,
   })
-  .refine((values) => !ENFORCE_REQUIRED || values.secretSociety !== 'yes' || values.secretSocietyName.trim() !== '', {
+  .refine((values) => values.secretSociety !== 'yes' || values.secretSocietyName.trim() !== '', {
     message: 'Conte qual é',
     path: ['secretSocietyName'],
     when: () => true,

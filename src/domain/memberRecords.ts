@@ -32,23 +32,17 @@ export const GENDER_LABELS: Record<Gender, string> = {
   female: 'Feminino',
 };
 
-export type MaritalStatus = 'single' | 'married' | 'widowed' | 'divorced';
+export type MaritalStatus = 'single' | 'married' | 'widowed' | 'divorced' | 'stable_union';
 
 export const MARITAL_STATUS_LABELS: Record<MaritalStatus, string> = {
   single: 'Solteiro(a)',
   married: 'Casado(a)',
   divorced: 'Divorciado(a)',
   widowed: 'Viúvo(a)',
-};
-
-export type MaritalStatusOption = MaritalStatus | 'stable_union';
-
-export const MARITAL_STATUS_OPTION_LABELS: Record<MaritalStatusOption, string> = {
-  ...MARITAL_STATUS_LABELS,
   stable_union: 'União estável',
 };
 
-export const MARITAL_STATUS_OPTIONS = toOptions(MARITAL_STATUS_OPTION_LABELS);
+export const MARITAL_STATUS_OPTIONS = toOptions(MARITAL_STATUS_LABELS);
 
 export type PendencyField =
   | MembershipAlertCode

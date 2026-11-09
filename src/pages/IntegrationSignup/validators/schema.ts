@@ -2,7 +2,8 @@
 import { z } from 'zod';
 import { text } from 'bp-kit';
 // Local
-import { MARITAL_STATUS_OPTION_LABELS, MaritalStatusOption } from '../../../domain/memberRecords';
+import { MARITAL_STATUS_LABELS, MaritalStatus } from '../../../domain/memberRecords';
+import { baptismAnswer, maritalStatusAnswer } from '../../../domain/signupAnswers';
 import { YES_NO_LABELS, YesNo } from '../../../domain/text';
 import { IntegrationSignupAnswers } from '../../../repositories/publicForms';
 
@@ -18,7 +19,7 @@ export interface SignupFormValues {
   baptismChurch: string;
   previousChurch: string;
   conversionTestimony: string;
-  maritalStatus: MaritalStatusOption | '';
+  maritalStatus: MaritalStatus | '';
   maritalStatusStory: string;
 }
 
@@ -34,7 +35,7 @@ export const signupFormSchema = z
     baptismChurch: z.string(),
     previousChurch: z.string().refine(filled, text.validation.required('a igreja que você frequentava')),
     conversionTestimony: z.string().min(1, text.validation.required('sua experiência de conversão')),
-    maritalStatus: choice(MARITAL_STATUS_OPTION_LABELS, 'Selecione o estado civil'),
+    maritalStatus: choice(MARITAL_STATUS_LABELS, 'Selecione o estado civil'),
     maritalStatusStory: z.string(),
   })
   .refine((values) => values.baptized !== 'yes' || filled(values.baptismChurch), {
@@ -51,20 +52,11 @@ export const signupFormSchema = z
     },
   );
 
-const withDetail = (label: string, detail: string) => (filled(detail) ? `${label} — ${detail.trim()}` : label);
-
 export function toSignupAnswers(values: SignupFormValues): IntegrationSignupAnswers {
   return {
     previousChurch: values.previousChurch.trim(),
-    baptismInfo:
-      values.baptized === 'yes'
-        ? withDetail(YES_NO_LABELS.yes, values.baptismChurch)
-        : values.baptized === 'no'
-          ? YES_NO_LABELS.no
-          : '',
+    baptismInfo: baptismAnswer(values.baptized, values.baptismChurch),
     conversionTestimony: values.conversionTestimony.trim(),
-    maritalStatusStory: values.maritalStatus
-      ? withDetail(MARITAL_STATUS_OPTION_LABELS[values.maritalStatus], values.maritalStatusStory)
-      : '',
+    maritalStatusStory: maritalStatusAnswer(values.maritalStatus, values.maritalStatusStory),
   };
 }

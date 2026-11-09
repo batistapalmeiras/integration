@@ -2,7 +2,7 @@
 import { LinkButton } from 'bp-kit';
 import { Pencil } from 'lucide-react';
 // Local
-import { GENDER_LABELS, MARITAL_STATUS_OPTION_LABELS } from '../../../domain/memberRecords';
+import { GENDER_LABELS, MARITAL_STATUS_LABELS } from '../../../domain/memberRecords';
 import { YES_NO_LABELS } from '../../../domain/text';
 import { ENTRY_TYPE_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
 import { SmallGroupOption } from '../../../repositories/publicForms';
@@ -47,7 +47,7 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
       ['Sexo', label(GENDER_LABELS, values.gender)],
       ['CPF', values.cpf],
       ['Data de nascimento', values.birthDate && formatDate(values.birthDate)],
-      ['Estado civil', label(MARITAL_STATUS_OPTION_LABELS, values.maritalStatus)],
+      ['Estado civil', label(MARITAL_STATUS_LABELS, values.maritalStatus)],
       ['Nome da mãe', values.motherName],
       ['Nome do pai', values.fatherName],
     ],

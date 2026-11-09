@@ -21,7 +21,6 @@ import {
   MemberProfilePage,
   MembersPage,
   MembershipInterestPage,
-  MembershipInterestPreviewPage,
   MembershipPage,
   MinistriesPage,
   ModuleMorePage,
@@ -52,7 +51,6 @@ export const PUBLIC_ROUTES: RouteDefinition[] = [
   { path: AppRoute.IntegrationSignup, element: <IntegrationSignupPage /> },
   { path: `${AppRoute.MakeupAttendance}/:token`, element: <MakeupAttendancePage /> },
   { path: AppRoute.MembershipInterest, element: <MembershipInterestPage /> },
-  { path: AppRoute.MembershipInterestPreview, element: <MembershipInterestPreviewPage /> },
 ];
 
 export const PRIVATE_ROUTES: RouteDefinition[] = [

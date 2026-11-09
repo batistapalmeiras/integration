@@ -6,7 +6,7 @@ type GeneratedFunctions = GeneratedDatabase['public']['Functions'];
 interface NullableFunctionArgs {
   submit_integration_signup: 'p_attending_since';
   submit_makeup_attendance: 'p_notes';
-  submit_membership_interest: 'p_membership_note' | 'p_origin_church';
+  submit_membership_form: 'p_baptism_date' | 'p_small_group_id';
 }
 
 type WithNullableArgs<

@@ -14,7 +14,7 @@ export const memberRecordSchema = z
     membershipStatus: z.enum(['active', 'pending_review', 'inactive', 'transferred', 'removed', 'deceased']),
     birthDate: optional,
     gender: z.enum(['male', 'female', '']),
-    maritalStatus: z.enum(['single', 'married', 'widowed', 'divorced', '']),
+    maritalStatus: z.enum(['single', 'married', 'widowed', 'divorced', 'stable_union', '']),
     nationality: optional,
     otherPhone: z.string().refine((value) => value === '' || isCompletePhone(value), text.validation.phoneIncomplete),
     addressZip: optional,

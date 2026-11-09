@@ -17,10 +17,6 @@ export const AuthPages = lazyPage(() => import('../pages/Auth'), 'AuthPages');
 export const IntegrationSignupPage = lazyPage(() => import('../pages/IntegrationSignup'), 'IntegrationSignupPage');
 export const MakeupAttendancePage = lazyPage(() => import('../pages/MakeupAttendance'), 'MakeupAttendancePage');
 export const MembershipInterestPage = lazyPage(() => import('../pages/MembershipInterest'), 'MembershipInterestPage');
-export const MembershipInterestPreviewPage = lazyPage(
-  () => import('../pages/MembershipInterestPreview'),
-  'MembershipInterestPreviewPage',
-);
 
 export const DashboardPage = lazyPage(() => import('../pages/Dashboard'), 'DashboardPage');
 export const ModuleMorePage = lazyPage(() => import('../pages/ModuleMore'), 'ModuleMorePage');

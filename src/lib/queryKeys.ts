@@ -44,7 +44,7 @@ export const queryKeys = {
   publicCohortSchedule: ['public', 'cohort-schedule'] as const,
   publicMinistryNames: ['public', 'ministry-names'] as const,
   publicSmallGroups: ['public', 'small-groups'] as const,
-  publicIntegrationTeam: ['public', 'integration-team'] as const,
+  publicTeamContacts: (stage: string) => ['public', 'team-contacts', stage] as const,
   mustChangePassword: (userId: string) => ['profile', userId, 'must-change-password'] as const,
 
   smallGroups: ['reference', 'small-groups'] as const,

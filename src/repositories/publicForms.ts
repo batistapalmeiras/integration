@@ -25,19 +25,68 @@ export interface MembershipEligibility {
   lessonsTotal: number;
 }
 
+export interface SavedMembershipAnswers {
+  email: string;
+  birthDate: string;
+  gender: string;
+  cpf: string;
+  maritalStatus: string;
+  motherName: string;
+  fatherName: string;
+  otherPhone: string;
+  zip: string;
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  entryType: string;
+  baptismChurch: string;
+  baptismDate: string;
+  originChurch: string;
+  previousChurch: string;
+  baptismInfo: string;
+  maritalStatusStory: string;
+  ministryInterests: string[];
+  wantsSmallGroup: string;
+  smallGroupId: string;
+  secretSociety: string;
+  membershipNote: string;
+}
+
 export interface MembershipInterestCheck extends MembershipEligibility {
   name: string;
   alreadySubmitted: boolean;
+  saved: SavedMembershipAnswers;
 }
 
-export interface MembershipInterestAnswers {
+export interface MembershipFormAnswers {
+  name: string;
+  gender: string;
+  cpf: string;
   birthDate: string;
+  maritalStatus: string;
+  motherName: string;
+  fatherName: string;
+  email: string;
+  otherPhone: string;
+  zip: string;
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
   entryType: string;
-  originChurch: string | null;
+  baptismChurch: string;
+  baptismDate: string | null;
+  lastChurch: string;
   ministryInterests: string[];
-  secretSociety: string;
   wantsSmallGroup: string;
-  membershipNote: string | null;
+  smallGroupId: string | null;
+  secretSociety: string;
+  membershipNote: string;
 }
 
 export interface SmallGroupOption {
@@ -61,8 +110,10 @@ export interface TeamContact {
   phone: string;
 }
 
-export async function listIntegrationTeamContacts(): Promise<TeamContact[]> {
-  const { data, error } = await supabase.rpc('integration_team_contacts');
+export type ContactStage = 'welcome' | 'class';
+
+export async function listTeamContacts(stage: ContactStage): Promise<TeamContact[]> {
+  const { data, error } = await supabase.rpc('team_contacts', { p_stage: stage });
   if (error) throw error;
   return data ?? [];
 }
@@ -111,23 +162,73 @@ export async function submitMakeupAttendance(token: string, notes: string | null
 export async function checkMembershipInterestPhone(phone: string): Promise<MembershipInterestCheck> {
   const { data, error } = await supabase.rpc('check_membership_interest_phone', { p_phone: phone }).single();
   if (error) throw error;
-  const row = data as LessonsProgressRow & { person_name: string; already_submitted: boolean };
-  return { name: row.person_name, alreadySubmitted: row.already_submitted, ...toEligibility(row) };
+  return {
+    name: data.person_name,
+    alreadySubmitted: data.already_submitted,
+    ...toEligibility(data),
+    saved: {
+      email: data.email,
+      birthDate: data.birth_date,
+      gender: data.gender,
+      cpf: data.cpf,
+      maritalStatus: data.marital_status,
+      motherName: data.mother_name,
+      fatherName: data.father_name,
+      otherPhone: data.other_phone,
+      zip: data.address_zip,
+      street: data.address_street,
+      number: data.address_number,
+      complement: data.address_complement,
+      neighborhood: data.address_neighborhood,
+      city: data.address_city,
+      state: data.address_state,
+      entryType: data.entry_type,
+      baptismChurch: data.baptism_church,
+      baptismDate: data.baptism_date,
+      originChurch: data.origin_church,
+      previousChurch: data.previous_church,
+      baptismInfo: data.baptism_info,
+      maritalStatusStory: data.marital_status_story,
+      ministryInterests: data.ministry_interests,
+      wantsSmallGroup: data.wants_small_group,
+      smallGroupId: data.small_group_id,
+      secretSociety: data.secret_society,
+      membershipNote: data.membership_note,
+    },
+  };
 }
 
-export async function submitMembershipInterest(
+export async function submitMembershipForm(
   phone: string,
-  answers: MembershipInterestAnswers,
+  answers: MembershipFormAnswers,
 ): Promise<MembershipEligibility> {
   const { data, error } = await supabase
-    .rpc('submit_membership_interest', {
+    .rpc('submit_membership_form', {
       p_phone: phone,
+      p_name: answers.name,
+      p_gender: answers.gender,
+      p_cpf: answers.cpf,
       p_birth_date: answers.birthDate,
+      p_marital_status: answers.maritalStatus,
+      p_mother_name: answers.motherName,
+      p_father_name: answers.fatherName,
+      p_email: answers.email,
+      p_other_phone: answers.otherPhone,
+      p_address_zip: answers.zip,
+      p_address_street: answers.street,
+      p_address_number: answers.number,
+      p_address_complement: answers.complement,
+      p_address_neighborhood: answers.neighborhood,
+      p_address_city: answers.city,
+      p_address_state: answers.state,
       p_entry_type: answers.entryType,
-      p_origin_church: answers.originChurch,
+      p_baptism_church: answers.baptismChurch,
+      p_baptism_date: answers.baptismDate,
+      p_last_church: answers.lastChurch,
       p_ministry_interests: answers.ministryInterests,
-      p_secret_society: answers.secretSociety,
       p_wants_small_group: answers.wantsSmallGroup,
+      p_small_group_id: answers.smallGroupId,
+      p_secret_society: answers.secretSociety,
       p_membership_note: answers.membershipNote,
     })
     .single();
