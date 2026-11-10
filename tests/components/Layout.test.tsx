@@ -6,10 +6,15 @@ import { AppRoute } from '../../src/routes/paths';
 import { UserRole } from '../../src/types/enums';
 import { renderScreen } from '../support/render';
 
-vi.mock('../../src/repositories/membership', () => ({ countMembershipPending: vi.fn(() => new Promise(() => undefined)) }));
+vi.mock('../../src/repositories/membership', () => ({
+  countMembershipPending: vi.fn(() => new Promise(() => undefined)),
+}));
 
 const hasLink = (name: string) =>
   screen.queryAllByRole('link', { name: new RegExp(`^${name}`), hidden: true }).length > 0;
+
+const linksTo = (path: string) =>
+  screen.queryAllByRole('link', { hidden: true }).some((link) => link.getAttribute('href') === path);
 
 describe('side menu by role', () => {
   it('shows the church area to the pastor', () => {
@@ -28,13 +33,16 @@ describe('side menu by role', () => {
     }
   });
 
-  it('keeps the integration team away from members and classes', () => {
+  it('keeps the integration team away from members and classes, but shows the history', () => {
     renderScreen(<Layout>conteúdo</Layout>, { role: UserRole.IntegrationTeam, route: AppRoute.Visitors });
     expect(hasLink('Visitantes')).toBe(true);
     expect(hasLink('Café')).toBe(true);
-    for (const item of ['Turmas', 'Membros', 'Membresia', 'Pendências']) {
+    for (const item of ['Membros', 'Membresia', 'Pendências']) {
       expect([item, hasLink(item)]).toEqual([item, false]);
     }
+    expect(linksTo(AppRoute.Classes)).toBe(false);
+    expect(linksTo(`${AppRoute.Reports}/cafes`)).toBe(true);
+    expect(linksTo(`${AppRoute.Reports}/turmas`)).toBe(true);
   });
 
   it('shows the user name and role and renders the page content', () => {

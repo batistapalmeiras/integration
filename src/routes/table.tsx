@@ -60,7 +60,7 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: AppRoute.Profile, element: <ProfilePage /> },
   { path: AppRoute.ChangePassword, element: <ChangePasswordPage /> },
   { path: AppRoute.ChurchMore, element: <ModuleMorePage areaId="church" />, roles: PASTOR },
-  { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: LEADERSHIP_ROLES },
+  { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: INTEGRATION_TEAM_ROLES },
 
   { path: AppRoute.Visitors, element: <VisitorsPage />, roles: INTEGRATION_TEAM_ROLES },
   { path: AppRoute.NewVisitor, element: <NewVisitorPage />, roles: INTEGRATION_TEAM_ROLES },
@@ -84,10 +84,10 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: `${AppRoute.Store}/*`, element: <StoreRoutes />, roles: PASTOR },
 
   { path: AppRoute.Reports, element: <ReportsPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Reports}/cafes`, element: <CoffeeHistoryPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Reports}/cafes/:id`, element: <CoffeeRosterPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Reports}/turmas`, element: <CohortsListPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Reports}/turmas/:id`, element: <CohortRosterPage />, roles: LEADERSHIP_ROLES },
+  { path: `${AppRoute.Reports}/cafes`, element: <CoffeeHistoryPage />, roles: INTEGRATION_TEAM_ROLES },
+  { path: `${AppRoute.Reports}/cafes/:id`, element: <CoffeeRosterPage />, roles: INTEGRATION_TEAM_ROLES },
+  { path: `${AppRoute.Reports}/turmas`, element: <CohortsListPage />, roles: INTEGRATION_TEAM_ROLES },
+  { path: `${AppRoute.Reports}/turmas/:id`, element: <CohortRosterPage />, roles: INTEGRATION_TEAM_ROLES },
 ];
 
 export function canAccess(role: string | undefined, pathname: string): boolean {

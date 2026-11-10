@@ -39,7 +39,7 @@ import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
 import { listEnrollableCoffeePeople } from '../../repositories/cafeSchedule';
 import { formatDate, todayKey, weekdayLabel } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
-import { hasRole, INTEGRATION_TEAM_ROLES } from '../../types/enums';
+import { hasRole, INTEGRATION_TEAM_ROLES, LEADERSHIP_ROLES } from '../../types/enums';
 import { PaginationWrap } from '../../components/ListLayout';
 import { CreateEventModal } from './components/CreateEventModal';
 import { useCoffee } from './hooks';
@@ -77,6 +77,7 @@ export function CoffeePage() {
   const { show: showToast, toast } = useToast();
 
   const canPlan = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
+  const canAddPeople = hasRole(user?.role, LEADERSHIP_ROLES);
 
   const openCreateModal = () => open(<CreateEventModal close={close} onCreate={createEvent} />);
   const openEditModal = () =>
@@ -364,7 +365,7 @@ export function CoffeePage() {
             </PaginationWrap>
           )}
 
-          {canPlan && event.event_date >= todayKey() && (
+          {canAddPeople && event.event_date >= todayKey() && (
             <AddButton type="button" onClick={openEnrollModal}>
               <Plus size={18} />
               Adicionar pessoa a este café

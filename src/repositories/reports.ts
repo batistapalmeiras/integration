@@ -67,7 +67,9 @@ export async function loadCohortRoster(cohortId: string): Promise<CohortRosterDa
 
   const cohortData = cohortResult.data;
   if (!cohortData) throw new Error('Turma não encontrada.');
-  const enrollments = enrollmentsResult.data ?? [];
+  const visible = (enrollmentsResult.data ?? []).flatMap((enrollment) =>
+    enrollment.person ? [{ enrollment, person: enrollment.person }] : [],
+  );
   const attendedByEnrollment = new Map(
     (summaryResult.data ?? []).flatMap((summary) =>
       summary.enrollment_id ? [[summary.enrollment_id, summary.lessons_attended ?? 0] as const] : [],
@@ -81,14 +83,14 @@ export async function loadCohortRoster(cohortId: string): Promise<CohortRosterDa
       name: cohortData.name,
       status: toCohortStatus(cohortData.status),
       createdAt: cohortData.created_at,
-      enrollmentCount: enrollments.length,
+      enrollmentCount: visible.length,
     },
-    roster: enrollments
-      .map((enrollment) => ({
+    roster: visible
+      .map(({ enrollment, person }) => ({
         enrollmentId: enrollment.id,
-        personId: enrollment.person.id,
-        name: enrollment.person.name,
-        status: toPersonStatus(enrollment.person.status),
+        personId: person.id,
+        name: person.name,
+        status: toPersonStatus(person.status),
         lessonsAttended: attendedByEnrollment.get(enrollment.id) ?? 0,
         totalLessons,
       }))

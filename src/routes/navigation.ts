@@ -108,7 +108,8 @@ export const INTEGRATION_TEAM_NAV_AREAS: NavArea[] = [
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.people],
-    more: [],
+    more: [HISTORY_GROUP],
+    morePath: AppRoute.IntegrationMore,
   },
 ];
 
