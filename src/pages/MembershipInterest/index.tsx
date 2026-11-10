@@ -49,7 +49,7 @@ export function MembershipInterestPage() {
         barTitle={BAR_TITLE}
         progress={interestFormProgress}
         initialValues={initialValues}
-        askPhone={false}
+        optionalPhone={false}
         onLeave={() => show('identification')}
         submitting={submitting}
         submitError={submitError && <TeamContactError message={submitError} stage="class" />}

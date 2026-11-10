@@ -1,7 +1,7 @@
 // Local
 import { memberRecordSchema } from '../../../src/features/memberRecord/schema';
 
-const cpfError = (cpf: string) => memberRecordSchema.shape.cpf.safeParse(cpf).error?.issues[0]?.message ?? null;
+const cpfError = (cpf: string) => memberRecordSchema(false).shape.cpf.safeParse(cpf).error?.issues[0]?.message ?? null;
 
 describe('member record CPF', () => {
   it('accepts an empty CPF and a valid one with or without punctuation', () => {

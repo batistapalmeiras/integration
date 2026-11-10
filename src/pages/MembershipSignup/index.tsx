@@ -40,7 +40,7 @@ export function MembershipSignupPage() {
         barTitle={BAR_TITLE}
         progress={signupFormProgress}
         initialValues={initialValues}
-        askPhone
+        optionalPhone
         onLeave={() => show('cpf')}
         submitting={submitting}
         submitError={submitError && <TeamContactError message={submitError} stage="class" />}

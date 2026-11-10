@@ -18,7 +18,7 @@ import { ServeStep } from './components/ServeStep';
 import { StatuteStep } from './components/StatuteStep';
 import { usePublicGroups } from './hooks/usePublicGroups';
 import { STEP_TITLES } from './options';
-import { MembershipFormValues, STEP_SCHEMAS } from './schema';
+import { MembershipFormValues, stepSchemas } from './schema';
 
 const LAST_STEP = STEP_TITLES.length - 1;
 
@@ -35,7 +35,7 @@ interface Props {
   barTitle: string;
   progress: StoredValue<MembershipFlowProgress>;
   initialValues: MembershipFormValues;
-  askPhone: boolean;
+  optionalPhone: boolean;
   onLeave: () => void;
   onSubmit: (values: MembershipFormValues) => Promise<void>;
   submitting: boolean;
@@ -46,7 +46,7 @@ export function MembershipFormFlow({
   barTitle,
   progress,
   initialValues,
-  askPhone,
+  optionalPhone,
   onLeave,
   onSubmit,
   submitting,
@@ -61,12 +61,16 @@ export function MembershipFormFlow({
   const stepRef = useRef(typeof saved?.step === 'number' ? saved.step : 0);
   const resolver: Resolver<MembershipFormValues> = async (values, context, options) => {
     const { criteriaMode, fields, names, shouldUseNativeValidation } = options;
-    const { errors } = await zodResolver(STEP_SCHEMAS[stepRef.current], undefined, { raw: true })(values, context, {
-      criteriaMode,
-      fields,
-      names,
-      shouldUseNativeValidation,
-    });
+    const { errors } = await zodResolver(stepSchemas(optionalPhone)[stepRef.current], undefined, { raw: true })(
+      values,
+      context,
+      {
+        criteriaMode,
+        fields,
+        names,
+        shouldUseNativeValidation,
+      },
+    );
     return Object.keys(errors).length > 0 ? { values: {}, errors } : { values, errors: {} };
   };
 
@@ -113,7 +117,7 @@ export function MembershipFormFlow({
       {typeof step === 'number' && (
         <Form onSubmit={(event: FormEvent<HTMLFormElement>) => submitStep(step)(event)} noValidate>
           {step === 0 && <PersonalStep control={control} />}
-          {step === 1 && <AddressStep control={control} setValue={setValue} askPhone={askPhone} />}
+          {step === 1 && <AddressStep control={control} setValue={setValue} optionalPhone={optionalPhone} />}
           {step === 2 && <JourneyStep control={control} />}
           {step === 3 && (
             <StatuteStep

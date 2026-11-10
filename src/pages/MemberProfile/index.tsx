@@ -11,7 +11,12 @@ import { Panel, PanelHeader, PanelTitle } from '../../components/Panel';
 import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { TonePill } from '../../components/StatusPill';
 import { formatTimestampDate } from '../../domain/dates';
-import { MemberRecord, MEMBERSHIP_STATUS_LABELS, MEMBERSHIP_STATUS_TONES } from '../../domain/memberRecords';
+import {
+  canLeavePhoneEmpty,
+  MemberRecord,
+  MEMBERSHIP_STATUS_LABELS,
+  MEMBERSHIP_STATUS_TONES,
+} from '../../domain/memberRecords';
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
 import { errorMessage } from '../../lib/queryCache';
 import {
@@ -69,7 +74,15 @@ export function MemberProfilePage() {
   const notes = notesQuery.data ?? [];
 
   const edit = (section: RecordSection) =>
-    open(<EditSectionModal personId={id} record={record} section={section} close={close} />);
+    open(
+      <EditSectionModal
+        personId={id}
+        record={record}
+        section={section}
+        optionalPhone={canLeavePhoneEmpty(info?.origin)}
+        close={close}
+      />,
+    );
 
   const renderPanel = (section: RecordSection) => (
     <SectionPanel key={section.id} section={section} record={record} onEdit={() => edit(section)} />

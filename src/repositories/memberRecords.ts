@@ -149,12 +149,13 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
 
 export interface MemberRecordInfo {
   createdAt: string;
+  origin: string;
 }
 
 export async function getMemberRecordInfo(personId: string): Promise<MemberRecordInfo> {
-  const { data, error } = await supabase.from('people').select('created_at').eq('id', personId).single();
+  const { data, error } = await supabase.from('people').select('created_at, origin').eq('id', personId).single();
   if (error) throw error;
-  return { createdAt: data.created_at };
+  return { createdAt: data.created_at, origin: data.origin };
 }
 
 export async function saveMemberRecord(personId: string, record: MemberRecord): Promise<void> {

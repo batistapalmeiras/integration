@@ -77,16 +77,21 @@ describe('displayValue', () => {
 });
 
 describe('sectionResolver', () => {
-  const resolve = (id: string, record: MemberRecord) =>
-    sectionResolver(section(id))(record, undefined, { fields: {}, shouldUseNativeValidation: false });
+  const resolve = (id: string, record: MemberRecord, optionalPhone = false) =>
+    sectionResolver(section(id), optionalPhone)(record, undefined, { fields: {}, shouldUseNativeValidation: false });
 
   it('ignores invalid data saved in other sections', async () => {
-    const result = await resolve('contact', { ...blank, cpf: '111.111.111-11' });
+    const result = await resolve('contact', { ...blank, phone: '(31) 99999-8888', cpf: '111.111.111-11' });
     expect(result.errors).toEqual({});
   });
 
   it('blocks the save when a field of the section is invalid', async () => {
     const result = await resolve('personal', { ...blank, cpf: '111.111.111-11' });
     expect(Object.keys(result.errors)).toEqual(['cpf']);
+  });
+
+  it('asks for the phone unless the person came from the membership signup', async () => {
+    expect(Object.keys((await resolve('contact', blank)).errors)).toEqual(['phone']);
+    expect((await resolve('contact', blank, true)).errors).toEqual({});
   });
 });

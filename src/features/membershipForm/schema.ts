@@ -91,33 +91,39 @@ const personalSchema = z.object({
   fatherName: z.string(),
 });
 
-const contactSchema = z
-  .object({
-    phone: z.string().refine(isCompletePhone, text.validation.required('um WhatsApp válido')),
-    email: required('seu e-mail').refine(
-      whenFilled((value) => z.string().email().safeParse(value.trim()).success),
-      text.validation.emailInvalid,
-    ),
-    otherPhone: z.string().refine((value) => value === '' || isCompletePhone(value), text.validation.phoneIncomplete),
-    zip: required('o CEP').refine(
-      whenFilled((value) => onlyDigits(value).length === 8),
-      'O CEP tem 8 dígitos',
-    ),
-    street: required('a rua'),
-    number: required('o número'),
-    complement: z.string(),
-    neighborhood: required('o bairro'),
-    city: required('a cidade'),
-    state: required('o estado').refine(
-      whenFilled((value) => /^[A-Za-z]{2}$/.test(value.trim())),
-      'Use a sigla, ex.: MG',
-    ),
-  })
-  .refine((values) => !isSamePhone(values.otherPhone, values.phone), {
-    message: 'Informe um número diferente do seu WhatsApp',
-    path: ['otherPhone'],
-    when: () => true,
-  });
+const contactSchema = (optionalPhone: boolean) =>
+  z
+    .object({
+      phone: z
+        .string()
+        .refine(
+          (value) => (optionalPhone && value === '') || isCompletePhone(value),
+          optionalPhone ? text.validation.phoneIncomplete : text.validation.required('um WhatsApp válido'),
+        ),
+      email: required('seu e-mail').refine(
+        whenFilled((value) => z.string().email().safeParse(value.trim()).success),
+        text.validation.emailInvalid,
+      ),
+      otherPhone: z.string().refine((value) => value === '' || isCompletePhone(value), text.validation.phoneIncomplete),
+      zip: required('o CEP').refine(
+        whenFilled((value) => onlyDigits(value).length === 8),
+        'O CEP tem 8 dígitos',
+      ),
+      street: required('a rua'),
+      number: required('o número'),
+      complement: z.string(),
+      neighborhood: required('o bairro'),
+      city: required('a cidade'),
+      state: required('o estado').refine(
+        whenFilled((value) => /^[A-Za-z]{2}$/.test(value.trim())),
+        'Use a sigla, ex.: MG',
+      ),
+    })
+    .refine((values) => !isSamePhone(values.otherPhone, values.phone), {
+      message: 'Informe um número diferente do seu telefone',
+      path: ['otherPhone'],
+      when: () => true,
+    });
 
 const journeySchema = z.object({
   entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
@@ -163,4 +169,6 @@ const serveSchema = z
 
 type StepSchema = z.ZodType<Record<string, unknown>, Record<string, unknown>>;
 
-export const STEP_SCHEMAS: StepSchema[] = [personalSchema, contactSchema, journeySchema, statuteSchema, serveSchema];
+export function stepSchemas(optionalPhone: boolean): StepSchema[] {
+  return [personalSchema, contactSchema(optionalPhone), journeySchema, statuteSchema, serveSchema];
+}

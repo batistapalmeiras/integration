@@ -8,14 +8,7 @@ import { MemberRecord } from '../../../domain/memberRecords';
 import { displayValue, LEGACY_FAMILY_FIELDS, WEDDING_DATE_FIELD } from '../../../features/memberRecord';
 import { Family, Relative } from '../../../repositories/family';
 import { AppRoute } from '../../../routes/paths';
-import {
-  Field,
-  FieldLabel,
-  Fields,
-  FieldValue,
-  LegacyNote,
-  RelativeLinks,
-} from '../styles';
+import { Field, FieldLabel, Fields, FieldValue, LegacyNote, RelativeLinks } from '../styles';
 import { Panel, PanelHeader, PanelTitle } from '../../../components/Panel';
 
 interface Props {

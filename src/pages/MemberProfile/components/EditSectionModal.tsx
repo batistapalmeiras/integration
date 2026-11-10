@@ -11,16 +11,17 @@ interface Props {
   personId: string;
   record: MemberRecord;
   section: RecordSection;
+  optionalPhone: boolean;
   close: () => void;
 }
 
-export function EditSectionModal({ personId, record, section, close }: Props) {
+export function EditSectionModal({ personId, record, section, optionalPhone, close }: Props) {
   const { show: showToast, toast } = useToast();
   const {
     control,
     handleSubmit,
     formState: { isSubmitting, isDirty },
-  } = useForm<MemberRecord>({ resolver: sectionResolver(section), defaultValues: record });
+  } = useForm<MemberRecord>({ resolver: sectionResolver(section, optionalPhone), defaultValues: record });
 
   const submit = handleSubmit(async (values) => {
     try {

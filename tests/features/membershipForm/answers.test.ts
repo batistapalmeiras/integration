@@ -1,6 +1,6 @@
 // Local
 import { prefilledForm, toMembershipFormAnswers } from '../../../src/features/membershipForm/answers';
-import { STEP_SCHEMAS } from '../../../src/features/membershipForm/schema';
+import { stepSchemas } from '../../../src/features/membershipForm/schema';
 import { MembershipInterestCheck, SavedMembershipAnswers } from '../../../src/repositories/publicForms';
 
 const PHONE = '(31) 99999-8888';
@@ -146,7 +146,6 @@ describe('toMembershipFormAnswers', () => {
 });
 
 describe('contact step', () => {
-  const contact = STEP_SCHEMAS[1];
   const valid = {
     phone: '(31) 99999-8888',
     email: 'ana@exemplo.com',
@@ -159,14 +158,21 @@ describe('contact step', () => {
     city: 'Belo Horizonte',
     state: 'MG',
   };
+  const signupContact = stepSchemas(true)[1];
+  const classContact = stepSchemas(false)[1];
 
-  it('asks for a complete WhatsApp', () => {
-    expect(contact.safeParse(valid).success).toBe(true);
-    expect(contact.safeParse({ ...valid, phone: '(31) 9999' }).success).toBe(false);
+  it('lets only the CPF signup leave the phone empty', () => {
+    expect(signupContact.safeParse({ ...valid, phone: '' }).success).toBe(true);
+    expect(classContact.safeParse({ ...valid, phone: '' }).success).toBe(false);
   });
 
-  it('wants the other phone to differ from the WhatsApp', () => {
-    const result = contact.safeParse({ ...valid, otherPhone: '31999998888' });
+  it('wants a complete phone when one is given', () => {
+    expect(signupContact.safeParse(valid).success).toBe(true);
+    expect(signupContact.safeParse({ ...valid, phone: '(31) 9999' }).success).toBe(false);
+  });
+
+  it('wants the other phone to differ from the phone', () => {
+    const result = signupContact.safeParse({ ...valid, otherPhone: '31999998888' });
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.path).toEqual(['otherPhone']);
   });

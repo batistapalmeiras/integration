@@ -9,9 +9,8 @@ import { saveMemberRecord } from '../../repositories/memberRecords';
 import { memberRecordSchema } from './schema';
 import { RecordSection } from './sections';
 
-const fullResolver = zodResolver(memberRecordSchema);
-
-export function sectionResolver(section: RecordSection): Resolver<MemberRecord> {
+export function sectionResolver(section: RecordSection, optionalPhone: boolean): Resolver<MemberRecord> {
+  const fullResolver = zodResolver(memberRecordSchema(optionalPhone));
   return async (values, context, options) => {
     const result = await fullResolver(values, context, options);
     const errors: FieldErrors<MemberRecord> = {};

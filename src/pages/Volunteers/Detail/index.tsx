@@ -16,6 +16,7 @@ import {
   text,
   TextInput,
   Typography,
+  isCompletePhone,
   maskPhone,
   onlyDigits,
   useAuthCtx,
@@ -28,20 +29,28 @@ import { z } from 'zod';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute } from '../../../routes/paths';
+import { canLeavePhoneEmpty } from '../../../domain/memberRecords';
 import { assignableRoles } from '../../../domain/volunteers';
+import { useLatest } from '../../../lib/useLatest';
 import { hasRole, LEADERSHIP_ROLES, UserRole } from '../../../types/enums';
 import { FormContent } from '../../../components/FormLayout';
 import { RoleOptions } from '../components/RoleOptions';
 import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
 
-const schema = z.object({
-  name: z.string().min(1, text.validation.required('o nome')),
-  email: z.string().email(text.validation.emailInvalid),
-  phone: z.string().refine((value) => [0, 10, 11].includes(onlyDigits(value).length), text.validation.phoneIncomplete),
-  role: z.nativeEnum(UserRole, { message: text.validation.selectRequired('o cargo') }),
-});
+const volunteerSchema = (optionalPhone: boolean) =>
+  z.object({
+    name: z.string().min(1, text.validation.required('o nome')),
+    email: z.string().email(text.validation.emailInvalid),
+    phone: z
+      .string()
+      .refine(
+        (value) => (optionalPhone && onlyDigits(value) === '') || isCompletePhone(value),
+        optionalPhone ? text.validation.phoneIncomplete : text.validation.required('o telefone'),
+      ),
+    role: z.nativeEnum(UserRole, { message: text.validation.selectRequired('o cargo') }),
+  });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof volunteerSchema>>;
 
 export function VolunteerDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -58,13 +67,15 @@ export function VolunteerDetailPage() {
   const isTargetPrivileged = hasRole(volunteer?.role, LEADERSHIP_ROLES);
   const canEdit = isPastor || isSelf || !isTargetPrivileged;
   const visibleRoleOptions = canEdit ? roleOptions : volunteer ? [volunteer.role] : [];
+  const optionalPhoneRef = useLatest(canLeavePhoneEmpty(volunteer?.origin));
 
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: (values, context, options) =>
+      zodResolver(volunteerSchema(optionalPhoneRef.current))(values, context, options),
     values: volunteer
       ? {
           name: volunteer.name,

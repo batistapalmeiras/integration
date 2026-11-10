@@ -9,6 +9,7 @@ export interface VolunteerRow {
   name: string;
   phone: string | null;
   email: string | null;
+  origin: string;
   role: UserRole;
   active: boolean;
 }
@@ -25,13 +26,13 @@ export interface NewVolunteer {
   role: UserRole;
 }
 
-const VOLUNTEER_COLUMNS = 'id, role, active, person:people!profiles_person_id_fkey(id, name, phone, email)';
+const VOLUNTEER_COLUMNS = 'id, role, active, person:people!profiles_person_id_fkey(id, name, phone, email, origin)';
 
 interface VolunteerRecord {
   id: string;
   role: string;
   active: boolean;
-  person: { id: string; name: string; phone: string | null; email: string | null } | null;
+  person: { id: string; name: string; phone: string | null; email: string | null; origin: string } | null;
 }
 
 function toVolunteer(row: VolunteerRecord): VolunteerRow {
@@ -41,6 +42,7 @@ function toVolunteer(row: VolunteerRecord): VolunteerRow {
     name: row.person?.name ?? '',
     phone: row.person?.phone ?? null,
     email: row.person?.email ?? null,
+    origin: row.person?.origin ?? '',
     role: toUserRole(row.role),
     active: row.active,
   };
