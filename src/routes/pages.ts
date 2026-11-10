@@ -1,12 +1,19 @@
 // React
 import { ComponentType, lazy } from 'react';
+// Local
+import { markPageLoaded } from '../pwa';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function lazyPage<Module extends Record<Key, ComponentType<any>>, Key extends keyof Module>(
   load: () => Promise<Module>,
   key: Key,
 ) {
-  return lazy(() => load().then((module) => ({ default: module[key] })));
+  return lazy(() =>
+    load().then((module) => {
+      markPageLoaded();
+      return { default: module[key] };
+    }),
+  );
 }
 
 export const LoginPage = lazyPage(() => import('../pages/Auth'), 'LoginPage');

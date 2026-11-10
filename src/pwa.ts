@@ -14,7 +14,10 @@ export function reloadOnMissingChunk(): void {
     event.preventDefault();
     window.location.reload();
   });
-  window.addEventListener('load', () => reloadedForMissingChunk.clear());
+}
+
+export function markPageLoaded(): void {
+  reloadedForMissingChunk.clear();
 }
 
 export function registerAppUpdates(): void {
