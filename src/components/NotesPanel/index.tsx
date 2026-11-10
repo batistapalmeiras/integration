@@ -13,15 +13,16 @@ import {
   useModal,
   useToast,
 } from 'bp-kit';
-import { Plus, Save, Trash2 } from 'lucide-react';
+import { Lock, Plus, Save, Trash2 } from 'lucide-react';
 // Local
 import { formatTimestampDate } from '../../domain/dates';
 import { PersonNote } from '../../domain/personNotes';
 import { invalidateQueries } from '../../lib/queryCache';
 import { queryKeys } from '../../lib/queryKeys';
 import { addPersonNote, deletePersonNote } from '../../repositories/personNotes';
+import { UserRole } from '../../types/enums';
 import { ItemPicker, ItemRow, ItemRows, Panel, PanelHeader, PanelTitle } from '../Panel';
-import { NoteBody, NoteDate, NoteText } from './styles';
+import { NoteBody, NoteDate, NoteText, PrivateHint } from './styles';
 
 interface Props {
   personId: string;
@@ -29,7 +30,7 @@ interface Props {
 }
 
 const noteOrigin = (note: PersonNote) =>
-  `${note.authorName ?? 'Importada do sistema antigo'} · ${formatTimestampDate(note.createdAt)}`;
+  [note.authorName ?? 'Importada do sistema antigo', formatTimestampDate(note.createdAt)].join(' · ');
 
 export function NotesPanel({ personId, notes }: Props) {
   const { user } = useAuthCtx();
@@ -95,7 +96,18 @@ export function NotesPanel({ personId, notes }: Props) {
             <ItemRow key={note.id}>
               <NoteText>
                 <NoteBody>{note.body}</NoteBody>
-                <NoteDate>{noteOrigin(note)}</NoteDate>
+                <NoteDate>
+                  {noteOrigin(note)}
+                  {note.private && (
+                    <>
+                      {' · '}
+                      <PrivateHint>
+                        <Lock size={12} aria-hidden="true" />
+                        Só você vê
+                      </PrivateHint>
+                    </>
+                  )}
+                </NoteDate>
               </NoteText>
               <IconButton
                 type="button"
@@ -121,6 +133,12 @@ export function NotesPanel({ personId, notes }: Props) {
             autoFocus
             onChange={(event) => setDraft(event.target.value)}
           />
+          {user?.role === UserRole.Pastor && (
+            <PrivateHint>
+              <Lock size={12} aria-hidden="true" />
+              Só você verá esta anotação.
+            </PrivateHint>
+          )}
           <Button type="button" variant="primary" disabled={saving || draft.trim() === ''} onClick={save}>
             <Save size={16} />
             {saving ? 'Salvando...' : 'Salvar anotação'}

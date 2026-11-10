@@ -3,4 +3,5 @@ export interface PersonNote {
   body: string;
   createdAt: string;
   authorName: string | null;
+  private: boolean;
 }

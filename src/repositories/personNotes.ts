@@ -10,6 +10,7 @@ export async function listPersonNotes(personId: string): Promise<PersonNote[]> {
     body: row.body,
     createdAt: row.created_at,
     authorName: row.author_name,
+    private: row.private,
   }));
 }
 

@@ -1085,6 +1085,7 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          private: boolean
         }[]
       }
       list_small_groups: {

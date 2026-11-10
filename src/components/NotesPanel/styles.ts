@@ -22,3 +22,12 @@ export const NoteDate = styled.span`
   font-size: 13px;
   color: ${({ theme }) => theme.colors.muted};
 `;
+
+export const PrivateHint = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.muted};
+`;
