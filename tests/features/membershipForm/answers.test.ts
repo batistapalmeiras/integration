@@ -1,6 +1,9 @@
 // Local
-import { prefilledForm, toMembershipFormAnswers } from '../../../src/pages/MembershipInterest/answers';
+import { prefilledForm, toMembershipFormAnswers } from '../../../src/features/membershipForm/answers';
+import { STEP_SCHEMAS } from '../../../src/features/membershipForm/schema';
 import { MembershipInterestCheck, SavedMembershipAnswers } from '../../../src/repositories/publicForms';
+
+const PHONE = '(31) 99999-8888';
 
 const nothingSaved: SavedMembershipAnswers = {
   email: '',
@@ -43,6 +46,7 @@ const check = (saved: Partial<SavedMembershipAnswers>): MembershipInterestCheck 
 describe('prefilledForm', () => {
   it('fills from the integration signup answers', () => {
     const form = prefilledForm(
+      PHONE,
       check({
         previousChurch: 'Igreja Batista Central',
         baptismInfo: 'Sim — Primeira Igreja Batista',
@@ -51,6 +55,7 @@ describe('prefilledForm', () => {
     );
     expect(form).toMatchObject({
       name: 'Ana Lima',
+      phone: PHONE,
       lastChurch: 'Igreja Batista Central',
       baptismChurch: 'Primeira Igreja Batista',
       maritalStatus: 'married',
@@ -60,11 +65,12 @@ describe('prefilledForm', () => {
   });
 
   it('suggests membership by baptism to who said they are not baptized', () => {
-    expect(prefilledForm(check({ baptismInfo: 'Não' })).entryType).toBe('baptism');
+    expect(prefilledForm(PHONE, check({ baptismInfo: 'Não' })).entryType).toBe('baptism');
   });
 
   it('prefers the member record over the signup answers', () => {
     const form = prefilledForm(
+      PHONE,
       check({
         maritalStatus: 'widowed',
         maritalStatusStory: 'Casado(a)',
@@ -88,12 +94,15 @@ describe('prefilledForm', () => {
   });
 
   it('reads the secret society and small group answers', () => {
-    expect(prefilledForm(check({ secretSociety: 'Não ' }))).toMatchObject({ secretSociety: 'no', secretSocietyName: '' });
-    expect(prefilledForm(check({ secretSociety: 'Maçonaria' }))).toMatchObject({
+    expect(prefilledForm(PHONE, check({ secretSociety: 'Não ' }))).toMatchObject({
+      secretSociety: 'no',
+      secretSocietyName: '',
+    });
+    expect(prefilledForm(PHONE, check({ secretSociety: 'Maçonaria' }))).toMatchObject({
       secretSociety: 'yes',
       secretSocietyName: 'Maçonaria',
     });
-    expect(prefilledForm(check({ smallGroupId: 'pg-1' }))).toMatchObject({
+    expect(prefilledForm(PHONE, check({ smallGroupId: 'pg-1' }))).toMatchObject({
       wantsSmallGroup: 'already',
       smallGroupId: 'pg-1',
     });
@@ -101,7 +110,7 @@ describe('prefilledForm', () => {
 });
 
 describe('toMembershipFormAnswers', () => {
-  const filled = { ...prefilledForm(check({})), entryType: 'transfer_letter' as const, baptismChurch: 'IBC' };
+  const filled = { ...prefilledForm(PHONE, check({})), entryType: 'transfer_letter' as const, baptismChurch: 'IBC' };
 
   it('drops what the chosen answers hide', () => {
     const answers = toMembershipFormAnswers({
@@ -133,5 +142,32 @@ describe('toMembershipFormAnswers', () => {
       secretSocietyName: ' Maçonaria ',
     });
     expect(answers).toMatchObject({ baptismChurch: 'IBC', smallGroupId: 'pg-1', secretSociety: 'Maçonaria' });
+  });
+});
+
+describe('contact step', () => {
+  const contact = STEP_SCHEMAS[1];
+  const valid = {
+    phone: '(31) 99999-8888',
+    email: 'ana@exemplo.com',
+    otherPhone: '',
+    zip: '30140-071',
+    street: 'Rua A',
+    number: '10',
+    complement: '',
+    neighborhood: 'Centro',
+    city: 'Belo Horizonte',
+    state: 'MG',
+  };
+
+  it('asks for a complete WhatsApp', () => {
+    expect(contact.safeParse(valid).success).toBe(true);
+    expect(contact.safeParse({ ...valid, phone: '(31) 9999' }).success).toBe(false);
+  });
+
+  it('wants the other phone to differ from the WhatsApp', () => {
+    const result = contact.safeParse({ ...valid, otherPhone: '31999998888' });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(['otherPhone']);
   });
 });

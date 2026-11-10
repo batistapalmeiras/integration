@@ -11,15 +11,27 @@ import { FieldRow, Hint } from '../styles';
 interface Props {
   control: Control<MembershipFormValues>;
   setValue: UseFormSetValue<MembershipFormValues>;
+  askPhone: boolean;
 }
 
-export function AddressStep({ control, setValue }: Props) {
+export function AddressStep({ control, setValue, askPhone }: Props) {
   const zip = useWatch({ control, name: 'zip' });
   const { looking, notFound } = useZipLookup(zip, setValue);
   const showAddress = onlyDigits(zip).length === 8 && !looking;
 
   return (
     <>
+      {askPhone && (
+        <TextInput
+          label="WhatsApp"
+          control={control}
+          name="phone"
+          mask="phone"
+          inputMode="numeric"
+          autoComplete="tel"
+          placeholder={PHONE_PLACEHOLDER}
+        />
+      )}
       <TextInput
         label={text.fields.email}
         control={control}

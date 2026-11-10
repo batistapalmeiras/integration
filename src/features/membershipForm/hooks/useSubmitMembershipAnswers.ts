@@ -2,19 +2,19 @@
 import { useState } from 'react';
 // Local
 import { errorMessage } from '../../../lib/queryCache';
-import { MembershipEligibility, submitMembershipForm } from '../../../repositories/publicForms';
+import { MembershipFormAnswers } from '../../../repositories/publicForms';
 import { toMembershipFormAnswers } from '../answers';
 import { MembershipFormValues } from '../schema';
 
-export function useSubmitMembershipForm() {
+export function useSubmitMembershipAnswers<Result>(send: (answers: MembershipFormAnswers) => Promise<Result>) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const submit = async (phone: string, values: MembershipFormValues): Promise<MembershipEligibility | null> => {
+  const submit = async (values: MembershipFormValues): Promise<{ result: Result } | null> => {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      return await submitMembershipForm(phone, toMembershipFormAnswers(values));
+      return { result: await send(toMembershipFormAnswers(values)) };
     } catch (e) {
       setSubmitError(errorMessage(e));
       return null;

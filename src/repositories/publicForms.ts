@@ -69,6 +69,7 @@ export interface MembershipFormAnswers {
   maritalStatus: string;
   motherName: string;
   fatherName: string;
+  phone: string;
   email: string;
   otherPhone: string;
   zip: string;
@@ -198,42 +199,49 @@ export async function checkMembershipInterestPhone(phone: string): Promise<Membe
   };
 }
 
-export async function submitMembershipForm(
-  phone: string,
-  answers: MembershipFormAnswers,
-): Promise<MembershipEligibility> {
-  const { data, error } = await supabase
-    .rpc('submit_membership_form', {
-      p_phone: phone,
-      p_name: answers.name,
-      p_gender: answers.gender,
-      p_cpf: answers.cpf,
-      p_birth_date: answers.birthDate,
-      p_marital_status: answers.maritalStatus,
-      p_mother_name: answers.motherName,
-      p_father_name: answers.fatherName,
-      p_email: answers.email,
-      p_other_phone: answers.otherPhone,
-      p_address_zip: answers.zip,
-      p_address_street: answers.street,
-      p_address_number: answers.number,
-      p_address_complement: answers.complement,
-      p_address_neighborhood: answers.neighborhood,
-      p_address_city: answers.city,
-      p_address_state: answers.state,
-      p_entry_type: answers.entryType,
-      p_baptism_church: answers.baptismChurch,
-      p_baptism_date: answers.baptismDate,
-      p_last_church: answers.lastChurch,
-      p_ministry_interests: answers.ministryInterests,
-      p_wants_small_group: answers.wantsSmallGroup,
-      p_small_group_id: answers.smallGroupId,
-      p_secret_society: answers.secretSociety,
-      p_membership_note: answers.membershipNote,
-    })
-    .single();
+const membershipAnswerParams = (answers: MembershipFormAnswers) => ({
+  p_phone: answers.phone,
+  p_name: answers.name,
+  p_gender: answers.gender,
+  p_cpf: answers.cpf,
+  p_birth_date: answers.birthDate,
+  p_marital_status: answers.maritalStatus,
+  p_mother_name: answers.motherName,
+  p_father_name: answers.fatherName,
+  p_email: answers.email,
+  p_other_phone: answers.otherPhone,
+  p_address_zip: answers.zip,
+  p_address_street: answers.street,
+  p_address_number: answers.number,
+  p_address_complement: answers.complement,
+  p_address_neighborhood: answers.neighborhood,
+  p_address_city: answers.city,
+  p_address_state: answers.state,
+  p_entry_type: answers.entryType,
+  p_baptism_church: answers.baptismChurch,
+  p_baptism_date: answers.baptismDate,
+  p_last_church: answers.lastChurch,
+  p_ministry_interests: answers.ministryInterests,
+  p_wants_small_group: answers.wantsSmallGroup,
+  p_small_group_id: answers.smallGroupId,
+  p_secret_society: answers.secretSociety,
+  p_membership_note: answers.membershipNote,
+});
+
+export async function submitMembershipForm(answers: MembershipFormAnswers): Promise<MembershipEligibility> {
+  const { data, error } = await supabase.rpc('submit_membership_form', membershipAnswerParams(answers)).single();
   if (error) throw error;
   return toEligibility(data);
+}
+
+export async function checkMembershipSignupCpf(cpf: string): Promise<void> {
+  const { error } = await supabase.rpc('check_membership_signup_cpf', { p_cpf: cpf });
+  if (error) throw error;
+}
+
+export async function submitMembershipSignup(answers: MembershipFormAnswers): Promise<void> {
+  const { error } = await supabase.rpc('submit_membership_signup', membershipAnswerParams(answers));
+  if (error) throw error;
 }
 
 export async function listPublicMinistryNames(): Promise<string[]> {

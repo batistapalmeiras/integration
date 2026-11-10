@@ -20,7 +20,7 @@ function isNegative(answer: string): boolean {
   return normalized === 'não' || normalized === 'nao';
 }
 
-export function prefilledForm({ name, saved }: MembershipInterestCheck): MembershipFormValues {
+export function prefilledForm(phone: string, { name, saved }: MembershipInterestCheck): MembershipFormValues {
   const baptism = readBaptismAnswer(saved.baptismInfo);
   const secretSociety = saved.secretSociety.trim();
   const smallGroupChoice = knownKey(WANTS_SMALL_GROUP_LABELS, saved.wantsSmallGroup);
@@ -35,6 +35,7 @@ export function prefilledForm({ name, saved }: MembershipInterestCheck): Members
       knownKey(MARITAL_STATUS_LABELS, saved.maritalStatus) || readMaritalStatusAnswer(saved.maritalStatusStory),
     motherName: saved.motherName,
     fatherName: saved.fatherName,
+    phone,
     email: saved.email,
     otherPhone: saved.otherPhone && maskPhone(saved.otherPhone),
     zip: saved.zip && maskCEP(saved.zip),
@@ -68,6 +69,7 @@ export function toMembershipFormAnswers(values: MembershipFormValues): Membershi
     maritalStatus: values.maritalStatus,
     motherName: values.motherName,
     fatherName: values.fatherName,
+    phone: values.phone,
     email: values.email,
     otherPhone: values.otherPhone,
     zip: values.zip,

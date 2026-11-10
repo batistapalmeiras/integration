@@ -574,7 +574,7 @@ export type Database = {
           email: string | null
           entry_type: string | null
           id: string
-          imported: boolean
+          origin: string
           membership_interest_sent_at: string | null
           membership_status: string | null
           name: string
@@ -595,7 +595,7 @@ export type Database = {
           email?: string | null
           entry_type?: string | null
           id?: string
-          imported?: boolean
+          origin?: string
           membership_interest_sent_at?: string | null
           membership_status?: string | null
           name: string
@@ -616,7 +616,7 @@ export type Database = {
           email?: string | null
           entry_type?: string | null
           id?: string
-          imported?: boolean
+          origin?: string
           membership_interest_sent_at?: string | null
           membership_status?: string | null
           name?: string
@@ -1130,6 +1130,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      check_membership_signup_cpf: {
+        Args: { p_cpf: string }
+        Returns: undefined
+      }
       submit_integration_signup: {
         Args: {
           p_attending_since: string
@@ -1146,6 +1150,37 @@ export type Database = {
       }
       submit_makeup_attendance: {
         Args: { p_notes: string; p_token: string }
+        Returns: undefined
+      }
+      submit_membership_signup: {
+        Args: {
+          p_address_city: string
+          p_address_complement: string
+          p_address_neighborhood: string
+          p_address_number: string
+          p_address_state: string
+          p_address_street: string
+          p_address_zip: string
+          p_baptism_church: string
+          p_baptism_date: string
+          p_birth_date: string
+          p_cpf: string
+          p_email: string
+          p_entry_type: string
+          p_father_name: string
+          p_gender: string
+          p_last_church: string
+          p_marital_status: string
+          p_membership_note: string
+          p_ministry_interests: string[]
+          p_mother_name: string
+          p_name: string
+          p_other_phone: string
+          p_phone: string
+          p_secret_society: string
+          p_small_group_id: string
+          p_wants_small_group: string
+        }
         Returns: undefined
       }
       submit_membership_form: {

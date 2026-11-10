@@ -52,6 +52,7 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
       ['Nome do pai', values.fatherName],
     ],
     [
+      ['WhatsApp', values.phone],
       ['E-mail', values.email],
       ['Outro telefone', values.otherPhone],
       ['Endereço', address, true],

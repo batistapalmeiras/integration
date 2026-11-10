@@ -28,8 +28,8 @@ export function StatuteStep({ control, readChapters, onChapterRead }: Props) {
         encaminha.
       </Typography>
       <Typography type="p">
-        Abaixo estão os Capítulos II e III, que tratam da admissão e do desligamento de membros e dos direitos e
-        deveres de um membro. Toque em cada um para ler com atenção.
+        Abaixo estão os Capítulos II e III, que tratam da admissão e do desligamento de membros e dos direitos e deveres
+        de um membro. Toque em cada um para ler com atenção.
       </Typography>
 
       <ChapterList>

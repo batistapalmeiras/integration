@@ -17,6 +17,7 @@ export enum AppRoute {
   IntegrationSignup = '/integracao/inscricao',
   MakeupAttendance = '/turma/reposicao',
   MembershipInterest = '/integracao/ficha-de-interesse',
+  MembershipSignup = '/cadastro-de-membresia',
   Members = '/membros',
   MemberPendencies = '/membros/pendencias',
   Birthdays = '/membros/aniversariantes',

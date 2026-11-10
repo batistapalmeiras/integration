@@ -13,6 +13,7 @@ export type MembershipFormValues = {
   maritalStatus: MaritalStatus | '';
   motherName: string;
   fatherName: string;
+  phone: string;
   email: string;
   otherPhone: string;
   zip: string;
@@ -44,6 +45,7 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   maritalStatus: '',
   motherName: '',
   fatherName: '',
+  phone: '',
   email: '',
   otherPhone: '',
   zip: '',
@@ -67,8 +69,7 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   membershipNote: '',
 };
 
-const required = (what: string) =>
-  z.string().refine((value) => value.trim() !== '', text.validation.required(what));
+const required = (what: string) => z.string().refine((value) => value.trim() !== '', text.validation.required(what));
 const whenFilled = (check: (value: string) => boolean) => (value: string) => value.trim() === '' || check(value);
 const choice = <T extends string>(values: readonly [T, ...T[]], message: string) =>
   z.string().refine((value) => (values as readonly string[]).includes(value), message);
@@ -90,19 +91,14 @@ const personalSchema = z.object({
   fatherName: z.string(),
 });
 
-function addressSchema(identificationPhone: string) {
-  return z.object({
+const contactSchema = z
+  .object({
+    phone: z.string().refine(isCompletePhone, text.validation.required('um WhatsApp válido')),
     email: required('seu e-mail').refine(
       whenFilled((value) => z.string().email().safeParse(value.trim()).success),
       text.validation.emailInvalid,
     ),
-    otherPhone: z
-      .string()
-      .refine((value) => value === '' || isCompletePhone(value), text.validation.phoneIncomplete)
-      .refine(
-        (value) => !isSamePhone(value, identificationPhone),
-        'Informe um número diferente do que você usou para entrar',
-      ),
+    otherPhone: z.string().refine((value) => value === '' || isCompletePhone(value), text.validation.phoneIncomplete),
     zip: required('o CEP').refine(
       whenFilled((value) => onlyDigits(value).length === 8),
       'O CEP tem 8 dígitos',
@@ -116,8 +112,12 @@ function addressSchema(identificationPhone: string) {
       whenFilled((value) => /^[A-Za-z]{2}$/.test(value.trim())),
       'Use a sigla, ex.: MG',
     ),
+  })
+  .refine((values) => !isSamePhone(values.otherPhone, values.phone), {
+    message: 'Informe um número diferente do seu WhatsApp',
+    path: ['otherPhone'],
+    when: () => true,
   });
-}
 
 const journeySchema = z.object({
   entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
@@ -127,9 +127,7 @@ const journeySchema = z.object({
 });
 
 const statuteSchema = z.object({
-  statuteAgreed: z
-    .boolean()
-    .refine((agreed) => agreed, 'É necessário concordar com o Estatuto para continuar.'),
+  statuteAgreed: z.boolean().refine((agreed) => agreed, 'É necessário concordar com o Estatuto para continuar.'),
 });
 
 const serveSchema = z
@@ -165,6 +163,4 @@ const serveSchema = z
 
 type StepSchema = z.ZodType<Record<string, unknown>, Record<string, unknown>>;
 
-export function stepSchemas(identificationPhone: string): StepSchema[] {
-  return [personalSchema, addressSchema(identificationPhone), journeySchema, statuteSchema, serveSchema];
-}
+export const STEP_SCHEMAS: StepSchema[] = [personalSchema, contactSchema, journeySchema, statuteSchema, serveSchema];

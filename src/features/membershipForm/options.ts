@@ -11,11 +11,13 @@ export const WANTS_TO_SERVE_LABELS = {
   no: 'Não posso ou não desejo servir agora',
 };
 export const WANTS_TO_SERVE_OPTIONS = toOptions(WANTS_TO_SERVE_LABELS);
-export const ENTRY_TYPE_OPTIONS = (Object.entries(ENTRY_TYPE_LABELS) as [EntryType, string][]).map(([value, label]) => ({
-  value,
-  label,
-  description: ENTRY_TYPE_DESCRIPTIONS[value],
-}));
+export const ENTRY_TYPE_OPTIONS = (Object.entries(ENTRY_TYPE_LABELS) as [EntryType, string][]).map(
+  ([value, label]) => ({
+    value,
+    label,
+    description: ENTRY_TYPE_DESCRIPTIONS[value],
+  }),
+);
 
 interface LastChurchPrompt {
   label: string;

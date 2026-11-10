@@ -7,6 +7,7 @@ interface NullableFunctionArgs {
   submit_integration_signup: 'p_attending_since';
   submit_makeup_attendance: 'p_notes';
   submit_membership_form: 'p_baptism_date' | 'p_small_group_id';
+  submit_membership_signup: 'p_baptism_date' | 'p_small_group_id';
 }
 
 type WithNullableArgs<

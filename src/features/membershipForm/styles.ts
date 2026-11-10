@@ -38,7 +38,9 @@ export const ChapterCard = styled.button<{ $read: boolean }>`
   font-family: ${({ theme }) => theme.typography.fontFamily};
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary};

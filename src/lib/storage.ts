@@ -1,6 +1,6 @@
 type StorageKind = 'local' | 'session';
 
-interface StoredValue<T> {
+export interface StoredValue<T> {
   load(): T | null;
   save(value: T): void;
   clear(): void;
