@@ -2,6 +2,7 @@
 import { onlyDigits } from 'bp-kit';
 // Local
 import { AppRoute } from '../routes/paths';
+import { firstNameOf } from './text';
 
 export function buildWhatsAppLink(phone: string, text: string): string {
   const digits = onlyDigits(phone);
@@ -10,12 +11,12 @@ export function buildWhatsAppLink(phone: string, text: string): string {
 }
 
 export function initialContactMessage(personName: string, volunteerName: string): string {
-  const firstName = personName.split(' ')[0];
-  return `Olá, ${firstName}! Tudo bem? Sou ${volunteerName} e tenho um convite especial para você:`;
+  const firstName = firstNameOf(personName);
+  return `Olá, ${firstName}! Tudo bem? Sou ${firstNameOf(volunteerName)} e tenho um convite especial para você:`;
 }
 
 export function classInviteMessage(name: string): string {
-  const firstName = name.split(' ')[0];
+  const firstName = firstNameOf(name);
   const signupUrl = `${window.location.origin}${AppRoute.IntegrationSignup}`;
   return [
     `Olá, ${firstName}!`,
@@ -33,7 +34,7 @@ export function classInviteMessage(name: string): string {
 }
 
 export function membershipInterestMessage(name: string, completedClasses: boolean): string {
-  const firstName = name.split(' ')[0];
+  const firstName = firstNameOf(name);
   const formUrl = `${window.location.origin}${AppRoute.MembershipInterest}`;
   const opening = completedClasses
     ? `Olá, ${firstName}! Você concluiu as 4 aulas de Integração 🎉 Agora é hora de preencher sua Ficha de Interesse de Membresia.`
@@ -42,7 +43,7 @@ export function membershipInterestMessage(name: string, completedClasses: boolea
 }
 
 export function makeupLessonMessage(name: string, lessonNumber: number, link: string): string {
-  const firstName = name.split(' ')[0];
+  const firstName = firstNameOf(name);
   return [
     `Olá, ${firstName}!`,
     '',

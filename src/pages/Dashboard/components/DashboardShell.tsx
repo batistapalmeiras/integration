@@ -9,6 +9,7 @@ import { SIDEMENU_MEDIA } from '../../../components/Layout/styles';
 import { PageHeader } from '../../../components/PageHeader';
 import { NAV_ITEMS, navAreasFor } from '../../../routes/navigation';
 // Local
+import { firstNameOf } from '../../../domain/text';
 import { EnterArea, Page } from '../styles';
 
 const ProfileIcon = NAV_ITEMS.profile.icon;
@@ -44,7 +45,7 @@ export function DashboardShell({ loading, error, children }: Props) {
   const hasSidebar = useMediaQuery(SIDEMENU_MEDIA);
   const areas = navAreasFor(user?.role);
   const singleArea = !hasSidebar && areas.length === 1 ? areas[0] : null;
-  const firstName = user?.name?.trim().split(' ')[0];
+  const firstName = user?.name ? firstNameOf(user.name) : '';
 
   return (
     <Page>

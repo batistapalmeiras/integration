@@ -13,3 +13,5 @@ export const YES_NO_OPTIONS = toOptions(YES_NO_LABELS);
 export const LOAD_RETRY_MESSAGE = 'Não foi possível carregar agora. Atualize a página para tentar de novo.';
 
 export const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, 'pt-BR');
+
+export const firstNameOf = (name: string) => name.trim().split(/\s+/)[0] ?? '';

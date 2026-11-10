@@ -4,7 +4,7 @@ import { Control } from 'react-hook-form';
 // Libs
 import { LinkButton, text, TextInput, Typography } from 'bp-kit';
 // Local
-import { PHONE_PLACEHOLDER } from '../../domain/text';
+import { firstNameOf, PHONE_PLACEHOLDER } from '../../domain/text';
 import { clearVisitorIdentity, KnownVisitor, loadKnownVisitor } from '../../lib/visitorIdentity';
 
 export function useKnownVisitor() {
@@ -37,7 +37,7 @@ export function VisitorPhoneField({ control, known, prompt, knownPrompt }: Props
   if (known) {
     return (
       <>
-        <Typography type="h5">Olá, {known.name.trim().split(/\s+/)[0]}!</Typography>
+        <Typography type="h5">Olá, {firstNameOf(known.name)}!</Typography>
         <Typography type="p">{knownPrompt}</Typography>
       </>
     );
