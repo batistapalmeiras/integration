@@ -34,7 +34,7 @@ export function MembershipPage() {
           isPastor && (
             <Button variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
               <Plus size={16} />
-              Novo conselho
+              Novo Conselho
             </Button>
           )
         }
@@ -43,7 +43,9 @@ export function MembershipPage() {
       <CouncilBar>
         <CouncilLabel>
           <CalendarDays size={16} aria-hidden="true" />
-          {council ? `Conselho atual: ${formatDate(council.meetingDate)}` : 'Nenhum conselho criado'}
+          {council
+            ? `Conselho Administrativo: ${formatDate(council.meetingDate)}`
+            : 'Nenhum Conselho Administrativo criado'}
         </CouncilLabel>
         {council && (
           <LinkButton icon={<ChevronRight size={16} />} onClick={() => navigate(councilPath(council.id))}>
@@ -58,7 +60,7 @@ export function MembershipPage() {
 
       {!loading && !error && rows.length === 0 && (
         <Empty
-          title="Ninguém aguardando o Conselho"
+          title="Ninguém aguardando o Conselho Administrativo"
           description="Quem concluir as aulas e preencher a ficha aparece aqui."
         />
       )}

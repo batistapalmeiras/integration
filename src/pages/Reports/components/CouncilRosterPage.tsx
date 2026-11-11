@@ -26,12 +26,13 @@ export function CouncilRosterPage() {
   const isPastor = user?.role === UserRole.Pastor;
 
   if (loading) return <Skeleton $h="320px" />;
-  if (error || !council) return <Empty title="Conselho não encontrado" description={errorMessage(error) ?? ''} />;
+  if (error || !council)
+    return <Empty title="Conselho Administrativo não encontrado" description={errorMessage(error) ?? ''} />;
 
   return (
     <div>
       <PageHeader
-        title="Conselho"
+        title="Conselho Administrativo"
         subtitle={`${weekdayLabel(council.meetingDate)}, ${formatDate(council.meetingDate)}`}
         back
         action={
@@ -59,7 +60,7 @@ export function CouncilRosterPage() {
       {council.members.length === 0 ? (
         <Empty
           title="Ninguém aprovado ainda"
-          description="Quem for confirmado como membro com este conselho aparece aqui."
+          description="Quem for confirmado como membro com este Conselho Administrativo aparece aqui."
         />
       ) : (
         <TableWrapper>

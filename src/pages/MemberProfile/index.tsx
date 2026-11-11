@@ -86,7 +86,7 @@ export function MemberProfilePage() {
 
   const churchInfo: InfoField[] = info
     ? [
-        { label: 'Aprovado no Conselho de', value: info.councilDate ? formatDate(info.councilDate) : '' },
+        { label: 'Aprovado no Conselho Administrativo de', value: info.councilDate ? formatDate(info.councilDate) : '' },
         { label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) },
         {
           label: MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,

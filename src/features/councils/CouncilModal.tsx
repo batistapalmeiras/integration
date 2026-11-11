@@ -48,7 +48,7 @@ export function CouncilModal({ council, close, onDeleted }: Props) {
       await refreshCouncils();
       close();
     } catch (e) {
-      showToast(errorMessage(e) ?? 'Não foi possível salvar o conselho.');
+      showToast(errorMessage(e) ?? 'Não foi possível salvar o Conselho Administrativo.');
     }
   });
 
@@ -62,7 +62,7 @@ export function CouncilModal({ council, close, onDeleted }: Props) {
       onDeleted?.();
     } catch (e) {
       setDeleting(false);
-      showToast(errorMessage(e) ?? 'Não foi possível excluir o conselho.');
+      showToast(errorMessage(e) ?? 'Não foi possível excluir o Conselho Administrativo.');
     }
   };
 
@@ -70,11 +70,11 @@ export function CouncilModal({ council, close, onDeleted }: Props) {
     const approved = council.members.length;
     return (
       <>
-        <ModalTitle onClose={close}>Excluir conselho?</ModalTitle>
+        <ModalTitle onClose={close}>Excluir Conselho Administrativo?</ModalTitle>
         <Typography type="p">
-          O Conselho de {formatDate(council.meetingDate)} será excluído.
+          O Conselho Administrativo de {formatDate(council.meetingDate)} será excluído.
           {approved > 0 &&
-            ` ${approved} ${approved === 1 ? 'membro aprovado nele continua' : 'membros aprovados nele continuam'} membro, mas sem conselho.`}{' '}
+            ` ${approved} ${approved === 1 ? 'membro aprovado nele continua' : 'membros aprovados nele continuam'} membro, mas sem Conselho Administrativo.`}{' '}
           Essa ação não pode ser desfeita.
         </Typography>
         <ModalActions>
@@ -84,7 +84,7 @@ export function CouncilModal({ council, close, onDeleted }: Props) {
             ) : (
               <>
                 <Trash2 size={16} />
-                Excluir conselho
+                Excluir Conselho Administrativo
               </>
             )}
           </Button>
@@ -99,7 +99,7 @@ export function CouncilModal({ council, close, onDeleted }: Props) {
 
   return (
     <>
-      <ModalTitle onClose={close}>{council ? 'Editar conselho' : 'Novo conselho'}</ModalTitle>
+      <ModalTitle onClose={close}>{council ? 'Editar Conselho Administrativo' : 'Novo Conselho'}</ModalTitle>
       <Form onSubmit={submit}>
         <DatePicker label="Data da reunião" control={control} name="meetingDate" />
         <ModalActions>
@@ -118,7 +118,7 @@ export function CouncilModal({ council, close, onDeleted }: Props) {
         {council && (
           <Button type="button" variant="danger" fullWidth onClick={() => setConfirmingDelete(true)}>
             <Trash2 size={16} />
-            Excluir conselho
+            Excluir Conselho Administrativo
           </Button>
         )}
       </Form>

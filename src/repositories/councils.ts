@@ -22,7 +22,7 @@ export async function listCouncils(): Promise<Council[]> {
 }
 
 function throwCouncilError(error: { code?: string } | null): void {
-  if (error?.code === UNIQUE_VIOLATION) throw new Error('Já existe um conselho nessa data.');
+  if (error?.code === UNIQUE_VIOLATION) throw new Error('Já existe um Conselho Administrativo nessa data.');
   if (error) throw error;
 }
 

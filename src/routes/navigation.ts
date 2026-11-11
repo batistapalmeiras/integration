@@ -41,7 +41,7 @@ export const NAV_ITEMS = {
   people: { label: 'Pessoas', path: AppRoute.People, icon: Contact },
   cohortHistory: { label: 'Histórico de turmas', path: `${AppRoute.Reports}/turmas`, icon: GraduationCap },
   coffeeHistory: { label: 'Histórico de cafés', path: `${AppRoute.Reports}/cafes`, icon: Coffee },
-  councilHistory: { label: 'Histórico de conselhos', path: COUNCILS_PATH, icon: Gavel },
+  councilHistory: { label: 'Histórico do Conselho Administrativo', path: COUNCILS_PATH, icon: Gavel },
   volunteers: { label: 'Voluntários', path: AppRoute.Volunteers, icon: UserPlus },
   reports: { label: 'Relatórios', path: AppRoute.Reports, icon: FileBarChart },
   members: { label: 'Membros', path: AppRoute.Members, icon: Users },
@@ -87,7 +87,7 @@ const HISTORY_GROUP: NavGroup = {
 
 const LEADERSHIP_HISTORY_GROUP: NavGroup = {
   ...HISTORY_GROUP,
-  items: [...HISTORY_GROUP.items, { ...NAV_ITEMS.councilHistory, label: 'Conselhos' }],
+  items: [...HISTORY_GROUP.items, { ...NAV_ITEMS.councilHistory, label: 'Conselho Administrativo' }],
 };
 
 export const PASTOR_NAV_AREAS: NavArea[] = [

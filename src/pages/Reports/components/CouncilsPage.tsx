@@ -18,14 +18,17 @@ export function CouncilsPage() {
 
   return (
     <div>
-      <PageHeader title="Histórico de conselhos" back />
+      <PageHeader title="Conselho Administrativo" back />
 
       {loading && <Skeleton $h="180px" />}
 
       {!loading && loadError && <Empty title={text.feedback.loadError} description={loadError} />}
 
       {!loading && !loadError && councils?.length === 0 && (
-        <Empty title="Nenhum conselho criado" description='Crie um conselho em Membresia, no botão "Novo conselho".' />
+        <Empty
+          title="Nenhum Conselho Administrativo criado"
+          description='Crie um em Membresia, no botão "Novo Conselho".'
+        />
       )}
 
       {!loading && !loadError && councils && councils.length > 0 && (
@@ -33,7 +36,7 @@ export function CouncilsPage() {
           <Table>
             <thead>
               <tr>
-                <Th>Conselho</Th>
+                <Th>Reunião</Th>
                 <Th $shrink>Aprovados</Th>
               </tr>
             </thead>

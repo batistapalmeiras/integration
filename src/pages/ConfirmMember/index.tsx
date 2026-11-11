@@ -75,7 +75,7 @@ function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember 
   const ministries = useMinistries().data ?? [];
   const community = useForm<CommunityFormValues>({
     resolver: zodResolver(communitySchema),
-    defaultValues: { smallGroupIds: [], ministryIds: [] },
+    values: { smallGroupIds: person.small_group_id ? [person.small_group_id] : [], ministryIds: [] },
   });
   const familyForm = useForm<FamilyFormValues>({ defaultValues: familyFormValues(family) });
   const councilForm = useForm<{ councilId: string }>({
@@ -112,11 +112,11 @@ function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember 
 
         <Form onSubmit={submit}>
           <Sections>
-            <Section aria-label="Conselho">
-              <PanelTitle>Conselho</PanelTitle>
+            <Section aria-label="Conselho Administrativo">
+              <PanelTitle>Conselho Administrativo</PanelTitle>
               {hasCouncil ? (
                 <FieldGrid>
-                  <Select label="Aprovado no Conselho de" control={councilForm.control} name="councilId">
+                  <Select label="Aprovado no Conselho Administrativo de" control={councilForm.control} name="councilId">
                     {councils.map((council) => (
                       <option key={council.id} value={council.id}>
                         {formatDate(council.meetingDate)}
@@ -126,11 +126,11 @@ function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember 
                 </FieldGrid>
               ) : (
                 <>
-                  <InfoBox variant="warning">Nenhum conselho criado. Crie o conselho para confirmar.</InfoBox>
+                  <InfoBox variant="warning">Nenhum Conselho Administrativo criado. Crie um para confirmar.</InfoBox>
                   <EndActions>
                     <Button type="button" variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
                       <Plus size={16} />
-                      Novo conselho
+                      Novo Conselho
                     </Button>
                   </EndActions>
                 </>

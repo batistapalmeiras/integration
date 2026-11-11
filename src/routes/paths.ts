@@ -31,6 +31,6 @@ export enum AppRoute {
 
 export const confirmMemberPath = (personId: string) => `${AppRoute.Membership}/${personId}/confirmar`;
 
-export const COUNCILS_PATH = `${AppRoute.Reports}/conselhos`;
+export const COUNCILS_PATH = `${AppRoute.Reports}/conselho-administrativo`;
 
 export const councilPath = (councilId: string) => `${COUNCILS_PATH}/${councilId}`;
