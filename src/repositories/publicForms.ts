@@ -31,8 +31,6 @@ export interface SavedMembershipAnswers {
   gender: string;
   cpf: string;
   maritalStatus: string;
-  motherName: string;
-  fatherName: string;
   otherPhone: string;
   zip: string;
   street: string;
@@ -67,8 +65,6 @@ export interface MembershipFormAnswers {
   cpf: string;
   birthDate: string;
   maritalStatus: string;
-  motherName: string;
-  fatherName: string;
   phone: string;
   email: string;
   otherPhone: string;
@@ -173,8 +169,6 @@ export async function checkMembershipInterestPhone(phone: string): Promise<Membe
       gender: data.gender,
       cpf: data.cpf,
       maritalStatus: data.marital_status,
-      motherName: data.mother_name,
-      fatherName: data.father_name,
       otherPhone: data.other_phone,
       zip: data.address_zip,
       street: data.address_street,
@@ -206,8 +200,6 @@ const membershipAnswerParams = (answers: MembershipFormAnswers) => ({
   p_cpf: answers.cpf,
   p_birth_date: answers.birthDate,
   p_marital_status: answers.maritalStatus,
-  p_mother_name: answers.motherName,
-  p_father_name: answers.fatherName,
   p_email: answers.email,
   p_other_phone: answers.otherPhone,
   p_address_zip: answers.zip,

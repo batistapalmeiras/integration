@@ -31,13 +31,6 @@ export const memberRecordSchema = (optionalPhone: boolean) =>
       addressState: optional,
       addressReference: optional,
       cpf: z.string().refine((value) => value === '' || isValidCpf(value), text.validation.cpfInvalid),
-      fatherName: optional,
-      motherName: optional,
-      spouseName: optional,
-      childrenNames: optional,
-      childrenCount: z
-        .string()
-        .refine((value) => value.trim() === '' || /^\d{1,2}$/.test(value.trim()), 'Informe um número'),
       baptismDate: optional,
       baptismChurch: optional,
       entryType: z.enum(['baptism', 'transfer_letter', 'acclamation', 'reconciliation', '']),

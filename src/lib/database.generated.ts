@@ -349,16 +349,11 @@ export type Database = {
           address_zip: string | null
           baptism_church: string | null
           baptism_date: string | null
-          children_count: number | null
-          children_names: string | null
           cpf: string | null
-          father_name: string | null
           gender: string | null
           marital_status: string | null
-          mother_name: string | null
           other_phone: string | null
           person_id: string
-          spouse_name: string | null
         }
         Insert: {
           address_city?: string | null
@@ -371,16 +366,11 @@ export type Database = {
           address_zip?: string | null
           baptism_church?: string | null
           baptism_date?: string | null
-          children_count?: number | null
-          children_names?: string | null
           cpf?: string | null
-          father_name?: string | null
           gender?: string | null
           marital_status?: string | null
-          mother_name?: string | null
           other_phone?: string | null
           person_id: string
-          spouse_name?: string | null
         }
         Update: {
           address_city?: string | null
@@ -393,16 +383,11 @@ export type Database = {
           address_zip?: string | null
           baptism_church?: string | null
           baptism_date?: string | null
-          children_count?: number | null
-          children_names?: string | null
           cpf?: string | null
-          father_name?: string | null
           gender?: string | null
           marital_status?: string | null
-          mother_name?: string | null
           other_phone?: string | null
           person_id?: string
-          spouse_name?: string | null
         }
         Relationships: [
           {
@@ -1018,7 +1003,6 @@ export type Database = {
           cpf: string
           email: string
           entry_type: string
-          father_name: string
           gender: string
           lessons_attended: number
           lessons_total: number
@@ -1026,7 +1010,6 @@ export type Database = {
           marital_status_story: string
           membership_note: string
           ministry_interests: string[]
-          mother_name: string
           origin_church: string
           other_phone: string
           person_name: string
@@ -1185,13 +1168,11 @@ export type Database = {
           p_cpf: string
           p_email: string
           p_entry_type: string
-          p_father_name: string
           p_gender: string
           p_last_church: string
           p_marital_status: string
           p_membership_note: string
           p_ministry_interests: string[]
-          p_mother_name: string
           p_name: string
           p_other_phone: string
           p_phone: string
@@ -1216,13 +1197,11 @@ export type Database = {
           p_cpf: string
           p_email: string
           p_entry_type: string
-          p_father_name: string
           p_gender: string
           p_last_church: string
           p_marital_status: string
           p_membership_note: string
           p_ministry_interests: string[]
-          p_mother_name: string
           p_name: string
           p_other_phone: string
           p_phone: string

@@ -33,10 +33,6 @@ export function PersonalStep({ control }: Props) {
         <SelectField control={control} name="gender" label="Sexo" options={GENDER_OPTIONS} />
         <SelectField control={control} name="maritalStatus" label="Estado civil" options={MARITAL_STATUS_OPTIONS} />
       </FieldPair>
-      <FieldPair>
-        <TextInput label="Nome da mãe (opcional)" control={control} name="motherName" />
-        <TextInput label="Nome do pai (opcional)" control={control} name="fatherName" />
-      </FieldPair>
     </>
   );
 }

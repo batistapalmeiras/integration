@@ -23,7 +23,7 @@ export function FamilyModal({ personId, family, close }: Props) {
 
   const submit = handleSubmit(async (values) => {
     try {
-      await saveFamily(personId, values);
+      await saveFamily(personId, family, values);
       close();
     } catch (e) {
       showToast(e instanceof Error ? e.message : 'Não foi possível salvar.');

@@ -11,8 +11,6 @@ export type MembershipFormValues = {
   cpf: string;
   birthDate: string;
   maritalStatus: MaritalStatus | '';
-  motherName: string;
-  fatherName: string;
   phone: string;
   email: string;
   otherPhone: string;
@@ -43,8 +41,6 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   cpf: '',
   birthDate: '',
   maritalStatus: '',
-  motherName: '',
-  fatherName: '',
   phone: '',
   email: '',
   otherPhone: '',
@@ -87,8 +83,6 @@ const personalSchema = z.object({
   cpf: required('seu CPF').refine(whenFilled(isValidCpf), text.validation.cpfInvalid),
   birthDate: required('sua data de nascimento').refine(whenFilled(pastDate), 'Escolha uma data que já passou.'),
   maritalStatus: choice(['single', 'married', 'divorced', 'widowed', 'stable_union'], 'Selecione o estado civil'),
-  motherName: z.string(),
-  fatherName: z.string(),
 });
 
 const contactSchema = (optionalPhone: boolean) =>

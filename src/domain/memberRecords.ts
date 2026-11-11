@@ -90,11 +90,6 @@ export interface MemberRecord {
   addressState: string;
   addressReference: string;
   cpf: string;
-  fatherName: string;
-  motherName: string;
-  spouseName: string;
-  childrenNames: string;
-  childrenCount: string;
   baptismDate: string;
   baptismChurch: string;
   entryType: EntryType | '';

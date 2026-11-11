@@ -47,12 +47,6 @@ export function FamilyFields({ personId, family, control }: Props) {
           )}
         />
       </WideField>
-      <Select label="Pai" control={control} name="fatherId" searchable>
-        {memberOptions}
-      </Select>
-      <Select label="Mãe" control={control} name="motherId" searchable>
-        {memberOptions}
-      </Select>
     </>
   );
 }

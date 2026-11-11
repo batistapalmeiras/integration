@@ -6,7 +6,7 @@ import { Empty, Skeleton, text } from 'bp-kit';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
-import { formatDate, weekdayLabel } from '../../../domain/dates';
+import { formatDate } from '../../../domain/dates';
 import { errorMessage } from '../../../lib/queryCache';
 import { useCouncils } from '../../../queries/councils';
 import { councilPath } from '../../../routes/paths';
@@ -40,9 +40,7 @@ export function CouncilsPage() {
             <tbody>
               {councils.map((council) => (
                 <Tr key={council.id} $clickable onClick={() => navigate(councilPath(council.id))}>
-                  <Td>
-                    {weekdayLabel(council.meetingDate)}, {formatDate(council.meetingDate)}
-                  </Td>
+                  <Td>{formatDate(council.meetingDate)}</Td>
                   <Td $shrink>{council.members.length}</Td>
                 </Tr>
               ))}

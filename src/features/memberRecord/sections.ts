@@ -118,11 +118,3 @@ export function displayValue(record: MemberRecord, field: RecordField): string {
   if (field.kind === 'select') return field.labels[value] ?? '';
   return value;
 }
-
-export const FAMILY_NAME_FIELDS = {
-  spouse: { name: 'spouseName', label: 'Cônjuge' },
-  father: { name: 'fatherName', label: 'Pai' },
-  mother: { name: 'motherName', label: 'Mãe' },
-  childrenNames: { name: 'childrenNames', label: 'Filhos' },
-  childrenCount: { name: 'childrenCount', label: 'Quantidade de filhos' },
-} as const satisfies Record<string, { name: keyof MemberRecord; label: string }>;

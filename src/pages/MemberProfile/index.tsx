@@ -141,7 +141,6 @@ export function MemberProfilePage() {
                   renderPanel(section),
                   <FamilyPanel
                     key="family"
-                    record={record}
                     family={family}
                     onEdit={() => open(<FamilyModal personId={id} family={family} close={close} />)}
                   />,

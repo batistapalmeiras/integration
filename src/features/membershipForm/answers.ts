@@ -33,8 +33,6 @@ export function prefilledForm(phone: string, { name, saved }: MembershipInterest
     birthDate: saved.birthDate,
     maritalStatus:
       knownKey(MARITAL_STATUS_LABELS, saved.maritalStatus) || readMaritalStatusAnswer(saved.maritalStatusStory),
-    motherName: saved.motherName,
-    fatherName: saved.fatherName,
     phone,
     email: saved.email,
     otherPhone: saved.otherPhone && maskPhone(saved.otherPhone),
@@ -67,8 +65,6 @@ export function toMembershipFormAnswers(values: MembershipFormValues): Membershi
     cpf: values.cpf,
     birthDate: values.birthDate,
     maritalStatus: values.maritalStatus,
-    motherName: values.motherName,
-    fatherName: values.fatherName,
     phone: values.phone,
     email: values.email,
     otherPhone: values.otherPhone,

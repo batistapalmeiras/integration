@@ -85,7 +85,7 @@ function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember 
 
   const submit = community.handleSubmit(async (values) => {
     try {
-      if (familyForm.formState.isDirty) await saveFamily(person.id, familyForm.getValues());
+      if (familyForm.formState.isDirty) await saveFamily(person.id, family, familyForm.getValues());
       await confirmMember({
         councilId: councilForm.getValues('councilId'),
         smallGroupId: values.smallGroupIds[0] ?? null,

@@ -3,7 +3,6 @@ import { MemberRecord } from '../../../src/domain/memberRecords';
 import {
   addressLines,
   displayValue,
-  FAMILY_NAME_FIELDS,
   MEMBER_RECORD_SECTIONS,
   sectionResolver,
 } from '../../../src/features/memberRecord';
@@ -26,11 +25,6 @@ const blank: MemberRecord = {
   addressState: '',
   addressReference: '',
   cpf: '',
-  fatherName: '',
-  motherName: '',
-  spouseName: '',
-  childrenNames: '',
-  childrenCount: '',
   baptismDate: '',
   baptismChurch: '',
   entryType: '',
@@ -42,10 +36,9 @@ const field = (name: keyof MemberRecord) =>
   MEMBER_RECORD_SECTIONS.flatMap((item) => item.fields).find((item) => item.name === name)!;
 
 describe('member record sections', () => {
-  it('lists every field of the record exactly once, with the family ones in the family panel', () => {
+  it('lists every field of the record exactly once', () => {
     const names = [
       ...MEMBER_RECORD_SECTIONS.flatMap((item) => item.fields.map((f) => f.name)),
-      ...Object.values(FAMILY_NAME_FIELDS).map((f) => f.name),
     ];
     expect(new Set(names).size).toBe(names.length);
     expect([...names].sort()).toEqual(Object.keys(blank).sort());

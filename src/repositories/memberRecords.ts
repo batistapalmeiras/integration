@@ -92,10 +92,6 @@ const PROFILE_COLUMNS = {
   addressState: 'address_state',
   addressReference: 'address_reference',
   cpf: 'cpf',
-  fatherName: 'father_name',
-  motherName: 'mother_name',
-  spouseName: 'spouse_name',
-  childrenNames: 'children_names',
   baptismDate: 'baptism_date',
   baptismChurch: 'baptism_church',
 } as const satisfies Partial<Record<keyof MemberRecord, string>>;
@@ -138,7 +134,6 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
     birthDate: sensitive.data?.birth_date ?? '',
     entryType: toEntryType(member.entry_type) ?? '',
     originChurch: sensitive.data?.origin_church ?? '',
-    childrenCount: profileRow.children_count == null ? '' : String(profileRow.children_count),
   };
 }
 
@@ -174,7 +169,6 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
   profile.cpf = digitsOrNull(record.cpf);
   profile.other_phone = digitsOrNull(record.otherPhone);
   profile.address_zip = digitsOrNull(record.addressZip);
-  profile.children_count = record.childrenCount.trim() === '' ? null : Number(record.childrenCount);
 
   const results = await Promise.all([
     supabase

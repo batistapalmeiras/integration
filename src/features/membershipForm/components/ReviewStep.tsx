@@ -48,8 +48,6 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
       ['CPF', values.cpf],
       ['Data de nascimento', values.birthDate && formatDate(values.birthDate)],
       ['Estado civil', label(MARITAL_STATUS_LABELS, values.maritalStatus)],
-      ['Nome da mãe', values.motherName],
-      ['Nome do pai', values.fatherName],
     ],
     [
       ['E-mail', values.email],

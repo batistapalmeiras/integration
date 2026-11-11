@@ -11,8 +11,6 @@ const nothingSaved: SavedMembershipAnswers = {
   gender: '',
   cpf: '',
   maritalStatus: '',
-  motherName: '',
-  fatherName: '',
   otherPhone: '',
   zip: '',
   street: '',
