@@ -19,6 +19,18 @@ export const FormActions = styled.div`
   }
 `;
 
+export const Sections = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xl};
+`;
+
+export const Section = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.base};
+`;
+
 export const SectionDivider = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.hairline};
   padding-top: ${({ theme }) => theme.spacing.xl};

@@ -17,7 +17,7 @@ import { hasRole, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../ty
 import { useVisitorProfile } from '../../../features/visitors';
 import { CommunityFields } from '../components/CommunityFields';
 import { communitySchema, CommunityFormValues } from '../validators';
-import { usePersonMakeups, usePersonSensitive } from '../../../queries/person';
+import { useMemberProfile, usePersonMakeups, usePersonSensitive } from '../../../queries/person';
 import { useMinistries, useSmallGroups } from '../../../queries/reference';
 import {
   DetailLabel,
@@ -28,9 +28,17 @@ import {
   InfoTabBar,
   SectionStack,
 } from '../Detail/styles';
-import { DetailContent, EndActions, FieldGrid, SectionDivider } from '../../../components/FormLayout';
+import {
+  DetailContent,
+  EndActions,
+  FieldGrid,
+  Section,
+  SectionDivider,
+  Sections,
+} from '../../../components/FormLayout';
+import { PanelTitle } from '../../../components/Panel';
 import { EntryList } from './EntryList';
-import { InfoEntry, integrationEntries, makeupEntries, membershipEntries } from './sensitive';
+import { integrationEntries, makeupEntries, membershipSections } from './sensitive';
 
 type InfoTab = 'general' | 'integration' | 'membership' | 'makeup';
 
@@ -59,6 +67,8 @@ export function VisitorInfoPage() {
   const sensitive = usePersonSensitive(id ?? '', canSeeSensitive).data ?? null;
   const makeups = usePersonMakeups(id ?? '', canSeeMakeups).data ?? [];
   const declines = communityDeclines(sensitive);
+  const reachedMembership = !!person && ['membership_pending', 'member'].includes(person.status);
+  const memberProfile = useMemberProfile(id ?? '', canSeeSensitive && reachedMembership).data ?? null;
 
   const canEditCommunity = user?.role === UserRole.Pastor && person?.status === 'member';
   const smallGroups = useSmallGroups(canEditCommunity).data ?? [];
@@ -77,7 +87,6 @@ export function VisitorInfoPage() {
   if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
 
   const reachedIntegration = ['integration', 'membership_pending', 'member'].includes(person.status);
-  const reachedMembership = ['membership_pending', 'member'].includes(person.status);
 
   const tabs: { key: InfoTab; label: string }[] = [
     { key: 'general', label: 'Geral' },
@@ -87,13 +96,6 @@ export function VisitorInfoPage() {
   ];
 
   const current = tabs.some((t) => t.key === tab) ? tab : 'general';
-
-  const entriesFor = (key: InfoTab): InfoEntry[] =>
-    key === 'integration'
-      ? integrationEntries(sensitive)
-      : key === 'membership'
-        ? membershipEntries(person, sensitive)
-        : [];
 
   const rows = [
     person.visited_on && { label: 'Visitou em', value: formatDate(person.visited_on) },
@@ -159,7 +161,18 @@ export function VisitorInfoPage() {
         </DetailsList>
       )}
 
-      {(current === 'integration' || current === 'membership') && <EntryList entries={entriesFor(current)} />}
+      {current === 'integration' && <EntryList entries={integrationEntries(sensitive)} />}
+
+      {current === 'membership' && (
+        <Sections>
+          {membershipSections(person, sensitive, memberProfile, profileSmallGroupName).map((section) => (
+            <Section key={section.title} aria-label={section.title}>
+              <PanelTitle>{section.title}</PanelTitle>
+              <EntryList entries={section.entries} />
+            </Section>
+          ))}
+        </Sections>
+      )}
 
       {current === 'makeup' && (
         <SectionStack>

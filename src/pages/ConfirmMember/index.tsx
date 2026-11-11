@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Empty, Form, InfoBox, Select, Skeleton, useModal, useToast } from 'bp-kit';
 import { Check, Plus } from 'lucide-react';
 // Components
-import { EndActions, FieldGrid, SectionDivider } from '../../components/FormLayout';
+import { EndActions, FieldGrid, Section, SectionDivider, Sections } from '../../components/FormLayout';
 import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
 import { PageHeader } from '../../components/PageHeader';
@@ -29,7 +29,7 @@ import { CommunityFields } from '../Visitors/components/CommunityFields';
 import { EntryList } from '../Visitors/Info/EntryList';
 import { membershipCommunityEntries } from '../Visitors/Info/sensitive';
 import { CommunityFormValues, communitySchema } from '../Visitors/validators';
-import { Actions, Section, Sections } from './styles';
+import { Actions } from './styles';
 
 export function ConfirmMemberPage() {
   const { id = '' } = useParams<{ id: string }>();

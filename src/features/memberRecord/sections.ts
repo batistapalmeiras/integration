@@ -5,6 +5,7 @@ import { formatDate } from '../../domain/dates';
 import {
   GENDER_LABELS,
   MARITAL_STATUS_LABELS,
+  MemberProfile,
   MemberRecord,
   MEMBERSHIP_STATUS_LABELS,
 } from '../../domain/memberRecords';
@@ -24,7 +25,7 @@ export interface RecordSection {
   id: string;
   title: string;
   fields: RecordField[];
-  summary?: (record: MemberRecord) => string[];
+  summary?: (record: MemberProfile) => string[];
 }
 
 const joinFilled = (parts: string[], separator: string) =>
@@ -33,7 +34,7 @@ const joinFilled = (parts: string[], separator: string) =>
     .filter(Boolean)
     .join(separator);
 
-export function addressLines(record: MemberRecord): string[] {
+export function addressLines(record: MemberProfile): string[] {
   const street = joinFilled([record.addressStreet, record.addressNumber], ', ');
   const city = joinFilled([record.addressCity, record.addressState], '/');
   const zip = record.addressZip.trim() && `CEP ${maskCEP(record.addressZip)}`;
@@ -111,7 +112,7 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
   },
 ];
 
-export function displayValue(record: MemberRecord, field: RecordField): string {
+export function displayValue(record: Partial<MemberRecord>, field: RecordField): string {
   const value = record[field.name];
   if (!value) return '';
   if (field.kind === 'date') return formatDate(value);

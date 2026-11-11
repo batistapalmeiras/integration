@@ -1,8 +1,15 @@
+// Libs
+import { maskPhone } from 'bp-kit';
 // Local
 import { formatDate, formatTimestampDate } from '../../../domain/dates';
 import { LessonMakeup } from '../../../domain/lessonMakeups';
+import { communityDeclines } from '../../../domain/membership';
+import { MemberProfile, MemberRecord } from '../../../domain/memberRecords';
 import { PersonSensitive } from '../../../domain/personSensitive';
-import { ENTRY_TYPE_LABELS, MEMBERSHIP_ANSWER_LABELS, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
+import { YES_NO_LABELS } from '../../../domain/text';
+import { MEMBERSHIP_ANSWER_LABELS, toEntryType, WANTS_SMALL_GROUP_LABELS } from '../../../types/church';
+import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../../features/memberRecord';
+import { SERVE_STEP_TITLE } from '../../../features/membershipForm';
 import { Person } from '../../../features/visitors';
 
 const NO_ANSWER = 'Sem resposta';
@@ -43,28 +50,74 @@ export function membershipCommunityEntries(data: PersonSensitive | null): InfoEn
     ),
     entry(
       MEMBERSHIP_ANSWER_LABELS.ministryInterests,
-      data?.ministry_interests?.length ? data.ministry_interests.join(', ') : null,
+      communityDeclines(data).ministry ? YES_NO_LABELS.no : data?.ministry_interests?.join(', '),
     ),
   ];
 }
 
-export function membershipEntries(person: Person, data: PersonSensitive | null): InfoEntry[] {
-  const [wantsSmallGroup, ministryInterests] = membershipCommunityEntries(data);
+export interface InfoSection {
+  title: string;
+  entries: InfoEntry[];
+}
+
+const NOT_ASKED_ON_FORM: (keyof MemberRecord)[] = ['addressReference'];
+const BAPTISM_FIELDS: (keyof MemberRecord)[] = ['baptismChurch', 'baptismDate'];
+
+function smallGroupAnswer(data: PersonSensitive | null, smallGroupName: string | null): string | null {
+  const answer = membershipCommunityEntries(data)[0];
+  if (!answer.answered) return null;
+  return data?.wants_small_group === 'already' && smallGroupName ? `${answer.value} — ${smallGroupName}` : answer.value;
+}
+
+function recordSectionEntries(section: RecordSection, record: Partial<MemberRecord>, profile: MemberProfile | null) {
+  if (section.summary) {
+    const lines = profile ? section.summary(profile) : [];
+    return [wideEntry('', lines.join(' · '))];
+  }
+  const skipped = record.entryType === 'baptism' ? [...NOT_ASKED_ON_FORM, ...BAPTISM_FIELDS] : NOT_ASKED_ON_FORM;
+  const entries = section.fields
+    .filter((field) => !skipped.includes(field.name))
+    .map((field) => ({ ...entry(field.label, displayValue(record, field)), wide: field.kind === 'email' }));
+  return [...entries.filter((item) => !item.wide), ...entries.filter((item) => item.wide)];
+}
+
+export function membershipSections(
+  person: Person,
+  data: PersonSensitive | null,
+  profile: MemberProfile | null,
+  smallGroupName: string | null,
+): InfoSection[] {
+  const [, ministryInterests] = membershipCommunityEntries(data);
+  const record: Partial<MemberRecord> = {
+    ...profile,
+    name: person.name,
+    phone: person.phone ? maskPhone(person.phone) : '',
+    email: person.email ?? '',
+    birthDate: data?.birth_date ?? '',
+    entryType: toEntryType(person.entry_type) ?? '',
+    originChurch: data?.origin_church ?? '',
+  };
+
+  const recordSections = MEMBER_RECORD_SECTIONS.filter((section) => section.id !== 'membership').map((section) => ({
+    title: section.title,
+    entries: recordSectionEntries(section, record, profile),
+  }));
+
   return [
-    entry('Data de nascimento', data?.birth_date ? formatDate(data.birth_date) : null),
-    entry(
-      MEMBERSHIP_ANSWER_LABELS.entryType,
-      person.entry_type ? ENTRY_TYPE_LABELS[person.entry_type as keyof typeof ENTRY_TYPE_LABELS] : null,
-    ),
-    entry(MEMBERSHIP_ANSWER_LABELS.originChurch, data?.origin_church),
-    wantsSmallGroup,
-    entry(MEMBERSHIP_ANSWER_LABELS.secretSociety, data?.secret_society),
-    entry(
-      MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,
-      person.statute_agreed_at ? formatDate(person.statute_agreed_at.slice(0, 10)) : null,
-    ),
-    { ...ministryInterests, wide: true },
-    wideEntry(MEMBERSHIP_ANSWER_LABELS.membershipNote, data?.membership_note),
+    ...recordSections,
+    {
+      title: SERVE_STEP_TITLE,
+      entries: [
+        entry(
+          MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,
+          person.statute_agreed_at ? formatDate(person.statute_agreed_at.slice(0, 10)) : null,
+        ),
+        entry(MEMBERSHIP_ANSWER_LABELS.secretSociety, data?.secret_society),
+        wideEntry(MEMBERSHIP_ANSWER_LABELS.wantsSmallGroup, smallGroupAnswer(data, smallGroupName)),
+        { ...ministryInterests, wide: true },
+        wideEntry(MEMBERSHIP_ANSWER_LABELS.membershipNote, data?.membership_note),
+      ],
+    },
   ];
 }
 

@@ -96,6 +96,24 @@ export interface MemberRecord {
   originChurch: string;
 }
 
+export type MemberProfile = Pick<
+  MemberRecord,
+  | 'gender'
+  | 'maritalStatus'
+  | 'otherPhone'
+  | 'addressZip'
+  | 'addressStreet'
+  | 'addressNumber'
+  | 'addressComplement'
+  | 'addressNeighborhood'
+  | 'addressCity'
+  | 'addressState'
+  | 'addressReference'
+  | 'cpf'
+  | 'baptismDate'
+  | 'baptismChurch'
+>;
+
 export const toMembershipStatus = keyParser(MEMBERSHIP_STATUS_LABELS, 'Situação de membresia');
 
 export const toPendencyField = keyParser(PENDENCY_LABELS, 'Pendência');

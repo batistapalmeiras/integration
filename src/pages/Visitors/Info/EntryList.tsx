@@ -9,7 +9,7 @@ export function EntryList({ entries }: { entries: InfoEntry[] }) {
     <EntryGrid>
       {entries.map((item) => (
         <SensitiveBlock key={item.label} $wide={item.wide}>
-          <DetailLabel>{item.label}</DetailLabel>
+          {item.label && <DetailLabel>{item.label}</DetailLabel>}
           <SensitiveValue $muted={!item.answered}>{item.value}</SensitiveValue>
         </SensitiveBlock>
       ))}

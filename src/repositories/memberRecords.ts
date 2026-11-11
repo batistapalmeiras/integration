@@ -4,6 +4,7 @@ import {
   COUNTED_MEMBERSHIP_STATUSES,
   Gender,
   MaritalStatus,
+  MemberProfile,
   MemberRecord,
   MembershipStatus,
   PendencyField,
@@ -94,7 +95,7 @@ const PROFILE_COLUMNS = {
   cpf: 'cpf',
   baptismDate: 'baptism_date',
   baptismChurch: 'baptism_church',
-} as const satisfies Partial<Record<keyof MemberRecord, string>>;
+} as const satisfies Record<keyof MemberProfile, string>;
 
 type ProfileKey = keyof typeof PROFILE_COLUMNS;
 
@@ -102,18 +103,11 @@ const blankToNull = (value: string) => (value.trim() === '' ? null : value.trim(
 
 const digitsOrNull = (value: string) => blankToNull(onlyDigits(value));
 
-export async function getMemberRecord(personId: string): Promise<MemberRecord> {
-  const [person, profile, sensitive] = await Promise.all([
-    supabase.from('people').select('name, phone, email, membership_status, entry_type').eq('id', personId).single(),
-    supabase.from('member_profiles').select('*').eq('person_id', personId).maybeSingle(),
-    supabase.from('person_sensitive').select('birth_date, origin_church').eq('person_id', personId).maybeSingle(),
-  ]);
-  const failure = person.error ?? profile.error ?? sensitive.error;
-  if (failure) throw failure;
-  const member = person.data;
-  if (!member) throw new Error('Membro não encontrado.');
+export async function getMemberProfile(personId: string): Promise<MemberProfile> {
+  const { data, error } = await supabase.from('member_profiles').select('*').eq('person_id', personId).maybeSingle();
+  if (error) throw error;
 
-  const profileRow = (profile.data ?? {}) as Record<string, string | number | boolean | null>;
+  const profileRow = (data ?? {}) as Record<string, string | number | boolean | null>;
   const profileValues = Object.fromEntries(
     (Object.entries(PROFILE_COLUMNS) as [ProfileKey, string][]).map(([key, column]) => [
       key,
@@ -127,6 +121,22 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
     otherPhone: profileValues.otherPhone && maskPhone(profileValues.otherPhone),
     gender: profileValues.gender as Gender | '',
     maritalStatus: profileValues.maritalStatus as MaritalStatus | '',
+  };
+}
+
+export async function getMemberRecord(personId: string): Promise<MemberRecord> {
+  const [person, profile, sensitive] = await Promise.all([
+    supabase.from('people').select('name, phone, email, membership_status, entry_type').eq('id', personId).single(),
+    getMemberProfile(personId),
+    supabase.from('person_sensitive').select('birth_date, origin_church').eq('person_id', personId).maybeSingle(),
+  ]);
+  const failure = person.error ?? sensitive.error;
+  if (failure) throw failure;
+  const member = person.data;
+  if (!member) throw new Error('Membro não encontrado.');
+
+  return {
+    ...profile,
     name: member.name,
     phone: member.phone ? maskPhone(member.phone) : '',
     email: member.email ?? '',

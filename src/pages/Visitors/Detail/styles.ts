@@ -110,6 +110,7 @@ export const SensitiveValue = styled.span<{ $muted?: boolean }>`
   color: ${({ theme, $muted }) => ($muted ? theme.colors.mutedSoft : theme.colors.ink)};
   font-style: ${({ $muted }) => ($muted ? 'italic' : 'normal')};
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 `;
 
 export const Steps = styled.ol`
