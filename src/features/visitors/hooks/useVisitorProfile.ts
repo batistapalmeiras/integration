@@ -2,7 +2,7 @@
 import { useAuthCtx } from 'bp-kit';
 // Local
 import { setPersonMinistries } from '../../../repositories/communityGroups';
-import { confirmMember as confirmMemberUseCase } from '../services/confirmMember';
+import { confirmMember as confirmMemberUseCase, MemberConfirmation } from '../services/confirmMember';
 import { PersonProfileSummary } from '../../../repositories/people';
 import { usePersonProfileSummary } from '../../../queries/person';
 import { usePerson } from './usePerson';
@@ -22,9 +22,9 @@ export function useVisitorProfile(id: string) {
   const profileQuery = usePersonProfileSummary(id);
   const profile = profileQuery.data ?? EMPTY_PROFILE;
 
-  const confirmMember = async (smallGroupId: string | null, ministryIds: string[]) => {
+  const confirmMember = async (confirmation: MemberConfirmation) => {
     if (!person) return;
-    setPerson(await confirmMemberUseCase(person, smallGroupId, ministryIds, user?.id));
+    setPerson(await confirmMemberUseCase(person, confirmation, user?.id));
     await profileQuery.refetch();
   };
 

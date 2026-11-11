@@ -1,24 +1,56 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Empty, Skeleton, text } from 'bp-kit';
-import { AlertTriangle } from 'lucide-react';
+import { Button, Empty, LinkButton, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { AlertTriangle, CalendarDays, ChevronRight, Plus } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
-import { NameCell, NameText, ReviewFlag, Subline, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
-import { AppRoute } from '../../routes/paths';
+import { NameCell, NameText, ReviewFlag, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { currentCouncil } from '../../domain/councils';
+import { CouncilModal } from '../../features/councils';
+import { formatDate } from '../../domain/dates';
+import { useCouncils } from '../../queries/councils';
+import { AppRoute, councilPath } from '../../routes/paths';
+import { UserRole } from '../../types/enums';
 import { ENTRY_TYPE_LABELS } from '../../types/church';
 // Local
 import { useMembershipQueue } from './hooks/useMembershipQueue';
+import { CouncilBar, CouncilLabel } from './styles';
 
 export function MembershipPage() {
   const navigate = useNavigate();
+  const { user } = useAuthCtx();
+  const { open, close, modal } = useModal('drawer');
   const { rows, loading, error } = useMembershipQueue();
+  const council = currentCouncil(useCouncils().data ?? []);
+  const isPastor = user?.role === UserRole.Pastor;
 
   return (
     <div>
-      <PageHeader title="Membresia" />
+      <PageHeader
+        title="Membresia"
+        action={
+          isPastor && (
+            <Button variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
+              <Plus size={16} />
+              Novo conselho
+            </Button>
+          )
+        }
+      />
+
+      <CouncilBar>
+        <CouncilLabel>
+          <CalendarDays size={16} aria-hidden="true" />
+          {council ? `Conselho atual: ${formatDate(council.meetingDate)}` : 'Nenhum conselho criado'}
+        </CouncilLabel>
+        {council && (
+          <LinkButton icon={<ChevronRight size={16} />} onClick={() => navigate(councilPath(council.id))}>
+            Ver lista
+          </LinkButton>
+        )}
+      </CouncilBar>
 
       {loading && <Skeleton $h="240px" />}
 
@@ -44,11 +76,14 @@ export function MembershipPage() {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <Tr key={row.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${row.id}/detalhes?tab=membership&from=membership`)}>
+                  <Tr
+                    key={row.id}
+                    $clickable
+                    onClick={() => navigate(`${AppRoute.Visitors}/${row.id}/detalhes?tab=membership&from=membership`)}
+                  >
                     <Td $truncate title={row.name}>
                       <NameCell>
                         <NameText>{row.name}</NameText>
-                        {row.originChurch && <Subline>{row.originChurch}</Subline>}
                         {row.reviewReasons.map((reason) => (
                           <ReviewFlag key={reason}>
                             <AlertTriangle size={12} />
@@ -65,6 +100,7 @@ export function MembershipPage() {
           </TableWrapper>
         </>
       )}
+      {modal}
     </div>
   );
 }

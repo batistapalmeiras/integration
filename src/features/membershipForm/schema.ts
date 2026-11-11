@@ -125,12 +125,18 @@ const contactSchema = (optionalPhone: boolean) =>
       when: () => true,
     });
 
-const journeySchema = z.object({
-  entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
-  baptismChurch: z.string(),
-  baptismDate: z.string().refine(whenFilled(pastDate), 'Escolha uma data que já passou.'),
-  lastChurch: required('o nome da igreja'),
-});
+const journeySchema = z
+  .object({
+    entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
+    baptismChurch: z.string(),
+    baptismDate: z.string().refine(whenFilled(pastDate), 'Escolha uma data que já passou.'),
+    lastChurch: required('o nome da igreja'),
+  })
+  .refine((values) => values.entryType === 'baptism' || values.baptismChurch.trim() !== '', {
+    message: text.validation.required('a igreja onde você foi batizado(a)'),
+    path: ['baptismChurch'],
+    when: () => true,
+  });
 
 const statuteSchema = z.object({
   statuteAgreed: z.boolean().refine((agreed) => agreed, 'É necessário concordar com o Estatuto para continuar.'),

@@ -13,6 +13,8 @@ import {
   CoffeeRosterPage,
   CohortRosterPage,
   CohortsListPage,
+  CouncilRosterPage,
+  CouncilsPage,
   CommunityGroupDetailPage,
   DashboardPage,
   IntegrationSignupPage,
@@ -39,7 +41,7 @@ import {
   VolunteerDetailPage,
   VolunteersPage,
 } from './pages';
-import { AppRoute } from './paths';
+import { AppRoute, COUNCILS_PATH } from './paths';
 
 export interface RouteDefinition {
   path: string;
@@ -89,6 +91,8 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: `${AppRoute.Reports}/cafes`, element: <CoffeeHistoryPage />, roles: INTEGRATION_TEAM_ROLES },
   { path: `${AppRoute.Reports}/cafes/:id`, element: <CoffeeRosterPage />, roles: INTEGRATION_TEAM_ROLES },
   { path: `${AppRoute.Reports}/turmas`, element: <CohortsListPage />, roles: INTEGRATION_TEAM_ROLES },
+  { path: COUNCILS_PATH, element: <CouncilsPage />, roles: LEADERSHIP_ROLES },
+  { path: `${COUNCILS_PATH}/:id`, element: <CouncilRosterPage />, roles: LEADERSHIP_ROLES },
   { path: `${AppRoute.Reports}/turmas/:id`, element: <CohortRosterPage />, roles: INTEGRATION_TEAM_ROLES },
 ];
 

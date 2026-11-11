@@ -3,19 +3,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, Form, Skeleton, useToast } from 'bp-kit';
-import { Check } from 'lucide-react';
+import { Button, Empty, Form, InfoBox, Select, Skeleton, useModal, useToast } from 'bp-kit';
+import { Check, Plus } from 'lucide-react';
 // Components
-import { FieldGrid, SectionDivider } from '../../components/FormLayout';
+import { EndActions, FieldGrid, SectionDivider } from '../../components/FormLayout';
 import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
 import { PageHeader } from '../../components/PageHeader';
 import { PanelTitle } from '../../components/Panel';
 // Local
+import { Council, currentCouncil } from '../../domain/councils';
+import { formatDate } from '../../domain/dates';
 import { communityDeclines } from '../../domain/membership';
+import { PersonSensitive } from '../../domain/personSensitive';
+import { CouncilModal } from '../../features/councils';
 import { FamilyFields, FamilyFormValues, familyFormValues, saveFamily } from '../../features/family';
-import { Person, useVisitorProfile } from '../../features/visitors';
+import { MemberConfirmation, Person, useVisitorProfile } from '../../features/visitors';
 import { errorMessage } from '../../lib/queryCache';
+import { useCouncils } from '../../queries/councils';
 import { useFamily, usePersonSensitive } from '../../queries/person';
 import { useMinistries, useSmallGroups } from '../../queries/reference';
 import { Family } from '../../repositories/family';
@@ -24,7 +29,6 @@ import { CommunityFields } from '../Visitors/components/CommunityFields';
 import { EntryList } from '../Visitors/Info/EntryList';
 import { membershipCommunityEntries } from '../Visitors/Info/sensitive';
 import { CommunityFormValues, communitySchema } from '../Visitors/validators';
-import { PersonSensitive } from '../../domain/personSensitive';
 import { Actions, Section, Sections } from './styles';
 
 export function ConfirmMemberPage() {
@@ -32,16 +36,26 @@ export function ConfirmMemberPage() {
   const { person, loading, error, confirmMember } = useVisitorProfile(id);
   const family = useFamily(id);
   const sensitive = usePersonSensitive(id);
+  const councils = useCouncils();
 
-  const loadError = error ?? errorMessage(family.error) ?? errorMessage(sensitive.error);
+  const loadError =
+    error ?? errorMessage(family.error) ?? errorMessage(sensitive.error) ?? errorMessage(councils.error);
   if (loadError) return <Empty title="Não foi possível carregar" description={loadError} />;
-  if (loading || !person || !family.data || sensitive.data === undefined) return <Skeleton $h="320px" />;
+  if (loading || !person || !family.data || sensitive.data === undefined || !councils.data) {
+    return <Skeleton $h="320px" />;
+  }
   if (person.status !== 'membership_pending') {
     return <Empty title="Nada para confirmar" description={`${person.name} não está aguardando confirmação.`} />;
   }
 
   return (
-    <ConfirmMemberForm person={person} family={family.data} sensitive={sensitive.data} confirmMember={confirmMember} />
+    <ConfirmMemberForm
+      person={person}
+      family={family.data}
+      sensitive={sensitive.data}
+      councils={councils.data}
+      confirmMember={confirmMember}
+    />
   );
 }
 
@@ -49,12 +63,14 @@ interface FormProps {
   person: Person;
   family: Family;
   sensitive: PersonSensitive | null;
-  confirmMember: (smallGroupId: string | null, ministryIds: string[]) => Promise<void>;
+  councils: Council[];
+  confirmMember: (confirmation: MemberConfirmation) => Promise<void>;
 }
 
-function ConfirmMemberForm({ person, family, sensitive, confirmMember }: FormProps) {
+function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember }: FormProps) {
   const navigate = useNavigate();
   const { show: showToast, toast } = useToast();
+  const { open, close, modal } = useModal('drawer');
   const smallGroups = useSmallGroups().data ?? [];
   const ministries = useMinistries().data ?? [];
   const community = useForm<CommunityFormValues>({
@@ -62,11 +78,19 @@ function ConfirmMemberForm({ person, family, sensitive, confirmMember }: FormPro
     defaultValues: { smallGroupIds: [], ministryIds: [] },
   });
   const familyForm = useForm<FamilyFormValues>({ defaultValues: familyFormValues(family) });
+  const councilForm = useForm<{ councilId: string }>({
+    values: { councilId: currentCouncil(councils)?.id ?? '' },
+  });
+  const hasCouncil = councils.length > 0;
 
   const submit = community.handleSubmit(async (values) => {
     try {
       if (familyForm.formState.isDirty) await saveFamily(person.id, familyForm.getValues());
-      await confirmMember(values.smallGroupIds[0] ?? null, values.ministryIds);
+      await confirmMember({
+        councilId: councilForm.getValues('councilId'),
+        smallGroupId: values.smallGroupIds[0] ?? null,
+        ministryIds: values.ministryIds,
+      });
       navigate(AppRoute.Membership);
     } catch (e) {
       showToast(errorMessage(e) ?? 'Não foi possível confirmar.');
@@ -88,17 +112,44 @@ function ConfirmMemberForm({ person, family, sensitive, confirmMember }: FormPro
 
         <Form onSubmit={submit}>
           <Sections>
-            <Section aria-label="Comunidade">
-              <PanelTitle>Comunidade</PanelTitle>
-              <FieldGrid>
-                <CommunityFields
-                  control={community.control}
-                  declines={communityDeclines(sensitive)}
-                  smallGroups={smallGroups}
-                  ministries={ministries}
-                />
-              </FieldGrid>
+            <Section aria-label="Conselho">
+              <PanelTitle>Conselho</PanelTitle>
+              {hasCouncil ? (
+                <FieldGrid>
+                  <Select label="Aprovado no Conselho de" control={councilForm.control} name="councilId">
+                    {councils.map((council) => (
+                      <option key={council.id} value={council.id}>
+                        {formatDate(council.meetingDate)}
+                      </option>
+                    ))}
+                  </Select>
+                </FieldGrid>
+              ) : (
+                <>
+                  <InfoBox variant="warning">Nenhum conselho criado. Crie o conselho para confirmar.</InfoBox>
+                  <EndActions>
+                    <Button type="button" variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
+                      <Plus size={16} />
+                      Novo conselho
+                    </Button>
+                  </EndActions>
+                </>
+              )}
             </Section>
+
+            <SectionDivider>
+              <Section aria-label="Comunidade">
+                <PanelTitle>Comunidade</PanelTitle>
+                <FieldGrid>
+                  <CommunityFields
+                    control={community.control}
+                    declines={communityDeclines(sensitive)}
+                    smallGroups={smallGroups}
+                    ministries={ministries}
+                  />
+                </FieldGrid>
+              </Section>
+            </SectionDivider>
 
             <SectionDivider>
               <Section aria-label="Família">
@@ -110,7 +161,7 @@ function ConfirmMemberForm({ person, family, sensitive, confirmMember }: FormPro
             </SectionDivider>
 
             <Actions>
-              <Button type="submit" variant="primary" disabled={community.formState.isSubmitting}>
+              <Button type="submit" variant="primary" disabled={!hasCouncil || community.formState.isSubmitting}>
                 {community.formState.isSubmitting ? (
                   'Confirmando...'
                 ) : (
@@ -124,6 +175,7 @@ function ConfirmMemberForm({ person, family, sensitive, confirmMember }: FormPro
           </Sections>
         </Form>
       </Columns>
+      {modal}
       {toast}
     </WideContent>
   );

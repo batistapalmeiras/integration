@@ -11,7 +11,7 @@ import { Panel, PanelHeader, PanelTitle } from '../../components/Panel';
 // Local
 import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { TonePill } from '../../components/StatusPill';
-import { formatTimestampDate } from '../../domain/dates';
+import { formatDate, formatTimestampDate } from '../../domain/dates';
 import {
   canLeavePhoneEmpty,
   MemberRecord,
@@ -86,6 +86,7 @@ export function MemberProfilePage() {
 
   const churchInfo: InfoField[] = info
     ? [
+        { label: 'Aprovado no Conselho de', value: info.councilDate ? formatDate(info.councilDate) : '' },
         { label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) },
         {
           label: MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,

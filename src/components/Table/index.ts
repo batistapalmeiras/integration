@@ -119,4 +119,8 @@ export const ReviewFlag = styled.span`
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
   font-weight: 600;
   color: ${({ theme }) => theme.colors.danger};
+
+  svg {
+    flex-shrink: 0;
+  }
 `;

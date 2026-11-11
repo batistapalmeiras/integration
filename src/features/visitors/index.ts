@@ -5,3 +5,4 @@ export { enrollInIntegrationClass } from './services/enrollInIntegrationClass';
 export { RESULT_LABELS } from './domain/types';
 export type { ContactResult, Person, PersonStatus } from './domain/types';
 export { reactivatePerson } from './services/reactivatePerson';
+export type { MemberConfirmation } from './services/confirmMember';

@@ -5,6 +5,7 @@ export const queryKeys = {
   members: ['people', 'members'] as const,
   memberNames: (withoutSmallGroup: boolean) => ['people', 'member-names', { withoutSmallGroup }] as const,
   membershipQueue: ['people', 'membership-queue'] as const,
+  councils: ['people', 'councils'] as const,
   membershipPendingCount: ['people', 'membership-pending-count'] as const,
   memberPendencies: (params: object) => ['people', 'member-pendencies', params] as const,
   peopleList: (params: object) => ['people', 'list', params] as const,

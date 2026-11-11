@@ -7,6 +7,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Button, Empty, LinkButton, Skeleton, Tab, useAuthCtx } from 'bp-kit';
 import { Check, Save, UserRound } from 'lucide-react';
 // Components
+import { Callout, CalloutContent } from '../../../components/Callout';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { formatDate } from '../../../domain/dates';
@@ -24,8 +25,6 @@ import {
   DetailsList,
   DetailValue,
   Form,
-  ConfirmCallout,
-  ConfirmCalloutContent,
   InfoTabBar,
   SectionStack,
 } from '../Detail/styles';
@@ -128,15 +127,15 @@ export function VisitorInfoPage() {
       />
 
       {showConfirmMember && (
-        <ConfirmCallout>
-          <ConfirmCalloutContent>
+        <Callout>
+          <CalloutContent>
             <span>Aguardando sua confirmação como membro.</span>
             <Button variant="primary" onClick={openConfirmMember}>
               <Check size={16} />
               Confirmar como membro
             </Button>
-          </ConfirmCalloutContent>
-        </ConfirmCallout>
+          </CalloutContent>
+        </Callout>
       )}
 
       {tabs.length > 1 && (

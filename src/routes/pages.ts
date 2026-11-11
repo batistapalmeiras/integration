@@ -63,6 +63,11 @@ export const CoffeeRosterPage = lazyPage(
   () => import('../pages/Reports/components/CoffeeRosterPage'),
   'CoffeeRosterPage',
 );
+export const CouncilsPage = lazyPage(() => import('../pages/Reports/components/CouncilsPage'), 'CouncilsPage');
+export const CouncilRosterPage = lazyPage(
+  () => import('../pages/Reports/components/CouncilRosterPage'),
+  'CouncilRosterPage',
+);
 export const CohortsListPage = lazyPage(() => import('../pages/Reports/components/CohortsListPage'), 'CohortsListPage');
 export const CohortRosterPage = lazyPage(
   () => import('../pages/Reports/components/CohortRosterPage'),

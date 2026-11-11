@@ -6,6 +6,7 @@ import {
   Coffee,
   Contact,
   FileBarChart,
+  Gavel,
   GraduationCap,
   HeartHandshake,
   History,
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 // Local
 import { UserRole } from '../types/enums';
-import { AppRoute } from './paths';
+import { AppRoute, COUNCILS_PATH } from './paths';
 
 export interface NavItem {
   label: string;
@@ -40,6 +41,7 @@ export const NAV_ITEMS = {
   people: { label: 'Pessoas', path: AppRoute.People, icon: Contact },
   cohortHistory: { label: 'Histórico de turmas', path: `${AppRoute.Reports}/turmas`, icon: GraduationCap },
   coffeeHistory: { label: 'Histórico de cafés', path: `${AppRoute.Reports}/cafes`, icon: Coffee },
+  councilHistory: { label: 'Histórico de conselhos', path: COUNCILS_PATH, icon: Gavel },
   volunteers: { label: 'Voluntários', path: AppRoute.Volunteers, icon: UserPlus },
   reports: { label: 'Relatórios', path: AppRoute.Reports, icon: FileBarChart },
   members: { label: 'Membros', path: AppRoute.Members, icon: Users },
@@ -83,6 +85,11 @@ const HISTORY_GROUP: NavGroup = {
   ],
 };
 
+const LEADERSHIP_HISTORY_GROUP: NavGroup = {
+  ...HISTORY_GROUP,
+  items: [...HISTORY_GROUP.items, { ...NAV_ITEMS.councilHistory, label: 'Conselhos' }],
+};
+
 export const PASTOR_NAV_AREAS: NavArea[] = [
   {
     id: 'church',
@@ -97,7 +104,7 @@ export const PASTOR_NAV_AREAS: NavArea[] = [
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
-    more: [NAV_ITEMS.people, HISTORY_GROUP, NAV_ITEMS.reports],
+    more: [NAV_ITEMS.people, LEADERSHIP_HISTORY_GROUP, NAV_ITEMS.reports],
     morePath: AppRoute.IntegrationMore,
   },
 ];
@@ -123,7 +130,7 @@ const ADMIN_NAV_AREAS: NavArea[] = [
       NAV_ITEMS.people,
       NAV_ITEMS.members,
       NAV_ITEMS.volunteers,
-      HISTORY_GROUP,
+      LEADERSHIP_HISTORY_GROUP,
       NAV_ITEMS.reports,
     ],
     morePath: AppRoute.IntegrationMore,

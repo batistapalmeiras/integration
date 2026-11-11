@@ -160,6 +160,35 @@ export type Database = {
           },
         ]
       }
+      councils: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          meeting_date: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meeting_date: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meeting_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "councils_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enrollments: {
         Row: {
           cohort_id: string
@@ -549,6 +578,7 @@ export type Database = {
           age: number | null
           class_invite_sent_at: string | null
           coffee_retry_used: boolean
+          council_id: string | null
           created_at: string
           email: string | null
           entry_type: string | null
@@ -570,6 +600,7 @@ export type Database = {
           age?: number | null
           class_invite_sent_at?: string | null
           coffee_retry_used?: boolean
+          council_id?: string | null
           created_at?: string
           email?: string | null
           entry_type?: string | null
@@ -591,6 +622,7 @@ export type Database = {
           age?: number | null
           class_invite_sent_at?: string | null
           coffee_retry_used?: boolean
+          council_id?: string | null
           created_at?: string
           email?: string | null
           entry_type?: string | null
@@ -609,6 +641,13 @@ export type Database = {
           whatsapp_opened_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "people_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "people_small_group_id_fkey"
             columns: ["small_group_id"]

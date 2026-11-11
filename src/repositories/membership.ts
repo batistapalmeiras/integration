@@ -55,7 +55,6 @@ export interface MembershipQueueRow {
   id: string;
   name: string;
   entryType: EntryType | null;
-  originChurch: string | null;
   reviewReasons: string[];
 }
 
@@ -70,20 +69,13 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
   const ids = pending.map((person) => person.id);
   if (ids.length === 0) return [];
 
-  const [sensitive, alerts] = await Promise.all([
-    supabase.from('person_sensitive').select('person_id, origin_church').in('person_id', ids),
-    listMembershipAlerts(ids),
-  ]);
-  if (sensitive.error) throw sensitive.error;
-
-  const sensitiveById = new Map((sensitive.data ?? []).map((row) => [row.person_id, row]));
+  const alerts = await listMembershipAlerts(ids);
 
   return pending
     .map((person) => ({
       id: person.id,
       name: person.name,
       entryType: person.entry_type,
-      originChurch: sensitiveById.get(person.id)?.origin_church ?? null,
       reviewReasons: alerts
         .filter((alert) => alert.person_id === person.id && !alert.resolved)
         .map((alert) => MEMBERSHIP_ALERT_LABELS[alert.code]),

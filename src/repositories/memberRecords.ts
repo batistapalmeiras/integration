@@ -110,11 +110,7 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
   const [person, profile, sensitive] = await Promise.all([
     supabase.from('people').select('name, phone, email, membership_status, entry_type').eq('id', personId).single(),
     supabase.from('member_profiles').select('*').eq('person_id', personId).maybeSingle(),
-    supabase
-      .from('person_sensitive')
-      .select('birth_date, origin_church')
-      .eq('person_id', personId)
-      .maybeSingle(),
+    supabase.from('person_sensitive').select('birth_date, origin_church').eq('person_id', personId).maybeSingle(),
   ]);
   const failure = person.error ?? profile.error ?? sensitive.error;
   if (failure) throw failure;
@@ -150,12 +146,22 @@ export interface MemberRecordInfo {
   createdAt: string;
   origin: string;
   statuteAgreedAt: string | null;
+  councilDate: string | null;
 }
 
 export async function getMemberRecordInfo(personId: string): Promise<MemberRecordInfo> {
-  const { data, error } = await supabase.from('people').select('created_at, origin, statute_agreed_at').eq('id', personId).single();
+  const { data, error } = await supabase
+    .from('people')
+    .select('created_at, origin, statute_agreed_at, council:councils(meeting_date)')
+    .eq('id', personId)
+    .single();
   if (error) throw error;
-  return { createdAt: data.created_at, origin: data.origin, statuteAgreedAt: data.statute_agreed_at };
+  return {
+    createdAt: data.created_at,
+    origin: data.origin,
+    statuteAgreedAt: data.statute_agreed_at,
+    councilDate: data.council?.meeting_date ?? null,
+  };
 }
 
 export async function saveMemberRecord(personId: string, record: MemberRecord): Promise<void> {
@@ -183,14 +189,12 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
       })
       .eq('id', personId),
     supabase.from('member_profiles').upsert({ person_id: personId, ...profile }),
-    supabase
-      .from('person_sensitive')
-      .upsert({
-        person_id: personId,
-        birth_date: blankToNull(record.birthDate),
-        origin_church: blankToNull(record.originChurch),
-        updated_at: new Date().toISOString(),
-      }),
+    supabase.from('person_sensitive').upsert({
+      person_id: personId,
+      birth_date: blankToNull(record.birthDate),
+      origin_church: blankToNull(record.originChurch),
+      updated_at: new Date().toISOString(),
+    }),
   ]);
   const failure = results.find((result) => result.error)?.error;
   if (failure) throw failure;

@@ -53,9 +53,6 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
           desfeita.
         </Typography>
         <ModalActions>
-          <Button type="button" variant="secondary" onClick={() => setConfirmingDelete(false)}>
-            Voltar
-          </Button>
           <Button type="button" variant="danger" onClick={confirmDelete} disabled={deleting}>
             {deleting ? (
               'Cancelando...'
@@ -65,6 +62,9 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
                 Cancelar café
               </>
             )}
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => setConfirmingDelete(false)}>
+            Voltar
           </Button>
         </ModalActions>
       </>

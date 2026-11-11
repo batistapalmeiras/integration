@@ -28,7 +28,7 @@ export function JourneyStep({ control }: Props) {
 
       {entryType && entryType !== 'baptism' && (
         <>
-          <TextInput label="Igreja onde foi batizado(a) (opcional)" control={control} name="baptismChurch" />
+          <TextInput label="Igreja onde foi batizado(a)" control={control} name="baptismChurch" />
           <DatePicker
             label="Data do batismo (opcional)"
             control={control}
