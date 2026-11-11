@@ -31,3 +31,9 @@ export const PrivateHint = styled.span`
   font-size: 13px;
   color: ${({ theme }) => theme.colors.muted};
 `;
+
+export const NoteActions = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.spacing.xs};
+`;

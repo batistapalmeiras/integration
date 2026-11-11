@@ -1084,6 +1084,7 @@ export type Database = {
         Returns: {
           author_name: string
           body: string
+          can_edit: boolean
           created_at: string
           id: string
           private: boolean

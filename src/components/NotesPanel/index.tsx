@@ -13,7 +13,7 @@ import {
   useModal,
   useToast,
 } from 'bp-kit';
-import { Lock, Plus, Save, Trash2 } from 'lucide-react';
+import { Lock, Pencil, Plus, Save, Trash2 } from 'lucide-react';
 // Local
 import { formatTimestampDate } from '../../domain/dates';
 import { PersonNote } from '../../domain/personNotes';
@@ -22,7 +22,8 @@ import { queryKeys } from '../../lib/queryKeys';
 import { addPersonNote, deletePersonNote } from '../../repositories/personNotes';
 import { UserRole } from '../../types/enums';
 import { ItemPicker, ItemRow, ItemRows, Panel, PanelHeader, PanelTitle } from '../Panel';
-import { NoteBody, NoteDate, NoteText, PrivateHint } from './styles';
+import { EditNoteModal } from './EditNoteModal';
+import { NoteActions, NoteBody, NoteDate, NoteText, PrivateHint } from './styles';
 
 interface Props {
   personId: string;
@@ -56,6 +57,8 @@ export function NotesPanel({ personId, notes }: Props) {
       setSaving(false);
     }
   };
+
+  const openEdit = (note: PersonNote) => open(<EditNoteModal note={note} onSaved={refresh} close={close} />);
 
   const confirmDelete = (note: PersonNote) =>
     open(
@@ -109,16 +112,30 @@ export function NotesPanel({ personId, notes }: Props) {
                   )}
                 </NoteDate>
               </NoteText>
-              <IconButton
-                type="button"
-                icon={<Trash2 size={14} />}
-                iconPosition="center"
-                variant="secondary"
-                size="sm"
-                aria-label="Apagar anotação"
-                title="Apagar"
-                onClick={() => confirmDelete(note)}
-              />
+              <NoteActions>
+                {note.canEdit && (
+                  <IconButton
+                    type="button"
+                    icon={<Pencil size={14} />}
+                    iconPosition="center"
+                    variant="secondary"
+                    size="sm"
+                    aria-label="Editar anotação"
+                    title="Editar"
+                    onClick={() => openEdit(note)}
+                  />
+                )}
+                <IconButton
+                  type="button"
+                  icon={<Trash2 size={14} />}
+                  iconPosition="center"
+                  variant="secondary"
+                  size="sm"
+                  aria-label="Apagar anotação"
+                  title="Apagar"
+                  onClick={() => confirmDelete(note)}
+                />
+              </NoteActions>
             </ItemRow>
           ))}
         </ItemRows>

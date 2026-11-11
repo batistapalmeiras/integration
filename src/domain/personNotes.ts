@@ -4,4 +4,5 @@ export interface PersonNote {
   createdAt: string;
   authorName: string | null;
   private: boolean;
+  canEdit: boolean;
 }

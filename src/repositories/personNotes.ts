@@ -11,6 +11,7 @@ export async function listPersonNotes(personId: string): Promise<PersonNote[]> {
     createdAt: row.created_at,
     authorName: row.author_name,
     private: row.private,
+    canEdit: row.can_edit,
   }));
 }
 
@@ -18,6 +19,11 @@ export async function addPersonNote(personId: string, body: string, authorId: st
   const { error } = await supabase
     .from('pastoral_notes')
     .insert({ person_id: personId, body: body.trim(), created_by: authorId });
+  if (error) throw error;
+}
+
+export async function updatePersonNote(id: string, body: string): Promise<void> {
+  const { error } = await supabase.from('pastoral_notes').update({ body: body.trim() }).eq('id', id);
   if (error) throw error;
 }
 
