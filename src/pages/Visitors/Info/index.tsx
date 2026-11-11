@@ -10,11 +10,10 @@ import { Check, Save, UserRound } from 'lucide-react';
 import { Callout, CalloutContent } from '../../../components/Callout';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
-import { formatDate } from '../../../domain/dates';
 import { communityDeclines } from '../../../domain/membership';
 import { AppRoute, confirmMemberPath } from '../../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
-import { useVisitorProfile } from '../../../features/visitors';
+import { generalDetailRows, useVisitorProfile } from '../../../features/visitors';
 import { CommunityFields } from '../components/CommunityFields';
 import { communitySchema, CommunityFormValues } from '../validators';
 import { useMemberProfile, usePersonMakeups, usePersonSensitive } from '../../../queries/person';
@@ -50,11 +49,7 @@ export function VisitorInfoPage() {
     person,
     loading,
     error,
-    profileCoffeeDate,
-    profileCohortName,
-    profileMinistryNames,
-    profileSmallGroupName,
-    profileMinistryIds,
+    profile,
     updateCommunity,
   } = useVisitorProfile(id ?? '');
 
@@ -80,7 +75,7 @@ export function VisitorInfoPage() {
     formState: { isSubmitting, isDirty },
   } = useForm<CommunityFormValues>({
     resolver: zodResolver(communitySchema),
-    values: { smallGroupIds: person?.small_group_id ? [person.small_group_id] : [], ministryIds: profileMinistryIds },
+    values: { smallGroupIds: person?.small_group_id ? [person.small_group_id] : [], ministryIds: profile.ministryIds },
   });
 
   if (loading) return <Skeleton $h="240px" />;
@@ -97,14 +92,7 @@ export function VisitorInfoPage() {
 
   const current = tabs.some((t) => t.key === tab) ? tab : 'general';
 
-  const rows = [
-    person.visited_on && { label: 'Visitou em', value: formatDate(person.visited_on) },
-    profileCohortName && { label: 'Turma', value: profileCohortName },
-    profileCoffeeDate && { label: 'Café', value: formatDate(profileCoffeeDate) },
-    !canEditCommunity && profileSmallGroupName && { label: 'Pequeno Grupo', value: profileSmallGroupName },
-    !canEditCommunity &&
-      profileMinistryNames.length > 0 && { label: 'Ministérios', value: profileMinistryNames.join(', ') },
-  ].filter((row): row is { label: string; value: string } => !!row);
+  const rows = generalDetailRows(person, profile, !canEditCommunity);
 
   const submit = handleSubmit((values) => updateCommunity(values.smallGroupIds[0] ?? null, values.ministryIds));
 
@@ -165,7 +153,7 @@ export function VisitorInfoPage() {
 
       {current === 'membership' && (
         <Sections>
-          {membershipSections(person, sensitive, memberProfile, profileSmallGroupName).map((section) => (
+          {membershipSections(person, sensitive, memberProfile, profile.smallGroupName).map((section) => (
             <Section key={section.title} aria-label={section.title}>
               <PanelTitle>{section.title}</PanelTitle>
               <EntryList entries={section.entries} />

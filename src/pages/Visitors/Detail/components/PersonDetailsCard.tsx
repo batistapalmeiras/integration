@@ -2,19 +2,18 @@
 import { ChevronRight } from 'lucide-react';
 import { Card, Typography } from 'bp-kit';
 // Local
-import { Person } from '../../../../features/visitors';
+import { hasPersonDetails, Person } from '../../../../features/visitors';
+import { PersonProfileSummary } from '../../../../repositories/people';
 import { PersonCardInfo, PersonCardRow } from '../styles';
 
 interface Props {
   person: Person;
-  coffeeDate: string | null;
-  cohortName: string | null;
+  profile: PersonProfileSummary;
   onClick: () => void;
 }
 
-export function PersonDetailsCard({ person, coffeeDate, cohortName, onClick }: Props) {
-  const hasDetails = !!cohortName || !!coffeeDate || !!person.small_group_id || person.status === 'member';
-  if (!hasDetails) return null;
+export function PersonDetailsCard({ person, profile, onClick }: Props) {
+  if (!hasPersonDetails(person, profile)) return null;
 
   return (
     <Card $hoverable onClick={onClick} role="button" tabIndex={0}>

@@ -36,11 +36,7 @@ export function useVisitorProfile(id: string) {
 
   return {
     ...personState,
-    profileCoffeeDate: profile.coffeeDate,
-    profileCohortName: profile.cohortName,
-    profileMinistryNames: profile.ministryNames,
-    profileSmallGroupName: profile.smallGroupName,
-    profileMinistryIds: profile.ministryIds,
+    profile,
     confirmMember,
     updateCommunity,
   };

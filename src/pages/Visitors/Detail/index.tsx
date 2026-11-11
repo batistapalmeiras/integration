@@ -19,7 +19,7 @@ export function VisitorDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const detail = useVisitorDetail(id ?? '');
-  const { person, loading, error, profileCoffeeDate, profileCohortName } = detail;
+  const { person, loading, error, profile } = detail;
   const showNotes = !!person && person.status !== 'member';
   const notes = usePersonNotes(showNotes ? person.id : '').data ?? [];
 
@@ -36,8 +36,7 @@ export function VisitorDetailPage() {
 
       <PersonDetailsCard
         person={person}
-        coffeeDate={profileCoffeeDate}
-        cohortName={profileCohortName}
+        profile={profile}
         onClick={() => navigate(`${AppRoute.Visitors}/${id}/detalhes`)}
       />
 
