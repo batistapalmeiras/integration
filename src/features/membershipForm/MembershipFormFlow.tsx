@@ -40,7 +40,6 @@ interface Props {
   onSubmit: (values: MembershipFormValues) => Promise<void>;
   submitting: boolean;
   submitError: ReactNode;
-  notice?: ReactNode;
 }
 
 export function MembershipFormFlow({
@@ -52,7 +51,6 @@ export function MembershipFormFlow({
   onSubmit,
   submitting,
   submitError,
-  notice,
 }: Props) {
   const [saved] = useState(() => progress.load());
   const [step, setStep] = useState<FlowStep>(saved?.step ?? 0);
@@ -118,7 +116,6 @@ export function MembershipFormFlow({
     >
       {typeof step === 'number' && (
         <Form onSubmit={(event: FormEvent<HTMLFormElement>) => submitStep(step)(event)} noValidate>
-          {step === 0 && notice}
           {step === 0 && <PersonalStep control={control} />}
           {step === 1 && <AddressStep control={control} setValue={setValue} optionalPhone={optionalPhone} />}
           {step === 2 && <JourneyStep control={control} />}

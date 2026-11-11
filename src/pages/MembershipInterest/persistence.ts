@@ -8,7 +8,6 @@ export type Phase = 'identification' | 'form' | 'done';
 interface MembershipInterestProgress {
   phase: Phase;
   eligibility: MembershipEligibility | null;
-  alreadySubmitted?: boolean;
 }
 
 export const interestProgress = storedValue<MembershipInterestProgress>('membership-interest-progress', 'session');
