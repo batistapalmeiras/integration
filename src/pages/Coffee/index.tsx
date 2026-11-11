@@ -240,7 +240,17 @@ export function CoffeePage() {
     <div>
       <PageHeader
         title="Café"
-        action={canPlan && <OptionsMenuButton label="Opções do café" onClick={openEventMenu} />}
+        action={
+          canPlan &&
+          (events.length > 0 ? (
+            <OptionsMenuButton label="Opções do café" onClick={openEventMenu} />
+          ) : (
+            <Button variant="secondary" onClick={openCreateModal}>
+              <Plus size={16} />
+              Novo café
+            </Button>
+          ))
+        }
       />
 
       {loading && <Skeleton $h="240px" />}
@@ -250,9 +260,7 @@ export function CoffeePage() {
       {!loading && !error && !event && (
         <Empty
           title="Nenhum café agendado"
-          description={
-            canPlan ? 'Agende o próximo café pelo botão de opções acima.' : 'Aguarde o próximo café ser agendado.'
-          }
+          description={canPlan ? 'Agende o próximo café pelo botão Novo café.' : 'Aguarde o próximo café ser agendado.'}
         />
       )}
 

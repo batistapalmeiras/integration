@@ -106,7 +106,17 @@ export function ClassesPage() {
     <div>
       <PageHeader
         title="Turma de Integração"
-        action={canManageCohort && <OptionsMenuButton label="Opções da turma" onClick={openCohortMenu} />}
+        action={
+          canManageCohort &&
+          (cohorts.length > 0 ? (
+            <OptionsMenuButton label="Opções da turma" onClick={openCohortMenu} />
+          ) : (
+            <Button variant="secondary" onClick={openCreateModal}>
+              <Plus size={16} />
+              Nova turma
+            </Button>
+          ))
+        }
       />
 
       {!loading && !error && cohort && (
@@ -130,7 +140,7 @@ export function ClassesPage() {
           title="Nenhuma turma ativa"
           description={
             canManageCohort
-              ? 'Abra uma nova turma pelo botão de opções acima.'
+              ? 'Abra a próxima turma pelo botão Nova turma.'
               : 'Aguarde o administrador abrir a próxima turma.'
           }
         />
