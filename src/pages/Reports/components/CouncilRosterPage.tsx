@@ -8,7 +8,7 @@ import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { PeopleCount } from '../../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
-import { formatDate, weekdayLabel } from '../../../domain/dates';
+import { formatDate } from '../../../domain/dates';
 import { CouncilModal } from '../../../features/councils';
 import { errorMessage } from '../../../lib/queryCache';
 import { useCouncils } from '../../../queries/councils';
@@ -33,7 +33,7 @@ export function CouncilRosterPage() {
     <div>
       <PageHeader
         title="Conselho Administrativo"
-        subtitle={`${weekdayLabel(council.meetingDate)}, ${formatDate(council.meetingDate)}`}
+        subtitle={formatDate(council.meetingDate)}
         back
         action={
           isPastor && (
