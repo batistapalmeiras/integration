@@ -82,7 +82,6 @@ export async function countMembers(): Promise<number> {
 const PROFILE_COLUMNS = {
   gender: 'gender',
   maritalStatus: 'marital_status',
-  nationality: 'nationality',
   otherPhone: 'other_phone',
   addressZip: 'address_zip',
   addressStreet: 'address_street',
@@ -93,15 +92,9 @@ const PROFILE_COLUMNS = {
   addressState: 'address_state',
   addressReference: 'address_reference',
   cpf: 'cpf',
-  birthplace: 'birthplace',
-  birthState: 'birth_state',
-  education: 'education',
-  profession: 'profession',
-  workplace: 'workplace',
   fatherName: 'father_name',
   motherName: 'mother_name',
   spouseName: 'spouse_name',
-  weddingDate: 'wedding_date',
   childrenNames: 'children_names',
   baptismDate: 'baptism_date',
   baptismChurch: 'baptism_church',
@@ -115,9 +108,13 @@ const digitsOrNull = (value: string) => blankToNull(onlyDigits(value));
 
 export async function getMemberRecord(personId: string): Promise<MemberRecord> {
   const [person, profile, sensitive] = await Promise.all([
-    supabase.from('people').select('name, phone, email, membership_status').eq('id', personId).single(),
+    supabase.from('people').select('name, phone, email, membership_status, entry_type').eq('id', personId).single(),
     supabase.from('member_profiles').select('*').eq('person_id', personId).maybeSingle(),
-    supabase.from('person_sensitive').select('birth_date').eq('person_id', personId).maybeSingle(),
+    supabase
+      .from('person_sensitive')
+      .select('birth_date, origin_church')
+      .eq('person_id', personId)
+      .maybeSingle(),
   ]);
   const failure = person.error ?? profile.error ?? sensitive.error;
   if (failure) throw failure;
@@ -143,6 +140,8 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
     email: member.email ?? '',
     membershipStatus: toMembershipStatus(member.membership_status ?? ''),
     birthDate: sensitive.data?.birth_date ?? '',
+    entryType: toEntryType(member.entry_type) ?? '',
+    originChurch: sensitive.data?.origin_church ?? '',
     childrenCount: profileRow.children_count == null ? '' : String(profileRow.children_count),
   };
 }
@@ -150,12 +149,13 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
 export interface MemberRecordInfo {
   createdAt: string;
   origin: string;
+  statuteAgreedAt: string | null;
 }
 
 export async function getMemberRecordInfo(personId: string): Promise<MemberRecordInfo> {
-  const { data, error } = await supabase.from('people').select('created_at, origin').eq('id', personId).single();
+  const { data, error } = await supabase.from('people').select('created_at, origin, statute_agreed_at').eq('id', personId).single();
   if (error) throw error;
-  return { createdAt: data.created_at, origin: data.origin };
+  return { createdAt: data.created_at, origin: data.origin, statuteAgreedAt: data.statute_agreed_at };
 }
 
 export async function saveMemberRecord(personId: string, record: MemberRecord): Promise<void> {
@@ -168,7 +168,6 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
   profile.cpf = digitsOrNull(record.cpf);
   profile.other_phone = digitsOrNull(record.otherPhone);
   profile.address_zip = digitsOrNull(record.addressZip);
-  profile.birth_state = blankToNull(record.birthState.toUpperCase());
   profile.children_count = record.childrenCount.trim() === '' ? null : Number(record.childrenCount);
 
   const results = await Promise.all([
@@ -179,13 +178,19 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
         phone: digitsOrNull(record.phone),
         email: blankToNull(record.email),
         membership_status: record.membershipStatus,
+        entry_type: record.entryType || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', personId),
     supabase.from('member_profiles').upsert({ person_id: personId, ...profile }),
     supabase
       .from('person_sensitive')
-      .upsert({ person_id: personId, birth_date: blankToNull(record.birthDate), updated_at: new Date().toISOString() }),
+      .upsert({
+        person_id: personId,
+        birth_date: blankToNull(record.birthDate),
+        origin_church: blankToNull(record.originChurch),
+        updated_at: new Date().toISOString(),
+      }),
   ]);
   const failure = results.find((result) => result.error)?.error;
   if (failure) throw failure;

@@ -1,14 +1,8 @@
 // Libs
 import styled from 'styled-components';
 // Components
+import { twoColumnsWhenRoom } from '../../components/FormLayout';
 import { IconBadge } from '../../components/MenuOptions';
-
-export const ProfileContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.lg};
-  max-width: 1040px;
-`;
 
 export const HeroText = styled.div`
   min-width: 0;
@@ -59,37 +53,15 @@ export const CommunityBadge = styled(IconBadge)<{ $empty: boolean }>`
   }
 `;
 
-export const Columns = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.base};
-
-  & > div {
-    display: flex;
-    flex-direction: column;
-    gap: ${({ theme }) => theme.spacing.base};
-    min-width: 0;
-  }
-
-  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    align-items: start;
-  }
-`;
-
-export const SideColumn = styled.div`
-  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    position: sticky;
-    top: ${({ theme }) => theme.spacing.base};
-  }
-`;
-
 export const Fields = styled.dl`
   margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.lg};
+  ${twoColumnsWhenRoom}
+`;
+
+export const AddressLines = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 `;
 
 export const Field = styled.div<{ $wide: boolean }>`
@@ -133,23 +105,4 @@ export const RelativeLinks = styled.ul`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.xs};
-`;
-
-export const LegacyNote = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
-  padding: ${({ theme }) => theme.spacing.md};
-  border-radius: ${({ theme }) => theme.rounded.sm};
-  background: ${({ theme }) => theme.colors.surfaceSoft};
-`;
-
-export const RecordInfo = styled.p`
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.base};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 13px;
-  color: ${({ theme }) => theme.colors.muted};
 `;

@@ -1,5 +1,5 @@
 // Local
-import { communityRequirements, hasCompletedLessons } from '../../src/domain/membership';
+import { communityDeclines, hasCompletedLessons } from '../../src/domain/membership';
 
 describe('hasCompletedLessons', () => {
   it('needs every lesson of the cohort, makeups included', () => {
@@ -12,32 +12,30 @@ describe('hasCompletedLessons', () => {
   });
 });
 
-describe('communityRequirements', () => {
-  it('drops the small group when the person said not now', () => {
-    expect(communityRequirements({ wants_small_group: 'not_now', ministry_interests: ['Louvor'] })).toEqual({
-      smallGroupRequired: false,
-      ministryRequired: true,
+describe('communityDeclines', () => {
+  it('notes when the person said not now to a small group', () => {
+    expect(communityDeclines({ wants_small_group: 'not_now', ministry_interests: ['Louvor'] })).toEqual({
+      smallGroup: true,
+      ministry: false,
     });
   });
 
-  it('drops the ministry when the person said they cannot serve now', () => {
-    expect(communityRequirements({ wants_small_group: 'yes', ministry_interests: [] })).toEqual({
-      smallGroupRequired: true,
-      ministryRequired: false,
+  it('notes when the person said they cannot serve now', () => {
+    expect(communityDeclines({ wants_small_group: 'yes', ministry_interests: [] })).toEqual({
+      smallGroup: false,
+      ministry: true,
     });
   });
 
-  it('keeps the small group for someone already in one', () => {
-    expect(communityRequirements({ wants_small_group: 'already', ministry_interests: ['60+'] }).smallGroupRequired).toBe(
-      true,
-    );
+  it('notes nothing for someone already in a small group', () => {
+    expect(communityDeclines({ wants_small_group: 'already', ministry_interests: ['60+'] }).smallGroup).toBe(false);
   });
 
-  it('requires both when there is no form to go by', () => {
-    expect(communityRequirements(null)).toEqual({ smallGroupRequired: true, ministryRequired: true });
-    expect(communityRequirements({ wants_small_group: null, ministry_interests: null })).toEqual({
-      smallGroupRequired: true,
-      ministryRequired: true,
+  it('notes nothing when there is no form to go by', () => {
+    expect(communityDeclines(null)).toEqual({ smallGroup: false, ministry: false });
+    expect(communityDeclines({ wants_small_group: null, ministry_interests: null })).toEqual({
+      smallGroup: false,
+      ministry: false,
     });
   });
 });

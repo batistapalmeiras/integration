@@ -4,19 +4,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, LinkButton, Skeleton, Tab, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, LinkButton, Skeleton, Tab, useAuthCtx } from 'bp-kit';
 import { Check, Save, UserRound } from 'lucide-react';
 // Components
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { communityRequirements } from '../../../domain/membership';
-import { AppRoute } from '../../../routes/paths';
+import { communityDeclines } from '../../../domain/membership';
+import { AppRoute, confirmMemberPath } from '../../../routes/paths';
 import { hasRole, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
 import { useVisitorProfile } from '../../../features/visitors';
 import { CommunityFields } from '../components/CommunityFields';
-import { ConfirmMemberModal } from '../Detail/components/ConfirmMemberModal';
-import { buildCommunitySchema, CommunityFormValues } from '../validators';
+import { communitySchema, CommunityFormValues } from '../validators';
 import { usePersonMakeups, usePersonSensitive } from '../../../queries/person';
 import { useMinistries, useSmallGroups } from '../../../queries/reference';
 import {
@@ -25,13 +24,13 @@ import {
   DetailsList,
   DetailValue,
   Form,
+  ConfirmCallout,
+  ConfirmCalloutContent,
   InfoTabBar,
   SectionStack,
-  SensitiveBlock,
-  SensitiveValue,
 } from '../Detail/styles';
-import { FormActions, FormContent, SectionDivider } from '../../../components/FormLayout';
-import { useLatest } from '../../../lib/useLatest';
+import { DetailContent, EndActions, FieldGrid, SectionDivider } from '../../../components/FormLayout';
+import { EntryList } from './EntryList';
 import { InfoEntry, integrationEntries, makeupEntries, membershipEntries } from './sensitive';
 
 type InfoTab = 'general' | 'integration' | 'membership' | 'makeup';
@@ -50,9 +49,7 @@ export function VisitorInfoPage() {
     profileSmallGroupName,
     profileMinistryIds,
     updateCommunity,
-    confirmMember,
   } = useVisitorProfile(id ?? '');
-  const { open, close, modal } = useModal('drawer');
 
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<InfoTab>(() => (searchParams.get('tab') as InfoTab | null) ?? 'general');
@@ -62,8 +59,7 @@ export function VisitorInfoPage() {
   const canSeeMakeups = hasRole(user?.role, TEACHING_ROLES);
   const sensitive = usePersonSensitive(id ?? '', canSeeSensitive).data ?? null;
   const makeups = usePersonMakeups(id ?? '', canSeeMakeups).data ?? [];
-  const requirements = communityRequirements(sensitive);
-  const requirementsRef = useLatest(requirements);
+  const declines = communityDeclines(sensitive);
 
   const canEditCommunity = user?.role === UserRole.Pastor && person?.status === 'member';
   const smallGroups = useSmallGroups(canEditCommunity).data ?? [];
@@ -74,8 +70,7 @@ export function VisitorInfoPage() {
     handleSubmit,
     formState: { isSubmitting, isDirty },
   } = useForm<CommunityFormValues>({
-    resolver: (values, context, options) =>
-      zodResolver(buildCommunitySchema(requirementsRef.current))(values, context, options),
+    resolver: zodResolver(communitySchema),
     values: { smallGroupIds: person?.small_group_id ? [person.small_group_id] : [], ministryIds: profileMinistryIds },
   });
 
@@ -114,20 +109,10 @@ export function VisitorInfoPage() {
 
   const showConfirmMember =
     fromMembershipQueue && user?.role === UserRole.Pastor && person.status === 'membership_pending';
-  const openConfirmMember = () =>
-    open(
-      <ConfirmMemberModal
-        person={person}
-        close={close}
-        onConfirm={async (smallGroupId, ministryIds) => {
-          await confirmMember(smallGroupId, ministryIds);
-          navigate(AppRoute.Membership);
-        }}
-      />,
-    );
+  const openConfirmMember = () => navigate(confirmMemberPath(person.id));
 
   return (
-    <FormContent>
+    <DetailContent>
       <PageHeader
         title="Detalhes"
         subtitle={person.name}
@@ -141,6 +126,18 @@ export function VisitorInfoPage() {
           )
         }
       />
+
+      {showConfirmMember && (
+        <ConfirmCallout>
+          <ConfirmCalloutContent>
+            <span>Aguardando sua confirmação como membro.</span>
+            <Button variant="primary" onClick={openConfirmMember}>
+              <Check size={16} />
+              Confirmar como membro
+            </Button>
+          </ConfirmCalloutContent>
+        </ConfirmCallout>
+      )}
 
       {tabs.length > 1 && (
         <InfoTabBar>
@@ -165,15 +162,6 @@ export function VisitorInfoPage() {
 
       {(current === 'integration' || current === 'membership') && <EntryList entries={entriesFor(current)} />}
 
-      {current === 'membership' && showConfirmMember && (
-        <FormActions>
-          <Button variant="primary" onClick={openConfirmMember}>
-            <Check size={16} />
-            Confirmar como membro
-          </Button>
-        </FormActions>
-      )}
-
       {current === 'makeup' && (
         <SectionStack>
           {makeups.map((makeup, index) =>
@@ -190,14 +178,11 @@ export function VisitorInfoPage() {
 
       {current === 'general' && canEditCommunity && (
         <Form onSubmit={submit}>
-          <CommunityFields
-            control={control}
-            requirements={requirements}
-            smallGroups={smallGroups}
-            ministries={ministries}
-          />
+          <FieldGrid>
+            <CommunityFields control={control} declines={declines} smallGroups={smallGroups} ministries={ministries} />
+          </FieldGrid>
 
-          <FormActions>
+          <EndActions>
             <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
               {isSubmitting ? (
                 'Salvando...'
@@ -208,24 +193,9 @@ export function VisitorInfoPage() {
                 </>
               )}
             </Button>
-          </FormActions>
+          </EndActions>
         </Form>
       )}
-
-      {modal}
-    </FormContent>
-  );
-}
-
-function EntryList({ entries }: { entries: InfoEntry[] }) {
-  return (
-    <DetailsList>
-      {entries.map((item) => (
-        <SensitiveBlock key={item.label}>
-          <DetailLabel>{item.label}</DetailLabel>
-          <SensitiveValue $muted={!item.answered}>{item.value}</SensitiveValue>
-        </SensitiveBlock>
-      ))}
-    </DetailsList>
+    </DetailContent>
   );
 }

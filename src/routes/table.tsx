@@ -19,6 +19,7 @@ import {
   MakeupAttendancePage,
   MemberPendenciesPage,
   MemberProfilePage,
+  ConfirmMemberPage,
   MembersPage,
   MembershipInterestPage,
   MembershipSignupPage,
@@ -70,6 +71,7 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: AppRoute.Coffee, element: <CoffeePage />, roles: INTEGRATION_TEAM_ROLES },
   { path: AppRoute.Classes, element: <ClassesPage />, roles: TEACHING_ROLES },
   { path: AppRoute.Membership, element: <MembershipPage />, roles: LEADERSHIP_ROLES },
+  { path: `${AppRoute.Membership}/:id/confirmar`, element: <ConfirmMemberPage />, roles: PASTOR },
   { path: AppRoute.People, element: <PeoplePage /> },
 
   { path: AppRoute.Members, element: <MembersPage />, roles: LEADERSHIP_ROLES },

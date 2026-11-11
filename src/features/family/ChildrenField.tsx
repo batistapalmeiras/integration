@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { BaseInput, Button, IconButton, LinkButton, Select } from 'bp-kit';
 import { Plus, Trash2 } from 'lucide-react';
 // Local
-import { Relative } from '../../../repositories/family';
-import { ItemPicker, ItemRow, ItemRows } from '../../../components/Panel';
+import { Relative } from '../../repositories/family';
+import { ItemPicker, ItemRow, ItemRows } from '../../components/Panel';
 
 interface Props {
   value: string[];

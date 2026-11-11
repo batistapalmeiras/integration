@@ -56,15 +56,13 @@ export interface MembershipQueueRow {
   name: string;
   entryType: EntryType | null;
   originChurch: string | null;
-  cohortName: string | null;
-  statuteAgreedAt: string | null;
   reviewReasons: string[];
 }
 
 export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
   const { data: people, error: peopleError } = await supabase
     .from('people')
-    .select('id, name, entry_type, statute_agreed_at')
+    .select('id, name, entry_type')
     .eq('status', 'membership_pending');
   if (peopleError) throw peopleError;
 
@@ -72,23 +70,13 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
   const ids = pending.map((person) => person.id);
   if (ids.length === 0) return [];
 
-  const [sensitive, enrollments, alerts] = await Promise.all([
+  const [sensitive, alerts] = await Promise.all([
     supabase.from('person_sensitive').select('person_id, origin_church').in('person_id', ids),
-    supabase
-      .from('enrollments')
-      .select('person_id, cohort:cohorts(name)')
-      .in('person_id', ids)
-      .order('created_at', { ascending: false }),
     listMembershipAlerts(ids),
   ]);
-  const failure = sensitive.error ?? enrollments.error;
-  if (failure) throw failure;
+  if (sensitive.error) throw sensitive.error;
 
   const sensitiveById = new Map((sensitive.data ?? []).map((row) => [row.person_id, row]));
-  const cohortById = new Map<string, string>();
-  for (const row of enrollments.data ?? []) {
-    if (row.cohort && !cohortById.has(row.person_id)) cohortById.set(row.person_id, row.cohort.name);
-  }
 
   return pending
     .map((person) => ({
@@ -96,8 +84,6 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
       name: person.name,
       entryType: person.entry_type,
       originChurch: sensitiveById.get(person.id)?.origin_church ?? null,
-      cohortName: cohortById.get(person.id) ?? null,
-      statuteAgreedAt: person.statute_agreed_at,
       reviewReasons: alerts
         .filter((alert) => alert.person_id === person.id && !alert.resolved)
         .map((alert) => MEMBERSHIP_ALERT_LABELS[alert.code]),

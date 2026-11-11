@@ -1,5 +1,5 @@
 // Libs
-import { text } from 'bp-kit';
+import { maskCEP, text } from 'bp-kit';
 // Local
 import { formatDate } from '../../domain/dates';
 import {
@@ -8,6 +8,7 @@ import {
   MemberRecord,
   MEMBERSHIP_STATUS_LABELS,
 } from '../../domain/memberRecords';
+import { ENTRY_TYPE_LABELS, MEMBERSHIP_ANSWER_LABELS } from '../../types/church';
 
 type FieldKind =
   | { kind: 'text'; placeholder?: string; maxLength?: number; numeric?: boolean }
@@ -23,6 +24,26 @@ export interface RecordSection {
   id: string;
   title: string;
   fields: RecordField[];
+  summary?: (record: MemberRecord) => string[];
+}
+
+const joinFilled = (parts: string[], separator: string) =>
+  parts
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(separator);
+
+export function addressLines(record: MemberRecord): string[] {
+  const street = joinFilled([record.addressStreet, record.addressNumber], ', ');
+  const city = joinFilled([record.addressCity, record.addressState], '/');
+  const zip = record.addressZip.trim() && `CEP ${maskCEP(record.addressZip)}`;
+  const reference = record.addressReference.trim() && `Referência: ${record.addressReference.trim()}`;
+  return [
+    joinFilled([street, record.addressComplement], ' – '),
+    joinFilled([record.addressNeighborhood, city], ' · '),
+    zip,
+    reference,
+  ].filter(Boolean);
 }
 
 export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
@@ -55,12 +76,6 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
         labels: MARITAL_STATUS_LABELS,
         emptyLabel: 'Não informado',
       },
-      { name: 'nationality', label: 'Nacionalidade', kind: 'text' },
-      { name: 'birthplace', label: 'Naturalidade', kind: 'text' },
-      { name: 'birthState', label: 'Estado de nascimento', kind: 'text', placeholder: 'MG', maxLength: 2 },
-      { name: 'education', label: 'Escolaridade', kind: 'text' },
-      { name: 'profession', label: 'Profissão', kind: 'text' },
-      { name: 'workplace', label: 'Local de trabalho', kind: 'text' },
     ],
   },
   {
@@ -69,11 +84,20 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
     fields: [
       { name: 'baptismDate', label: 'Data de batismo', kind: 'date' },
       { name: 'baptismChurch', label: 'Igreja do batismo', kind: 'text' },
+      {
+        name: 'entryType',
+        label: MEMBERSHIP_ANSWER_LABELS.entryType,
+        kind: 'select',
+        labels: ENTRY_TYPE_LABELS,
+        emptyLabel: 'Não informado',
+      },
+      { name: 'originChurch', label: MEMBERSHIP_ANSWER_LABELS.originChurch, kind: 'text' },
     ],
   },
   {
     id: 'address',
     title: 'Endereço',
+    summary: addressLines,
     fields: [
       { name: 'addressZip', label: 'CEP', kind: 'text', numeric: true },
       { name: 'addressStreet', label: 'Rua', kind: 'text' },
@@ -95,9 +119,7 @@ export function displayValue(record: MemberRecord, field: RecordField): string {
   return value;
 }
 
-export const WEDDING_DATE_FIELD: RecordField = { name: 'weddingDate', label: 'Data de casamento', kind: 'date' };
-
-export const LEGACY_FAMILY_FIELDS = {
+export const FAMILY_NAME_FIELDS = {
   spouse: { name: 'spouseName', label: 'Cônjuge' },
   father: { name: 'fatherName', label: 'Pai' },
   mother: { name: 'motherName', label: 'Mãe' },

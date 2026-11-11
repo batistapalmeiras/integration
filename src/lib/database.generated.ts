@@ -320,23 +320,16 @@ export type Database = {
           address_zip: string | null
           baptism_church: string | null
           baptism_date: string | null
-          birth_state: string | null
-          birthplace: string | null
           children_count: number | null
           children_names: string | null
           cpf: string | null
-          education: string | null
           father_name: string | null
           gender: string | null
           marital_status: string | null
           mother_name: string | null
-          nationality: string | null
           other_phone: string | null
           person_id: string
-          profession: string | null
           spouse_name: string | null
-          wedding_date: string | null
-          workplace: string | null
         }
         Insert: {
           address_city?: string | null
@@ -349,23 +342,16 @@ export type Database = {
           address_zip?: string | null
           baptism_church?: string | null
           baptism_date?: string | null
-          birth_state?: string | null
-          birthplace?: string | null
           children_count?: number | null
           children_names?: string | null
           cpf?: string | null
-          education?: string | null
           father_name?: string | null
           gender?: string | null
           marital_status?: string | null
           mother_name?: string | null
-          nationality?: string | null
           other_phone?: string | null
           person_id: string
-          profession?: string | null
           spouse_name?: string | null
-          wedding_date?: string | null
-          workplace?: string | null
         }
         Update: {
           address_city?: string | null
@@ -378,23 +364,16 @@ export type Database = {
           address_zip?: string | null
           baptism_church?: string | null
           baptism_date?: string | null
-          birth_state?: string | null
-          birthplace?: string | null
           children_count?: number | null
           children_names?: string | null
           cpf?: string | null
-          education?: string | null
           father_name?: string | null
           gender?: string | null
           marital_status?: string | null
           mother_name?: string | null
-          nationality?: string | null
           other_phone?: string | null
           person_id?: string
-          profession?: string | null
           spouse_name?: string | null
-          wedding_date?: string | null
-          workplace?: string | null
         }
         Relationships: [
           {

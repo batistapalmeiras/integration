@@ -1,8 +1,6 @@
 // Libs
 import { z } from 'zod';
 import { text } from 'bp-kit';
-// Components
-import { CommunityRequirements } from '../../../domain/membership';
 
 export const createVisitorSchema = z.object({
   name: z.string().min(1, text.validation.required('o nome')),
@@ -19,15 +17,9 @@ export const contactAttemptSchema = z.object({
 
 export type ContactAttemptFormValues = z.infer<typeof contactAttemptSchema>;
 
-export function buildCommunitySchema({ smallGroupRequired, ministryRequired }: CommunityRequirements) {
-  return z.object({
-    smallGroupIds: smallGroupRequired
-      ? z.array(z.string()).min(1, text.validation.selectRequired('o Pequeno Grupo'))
-      : z.array(z.string()),
-    ministryIds: ministryRequired
-      ? z.array(z.string()).min(1, text.validation.selectRequired('pelo menos um ministério'))
-      : z.array(z.string()),
-  });
-}
+export const communitySchema = z.object({
+  smallGroupIds: z.array(z.string()).max(1),
+  ministryIds: z.array(z.string()),
+});
 
-export type CommunityFormValues = z.infer<ReturnType<typeof buildCommunitySchema>>;
+export type CommunityFormValues = z.infer<typeof communitySchema>;

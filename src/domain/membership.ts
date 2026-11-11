@@ -20,16 +20,16 @@ interface CommunityAnswers {
   ministry_interests: string[] | null;
 }
 
-export interface CommunityRequirements {
-  smallGroupRequired: boolean;
-  ministryRequired: boolean;
+export interface CommunityDeclines {
+  smallGroup: boolean;
+  ministry: boolean;
 }
 
-export function communityRequirements(answers: CommunityAnswers | null): CommunityRequirements {
+export function communityDeclines(answers: CommunityAnswers | null): CommunityDeclines {
   const ministries = answers?.ministry_interests;
   return {
-    smallGroupRequired: answers?.wants_small_group !== 'not_now',
-    ministryRequired: !(Array.isArray(ministries) && ministries.length === 0),
+    smallGroup: answers?.wants_small_group === 'not_now',
+    ministry: Array.isArray(ministries) && ministries.length === 0,
   };
 }
 

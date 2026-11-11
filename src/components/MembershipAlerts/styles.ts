@@ -1,11 +1,34 @@
 // Libs
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const AlertSection = styled.section`
+export const AlertItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xxs};
+`;
+
+export const AlertSection = styled.section<{ $boxed: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.md};
   font-family: ${({ theme }) => theme.typography.fontFamily};
+
+  ${({ $boxed, theme }) =>
+    $boxed &&
+    `
+    padding: 18px ${theme.spacing.base};
+    border: 1px solid ${theme.colors.hairline};
+    border-radius: 14px;
+  `}
+
+  ${({ $boxed, theme }) =>
+    $boxed &&
+    css`
+      ${AlertItem} + ${AlertItem} {
+        padding-top: ${theme.spacing.md};
+        border-top: 1px solid ${theme.colors.hairline};
+      }
+    `}
 `;
 
 export const AlertSectionTitle = styled.h3`
@@ -13,12 +36,6 @@ export const AlertSectionTitle = styled.h3`
   font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
   font-weight: 600;
   color: ${({ theme }) => theme.colors.danger};
-`;
-
-export const AlertItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xxs};
 `;
 
 export const AlertTitle = styled.span`

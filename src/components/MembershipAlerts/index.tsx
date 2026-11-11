@@ -12,11 +12,13 @@ import { AlertAnswer, AlertItem, AlertNote, AlertSection, AlertSectionTitle, Ale
 
 interface Props {
   personId: string;
+  onlyPending?: boolean;
+  boxed?: boolean;
 }
 
-export function MembershipAlerts({ personId }: Props) {
+export function MembershipAlerts({ personId, onlyPending = false, boxed = false }: Props) {
   const query = useMembershipAlerts(personId);
-  const alerts = query.data ?? [];
+  const alerts = (query.data ?? []).filter((alert) => !onlyPending || !alert.resolved);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const error = saveError ?? errorMessage(query.error);
@@ -39,7 +41,7 @@ export function MembershipAlerts({ personId }: Props) {
   };
 
   return (
-    <AlertSection>
+    <AlertSection $boxed={boxed}>
       <AlertSectionTitle>Pendências</AlertSectionTitle>
       {alerts.map((alert) => (
         <AlertItem key={alert.code}>
@@ -53,7 +55,6 @@ export function MembershipAlerts({ personId }: Props) {
           />
         </AlertItem>
       ))}
-      <AlertNote>O que não estiver resolvido fica nas pendências do membro até o pastor resolver.</AlertNote>
       {error && <AlertNote>{error}</AlertNote>}
     </AlertSection>
   );

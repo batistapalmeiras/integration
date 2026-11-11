@@ -1,20 +1,19 @@
+// React
+import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Card, Typography, useModal } from 'bp-kit';
+import { Button, Card, Typography } from 'bp-kit';
 // Local
 import { RowActions } from '../../../../components/Table';
 import { Person } from '../../../../features/visitors';
+import { confirmMemberPath } from '../../../../routes/paths';
 import { CardHeader, StagePanel } from '../styles';
-import { ConfirmMemberModal } from './ConfirmMemberModal';
 
 interface Props {
   person: Person;
-  onConfirm: (smallGroupId: string | null, ministryIds: string[]) => Promise<void>;
 }
 
-export function MembershipPendingStagePanel({ person, onConfirm }: Props) {
-  const { open, close, modal } = useModal('drawer');
-
-  const openConfirmModal = () => open(<ConfirmMemberModal person={person} close={close} onConfirm={onConfirm} />);
+export function MembershipPendingStagePanel({ person }: Props) {
+  const navigate = useNavigate();
 
   return (
     <StagePanel>
@@ -23,12 +22,11 @@ export function MembershipPendingStagePanel({ person, onConfirm }: Props) {
           <Typography type="label">Concluiu as 4 aulas e aguarda confirmação como membro</Typography>
         </CardHeader>
         <RowActions>
-          <Button variant="primary" onClick={openConfirmModal}>
+          <Button variant="primary" onClick={() => navigate(confirmMemberPath(person.id))}>
             Confirmar como membro
           </Button>
         </RowActions>
       </Card>
-      {modal}
     </StagePanel>
   );
 }

@@ -28,3 +28,5 @@ export enum AppRoute {
   Store = '/loja',
   NewStoreItem = '/loja/novo',
 }
+
+export const confirmMemberPath = (personId: string) => `${AppRoute.Membership}/${personId}/confirmar`;

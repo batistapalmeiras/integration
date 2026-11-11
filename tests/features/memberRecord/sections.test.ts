@@ -1,11 +1,11 @@
 // Local
 import { MemberRecord } from '../../../src/domain/memberRecords';
 import {
+  addressLines,
   displayValue,
-  LEGACY_FAMILY_FIELDS,
+  FAMILY_NAME_FIELDS,
   MEMBER_RECORD_SECTIONS,
   sectionResolver,
-  WEDDING_DATE_FIELD,
 } from '../../../src/features/memberRecord';
 
 const blank: MemberRecord = {
@@ -16,7 +16,6 @@ const blank: MemberRecord = {
   birthDate: '',
   gender: '',
   maritalStatus: '',
-  nationality: '',
   otherPhone: '',
   addressZip: '',
   addressStreet: '',
@@ -27,19 +26,15 @@ const blank: MemberRecord = {
   addressState: '',
   addressReference: '',
   cpf: '',
-  birthplace: '',
-  birthState: '',
-  education: '',
-  profession: '',
-  workplace: '',
   fatherName: '',
   motherName: '',
   spouseName: '',
-  weddingDate: '',
   childrenNames: '',
   childrenCount: '',
   baptismDate: '',
   baptismChurch: '',
+  entryType: '',
+  originChurch: '',
 };
 
 const section = (id: string) => MEMBER_RECORD_SECTIONS.find((item) => item.id === id)!;
@@ -50,8 +45,7 @@ describe('member record sections', () => {
   it('lists every field of the record exactly once, with the family ones in the family panel', () => {
     const names = [
       ...MEMBER_RECORD_SECTIONS.flatMap((item) => item.fields.map((f) => f.name)),
-      WEDDING_DATE_FIELD.name,
-      ...Object.values(LEGACY_FAMILY_FIELDS).map((f) => f.name),
+      ...Object.values(FAMILY_NAME_FIELDS).map((f) => f.name),
     ];
     expect(new Set(names).size).toBe(names.length);
     expect([...names].sort()).toEqual(Object.keys(blank).sort());
@@ -93,5 +87,28 @@ describe('sectionResolver', () => {
   it('asks for the phone unless the person came from the membership signup', async () => {
     expect(Object.keys((await resolve('contact', blank)).errors)).toEqual(['phone']);
     expect((await resolve('contact', blank, true)).errors).toEqual({});
+  });
+
+  it('summarizes the address in a few lines, skipping what is empty', () => {
+    const address = {
+      ...blank,
+      addressZip: '30550300',
+      addressStreet: 'Rua Dias de Carvalho',
+      addressNumber: '103',
+      addressComplement: 'Casa',
+      addressNeighborhood: 'Salgado Filho',
+      addressCity: 'Belo Horizonte',
+      addressState: 'MG',
+    };
+    expect(addressLines(address)).toEqual([
+      'Rua Dias de Carvalho, 103 – Casa',
+      'Salgado Filho · Belo Horizonte/MG',
+      'CEP 30550-300',
+    ]);
+    expect(addressLines({ ...blank, addressCity: 'Contagem', addressReference: 'Perto da praça' })).toEqual([
+      'Contagem',
+      'Referência: Perto da praça',
+    ]);
+    expect(addressLines(blank)).toEqual([]);
   });
 });

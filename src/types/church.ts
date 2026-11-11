@@ -26,3 +26,13 @@ export const WANTS_SMALL_GROUP_LABELS: Record<WantsSmallGroup, string> = {
 };
 
 export const toEntryType = optional(keyParser(ENTRY_TYPE_LABELS, 'Tipo de entrada'));
+
+export const MEMBERSHIP_ANSWER_LABELS = {
+  entryType: 'Forma de entrada',
+  originChurch: 'Igreja de origem',
+  ministryInterests: 'Interesse em ministérios',
+  wantsSmallGroup: 'Quer participar de um PG',
+  secretSociety: 'Sociedade secreta',
+  membershipNote: 'Observações',
+  statuteAgreedAt: 'Estatuto aceito em',
+};

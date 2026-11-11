@@ -5,10 +5,10 @@ import { LinkButton } from 'bp-kit';
 import { Pencil } from 'lucide-react';
 // Local
 import { MemberRecord } from '../../../domain/memberRecords';
-import { displayValue, LEGACY_FAMILY_FIELDS, WEDDING_DATE_FIELD } from '../../../features/memberRecord';
+import { FAMILY_NAME_FIELDS } from '../../../features/memberRecord';
 import { Family, Relative } from '../../../repositories/family';
 import { AppRoute } from '../../../routes/paths';
-import { Field, FieldLabel, Fields, FieldValue, LegacyNote, RelativeLinks } from '../styles';
+import { Field, FieldLabel, Fields, FieldValue, RelativeLinks } from '../styles';
 import { Panel, PanelHeader, PanelTitle } from '../../../components/Panel';
 
 interface Props {
@@ -17,22 +17,53 @@ interface Props {
   onEdit: () => void;
 }
 
-function RelativeValue({ relative }: { relative: Relative | null }) {
-  if (!relative) return <FieldValue $empty>—</FieldValue>;
+const relativePath = (relative: Relative) => `${AppRoute.Members}/${relative.id}`;
+
+interface RelativeFieldProps {
+  label: string;
+  relative: Relative | null;
+  typedName: string;
+  wide?: boolean;
+}
+
+function RelativeField({ label, relative, typedName, wide = false }: RelativeFieldProps) {
+  const name = typedName.trim();
   return (
-    <FieldValue $empty={false}>
-      <Link to={`${AppRoute.Members}/${relative.id}`}>{relative.name}</Link>
-    </FieldValue>
+    <Field $wide={wide}>
+      <FieldLabel>{label}</FieldLabel>
+      <FieldValue $empty={!relative && !name}>
+        {relative ? <Link to={relativePath(relative)}>{relative.name}</Link> : name || '—'}
+      </FieldValue>
+    </Field>
+  );
+}
+
+function ChildrenField({ record, family }: Pick<Props, 'record' | 'family'>) {
+  const typedNames = record.childrenNames.trim();
+  const count = family.children.length || Number(record.childrenCount) || 0;
+  return (
+    <Field $wide>
+      <FieldLabel>
+        {count > 0 ? `${FAMILY_NAME_FIELDS.childrenNames.label} (${count})` : FAMILY_NAME_FIELDS.childrenNames.label}
+      </FieldLabel>
+      {family.children.length > 0 ? (
+        <FieldValue $empty={false}>
+          <RelativeLinks>
+            {family.children.map((child) => (
+              <li key={child.id}>
+                <Link to={relativePath(child)}>{child.name}</Link>
+              </li>
+            ))}
+          </RelativeLinks>
+        </FieldValue>
+      ) : (
+        <FieldValue $empty={!typedNames}>{typedNames || '—'}</FieldValue>
+      )}
+    </Field>
   );
 }
 
 export function FamilyPanel({ record, family, onEdit }: Props) {
-  const legacyFields = Object.values(LEGACY_FAMILY_FIELDS);
-  const legacy = legacyFields
-    .map((field) => ({ label: field.label, value: record[field.name].trim() }))
-    .filter((field) => field.value !== '');
-  const weddingDate = displayValue(record, WEDDING_DATE_FIELD);
-
   return (
     <Panel aria-label="Família">
       <PanelHeader>
@@ -42,52 +73,16 @@ export function FamilyPanel({ record, family, onEdit }: Props) {
         </LinkButton>
       </PanelHeader>
       <Fields>
-        <Field $wide={false}>
-          <FieldLabel>Cônjuge</FieldLabel>
-          <RelativeValue relative={family.spouse} />
-        </Field>
-        <Field $wide={false}>
-          <FieldLabel>{WEDDING_DATE_FIELD.label}</FieldLabel>
-          <FieldValue $empty={!weddingDate}>{weddingDate || '—'}</FieldValue>
-        </Field>
-        <Field $wide={false}>
-          <FieldLabel>Pai</FieldLabel>
-          <RelativeValue relative={family.father} />
-        </Field>
-        <Field $wide={false}>
-          <FieldLabel>Mãe</FieldLabel>
-          <RelativeValue relative={family.mother} />
-        </Field>
-        <Field $wide>
-          <FieldLabel>{family.children.length > 0 ? `Filhos (${family.children.length})` : 'Filhos'}</FieldLabel>
-          {family.children.length > 0 ? (
-            <FieldValue $empty={false}>
-              <RelativeLinks>
-                {family.children.map((child) => (
-                  <li key={child.id}>
-                    <Link to={`${AppRoute.Members}/${child.id}`}>{child.name}</Link>
-                  </li>
-                ))}
-              </RelativeLinks>
-            </FieldValue>
-          ) : (
-            <FieldValue $empty>—</FieldValue>
-          )}
-        </Field>
+        <RelativeField
+          label={FAMILY_NAME_FIELDS.spouse.label}
+          wide
+          relative={family.spouse}
+          typedName={record.spouseName}
+        />
+        <ChildrenField record={record} family={family} />
+        <RelativeField label={FAMILY_NAME_FIELDS.father.label} relative={family.father} typedName={record.fatherName} />
+        <RelativeField label={FAMILY_NAME_FIELDS.mother.label} relative={family.mother} typedName={record.motherName} />
       </Fields>
-      {legacy.length > 0 && (
-        <LegacyNote>
-          <FieldLabel as="span">Do sistema antigo</FieldLabel>
-          <Fields>
-            {legacy.map((field) => (
-              <Field key={field.label} $wide={false}>
-                <FieldLabel>{field.label}</FieldLabel>
-                <FieldValue $empty={false}>{field.value}</FieldValue>
-              </Field>
-            ))}
-          </Fields>
-        </LegacyNote>
-      )}
     </Panel>
   );
 }

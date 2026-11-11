@@ -72,7 +72,7 @@ export function NextStep({ detail, onContactRegistered }: Props) {
       )}
 
       {isPastor && person.status === 'membership_pending' && (
-        <MembershipPendingStagePanel person={person} onConfirm={detail.confirmMember} />
+        <MembershipPendingStagePanel person={person} />
       )}
     </>
   );

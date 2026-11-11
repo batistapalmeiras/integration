@@ -6,6 +6,7 @@ import { HeartHandshake, LucideIcon, Pencil, UsersRound } from 'lucide-react';
 // Components
 import { NotesPanel } from '../../components/NotesPanel';
 import { PageHeader } from '../../components/PageHeader';
+import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
 import { Panel, PanelHeader, PanelTitle } from '../../components/Panel';
 // Local
 import { MembershipAlerts } from '../../components/MembershipAlerts';
@@ -19,6 +20,7 @@ import {
 } from '../../domain/memberRecords';
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
 import { errorMessage } from '../../lib/queryCache';
+import { MEMBERSHIP_ANSWER_LABELS } from '../../types/church';
 import {
   useFamily,
   useMemberRecord,
@@ -30,7 +32,6 @@ import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
 import {
-  Columns,
   Community,
   CommunityBadge,
   CommunityItem,
@@ -39,15 +40,14 @@ import {
   Fields,
   FieldValue,
   HeroText,
-  ProfileContent,
-  RecordInfo,
-  SideColumn,
+  AddressLines,
   StatusRow,
 } from './styles';
 
 const MEMBERSHIP_SECTION = 'membership';
 const SIDE_SECTIONS = ['contact'];
 const FAMILY_AFTER = 'personal';
+const CHURCH_SECTION = 'church';
 
 const MEMBERSHIP = MEMBER_RECORD_SECTIONS.find((section) => section.id === MEMBERSHIP_SECTION);
 const SIDE = MEMBER_RECORD_SECTIONS.filter((section) => SIDE_SECTIONS.includes(section.id));
@@ -84,12 +84,28 @@ export function MemberProfilePage() {
       />,
     );
 
+  const churchInfo: InfoField[] = info
+    ? [
+        { label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) },
+        {
+          label: MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,
+          value: info.statuteAgreedAt ? formatTimestampDate(info.statuteAgreedAt) : '',
+        },
+      ]
+    : [];
+
   const renderPanel = (section: RecordSection) => (
-    <SectionPanel key={section.id} section={section} record={record} onEdit={() => edit(section)} />
+    <SectionPanel
+      key={section.id}
+      section={section}
+      record={record}
+      info={section.id === CHURCH_SECTION ? churchInfo : []}
+      onEdit={() => edit(section)}
+    />
   );
 
   return (
-    <ProfileContent>
+    <WideContent>
       <PageHeader title={record.name} back />
 
       <HeroText>
@@ -113,7 +129,7 @@ export function MemberProfilePage() {
         </Community>
       </HeroText>
 
-      <MembershipAlerts personId={id} />
+      <MembershipAlerts personId={id} onlyPending />
 
       <Columns>
         <SideColumn>{SIDE.map(renderPanel)}</SideColumn>
@@ -126,7 +142,7 @@ export function MemberProfilePage() {
                     key="family"
                     record={record}
                     family={family}
-                    onEdit={() => open(<FamilyModal personId={id} record={record} family={family} close={close} />)}
+                    onEdit={() => open(<FamilyModal personId={id} family={family} close={close} />)}
                   />,
                 ]
               : [renderPanel(section)],
@@ -135,14 +151,8 @@ export function MemberProfilePage() {
         </div>
       </Columns>
 
-      {info && (
-        <RecordInfo>
-          <span>Cadastrado em {formatTimestampDate(info.createdAt)}</span>
-        </RecordInfo>
-      )}
-
       {modal}
-    </ProfileContent>
+    </WideContent>
   );
 }
 
@@ -163,13 +173,28 @@ function CommunityLine({ icon: Icon, value, emptyText }: CommunityLineProps) {
   );
 }
 
+interface InfoField {
+  label: string;
+  value: string;
+  wide?: boolean;
+}
+
 interface SectionPanelProps {
   section: RecordSection;
   record: MemberRecord;
+  info: InfoField[];
   onEdit: () => void;
 }
 
-function SectionPanel({ section, record, onEdit }: SectionPanelProps) {
+function SectionPanel({ section, record, info, onEdit }: SectionPanelProps) {
+  const fields: InfoField[] = [
+    ...section.fields.map((field) => ({
+      label: field.label,
+      value: displayValue(record, field),
+      wide: field.kind === 'textarea',
+    })),
+    ...info,
+  ];
   return (
     <Panel aria-label={section.title}>
       <PanelHeader>
@@ -178,17 +203,31 @@ function SectionPanel({ section, record, onEdit }: SectionPanelProps) {
           Editar
         </LinkButton>
       </PanelHeader>
-      <Fields>
-        {section.fields.map((field) => {
-          const value = displayValue(record, field);
-          return (
-            <Field key={field.name} $wide={field.kind === 'textarea'}>
+      {section.summary ? (
+        <SummaryLines lines={section.summary(record)} />
+      ) : (
+        <Fields>
+          {fields.map((field) => (
+            <Field key={field.label} $wide={!!field.wide}>
               <FieldLabel>{field.label}</FieldLabel>
-              <FieldValue $empty={!value}>{value || '—'}</FieldValue>
+              <FieldValue $empty={!field.value}>{field.value || '—'}</FieldValue>
             </Field>
-          );
-        })}
-      </Fields>
+          ))}
+        </Fields>
+      )}
     </Panel>
+  );
+}
+
+function SummaryLines({ lines }: { lines: string[] }) {
+  if (lines.length === 0) return <FieldValue as="p" $empty>—</FieldValue>;
+  return (
+    <AddressLines>
+      {lines.map((line) => (
+        <FieldValue as="p" key={line} $empty={false}>
+          {line}
+        </FieldValue>
+      ))}
+    </AddressLines>
   );
 }

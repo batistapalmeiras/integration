@@ -7,7 +7,6 @@ import { AlertTriangle } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
 import { NameCell, NameText, ReviewFlag, Subline, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
-import { formatTimestampDate } from '../../domain/dates';
 import { AppRoute } from '../../routes/paths';
 import { ENTRY_TYPE_LABELS } from '../../types/church';
 // Local
@@ -40,11 +39,7 @@ export function MembershipPage() {
               <thead>
                 <tr>
                   <Th>{text.fields.name}</Th>
-                  <Th $hideOnMobile>Turma</Th>
                   <Th $shrink>Forma de entrada</Th>
-                  <Th $shrink $hideOnMobile>
-                    Ficha
-                  </Th>
                 </tr>
               </thead>
               <tbody>
@@ -62,11 +57,7 @@ export function MembershipPage() {
                         ))}
                       </NameCell>
                     </Td>
-                    <Td $hideOnMobile>{row.cohortName ?? '—'}</Td>
                     <Td $shrink>{row.entryType ? ENTRY_TYPE_LABELS[row.entryType] : '—'}</Td>
-                    <Td $shrink $hideOnMobile>
-                      {row.statuteAgreedAt ? formatTimestampDate(row.statuteAgreedAt) : '—'}
-                    </Td>
                   </Tr>
                 ))}
               </tbody>

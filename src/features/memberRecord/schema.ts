@@ -21,7 +21,6 @@ export const memberRecordSchema = (optionalPhone: boolean) =>
       birthDate: optional,
       gender: z.enum(['male', 'female', '']),
       maritalStatus: z.enum(['single', 'married', 'widowed', 'divorced', 'stable_union', '']),
-      nationality: optional,
       otherPhone: z.string().refine((value) => value === '' || isCompletePhone(value), text.validation.phoneIncomplete),
       addressZip: optional,
       addressStreet: optional,
@@ -32,23 +31,17 @@ export const memberRecordSchema = (optionalPhone: boolean) =>
       addressState: optional,
       addressReference: optional,
       cpf: z.string().refine((value) => value === '' || isValidCpf(value), text.validation.cpfInvalid),
-      birthplace: optional,
-      birthState: z
-        .string()
-        .refine((value) => value.trim() === '' || /^[A-Za-z]{2}$/.test(value.trim()), 'Use a sigla, ex.: MG'),
-      education: optional,
-      profession: optional,
-      workplace: optional,
       fatherName: optional,
       motherName: optional,
       spouseName: optional,
-      weddingDate: optional,
       childrenNames: optional,
       childrenCount: z
         .string()
         .refine((value) => value.trim() === '' || /^\d{1,2}$/.test(value.trim()), 'Informe um número'),
       baptismDate: optional,
       baptismChurch: optional,
+      entryType: z.enum(['baptism', 'transfer_letter', 'acclamation', 'reconciliation', '']),
+      originChurch: optional,
     })
     .refine((record) => !isSamePhone(record.otherPhone, record.phone), {
       path: ['otherPhone'],

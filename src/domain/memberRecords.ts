@@ -1,5 +1,6 @@
 // Local
 import { keyParser } from '../lib/parse';
+import { EntryType } from '../types/church';
 import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membership';
 import { toOptions } from './text';
 
@@ -52,7 +53,6 @@ export type PendencyField =
   | 'birth_date'
   | 'gender'
   | 'marital_status'
-  | 'nationality'
   | 'address'
   | 'cpf';
 
@@ -64,7 +64,6 @@ export const PENDENCY_LABELS: Record<PendencyField, string> = {
   birth_date: 'Nascimento',
   gender: 'Sexo',
   marital_status: 'Estado civil',
-  nationality: 'Nacionalidade',
   address: 'Endereço',
   cpf: 'CPF',
 };
@@ -81,7 +80,6 @@ export interface MemberRecord {
   birthDate: string;
   gender: Gender | '';
   maritalStatus: MaritalStatus | '';
-  nationality: string;
   otherPhone: string;
   addressZip: string;
   addressStreet: string;
@@ -92,19 +90,15 @@ export interface MemberRecord {
   addressState: string;
   addressReference: string;
   cpf: string;
-  birthplace: string;
-  birthState: string;
-  education: string;
-  profession: string;
-  workplace: string;
   fatherName: string;
   motherName: string;
   spouseName: string;
-  weddingDate: string;
   childrenNames: string;
   childrenCount: string;
   baptismDate: string;
   baptismChurch: string;
+  entryType: EntryType | '';
+  originChurch: string;
 }
 
 export const toMembershipStatus = keyParser(MEMBERSHIP_STATUS_LABELS, 'Situação de membresia');
