@@ -1,7 +1,7 @@
 // React
 import { useEffect, useState } from 'react';
 // Libs
-import { isSamePhone } from 'bp-kit';
+import { InfoBox, isSamePhone } from 'bp-kit';
 // Components
 import { PublicPage } from '../../components/PublicPage';
 // Local
@@ -19,10 +19,14 @@ export function MembershipInterestPage() {
   const [saved] = useState(() => interestProgress.load());
   const [phase, setPhase] = useState<Phase>(saved?.phase ?? 'identification');
   const [eligibility, setEligibility] = useState<MembershipEligibility | null>(saved?.eligibility ?? null);
+  const [alreadySubmitted, setAlreadySubmitted] = useState(saved?.alreadySubmitted ?? false);
   const [initialValues, setInitialValues] = useState(() => interestFormProgress.load()?.values);
   const { submit, submitting, submitError } = useSubmitMembershipAnswers(submitMembershipForm);
 
-  useEffect(() => interestProgress.save({ phase, eligibility }), [phase, eligibility]);
+  useEffect(
+    () => interestProgress.save({ phase, eligibility, alreadySubmitted }),
+    [phase, eligibility, alreadySubmitted],
+  );
 
   const show = (next: Phase) => {
     setPhase(next);
@@ -32,10 +36,7 @@ export function MembershipInterestPage() {
   const open = (phone: string, found: MembershipInterestCheck) => {
     saveVisitorIdentity({ phone, name: found.name });
     setEligibility(found);
-    if (found.alreadySubmitted) {
-      show('done');
-      return;
-    }
+    setAlreadySubmitted(found.alreadySubmitted);
     if (!initialValues || !isSamePhone(initialValues.phone, phone)) {
       interestFormProgress.clear();
       setInitialValues(prefilledForm(phone, found));
@@ -53,6 +54,14 @@ export function MembershipInterestPage() {
         onLeave={() => show('identification')}
         submitting={submitting}
         submitError={submitError && <TeamContactError message={submitError} stage="class" />}
+        notice={
+          alreadySubmitted && (
+            <InfoBox>
+              Você já enviou sua ficha. Ela ganhou perguntas novas: confira suas respostas, complete o que faltar e
+              envie de novo.
+            </InfoBox>
+          )
+        }
         onSubmit={async (values) => {
           const sent = await submit(values);
           if (!sent) return;
