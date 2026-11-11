@@ -1,3 +1,5 @@
+// Libs
+import { FunctionsHttpError } from '@supabase/supabase-js';
 // Local
 import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
@@ -48,9 +50,16 @@ function toVolunteer(row: VolunteerRecord): VolunteerRow {
   };
 }
 
+async function functionErrorMessage(error: Error): Promise<string> {
+  if (!(error instanceof FunctionsHttpError)) return error.message;
+  const body: unknown = await error.context.json().catch(() => null);
+  const message = body && typeof body === 'object' && 'error' in body ? body.error : null;
+  return typeof message === 'string' ? message : error.message;
+}
+
 async function invokeFunction<T = unknown>(name: string, body: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke(name, { body });
-  if (error) throw error;
+  if (error) throw new Error(await functionErrorMessage(error));
   if (data?.error) throw new Error(data.error);
   return data;
 }

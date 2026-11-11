@@ -66,7 +66,8 @@ export function VolunteerDetailPage() {
   const isSelf = volunteer?.id === user?.id;
   const isTargetPrivileged = hasRole(volunteer?.role, LEADERSHIP_ROLES);
   const canEdit = isPastor || isSelf || !isTargetPrivileged;
-  const visibleRoleOptions = canEdit ? roleOptions : volunteer ? [volunteer.role] : [];
+  const canManage = canEdit && !isSelf;
+  const visibleRoleOptions = canManage ? roleOptions : volunteer ? [volunteer.role] : [];
   const optionalPhoneRef = useLatest(canLeavePhoneEmpty(volunteer?.origin));
 
   const {
@@ -168,7 +169,7 @@ export function VolunteerDetailPage() {
         <Select label="Cargo" control={control} name="role">
           <RoleOptions roles={visibleRoleOptions} />
         </Select>
-        <Switch label="Conta ativa" checked={volunteer.active} onChange={toggleActive} disabled={!canEdit} />
+        <Switch label="Conta ativa" checked={volunteer.active} onChange={toggleActive} disabled={!canManage} />
 
         {canEdit && (
           <>
@@ -183,10 +184,12 @@ export function VolunteerDetailPage() {
               )}
             </Button>
 
-            <Button type="button" variant="danger" fullWidth onClick={confirmRemove}>
-              <Trash2 size={16} />
-              Remover voluntário
-            </Button>
+            {canManage && (
+              <Button type="button" variant="danger" fullWidth onClick={confirmRemove}>
+                <Trash2 size={16} />
+                Remover voluntário
+              </Button>
+            )}
           </>
         )}
       </Form>
