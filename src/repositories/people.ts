@@ -137,7 +137,7 @@ export async function fetchPersonProfileSummary(personId: string): Promise<Perso
   const { data, error } = await supabase
     .from('people')
     .select(
-      'small_group_id, small_group:small_groups(name), person_ministries(ministry_id, ministry:ministries(name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))',
+      'small_group_id, small_group:small_groups!people_small_group_id_fkey(name), person_ministries(ministry_id, ministry:ministries!person_ministries_ministry_id_fkey(name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))',
     )
     .eq('id', personId)
     .single();

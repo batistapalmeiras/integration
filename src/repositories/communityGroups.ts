@@ -107,14 +107,14 @@ async function listGroupsWithCounts(table: Table): Promise<CommunityGroupWithCou
   if (isSmallGroups(table)) {
     const { data, error } = await supabase
       .from('small_groups')
-      .select(`${SMALL_GROUP_COLUMNS}, people(count)`)
+      .select(`${SMALL_GROUP_COLUMNS}, people!people_small_group_id_fkey(count)`)
       .order('name');
     if (error) throw error;
     return data.map((row) => ({ ...fromSmallGroup(row), peopleCount: row.people[0]?.count ?? 0 }));
   }
   const { data, error } = await supabase
     .from('ministries')
-    .select(`${MINISTRY_COLUMNS}, person_ministries(count)`)
+    .select(`${MINISTRY_COLUMNS}, person_ministries!person_ministries_ministry_id_fkey(count)`)
     .order('name');
   if (error) throw error;
   return data.map((row) => ({ ...fromMinistry(row), peopleCount: row.person_ministries[0]?.count ?? 0 }));
