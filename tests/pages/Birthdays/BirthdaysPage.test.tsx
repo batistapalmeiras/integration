@@ -42,4 +42,11 @@ describe('birthdays page', () => {
     );
     expect(await screen.findByText('Lista copiada.')).toBeInTheDocument();
   });
+
+  it('goes from December to January', async () => {
+    const user = userEvent.setup();
+    renderScreen(<BirthdaysPage />, { role: UserRole.Pastor, route: `${AppRoute.Birthdays}?month=12` });
+    await user.click(await screen.findByRole('button', { name: 'Próximo mês' }));
+    expect(await screen.findByText('Janeiro')).toBeInTheDocument();
+  });
 });

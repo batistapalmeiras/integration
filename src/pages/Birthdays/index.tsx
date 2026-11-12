@@ -16,6 +16,7 @@ import {
   birthdaysInMonth,
   birthdaysListText,
   isBirthdayToday,
+  shiftMonth,
 } from '../../domain/birthdays';
 import { monthName, todayKey } from '../../domain/dates';
 import { errorMessage } from '../../lib/queryCache';
@@ -75,8 +76,8 @@ export function BirthdaysPage() {
         title={label}
         previousLabel="Mês anterior"
         nextLabel="Próximo mês"
-        onPrevious={month > 1 ? () => selectMonth(month - 1) : undefined}
-        onNext={month < 12 ? () => selectMonth(month + 1) : undefined}
+        onPrevious={() => selectMonth(shiftMonth(month, -1))}
+        onNext={() => selectMonth(shiftMonth(month, 1))}
       />
 
       {!loading && !error && <PeopleCount count={count} />}

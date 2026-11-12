@@ -6,6 +6,7 @@ import {
   birthdaysListText,
   isBirthdayToday,
   MemberBirthday,
+  shiftMonth,
   upcomingBirthdaysThisMonth,
 } from '../../src/domain/birthdays';
 
@@ -86,5 +87,14 @@ describe('birthdaysListText', () => {
     expect(text).toBe(
       ['Aniversariantes de novembro de 2026', '03/11 · Ana · +11988887777', '07/11 · Davi · sem celular'].join('\n\n'),
     );
+  });
+});
+
+describe('shiftMonth', () => {
+  it('wraps from December to January and back', () => {
+    expect(shiftMonth(12, 1)).toBe(1);
+    expect(shiftMonth(1, -1)).toBe(12);
+    expect(shiftMonth(6, 1)).toBe(7);
+    expect(shiftMonth(6, -1)).toBe(5);
   });
 });

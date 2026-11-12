@@ -6,8 +6,11 @@ export interface MemberBirthday {
 }
 
 const MAX_AGE = 120;
+const MONTHS = 12;
 
 export const birthdayMonth = (birthDate: string) => Number(birthDate.slice(5, 7));
+
+export const shiftMonth = (month: number, step: number) => ((((month - 1 + step) % MONTHS) + MONTHS) % MONTHS) + 1;
 
 const birthdayDay = (birthDate: string) => Number(birthDate.slice(8, 10));
 
