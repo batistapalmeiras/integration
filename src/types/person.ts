@@ -37,7 +37,6 @@ export interface Person {
   entry_type: string | null;
   statute_agreed_at: string | null;
   coffee_retry_used: boolean;
-  small_group_id: string | null;
   origin: string;
   membership_status: string | null;
   visited_on: string | null;

@@ -100,14 +100,14 @@ async function listGroupsWithCounts(table: Table): Promise<CommunityGroupWithCou
   if (isSmallGroups(table)) {
     const { data, error } = await supabase
       .from('small_groups')
-      .select('id, name, meeting_day, people!people_small_group_id_fkey(count)')
+      .select('id, name, meeting_day, person_small_groups!person_small_groups_small_group_id_fkey(count)')
       .order('name');
     if (error) throw error;
     return data.map((row) => ({
       id: row.id,
       name: row.name,
       meetingDay: toWeekDay(row.meeting_day),
-      peopleCount: row.people[0]?.count ?? 0,
+      peopleCount: row.person_small_groups[0]?.count ?? 0,
     }));
   }
   const { data, error } = await supabase
@@ -143,9 +143,8 @@ async function deleteGroup(table: Table, id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function listMembers({ withoutSmallGroup = false } = {}): Promise<PersonInGroup[]> {
-  const query = supabase.from('people').select('id, name, status').eq('status', 'member');
-  const { data, error } = await (withoutSmallGroup ? query.is('small_group_id', null) : query).order('name');
+export async function listMembers(): Promise<PersonInGroup[]> {
+  const { data, error } = await supabase.from('people').select('id, name, status').eq('status', 'member').order('name');
   if (error) throw error;
   return (data ?? []).map(toPersonInGroup);
 }
@@ -161,7 +160,10 @@ export async function getCommunityOverview(): Promise<CommunityOverview> {
 }
 
 export async function addPeopleToSmallGroup(groupId: string, personIds: string[]): Promise<void> {
-  const { error } = await supabase.from('people').update({ small_group_id: groupId }).in('id', personIds);
+  const { error } = await supabase.from('person_small_groups').upsert(
+    personIds.map((personId) => ({ person_id: personId, small_group_id: groupId })),
+    { onConflict: 'person_id,small_group_id', ignoreDuplicates: true },
+  );
   if (error) throw error;
 }
 
@@ -173,8 +175,12 @@ export async function addPeopleToMinistry(ministryId: string, personIds: string[
   if (error) throw error;
 }
 
-export async function removePersonFromSmallGroup(personId: string): Promise<void> {
-  const { error } = await supabase.from('people').update({ small_group_id: null }).eq('id', personId);
+export async function removePersonFromSmallGroup(groupId: string, personId: string): Promise<void> {
+  const { error } = await supabase
+    .from('person_small_groups')
+    .delete()
+    .eq('small_group_id', groupId)
+    .eq('person_id', personId);
   if (error) throw error;
 }
 
@@ -189,12 +195,11 @@ export async function removePersonFromMinistry(ministryId: string, personId: str
 
 async function listSmallGroupPeople(id: string): Promise<PersonInGroup[]> {
   const { data, error } = await supabase
-    .from('people')
-    .select('id, name, status')
-    .eq('small_group_id', id)
-    .order('name');
+    .from('person_small_groups')
+    .select('person:people(id, name, status)')
+    .eq('small_group_id', id);
   if (error) throw error;
-  return (data ?? []).map(toPersonInGroup);
+  return (data ?? []).map((row) => toPersonInGroup(row.person)).sort(byName);
 }
 
 async function listMinistryPeople(id: string): Promise<PersonInGroup[]> {
@@ -206,27 +211,57 @@ async function listMinistryPeople(id: string): Promise<PersonInGroup[]> {
   return (data ?? []).map((row) => toPersonInGroup(row.person)).sort(byName);
 }
 
-export async function setPersonMinistries(personId: string, ministryIds: string[]): Promise<void> {
-  const { error: deleteError } = await supabase.from('person_ministries').delete().eq('person_id', personId);
-  if (deleteError) throw deleteError;
-  if (ministryIds.length === 0) return;
-  const { error } = await supabase
-    .from('person_ministries')
-    .insert(ministryIds.map((ministryId) => ({ person_id: personId, ministry_id: ministryId })));
+async function syncPersonMinistries(personId: string, ministryIds: string[]): Promise<void> {
+  const { data, error } = await supabase.from('person_ministries').select('ministry_id').eq('person_id', personId);
   if (error) throw error;
+  const current = data.map((row) => row.ministry_id);
+  const removed = current.filter((id) => !ministryIds.includes(id));
+  const added = ministryIds.filter((id) => !current.includes(id));
+  if (removed.length > 0) {
+    const result = await supabase.from('person_ministries').delete().eq('person_id', personId).in('ministry_id', removed);
+    if (result.error) throw result.error;
+  }
+  if (added.length > 0) {
+    const result = await supabase
+      .from('person_ministries')
+      .insert(added.map((ministryId) => ({ person_id: personId, ministry_id: ministryId })));
+    if (result.error) throw result.error;
+  }
+}
+
+async function syncPersonSmallGroups(personId: string, smallGroupIds: string[]): Promise<void> {
+  const { data, error } = await supabase
+    .from('person_small_groups')
+    .select('small_group_id')
+    .eq('person_id', personId);
+  if (error) throw error;
+  const current = data.map((row) => row.small_group_id);
+  const removed = current.filter((id) => !smallGroupIds.includes(id));
+  const added = smallGroupIds.filter((id) => !current.includes(id));
+  if (removed.length > 0) {
+    const result = await supabase
+      .from('person_small_groups')
+      .delete()
+      .eq('person_id', personId)
+      .in('small_group_id', removed);
+    if (result.error) throw result.error;
+  }
+  if (added.length > 0) {
+    const result = await supabase
+      .from('person_small_groups')
+      .insert(added.map((smallGroupId) => ({ person_id: personId, small_group_id: smallGroupId })));
+    if (result.error) throw result.error;
+  }
 }
 
 export async function savePersonCommunity(
   personId: string,
-  smallGroupId: string | null,
+  smallGroupIds: string[],
   ministryIds: string[],
 ): Promise<Person> {
-  const person = await updatePersonFields(personId, {
-    small_group_id: smallGroupId,
-    updated_at: new Date().toISOString(),
-  });
-  await setPersonMinistries(personId, ministryIds);
-  return person;
+  await syncPersonSmallGroups(personId, smallGroupIds);
+  await syncPersonMinistries(personId, ministryIds);
+  return updatePersonFields(personId, { updated_at: new Date().toISOString() });
 }
 
 async function getGroup(table: Table, id: string): Promise<CommunityGroup> {

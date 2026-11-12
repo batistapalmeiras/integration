@@ -17,7 +17,7 @@ import { CommunityFormValues, communitySchema } from '../../Visitors/validators'
 
 interface Props {
   personId: string;
-  community: Pick<MemberCommunity, 'smallGroupId' | 'ministryIds'>;
+  community: Pick<MemberCommunity, 'smallGroupIds' | 'ministryIds'>;
   close: () => void;
 }
 
@@ -32,12 +32,12 @@ export function CommunityModal({ personId, community, close }: Props) {
     formState: { isSubmitting, isDirty },
   } = useForm<CommunityFormValues>({
     resolver: zodResolver(communitySchema),
-    defaultValues: { smallGroupId: community.smallGroupId ?? '', ministryIds: community.ministryIds },
+    defaultValues: { smallGroupIds: community.smallGroupIds, ministryIds: community.ministryIds },
   });
 
   const submit = handleSubmit(async (values) => {
     try {
-      await savePersonCommunity(personId, values.smallGroupId || null, values.ministryIds);
+      await savePersonCommunity(personId, values.smallGroupIds, values.ministryIds);
       await markPipelineStale();
       await invalidateQueries(queryKeys.memberPage(personId));
       close();

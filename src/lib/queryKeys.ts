@@ -3,7 +3,7 @@ export const PIPELINE_ROOTS = ['people', 'person', 'coffee', 'cohorts', 'groups'
 export const queryKeys = {
   visitors: ['people', 'visitors'] as const,
   members: ['people', 'members'] as const,
-  memberNames: (withoutSmallGroup: boolean) => ['people', 'member-names', { withoutSmallGroup }] as const,
+  memberNames: ['people', 'member-names'] as const,
   membershipQueue: ['people', 'membership-queue'] as const,
   councils: ['people', 'councils'] as const,
   councilRoster: (id: string) => ['people', 'councils', id] as const,

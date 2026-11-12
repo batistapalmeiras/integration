@@ -9,13 +9,12 @@ import { useMemberNames } from '../../../queries/reference';
 interface Props {
   title: string;
   currentIds: string[];
-  withoutSmallGroup?: boolean;
   close: () => void;
   onAdd: (personIds: string[]) => Promise<void>;
 }
 
-export function AddMembersModal({ title, currentIds, withoutSmallGroup, close, onAdd }: Props) {
-  const members = useMemberNames(withoutSmallGroup).data ?? [];
+export function AddMembersModal({ title, currentIds, close, onAdd }: Props) {
+  const members = useMemberNames().data ?? [];
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 

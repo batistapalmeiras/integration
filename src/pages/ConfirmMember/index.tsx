@@ -33,7 +33,7 @@ import { Actions } from './styles';
 
 export function ConfirmMemberPage() {
   const { id = '' } = useParams<{ id: string }>();
-  const { person, loading, error, confirmMember } = useVisitorProfile(id);
+  const { person, profile, loading, error, confirmMember } = useVisitorProfile(id);
   const family = useFamily(id);
   const sensitive = usePersonSensitive(id);
   const councils = useCouncils();
@@ -51,6 +51,7 @@ export function ConfirmMemberPage() {
   return (
     <ConfirmMemberForm
       person={person}
+      smallGroupIds={profile.smallGroupIds}
       family={family.data}
       sensitive={sensitive.data}
       councils={councils.data}
@@ -61,13 +62,14 @@ export function ConfirmMemberPage() {
 
 interface FormProps {
   person: Person;
+  smallGroupIds: string[];
   family: Family;
   sensitive: PersonSensitive | null;
   councils: Council[];
   confirmMember: (confirmation: MemberConfirmation) => Promise<void>;
 }
 
-function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember }: FormProps) {
+function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils, confirmMember }: FormProps) {
   const navigate = useNavigate();
   const { show: showToast, toast } = useToast();
   const { open, close, modal } = useModal('drawer');
@@ -75,7 +77,7 @@ function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember 
   const ministries = useMinistries().data ?? [];
   const community = useForm<CommunityFormValues>({
     resolver: zodResolver(communitySchema),
-    values: { smallGroupId: person.small_group_id ?? '', ministryIds: [] },
+    values: { smallGroupIds, ministryIds: [] },
   });
   const familyForm = useForm<FamilyFormValues>({ defaultValues: familyFormValues(family) });
   const councilForm = useForm<{ councilId: string }>({
@@ -88,7 +90,7 @@ function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember 
       if (familyForm.formState.isDirty) await saveFamily(person.id, family, familyForm.getValues());
       await confirmMember({
         councilId: councilForm.getValues('councilId'),
-        smallGroupId: values.smallGroupId || null,
+        smallGroupIds: values.smallGroupIds,
         ministryIds: values.ministryIds,
       });
       navigate(AppRoute.Membership);

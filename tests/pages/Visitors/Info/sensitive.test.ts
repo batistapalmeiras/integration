@@ -18,7 +18,6 @@ const person: Person = {
   entry_type: 'transfer_letter',
   statute_agreed_at: '2026-11-11T12:00:00Z',
   coffee_retry_used: false,
-  small_group_id: 'g1',
   origin: 'visitor',
   membership_status: null,
   visited_on: null,
@@ -66,7 +65,7 @@ const sectionOf = (sections: Sections, title: string) => sections.find((section)
 
 describe('membership sections', () => {
   it('shows the answers the person gave on the membership form', () => {
-    const sections = membershipSections(person, sensitive, profile, 'PG Centro');
+    const sections = membershipSections(person, sensitive, profile, ['PG Centro']);
 
     expect(valueOf(sections, 'Sexo')).toBe('Masculino');
     expect(valueOf(sections, 'CPF')).toBe('123.456.789-09');
@@ -80,13 +79,13 @@ describe('membership sections', () => {
   });
 
   it('groups the answers like the member screen, then the form-only answers', () => {
-    const titles = membershipSections(person, sensitive, profile, null).map((section) => section.title);
+    const titles = membershipSections(person, sensitive, profile, []).map((section) => section.title);
 
     expect(titles).toEqual(['Contato', 'Dados pessoais', 'Vida na igreja', 'Endereço', 'Servir e comunidade']);
   });
 
   it('gives the e-mail the whole row', () => {
-    const email = membershipSections(person, sensitive, profile, null)
+    const email = membershipSections(person, sensitive, profile, [])
       .flatMap((section) => section.entries)
       .find((item) => item.label === 'E-mail');
 
@@ -94,26 +93,26 @@ describe('membership sections', () => {
   });
 
   it('keeps the short contact fields side by side, before the e-mail', () => {
-    const contact = sectionOf(membershipSections(person, sensitive, profile, null), 'Contato');
+    const contact = sectionOf(membershipSections(person, sensitive, profile, []), 'Contato');
 
     expect(contact?.entries.map((item) => item.label)).toEqual(['Celular', 'Outro telefone para contato', 'E-mail']);
   });
 
   it('leaves out the baptism questions for who is joining by baptism', () => {
-    const sections = membershipSections({ ...person, entry_type: 'baptism' }, sensitive, profile, null);
+    const sections = membershipSections({ ...person, entry_type: 'baptism' }, sensitive, profile, []);
 
     expect(valueOf(sections, 'Igreja do batismo')).toBeUndefined();
     expect(valueOf(sections, 'Data de batismo')).toBeUndefined();
   });
 
   it('shows no for who does not want to serve in a ministry', () => {
-    const sections = membershipSections(person, { ...sensitive, ministry_interests: [] }, profile, null);
+    const sections = membershipSections(person, { ...sensitive, ministry_interests: [] }, profile, []);
 
     expect(valueOf(sections, 'Interesse em ministérios')).toBe('Não');
   });
 
   it('marks the profile answers as unanswered while they are loading', () => {
-    const gender = membershipSections(person, sensitive, null, null)
+    const gender = membershipSections(person, sensitive, null, [])
       .flatMap((section) => section.entries)
       .find((item) => item.label === 'Sexo');
 

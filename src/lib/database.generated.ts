@@ -604,7 +604,6 @@ export type Database = {
           name: string
           phone: string | null
           signup_window_from: string | null
-          small_group_id: string | null
           status: string
           statute_agreed_at: string | null
           updated_at: string
@@ -626,7 +625,6 @@ export type Database = {
           name: string
           phone?: string | null
           signup_window_from?: string | null
-          small_group_id?: string | null
           status?: string
           statute_agreed_at?: string | null
           updated_at?: string
@@ -648,7 +646,6 @@ export type Database = {
           name?: string
           phone?: string | null
           signup_window_from?: string | null
-          small_group_id?: string | null
           status?: string
           statute_agreed_at?: string | null
           updated_at?: string
@@ -661,13 +658,6 @@ export type Database = {
             columns: ["council_id"]
             isOneToOne: false
             referencedRelation: "councils"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "people_small_group_id_fkey"
-            columns: ["small_group_id"]
-            isOneToOne: false
-            referencedRelation: "small_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -715,6 +705,39 @@ export type Database = {
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      person_small_groups: {
+        Row: {
+          created_at: string
+          person_id: string
+          small_group_id: string
+        }
+        Insert: {
+          created_at?: string
+          person_id: string
+          small_group_id: string
+        }
+        Update: {
+          created_at?: string
+          person_id?: string
+          small_group_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_small_groups_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_small_groups_small_group_id_fkey"
+            columns: ["small_group_id"]
+            isOneToOne: false
+            referencedRelation: "small_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -893,6 +916,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_group_roles_membership_fkey"
+            columns: ["person_id", "small_group_id"]
+            isOneToOne: false
+            referencedRelation: "person_small_groups"
+            referencedColumns: ["person_id", "small_group_id"]
           },
           {
             foreignKeyName: "small_group_roles_small_group_id_fkey"

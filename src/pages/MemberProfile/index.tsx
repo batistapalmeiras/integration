@@ -55,7 +55,7 @@ export function MemberProfilePage() {
 
   const { record, info, community } = page;
   const councils = info.council ? [info.council] : [];
-  const smallGroup = community.smallGroupName;
+  const smallGroups = community.smallGroupNames;
   const ministries = community.ministryNames;
   const notes = notesQuery.data ?? [];
 
@@ -105,8 +105,12 @@ export function MemberProfilePage() {
           )}
         </StatusRow>
         <InfoPanel>
-          <InfoLine icon={UsersRound} label="Pequeno Grupo" empty={!smallGroup}>
-            {smallGroup ?? 'Não participa de um PG'}
+          <InfoLine
+            icon={UsersRound}
+            label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}
+            empty={smallGroups.length === 0}
+          >
+            {smallGroups.length > 0 ? smallGroups.join(', ') : 'Não participa de um PG'}
           </InfoLine>
           <InfoLine
             icon={HeartHandshake}

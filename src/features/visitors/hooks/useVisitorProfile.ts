@@ -10,7 +10,8 @@ import { usePerson } from './usePerson';
 const EMPTY_PROFILE: PersonProfileSummary = {
   coffeeDate: null,
   cohortName: null,
-  smallGroupName: null,
+  smallGroupIds: [],
+  smallGroupNames: [],
   ministryNames: [],
   ministryIds: [],
 };
@@ -28,8 +29,8 @@ export function useVisitorProfile(id: string) {
     await profileQuery.refetch();
   };
 
-  const updateCommunity = async (smallGroupId: string | null, ministryIds: string[]) => {
-    setPerson(await savePersonCommunity(id, smallGroupId, ministryIds));
+  const updateCommunity = async (smallGroupIds: string[], ministryIds: string[]) => {
+    setPerson(await savePersonCommunity(id, smallGroupIds, ministryIds));
     await profileQuery.refetch();
   };
 

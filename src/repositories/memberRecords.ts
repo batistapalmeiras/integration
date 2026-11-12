@@ -12,9 +12,9 @@ import {
   toPendencyField,
 } from '../domain/memberRecords';
 import { EntryType, toEntryType } from '../types/church';
+import { groupNames } from '../domain/communityGroups';
 import { CouncilDate } from '../domain/councils';
 import { nameFilter, phoneDigits } from '../domain/search';
-import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
 
 interface MemberPendency {
@@ -137,8 +137,8 @@ interface MemberRecordInfo {
 }
 
 export interface MemberCommunity {
-  smallGroupId: string | null;
-  smallGroupName: string | null;
+  smallGroupIds: string[];
+  smallGroupNames: string[];
   ministryIds: string[];
   ministryNames: string[];
 }
@@ -150,15 +150,14 @@ export interface MemberPage {
 }
 
 const MEMBER_PAGE_COLUMNS =
-  'name, phone, email, membership_status, entry_type, council_id, created_at, origin, statute_agreed_at, small_group_id, council:councils(id, meeting_date), member_profiles(*), person_sensitive(birth_date, origin_church), small_group:small_groups!people_small_group_id_fkey(name), person_ministries(ministry_id, ministry:ministries!person_ministries_ministry_id_fkey(name))';
+  'name, phone, email, membership_status, entry_type, council_id, created_at, origin, statute_agreed_at, council:councils(id, meeting_date), member_profiles(*), person_sensitive(birth_date, origin_church), person_small_groups!person_small_groups_person_id_fkey(small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(ministry:ministries!person_ministries_ministry_id_fkey(id, name))';
 
 export async function getMemberPage(personId: string): Promise<MemberPage> {
   const { data: member, error } = await supabase.from('people').select(MEMBER_PAGE_COLUMNS).eq('id', personId).single();
   if (error) throw error;
 
-  const ministries = member.person_ministries
-    .flatMap((item) => (item.ministry ? [{ id: item.ministry_id, name: item.ministry.name }] : []))
-    .sort(byName);
+  const smallGroups = groupNames(member.person_small_groups.flatMap((link) => (link.small_group ? [link.small_group] : [])));
+  const ministries = groupNames(member.person_ministries.flatMap((link) => (link.ministry ? [link.ministry] : [])));
 
   return {
     record: {
@@ -179,10 +178,10 @@ export async function getMemberPage(personId: string): Promise<MemberPage> {
       council: member.council ? { id: member.council.id, meetingDate: member.council.meeting_date } : null,
     },
     community: {
-      smallGroupId: member.small_group_id,
-      smallGroupName: member.small_group?.name ?? null,
-      ministryIds: ministries.map((ministry) => ministry.id),
-      ministryNames: ministries.map((ministry) => ministry.name),
+      smallGroupIds: smallGroups.ids,
+      smallGroupNames: smallGroups.names,
+      ministryIds: ministries.ids,
+      ministryNames: ministries.names,
     },
   };
 }

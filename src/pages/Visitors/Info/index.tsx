@@ -75,7 +75,7 @@ export function VisitorInfoPage() {
     formState: { isSubmitting, isDirty },
   } = useForm<CommunityFormValues>({
     resolver: zodResolver(communitySchema),
-    values: { smallGroupId: person?.small_group_id ?? '', ministryIds: profile.ministryIds },
+    values: { smallGroupIds: profile.smallGroupIds, ministryIds: profile.ministryIds },
   });
 
   if (loading) return <Skeleton $h="240px" />;
@@ -94,7 +94,7 @@ export function VisitorInfoPage() {
 
   const rows = generalDetailRows(person, profile, !canEditCommunity);
 
-  const submit = handleSubmit((values) => updateCommunity(values.smallGroupId || null, values.ministryIds));
+  const submit = handleSubmit((values) => updateCommunity(values.smallGroupIds, values.ministryIds));
 
   const showConfirmMember =
     fromMembershipQueue && user?.role === UserRole.Pastor && person.status === 'membership_pending';
@@ -153,7 +153,7 @@ export function VisitorInfoPage() {
 
       {current === 'membership' && (
         <Sections>
-          {membershipSections(person, sensitive, memberProfile, profile.smallGroupName).map((section) => (
+          {membershipSections(person, sensitive, memberProfile, profile.smallGroupNames).map((section) => (
             <Section key={section.title} aria-label={section.title}>
               <PanelTitle>{section.title}</PanelTitle>
               <EntryList entries={section.entries} />

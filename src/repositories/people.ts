@@ -8,6 +8,7 @@ import {
   toPersonStatus,
   VISITOR_QUEUE_STATUSES,
 } from '../types/person';
+import { groupNames } from '../domain/communityGroups';
 import { nameOrPhoneFilter } from '../domain/search';
 import { supabase } from '../lib/supabase';
 
@@ -127,7 +128,8 @@ export async function updateContactAttemptResult(attemptId: string, result: stri
 export interface PersonProfileSummary {
   coffeeDate: string | null;
   cohortName: string | null;
-  smallGroupName: string | null;
+  smallGroupIds: string[];
+  smallGroupNames: string[];
   ministryNames: string[];
   ministryIds: string[];
 }
@@ -136,7 +138,7 @@ export async function fetchPersonProfileSummary(personId: string): Promise<Perso
   const { data, error } = await supabase
     .from('people')
     .select(
-      'small_group:small_groups!people_small_group_id_fkey(name), person_ministries(ministry_id, ministry:ministries!person_ministries_ministry_id_fkey(name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))',
+      'person_small_groups!person_small_groups_person_id_fkey(small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(ministry:ministries!person_ministries_ministry_id_fkey(id, name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))',
     )
     .eq('id', personId)
     .single();
@@ -149,15 +151,16 @@ export async function fetchPersonProfileSummary(personId: string): Promise<Perso
     .map((a) => a.coffee_event!.event_date)
     .sort();
 
+  const smallGroups = groupNames(row.person_small_groups.flatMap((link) => (link.small_group ? [link.small_group] : [])));
+  const ministries = groupNames(row.person_ministries.flatMap((link) => (link.ministry ? [link.ministry] : [])));
+
   return {
     coffeeDate: attendedDates.at(-1) ?? null,
     cohortName: latestEnrollment?.cohort?.name ?? null,
-    smallGroupName: row.small_group?.name ?? null,
-    ministryNames: row.person_ministries
-      .map((m) => m.ministry?.name)
-      .filter((name): name is string => !!name)
-      .sort((a, b) => a.localeCompare(b, 'pt-BR')),
-    ministryIds: row.person_ministries.map((m) => m.ministry_id),
+    smallGroupIds: smallGroups.ids,
+    smallGroupNames: smallGroups.names,
+    ministryNames: ministries.names,
+    ministryIds: ministries.ids,
   };
 }
 

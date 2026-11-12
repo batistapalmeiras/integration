@@ -8,6 +8,24 @@ const JWT_CLOCK_RETRY_DELAY_MS = 1500;
 const AUTH_PATH = '/auth/v1/';
 const SESSION_ERROR_MESSAGE = 'Não foi possível validar sua sessão agora. Tente novamente em alguns segundos.';
 
+const UNIQUE_VIOLATION = '23505';
+const DUPLICATE_MESSAGES: Record<string, string> = {
+  people_phone_key: 'Esse telefone já está no cadastro de outra pessoa.',
+  member_profiles_cpf_key: 'Esse CPF já está no cadastro de outra pessoa.',
+};
+
+export function duplicateMessage(body: string): string | null {
+  try {
+    const error: unknown = JSON.parse(body);
+    if (typeof error !== 'object' || error === null || !('code' in error) || error.code !== UNIQUE_VIOLATION) return null;
+    const text = 'message' in error && typeof error.message === 'string' ? error.message : '';
+    const constraint = Object.keys(DUPLICATE_MESSAGES).find((name) => text.includes(name));
+    return constraint ? DUPLICATE_MESSAGES[constraint] : null;
+  } catch {
+    return null;
+  }
+}
+
 export function isJwtClockError(body: string): boolean {
   return /jwt/i.test(body) && /(issued at future|not yet valid|used before issued)/i.test(body);
 }
@@ -81,7 +99,14 @@ function isDataWrite(input: FetchInput, init?: RequestInit): boolean {
 const fetchAndTrackWrites: typeof fetch = async (input, init) => {
   const response = await fetchWithJwtRetry(input, init);
   if (response.ok && isDataWrite(input, init)) markPipelineStale();
-  return response;
+  if (response.ok) return response;
+  const body = await response.clone().text();
+  const message = duplicateMessage(body);
+  if (!message) return response;
+  return new Response(JSON.stringify({ ...JSON.parse(body), message }), {
+    status: response.status,
+    headers: { 'Content-Type': 'application/json' },
+  });
 };
 
 export const supabase = createClient<Database>(

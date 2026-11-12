@@ -15,7 +15,6 @@ const person: Person = {
   entry_type: null,
   statute_agreed_at: null,
   coffee_retry_used: false,
-  small_group_id: null,
   origin: 'visitor',
   membership_status: null,
   visited_on: null,
@@ -23,7 +22,7 @@ const person: Person = {
   updated_at: '2026-10-04T00:00:00Z',
 };
 
-const emptyProfile = { coffeeDate: null, cohortName: null, smallGroupName: null, ministryNames: [] };
+const emptyProfile = { coffeeDate: null, cohortName: null, smallGroupNames: [], ministryNames: [] };
 
 describe('person details', () => {
   it('has details when the visit date is known', () => {
@@ -39,7 +38,7 @@ describe('person details', () => {
   });
 
   it('leaves the community rows out when they are edited on the page', () => {
-    const profile = { ...emptyProfile, smallGroupName: 'PG Centro', ministryNames: ['Louvor'] };
+    const profile = { ...emptyProfile, smallGroupNames: ['PG Centro'], ministryNames: ['Louvor'] };
 
     expect(generalDetailRows(person, profile, true).map((row) => row.label)).toEqual(['Pequeno Grupo', 'Ministérios']);
     expect(generalDetailRows(person, profile, false)).toEqual([]);

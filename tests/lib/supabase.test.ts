@@ -1,5 +1,5 @@
 // Local
-import { isJwtClockError, isJwtExpiredError, supabase } from '../../src/lib/supabase';
+import { duplicateMessage, isJwtClockError, isJwtExpiredError, supabase } from '../../src/lib/supabase';
 
 vi.stubGlobal('import.meta', { env: {} });
 
@@ -73,5 +73,24 @@ describe('expired session on resume', () => {
 
     expect(refresh).not.toHaveBeenCalled();
     expect(new Headers(fetchMock.mock.calls[1][1].headers).get('Authorization')).toBe('Bearer renewed-elsewhere');
+  });
+});
+
+describe('duplicateMessage', () => {
+  it('explains a repeated phone or CPF in plain words', () => {
+    expect(
+      duplicateMessage('{"code":"23505","message":"duplicate key value violates unique constraint \\"people_phone_key\\""}'),
+    ).toBe('Esse telefone já está no cadastro de outra pessoa.');
+    expect(
+      duplicateMessage(
+        '{"code":"23505","message":"duplicate key value violates unique constraint \\"member_profiles_cpf_key\\""}',
+      ),
+    ).toBe('Esse CPF já está no cadastro de outra pessoa.');
+  });
+
+  it('leaves other errors alone', () => {
+    expect(duplicateMessage('{"code":"23505","message":"duplicate key value violates unique constraint \\"councils_meeting_date_key\\""}')).toBeNull();
+    expect(duplicateMessage('{"code":"42501","message":"permission denied"}')).toBeNull();
+    expect(duplicateMessage('not json')).toBeNull();
   });
 });

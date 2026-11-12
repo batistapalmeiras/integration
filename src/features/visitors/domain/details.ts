@@ -10,7 +10,7 @@ export interface DetailRow {
 interface ProfileDetails {
   coffeeDate: string | null;
   cohortName: string | null;
-  smallGroupName: string | null;
+  smallGroupNames: string[];
   ministryNames: string[];
 }
 
@@ -19,7 +19,11 @@ export function generalDetailRows(person: Person, profile: ProfileDetails, withC
     person.visited_on && { label: 'Visitou em', value: formatDate(person.visited_on) },
     profile.cohortName && { label: 'Turma', value: profile.cohortName },
     profile.coffeeDate && { label: 'Café', value: formatDate(profile.coffeeDate) },
-    withCommunity && profile.smallGroupName && { label: 'Pequeno Grupo', value: profile.smallGroupName },
+    withCommunity &&
+      profile.smallGroupNames.length > 0 && {
+        label: profile.smallGroupNames.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos',
+        value: profile.smallGroupNames.join(', '),
+      },
     withCommunity &&
       profile.ministryNames.length > 0 && { label: 'Ministérios', value: profile.ministryNames.join(', ') },
   ].filter((row): row is DetailRow => !!row);

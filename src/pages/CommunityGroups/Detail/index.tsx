@@ -114,7 +114,6 @@ export function CommunityGroupDetailPage() {
       <AddMembersModal
         title={`Adicionar membros a ${group.name}`}
         currentIds={people.map((person) => person.id)}
-        withoutSmallGroup={isPg}
         close={close}
         onAdd={async (personIds) => {
           try {
@@ -142,7 +141,7 @@ export function CommunityGroupDetailPage() {
             variant="danger"
             onClick={async () => {
               try {
-                if (isPg) await removePersonFromSmallGroup(person.id);
+                if (isPg) await removePersonFromSmallGroup(group.id, person.id);
                 else await removePersonFromMinistry(group.id, person.id);
                 close();
                 await load();

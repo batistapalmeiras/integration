@@ -20,28 +20,32 @@ vi.mock('../../../src/queries/reference', () => ({
 vi.mock('../../../src/queries/person', () => ({ usePersonSensitive: () => ({ data: null }) }));
 
 describe('member community modal', () => {
-  it('moves the member to another small group and keeps the ministries', async () => {
+  it('adds the member to a second small group and keeps the ministries', async () => {
     const close = vi.fn();
     renderScreen(
-      <CommunityModal personId="p1" community={{ smallGroupId: 'pg-1', ministryIds: ['min-1'] }} close={close} />,
+      <CommunityModal personId="p1" community={{ smallGroupIds: ['pg-1'], ministryIds: ['min-1'] }} close={close} />,
       { role: UserRole.Pastor },
     );
 
-    await userEvent.selectOptions(screen.getByRole('combobox'), 'pg-2');
+    await userEvent.click(screen.getByRole('button', { name: 'Pequenos Grupos' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Marcos' }));
+    expect(screen.getByRole('button', { name: 'Remover Marcos' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Pequenos Grupos' }));
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 
-    expect(savePersonCommunity).toHaveBeenCalledWith('p1', 'pg-2', ['min-1']);
+    expect(savePersonCommunity).toHaveBeenCalledWith('p1', ['pg-1', 'pg-2'], ['min-1']);
     expect(close).toHaveBeenCalled();
   });
 
-  it('leaves the small group when Nenhum is chosen', async () => {
-    renderScreen(<CommunityModal personId="p1" community={{ smallGroupId: 'pg-1', ministryIds: [] }} close={vi.fn()} />, {
-      role: UserRole.Pastor,
-    });
+  it('takes the member out of a small group', async () => {
+    renderScreen(
+      <CommunityModal personId="p1" community={{ smallGroupIds: ['pg-1'], ministryIds: [] }} close={vi.fn()} />,
+      { role: UserRole.Pastor },
+    );
 
-    await userEvent.selectOptions(screen.getByRole('combobox'), '');
+    await userEvent.click(screen.getByRole('button', { name: 'Remover Phil e Pedro' }));
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 
-    expect(savePersonCommunity).toHaveBeenCalledWith('p1', null, []);
+    expect(savePersonCommunity).toHaveBeenCalledWith('p1', [], []);
   });
 });

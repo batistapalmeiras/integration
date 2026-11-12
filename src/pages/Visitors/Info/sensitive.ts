@@ -63,10 +63,12 @@ export interface InfoSection {
 const NOT_ASKED_ON_FORM: (keyof MemberRecord)[] = ['addressReference', 'councilId'];
 const BAPTISM_FIELDS: (keyof MemberRecord)[] = ['baptismChurch', 'baptismDate'];
 
-function smallGroupAnswer(data: PersonSensitive | null, smallGroupName: string | null): string | null {
+function smallGroupAnswer(data: PersonSensitive | null, smallGroupNames: string[]): string | null {
   const answer = membershipCommunityEntries(data)[0];
   if (!answer.answered) return null;
-  return data?.wants_small_group === 'already' && smallGroupName ? `${answer.value} — ${smallGroupName}` : answer.value;
+  return data?.wants_small_group === 'already' && smallGroupNames.length > 0
+    ? `${answer.value} — ${smallGroupNames.join(', ')}`
+    : answer.value;
 }
 
 function recordSectionEntries(section: RecordSection, record: Partial<MemberRecord>, profile: MemberProfile | null) {
@@ -85,7 +87,7 @@ export function membershipSections(
   person: Person,
   data: PersonSensitive | null,
   profile: MemberProfile | null,
-  smallGroupName: string | null,
+  smallGroupNames: string[],
 ): InfoSection[] {
   const [, ministryInterests] = membershipCommunityEntries(data);
   const record: Partial<MemberRecord> = {
@@ -113,7 +115,7 @@ export function membershipSections(
           person.statute_agreed_at ? formatDate(person.statute_agreed_at.slice(0, 10)) : null,
         ),
         entry(MEMBERSHIP_ANSWER_LABELS.secretSociety, data?.secret_society),
-        wideEntry(MEMBERSHIP_ANSWER_LABELS.wantsSmallGroup, smallGroupAnswer(data, smallGroupName)),
+        wideEntry(MEMBERSHIP_ANSWER_LABELS.wantsSmallGroup, smallGroupAnswer(data, smallGroupNames)),
         { ...ministryInterests, wide: true },
         wideEntry(MEMBERSHIP_ANSWER_LABELS.membershipNote, data?.membership_note),
       ],

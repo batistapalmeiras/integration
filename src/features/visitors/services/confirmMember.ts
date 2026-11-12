@@ -1,24 +1,21 @@
 // Local
-import { setPersonMinistries } from '../../../repositories/communityGroups';
+import { savePersonCommunity } from '../../../repositories/communityGroups';
 import { Person } from '../domain/types';
 import { insertStatusHistory, updatePersonStatus } from '../../../repositories/people';
 
 export interface MemberConfirmation {
   councilId: string;
-  smallGroupId: string | null;
+  smallGroupIds: string[];
   ministryIds: string[];
 }
 
 export async function confirmMember(
   person: Person,
-  { councilId, smallGroupId, ministryIds }: MemberConfirmation,
+  { councilId, smallGroupIds, ministryIds }: MemberConfirmation,
   actorId?: string,
 ): Promise<Person> {
-  const updated = await updatePersonStatus(person.id, 'member', {
-    small_group_id: smallGroupId,
-    council_id: councilId,
-  });
-  await setPersonMinistries(person.id, ministryIds);
+  await updatePersonStatus(person.id, 'member', { council_id: councilId });
+  const updated = await savePersonCommunity(person.id, smallGroupIds, ministryIds);
   await insertStatusHistory({
     personId: person.id,
     fromStatus: 'membership_pending',

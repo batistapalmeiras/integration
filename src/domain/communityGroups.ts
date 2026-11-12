@@ -1,3 +1,6 @@
+// Local
+import { byName } from './text';
+
 export type WeekDay = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 
 export const WEEK_DAY_LABELS: Record<WeekDay, string> = {
@@ -34,4 +37,14 @@ export interface CommunityGroupWithCount extends Pick<CommunityGroup, 'id' | 'na
 export interface CommunityOverview {
   smallGroups: number;
   ministries: number;
+}
+
+export interface GroupNames {
+  ids: string[];
+  names: string[];
+}
+
+export function groupNames(groups: GroupOption[]): GroupNames {
+  const sorted = [...groups].sort(byName);
+  return { ids: sorted.map((group) => group.id), names: sorted.map((group) => group.name) };
 }
