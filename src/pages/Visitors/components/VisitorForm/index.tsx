@@ -37,7 +37,7 @@ export function VisitorForm({ control, onSubmit, disabled, children }: Props) {
       />
       <InlineFields>
         <TextInput
-          label="Idade"
+          label="Idade (opcional)"
           control={control}
           name="age"
           type="text"
@@ -46,7 +46,7 @@ export function VisitorForm({ control, onSubmit, disabled, children }: Props) {
           disabled={disabled}
         />
         <TextInput
-          label={text.fields.email}
+          label={`${text.fields.email} (opcional)`}
           control={control}
           name="email"
           type="email"

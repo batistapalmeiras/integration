@@ -36,6 +36,7 @@ import {
   StoreRoutes,
   VisitorDetailPage,
   VisitorInfoPage,
+  ArchivedVisitorsPage,
   VisitorsPage,
   VolunteerDetailPage,
   VolunteersPage,
@@ -72,6 +73,7 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: INTEGRATION_TEAM_ROLES },
 
   { path: `${AppRoute.Visitors}/*`, ...VISITORS_LIST },
+  { path: AppRoute.ArchivedVisitors, element: <ArchivedVisitorsPage />, roles: INTEGRATION_TEAM_ROLES },
   { path: AppRoute.NewVisitor, element: <NewVisitorPage />, roles: INTEGRATION_TEAM_ROLES },
   { path: `${AppRoute.Visitors}/:id`, element: <VisitorDetailPage />, roles: STAFF_ROLES, list: VISITORS_LIST },
   { path: `${AppRoute.Visitors}/:id/detalhes`, element: <VisitorInfoPage />, roles: STAFF_ROLES },

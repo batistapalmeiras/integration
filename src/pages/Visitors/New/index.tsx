@@ -75,7 +75,7 @@ export function NewVisitorPage() {
   return (
     <div>
       <PageHeader title="Novo visitante" back />
-      <Intro type="p">Só nome e WhatsApp são obrigatórios. O resto a pessoa completa na inscrição.</Intro>
+      <Intro type="p">Informe os dados de contato de quem visitou a igreja.</Intro>
 
       <VisitorForm control={control} onSubmit={submit}>
         <VisitorFormActions>

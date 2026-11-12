@@ -64,6 +64,7 @@ export const StatusLine = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
 `;
 
 export const PersonCardRow = styled.div`

@@ -7,6 +7,7 @@ export enum AppRoute {
   IntegrationMore = '/integracao/mais',
   Visitors = '/visitantes',
   NewVisitor = '/visitantes/novo',
+  ArchivedVisitors = '/visitantes/arquivado',
   People = '/pessoas',
   Coffee = '/cafe-de-boas-vindas',
   Classes = '/turma',

@@ -1,18 +1,17 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Chip, Empty, Pagination, SearchInput, Skeleton, Tab, TabBar, text } from 'bp-kit';
+import { ChevronRight } from 'lucide-react';
+import { Button, Chip, Empty, SearchInput, Skeleton, Tab, TabBar, text } from 'bp-kit';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
-import { List, ListChevron, ListGrow, ListHeader, ListItem, ListSlot, ListStatusCell } from '../../components/List';
 import { PeopleCount } from '../../components/PeopleCount';
-import { StatusPill } from '../../components/StatusPill';
 import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META, VISITOR_QUEUE_STATUSES } from '../../types/person';
-import { PaginationWrap } from '../../components/ListLayout';
 import { useVisitors } from './hooks/useVisitors';
-import { QueueChips, RowButton, RowText, SearchRow } from './styles';
+import { VisitorList } from './components/VisitorList';
+import { ArchivedLink, QueueChips, SearchRow } from './styles';
 
 export function VisitorsPage() {
   const navigate = useNavigate();
@@ -26,9 +25,6 @@ export function VisitorsPage() {
     setPage,
     search,
     setSearch,
-    view,
-    setView,
-    queueCount,
     archivedCount,
     statusFilter,
     setStatusFilter,
@@ -56,18 +52,16 @@ export function VisitorsPage() {
       {!loading && !error && (
         <>
           <TabBar>
-            <Tab $active={view === 'queue'} onClick={() => setView('queue')}>
-              Na fila ({queueCount})
-            </Tab>
-            <Tab $active={view === 'archived'} onClick={() => setView('archived')}>
+            <Tab $active>Na fila ({totalCount})</Tab>
+            <ArchivedLink type="button" onClick={() => navigate(AppRoute.ArchivedVisitors)}>
               Arquivados ({archivedCount})
-            </Tab>
+              <ChevronRight size={16} aria-hidden="true" />
+            </ArchivedLink>
           </TabBar>
           <SearchRow>
             <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
           </SearchRow>
-          {view === 'queue' && (
-            <QueueChips role="group" aria-label="Filtrar por status">
+          <QueueChips role="group" aria-label="Filtrar por status">
               {VISITOR_QUEUE_STATUSES.map((status) => (
                 <Chip
                   key={status}
@@ -80,50 +74,22 @@ export function VisitorsPage() {
                 </Chip>
               ))}
             </QueueChips>
-          )}
         </>
       )}
 
       {!loading && !error && rows.length === 0 && (
         <Empty
-          title={view === 'queue' ? 'Ninguém na fila' : 'Nenhum visitante arquivado'}
+          title="Ninguém na fila"
           description={
             hasFilter
               ? 'Nenhum visitante encontrado para os filtros aplicados.'
-              : view === 'queue'
-                ? 'Os visitantes que precisam de contato aparecem aqui.'
-                : ''
+              : 'Os visitantes que precisam de contato aparecem aqui.'
           }
         />
       )}
 
       {!loading && !error && rows.length > 0 && (
-        <>
-          <List>
-            <ListHeader aria-hidden="true">
-              <ListGrow>{text.fields.name}</ListGrow>
-              <ListStatusCell>{text.fields.status}</ListStatusCell>
-              <ListSlot $width={16} />
-            </ListHeader>
-            {rows.map((person) => (
-              <ListItem key={person.id}>
-                <RowButton type="button" onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
-                  <RowText>{person.name}</RowText>
-                  <ListStatusCell>
-                    <StatusPill person={person} compact />
-                  </ListStatusCell>
-                  <ListChevron />
-                </RowButton>
-              </ListItem>
-            ))}
-          </List>
-
-          {totalPages > 1 && (
-            <PaginationWrap>
-              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
-            </PaginationWrap>
-          )}
-        </>
+        <VisitorList rows={rows} page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

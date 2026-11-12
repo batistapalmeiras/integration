@@ -39,3 +39,18 @@ export const RowText = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+export const ArchivedLink = styled.button`
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xxs};
+  padding: ${({ theme }) => theme.spacing.sm} 0;
+  border: 0;
+  background: transparent;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.muted};
+  cursor: pointer;
+`;

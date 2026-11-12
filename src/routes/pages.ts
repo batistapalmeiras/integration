@@ -31,6 +31,7 @@ export const ModuleMorePage = lazyPage(() => import('../pages/ModuleMore'), 'Mod
 export const ProfilePage = lazyPage(() => import('../pages/Profile'), 'ProfilePage');
 
 export const VisitorsPage = lazyPage(() => import('../pages/Visitors'), 'VisitorsPage');
+export const ArchivedVisitorsPage = lazyPage(() => import('../pages/Visitors/Archived'), 'ArchivedVisitorsPage');
 export const NewVisitorPage = lazyPage(() => import('../pages/Visitors/New'), 'NewVisitorPage');
 export const VisitorDetailPage = lazyPage(() => import('../pages/Visitors/Detail'), 'VisitorDetailPage');
 export const VisitorInfoPage = lazyPage(() => import('../pages/Visitors/Info'), 'VisitorInfoPage');

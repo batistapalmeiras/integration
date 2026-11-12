@@ -59,21 +59,18 @@ function VisitorDetailContent({ detail, person }: ContentProps) {
 
   return (
     <WideContent>
-      <div>
-        <PageHeader
-          title={person.name}
-          back
-          actionAlign="end"
-          action={
-            <OptionsMenuButton label="Mais ações" onClick={menu.openMenu} />
-          }
-        />
-        <StatusLine>
-          <StatusPill person={person} />
-        </StatusLine>
-      </div>
-
       <Hero>
+        <div>
+          <PageHeader
+            title={person.name}
+            back
+            actionAlign="end"
+            action={<OptionsMenuButton label="Mais ações" onClick={menu.openMenu} />}
+          />
+          <StatusLine>
+            <StatusPill person={person} />
+          </StatusLine>
+        </div>
         <ProgressStepper status={person.status} />
         <VisitFacts person={person} profile={detail.profile} />
       </Hero>
