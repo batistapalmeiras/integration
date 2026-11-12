@@ -44,8 +44,8 @@ vi.mock('../../../src/repositories/people', async (importOriginal) => ({
       updated_at: '2026-09-06T00:00:00Z',
     },
     profile: {
-      coffeeDate: null,
-      cohortName: null,
+      coffee: null,
+      cohort: null,
       smallGroupIds: [],
       smallGroupNames: [],
       ministryNames: [],

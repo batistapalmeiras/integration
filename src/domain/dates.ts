@@ -10,8 +10,19 @@ export function formatTimestampDate(timestamp: string): string {
   return new Date(timestamp).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 }
 
+export function formatTimestamp(timestamp: string): string {
+  const moment = new Date(timestamp);
+  const date = moment.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  const time = moment.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
+  return `${date} ${time}`;
+}
+
+export function timestampDateKey(timestamp: string): string {
+  return new Date(timestamp).toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+}
+
 export function todayKey(): string {
-  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+  return timestampDateKey(new Date().toISOString());
 }
 
 export function weekdayLabel(dateKey: string): string {

@@ -4,6 +4,8 @@ export { useVisitorProfile } from './hooks/useVisitorProfile';
 export { enrollInIntegrationClass } from './services/enrollInIntegrationClass';
 export { DETAIL_TAB_LABELS, detailTabs } from './domain/details';
 export type { DetailTab } from './domain/details';
+export { previewTimeline, SYSTEM_ACTOR, visitTimeline } from './domain/timeline';
+export type { TimelineEntry } from './domain/timeline';
 export { RESULT_LABELS } from './domain/types';
 export type { ContactResult, Person, PersonStatus } from './domain/types';
 export { reactivatePerson } from './services/reactivatePerson';

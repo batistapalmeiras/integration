@@ -1,24 +1,45 @@
 // React
 import { ReactNode } from 'react';
 // Libs
-import { Card } from 'bp-kit';
+import { LucideIcon } from 'lucide-react';
 // Components
 import { PanelTitle } from '../../../../components/Panel';
 // Local
-import { StageStack } from '../styles';
+import { Eyebrow, Hint, StageIconTile, StageStack, StageSummary, StageSummaryTitle, StageSurface } from '../styles';
+
+interface Summary {
+  icon: LucideIcon;
+  title: string;
+  text: string;
+}
 
 interface Props {
   title: string;
-  children: ReactNode;
+  summary: Summary;
+  children?: ReactNode;
 }
 
-export function StageCard({ title, children }: Props) {
+export function StageCard({ title, summary, children }: Props) {
+  const Icon = summary.icon;
+
   return (
-    <Card>
+    <StageSurface>
       <StageStack>
-        <PanelTitle>{title}</PanelTitle>
+        <div>
+          <Eyebrow>Próximo passo</Eyebrow>
+          <PanelTitle>{title}</PanelTitle>
+        </div>
+        <StageSummary>
+          <StageIconTile>
+            <Icon size={24} aria-hidden="true" />
+          </StageIconTile>
+          <div>
+            <StageSummaryTitle>{summary.title}</StageSummaryTitle>
+            <Hint>{summary.text}</Hint>
+          </div>
+        </StageSummary>
         {children}
       </StageStack>
-    </Card>
+    </StageSurface>
   );
 }

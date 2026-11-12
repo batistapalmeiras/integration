@@ -1,13 +1,13 @@
 // Libs
 import { Button, InfoBox, Skeleton, Typography } from 'bp-kit';
-import { Check, Clock, X } from 'lucide-react';
+import { Check, Clock, Coffee, GraduationCap, Info, X } from 'lucide-react';
 // Local
 import { FormActions } from '../../../../components/FormLayout';
 import { PersonCoffeeAttendance, canMarkCoffeeAttendance } from '../../../../domain/cafeSchedule';
 import { formatDate, todayKey } from '../../../../domain/dates';
 import { classInviteMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
-import { Hint, StepBody } from '../styles';
+import { Hint, StageNote, StepBody } from '../styles';
 import { StageCard } from './StageCard';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
@@ -36,27 +36,45 @@ export function CoffeeStagePanel({
 }: Props) {
   if (loading) return <Skeleton $h="80px" />;
 
+  const inviteSummary = {
+    icon: GraduationCap,
+    title: attendance ? `Compareceu ao café de ${formatDate(attendance.eventDate)}` : 'Compareceu ao café',
+    text: 'Convide a pessoa para a próxima turma de Integração.',
+  };
+
   if (!attendance) {
     return (
-      <StageCard title="Café">
-        <Hint>Ainda sem vaga em um café. Assim que houver um café agendado, a pessoa entra na lista automaticamente.</Hint>
-      </StageCard>
+      <StageCard
+        title="Café de boas-vindas"
+        summary={{
+          icon: Coffee,
+          title: 'Sem café agendado',
+          text: 'Assim que houver um café, a pessoa entra na lista automaticamente.',
+        }}
+      />
     );
   }
 
   if (!attendance.attended && !canMarkCoffeeAttendance(attendance.eventDate, todayKey())) {
     return (
-      <StageCard title="Aguardando o café">
-        <Hint>
-          Inscrita no café de {formatDate(attendance.eventDate)}. A presença só pode ser marcada a partir do dia do café.
-        </Hint>
+      <StageCard
+        title="Café de boas-vindas"
+        summary={{ icon: Coffee, title: formatDate(attendance.eventDate), text: 'Aguardando participação' }}
+      >
+        <StageNote>
+          <Info size={16} aria-hidden="true" />
+          <Hint>A presença só pode ser marcada a partir do dia do café.</Hint>
+        </StageNote>
       </StageCard>
     );
   }
 
   if (!attendance.attended) {
     return (
-      <StageCard title="Registrar presença">
+      <StageCard
+        title="Registrar presença"
+        summary={{ icon: Coffee, title: formatDate(attendance.eventDate), text: 'Marque se a pessoa compareceu ao café.' }}
+      >
         <FormActions>
           <Button variant="secondary" onClick={onMarkNotAttended}>
             <X size={16} />
@@ -73,7 +91,7 @@ export function CoffeeStagePanel({
 
   if (hasCohort === false) {
     return (
-      <StageCard title="Convidar para a turma">
+      <StageCard title="Convidar para a turma" summary={inviteSummary}>
         <InfoBox variant="warning">
           A próxima turma de Integração ainda não foi aberta. Peça ao pastor ou ao administrador para abrir antes de convidar.
         </InfoBox>
@@ -82,7 +100,7 @@ export function CoffeeStagePanel({
   }
 
   return (
-    <StageCard title="Convidar para a turma">
+    <StageCard title="Convidar para a turma" summary={inviteSummary}>
       <WhatsAppMessageBox
         person={person}
         defaultMessage={classInviteMessage(person.name)}

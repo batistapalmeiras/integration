@@ -12,10 +12,11 @@ interface Props {
 
 export function ContactPanel({ person, onEdit }: Props) {
   const fields = [
-    { label: 'Celular', value: person.phone ? maskPhone(person.phone) : '' },
-    { label: 'E-mail', value: person.email ?? '' },
-    { label: 'Idade', value: person.age ? `${person.age} anos` : '' },
-  ];
+    { label: 'Celular', value: person.phone ? maskPhone(person.phone) : '', wide: false },
+    { label: 'Idade', value: person.age ? `${person.age} anos` : '', wide: false },
+    { label: 'E-mail', value: person.email ?? '', wide: true },
+  ].filter((field) => field.value);
+
   return (
     <Panel aria-label="Contato">
       <PanelHeader>
@@ -26,9 +27,9 @@ export function ContactPanel({ person, onEdit }: Props) {
       </PanelHeader>
       <Fields>
         {fields.map((field) => (
-          <Field key={field.label} $wide>
+          <Field key={field.label} $wide={field.wide}>
             <FieldLabel>{field.label}</FieldLabel>
-            <FieldValue $empty={!field.value}>{field.value || '—'}</FieldValue>
+            <FieldValue $empty={false}>{field.value}</FieldValue>
           </Field>
         ))}
       </Fields>

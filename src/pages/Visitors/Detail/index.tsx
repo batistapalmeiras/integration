@@ -18,7 +18,7 @@ import { ContactPanel } from './components/ContactPanel';
 import { NextStep } from './components/NextStep';
 import { PersonDetailsCard } from './components/PersonDetailsCard';
 import { ProgressStepper } from './components/ProgressStepper';
-import { VisitFacts } from './components/VisitFacts';
+import { VisitHistory } from './components/VisitHistory';
 import { useVisitorMenu } from './components/useVisitorMenu';
 import { ActionArea, Hero, Layout, NotesArea, SideArea, StatusLine } from './styles';
 
@@ -72,12 +72,12 @@ function VisitorDetailContent({ detail, person }: ContentProps) {
           </StatusLine>
         </div>
         <ProgressStepper status={person.status} />
-        <VisitFacts person={person} profile={detail.profile} />
       </Hero>
 
       <Layout>
         <ActionArea>
           <NextStep detail={detail} onContactRegistered={() => navigate(AppRoute.Visitors)} />
+          <VisitHistory person={person} profile={detail.profile} />
         </ActionArea>
         <SideArea>
           <ContactPanel person={person} onEdit={menu.openEdit} />

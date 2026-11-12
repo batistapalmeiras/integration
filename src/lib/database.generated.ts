@@ -1191,6 +1191,16 @@ export type Database = {
           name: string
         }[]
       }
+      list_person_history: {
+        Args: { p_person_id: string }
+        Returns: {
+          author_name: string | null
+          created_at: string
+          from_status: string | null
+          note: string | null
+          to_status: string
+        }[]
+      }
       list_person_notes: {
         Args: { p_person_id: string }
         Returns: {

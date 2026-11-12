@@ -9,6 +9,7 @@ import {
   VISITOR_QUEUE_STATUSES,
 } from '../types/person';
 import { groupNames } from '../domain/communityGroups';
+import { timestampDateKey } from '../domain/dates';
 import { nameOrPhoneFilter } from '../domain/search';
 import { supabase } from '../lib/supabase';
 
@@ -90,6 +91,26 @@ export async function updatePersonStatus(
   return updatePersonFields(id, { status: toStatus, updated_at: new Date().toISOString(), ...extra });
 }
 
+export interface StatusChange {
+  fromStatus: string | null;
+  toStatus: string;
+  note: string | null;
+  changedAt: string;
+  authorName: string | null;
+}
+
+export async function listStatusHistory(personId: string): Promise<StatusChange[]> {
+  const { data, error } = await supabase.rpc('list_person_history', { p_person_id: personId });
+  if (error) throw error;
+  return (data ?? []).map((row) => ({
+    fromStatus: row.from_status,
+    toStatus: row.to_status,
+    note: row.note,
+    changedAt: row.created_at,
+    authorName: row.author_name,
+  }));
+}
+
 export async function insertStatusHistory(entry: {
   personId: string;
   fromStatus: PersonStatus;
@@ -120,8 +141,8 @@ export async function updateContactAttemptResult(attemptId: string, result: stri
 }
 
 export interface PersonProfileSummary {
-  coffeeDate: string | null;
-  cohortName: string | null;
+  coffee: { date: string; attended: boolean } | null;
+  cohort: { name: string; enrolledOn: string } | null;
   smallGroupIds: string[];
   smallGroupNames: string[];
   ministryNames: string[];
@@ -134,8 +155,8 @@ export interface PersonWithProfile {
 }
 
 export const EMPTY_PROFILE: PersonProfileSummary = {
-  coffeeDate: null,
-  cohortName: null,
+  coffee: null,
+  cohort: null,
   smallGroupIds: [],
   smallGroupNames: [],
   ministryNames: [],
@@ -152,17 +173,22 @@ export async function fetchPersonWithProfile(id: string): Promise<PersonWithProf
 
   const { person_small_groups, person_ministries, enrollments, coffee_attendance, ...row } = data;
   const latestEnrollment = [...enrollments].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
-  const attendedDates = coffee_attendance
-    .flatMap((attendance) => (attendance.attended && attendance.coffee_event ? [attendance.coffee_event.event_date] : []))
-    .sort();
+  const latestCoffee = coffee_attendance
+    .flatMap((attendance) =>
+      attendance.coffee_event ? [{ date: attendance.coffee_event.event_date, attended: attendance.attended }] : [],
+    )
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .at(-1);
   const smallGroups = groupNames(person_small_groups.flatMap((link) => (link.small_group ? [link.small_group] : [])));
   const ministries = groupNames(person_ministries.flatMap((link) => (link.ministry ? [link.ministry] : [])));
 
   return {
     person: toPerson(row),
     profile: {
-      coffeeDate: attendedDates.at(-1) ?? null,
-      cohortName: latestEnrollment?.cohort?.name ?? null,
+      coffee: latestCoffee ?? null,
+      cohort: latestEnrollment?.cohort
+        ? { name: latestEnrollment.cohort.name, enrolledOn: timestampDateKey(latestEnrollment.created_at) }
+        : null,
       smallGroupIds: smallGroups.ids,
       smallGroupNames: smallGroups.names,
       ministryNames: ministries.names,

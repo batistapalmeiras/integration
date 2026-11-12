@@ -24,6 +24,7 @@ export const queryKeys = {
   personCoffeeAttendance: (id: string, status: string) => ['person', id, 'coffee-attendance', status] as const,
   personLastContactAttempt: (id: string, status: string) => ['person', id, 'last-contact-attempt', status] as const,
   personIntegrationClass: (id: string) => ['person', id, 'integration-class'] as const,
+  personHistory: (id: string) => ['person', id, 'history'] as const,
   personSensitive: (id: string) => ['person', id, 'sensitive'] as const,
   personMakeups: (id: string) => ['person', id, 'makeups'] as const,
   memberPage: (id: string) => ['person', id, 'member-page'] as const,

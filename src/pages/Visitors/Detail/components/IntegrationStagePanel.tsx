@@ -1,13 +1,13 @@
 // Libs
-import { Send } from 'lucide-react';
-import { Card, Checkbox, LinkButton, ModalTitle, Skeleton, Typography, useModal } from 'bp-kit';
+import { GraduationCap, Send } from 'lucide-react';
+import { Checkbox, LinkButton, ModalTitle, Skeleton, useModal } from 'bp-kit';
 // Local
-import { CountBadge } from '../../../Classes/styles';
 import { formatDate, todayKey } from '../../../../domain/dates';
 import { hasCompletedLessons } from '../../../../domain/membership';
 import { makeupLessonMessage, membershipInterestMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
-import { CardHeader, LessonList, LessonMakeupAction, LessonRow, StagePanel } from '../styles';
+import { LessonList, LessonMakeupAction, LessonRow } from '../styles';
+import { StageCard } from './StageCard';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
 interface IntegrationClassState {
@@ -62,51 +62,50 @@ export function IntegrationStagePanel({
   };
 
   return (
-    <StagePanel>
-      <Card>
-        <CardHeader>
-          <Typography type="label">Presença nas aulas</Typography>
-          <CountBadge $eligible={eligible}>
-            {attendedCount}/{lessons.length} aulas
-          </CountBadge>
-        </CardHeader>
-
-        <LessonList>
-          {lessons.map((lesson) => {
-            const attended = attendanceByLesson[lesson.id]?.attended ?? false;
-            const needsMakeup = !attended && canRecordAttendance && makeupUnlocked;
-            return (
-              <LessonRow key={lesson.id}>
-                <Checkbox
-                  label={`Aula ${lesson.number} (${formatDate(lesson.date)})`}
-                  checked={attended}
-                  disabled={!canRecordAttendance}
-                  onChange={(e) => onToggle(lesson.id, e.target.checked)}
-                />
-                {needsMakeup && (
-                  <LessonMakeupAction>
-                    <LinkButton type="button" onClick={() => openMakeupMessage(lesson.id, lesson.number)}>
-                      <Send size={14} />
-                      Link de reposição
-                    </LinkButton>
-                  </LessonMakeupAction>
-                )}
-              </LessonRow>
-            );
-          })}
-        </LessonList>
-      </Card>
+    <StageCard
+      title="Presença nas aulas"
+      summary={{
+        icon: GraduationCap,
+        title: `${attendedCount} de ${lessons.length} aulas`,
+        text: eligible ? 'Já pode receber a Ficha de Interesse.' : 'Marque a presença em cada aula.',
+      }}
+    >
+      <LessonList>
+        {lessons.map((lesson) => {
+          const attended = attendanceByLesson[lesson.id]?.attended ?? false;
+          const needsMakeup = !attended && canRecordAttendance && makeupUnlocked;
+          return (
+            <LessonRow key={lesson.id}>
+              <Checkbox
+                label={`Aula ${lesson.number} (${formatDate(lesson.date)})`}
+                checked={attended}
+                disabled={!canRecordAttendance}
+                onChange={(e) => onToggle(lesson.id, e.target.checked)}
+              />
+              {needsMakeup && (
+                <LessonMakeupAction>
+                  <LinkButton type="button" onClick={() => openMakeupMessage(lesson.id, lesson.number)}>
+                    <Send size={14} />
+                    Link de reposição
+                  </LinkButton>
+                </LessonMakeupAction>
+              )}
+            </LessonRow>
+          );
+        })}
+      </LessonList>
 
       {canRecordAttendance && (
         <WhatsAppMessageBox
           person={person}
           defaultMessage={membershipInterestMessage(person.name, eligible)}
           buttonLabel="Enviar Ficha de Interesse"
+          bare
           onOpen={onMembershipInterestSent}
         />
       )}
 
       {modal}
-    </StagePanel>
+    </StageCard>
   );
 }
