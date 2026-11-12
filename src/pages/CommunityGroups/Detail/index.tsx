@@ -41,7 +41,7 @@ import { refreshGroupLists } from '../hooks/useCommunityGroupsList';
 import { AppRoute } from '../../../routes/paths';
 import { AddMembersModal } from '../components/AddMembersModal';
 import { GroupModal } from '../components/GroupModal';
-import { FieldGroup, LeaderList, LeaderRow, NameCell, Stack } from '../styles';
+import { GroupSummary, LeaderList, NameCell, Stack, SummaryItem } from '../styles';
 
 type GroupType = 'ministerios' | 'pgs';
 
@@ -78,11 +78,11 @@ export function CommunityGroupDetailPage() {
   if (loading) return <Skeleton $h="320px" />;
   if (error || !group) return <Empty title={`${label} não encontrado`} description={error ?? ''} />;
 
-  const memberNames = people.map((person) => person.name);
-  const roleOf = (name: string) =>
-    [group.leaders.includes(name) && 'Líder', group.hosts.includes(name) && 'Anfitrião'].filter(
+  const roleOf = (personId: string) =>
+    [group.leaderIds.includes(personId) && 'Líder', group.hostIds.includes(personId) && 'Anfitrião'].filter(
       (role): role is string => !!role,
     );
+  const namesOf = (ids: string[]) => people.filter((person) => ids.includes(person.id));
 
   const save = async (input: GroupInput) => {
     if (isPg) await updateSmallGroup(group.id, input);
@@ -98,7 +98,7 @@ export function CommunityGroupDetailPage() {
         fieldLabel={label}
         group={group}
         smallGroup={isPg}
-        groupMembers={memberNames}
+        groupMembers={people}
         onDelete={people.length === 0 ? openDelete : undefined}
         close={close}
         onSave={save}
@@ -130,7 +130,7 @@ export function CommunityGroupDetailPage() {
         <ModalTitle onClose={close}>Remover {person.name}?</ModalTitle>
         <Typography type="p">
           O cadastro não é apagado. A pessoa apenas deixa de participar deste {label.toLowerCase()}
-          {roleOf(person.name).length > 0 && ` e deixa de ser ${roleOf(person.name).join(' e ').toLowerCase()}`}.
+          {roleOf(person.id).length > 0 && ` e deixa de ser ${roleOf(person.id).join(' e ').toLowerCase()}`}.
         </Typography>
         <ModalActions>
           <Button
@@ -140,13 +140,6 @@ export function CommunityGroupDetailPage() {
               try {
                 if (isPg) await removePersonFromSmallGroup(person.id);
                 else await removePersonFromMinistry(group.id, person.id);
-                if (roleOf(person.name).length > 0) {
-                  await (isPg ? updateSmallGroup : updateMinistry)(group.id, {
-                    ...group,
-                    leaders: group.leaders.filter((name) => name !== person.name),
-                    hosts: group.hosts.filter((name) => name !== person.name),
-                  });
-                }
                 close();
                 await load();
               } catch (e) {
@@ -193,7 +186,7 @@ export function CommunityGroupDetailPage() {
     <Stack>
       <PageHeader
         title={group.name}
-        subtitle={isPg && group.meetingDay ? `${label} · ${WEEK_DAY_LABELS[group.meetingDay]}` : label}
+        subtitle={label}
         back
         action={
           <Button variant="secondary" onClick={openEdit}>
@@ -203,31 +196,26 @@ export function CommunityGroupDetailPage() {
         }
       />
 
-      <FieldGroup>
-        <Typography type="label">Líder(es)</Typography>
-        <LeaderList>
-          {group.leaders.length === 0 && <Typography type="caption">Nenhum líder cadastrado.</Typography>}
-          {group.leaders.map((leader) => (
-            <LeaderRow key={leader} $readOnly>
-              <Typography type="caption">{leader}</Typography>
-            </LeaderRow>
-          ))}
-        </LeaderList>
-      </FieldGroup>
-
-      {isPg && (
-        <FieldGroup>
-          <Typography type="label">Anfitrião(ões)</Typography>
-          <LeaderList>
-            {group.hosts.length === 0 && <Typography type="caption">Nenhum anfitrião cadastrado.</Typography>}
-            {group.hosts.map((host) => (
-              <LeaderRow key={host} $readOnly>
-                <Typography type="caption">{host}</Typography>
-              </LeaderRow>
-            ))}
-          </LeaderList>
-        </FieldGroup>
-      )}
+      <GroupSummary>
+        {isPg && (
+          <SummaryItem>
+            <Typography type="label">Dia</Typography>
+            <Typography type="caption">
+              {group.meetingDay ? WEEK_DAY_LABELS[group.meetingDay] : 'Nenhum dia cadastrado.'}
+            </Typography>
+          </SummaryItem>
+        )}
+        <SummaryItem>
+          <Typography type="label">Líder(es)</Typography>
+          <PeoplePills people={namesOf(group.leaderIds)} emptyText="Nenhum líder cadastrado." />
+        </SummaryItem>
+        {isPg && (
+          <SummaryItem>
+            <Typography type="label">Anfitrião(ões)</Typography>
+            <PeoplePills people={namesOf(group.hostIds)} emptyText="Nenhum anfitrião cadastrado." />
+          </SummaryItem>
+        )}
+      </GroupSummary>
 
       {people.length === 0 && (
         <Empty title="Ninguém vinculado ainda" description="Use o botão acima para adicionar pessoas." />
@@ -244,11 +232,11 @@ export function CommunityGroupDetailPage() {
             </thead>
             <tbody>
               {people.map((person) => (
-                <Tr key={person.id} $clickable onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
+                <Tr key={person.id} $clickable onClick={() => navigate(`${person.isMember ? AppRoute.Members : AppRoute.Visitors}/${person.id}`)}>
                   <Td data-label={text.fields.name}>
                     <NameCell>
                       {person.name}
-                      {roleOf(person.name).map((role) => (
+                      {roleOf(person.id).map((role) => (
                         <TonePill key={role} $tone="success">
                           {role}
                         </TonePill>
@@ -284,5 +272,23 @@ export function CommunityGroupDetailPage() {
       {modal}
       {toast}
     </Stack>
+  );
+}
+
+interface PeoplePillsProps {
+  people: PersonInGroup[];
+  emptyText: string;
+}
+
+function PeoplePills({ people, emptyText }: PeoplePillsProps) {
+  if (people.length === 0) return <Typography type="caption">{emptyText}</Typography>;
+  return (
+    <LeaderList>
+      {people.map((person) => (
+        <TonePill key={person.id} $tone="success">
+          {person.name}
+        </TonePill>
+      ))}
+    </LeaderList>
   );
 }

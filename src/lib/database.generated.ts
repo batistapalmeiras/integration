@@ -484,6 +484,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ministry_leaders: {
+        Row: {
+          ministry_id: string
+          person_id: string
+        }
+        Insert: {
+          ministry_id: string
+          person_id: string
+        }
+        Update: {
+          ministry_id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ministry_leaders_ministry_id_fkey"
+            columns: ["ministry_id"]
+            isOneToOne: false
+            referencedRelation: "ministries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_leaders_person_id_ministry_id_fkey"
+            columns: ["person_id", "ministry_id"]
+            isOneToOne: false
+            referencedRelation: "person_ministries"
+            referencedColumns: ["person_id", "ministry_id"]
+          },
+        ]
+      }
       parent_links: {
         Row: {
           child_id: string
@@ -825,6 +855,53 @@ export type Database = {
           person_b_id?: string
         }
         Relationships: []
+      }
+      small_group_roles: {
+        Row: {
+          person_id: string
+          role: string
+          small_group_id: string
+        }
+        Insert: {
+          person_id: string
+          role: string
+          small_group_id: string
+        }
+        Update: {
+          person_id?: string
+          role?: string
+          small_group_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "small_group_roles_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "small_group_roles_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "small_group_roles_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_group_roles_small_group_id_fkey"
+            columns: ["small_group_id"]
+            isOneToOne: false
+            referencedRelation: "small_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       small_groups: {
         Row: {

@@ -8,7 +8,7 @@ import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { SelectField } from '../../../components/SelectField';
-import { CommunityGroup, GroupInput, WEEK_DAY_LABELS, WeekDay } from '../../../domain/communityGroups';
+import { CommunityGroup, GroupInput, PersonInGroup, WEEK_DAY_LABELS, WeekDay } from '../../../domain/communityGroups';
 import { toOptions } from '../../../domain/text';
 import { DangerZone } from '../styles';
 
@@ -30,7 +30,7 @@ interface Props {
   fieldLabel: string;
   group?: CommunityGroup;
   smallGroup?: boolean;
-  groupMembers?: string[];
+  groupMembers?: PersonInGroup[];
   onDelete?: () => void;
   close: () => void;
   onSave: (input: GroupInput) => Promise<void>;
@@ -47,9 +47,9 @@ export function GroupModal({
   onSave,
 }: Props) {
   const members = groupMembers ?? [];
-  const inGroup = (names: string[] = []) => names.filter((name) => members.includes(name));
-  const [leaders, setLeaders] = useState<string[]>(inGroup(group?.leaders));
-  const [hosts, setHosts] = useState<string[]>(inGroup(group?.hosts));
+  const inGroup = (ids: string[] = []) => ids.filter((id) => members.some((member) => member.id === id));
+  const [leaderIds, setLeaderIds] = useState<string[]>(inGroup(group?.leaderIds));
+  const [hostIds, setHostIds] = useState<string[]>(inGroup(group?.hostIds));
   const {
     control,
     handleSubmit,
@@ -60,15 +60,15 @@ export function GroupModal({
   });
 
   const options = [...members]
-    .sort((a, b) => a.localeCompare(b, 'pt-BR'))
-    .map((name) => ({ value: name, label: name }));
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+    .map((member) => ({ value: member.id, label: member.name }));
   const canPickPeople = options.length > 0;
 
   const submit = handleSubmit(async (values) => {
     await onSave({
       name: values.name.trim(),
-      leaders,
-      hosts,
+      leaderIds,
+      hostIds,
       meetingDay: values.meetingDay === '' ? null : values.meetingDay,
     });
     close();
@@ -86,8 +86,8 @@ export function GroupModal({
           <MultiSelect
             label="Líder(es)"
             options={options}
-            value={leaders}
-            onChange={setLeaders}
+            value={leaderIds}
+            onChange={setLeaderIds}
             placeholder="Buscar pessoa da lista…"
           />
         )}
@@ -96,8 +96,8 @@ export function GroupModal({
           <MultiSelect
             label="Anfitrião(ões)"
             options={options}
-            value={hosts}
-            onChange={setHosts}
+            value={hostIds}
+            onChange={setHostIds}
             placeholder="Buscar pessoa da lista…"
           />
         )}

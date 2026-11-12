@@ -12,16 +12,17 @@ export const WEEK_DAY_LABELS: Record<WeekDay, string> = {
 export interface CommunityGroup {
   id: string;
   name: string;
-  leaders: string[];
-  hosts: string[];
+  leaderIds: string[];
+  hostIds: string[];
   meetingDay: WeekDay | null;
 }
 
-export type GroupInput = Pick<CommunityGroup, 'name' | 'leaders' | 'hosts' | 'meetingDay'>;
+export type GroupInput = Pick<CommunityGroup, 'name' | 'leaderIds' | 'hostIds' | 'meetingDay'>;
 
 export interface PersonInGroup {
   id: string;
   name: string;
+  isMember: boolean;
 }
 
 export interface CommunityGroupWithCount extends CommunityGroup {

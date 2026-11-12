@@ -10,7 +10,7 @@ import {
 import { errorMessage, invalidateQueries, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 
-export type GroupRow = Pick<CommunityGroupWithCount, 'id' | 'name' | 'leaders' | 'meetingDay' | 'peopleCount'>;
+export type GroupRow = Pick<CommunityGroupWithCount, 'id' | 'name' | 'meetingDay' | 'peopleCount'>;
 
 type GroupType = 'small-groups' | 'ministries';
 

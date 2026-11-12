@@ -127,6 +127,7 @@ export async function updateContactAttemptResult(attemptId: string, result: stri
 export interface PersonProfileSummary {
   coffeeDate: string | null;
   cohortName: string | null;
+  smallGroupId: string | null;
   smallGroupName: string | null;
   ministryNames: string[];
   ministryIds: string[];
@@ -136,7 +137,7 @@ export async function fetchPersonProfileSummary(personId: string): Promise<Perso
   const { data, error } = await supabase
     .from('people')
     .select(
-      'small_group:small_groups(name), person_ministries(ministry_id, ministry:ministries(name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))',
+      'small_group_id, small_group:small_groups(name), person_ministries(ministry_id, ministry:ministries(name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))',
     )
     .eq('id', personId)
     .single();
@@ -152,6 +153,7 @@ export async function fetchPersonProfileSummary(personId: string): Promise<Perso
   return {
     coffeeDate: attendedDates.at(-1) ?? null,
     cohortName: latestEnrollment?.cohort?.name ?? null,
+    smallGroupId: row.small_group_id,
     smallGroupName: row.small_group?.name ?? null,
     ministryNames: row.person_ministries
       .map((m) => m.ministry?.name)

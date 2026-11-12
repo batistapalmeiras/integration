@@ -30,6 +30,7 @@ import {
   usePersonNotes,
   usePersonProfileSummary,
 } from '../../queries/person';
+import { CommunityModal } from './components/CommunityModal';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
@@ -72,8 +73,9 @@ export function MemberProfilePage() {
   if (loadError) return <Empty title="Membro não encontrado" description={loadError} />;
   if (!record) return <Skeleton $h="320px" />;
 
-  const smallGroup = summaryQuery.data?.smallGroupName ?? null;
-  const ministries = summaryQuery.data?.ministryNames ?? [];
+  const summary = summaryQuery.data;
+  const smallGroup = summary?.smallGroupName ?? null;
+  const ministries = summary?.ministryNames ?? [];
   const notes = notesQuery.data ?? [];
 
   const edit = (section: RecordSection) =>
@@ -130,6 +132,16 @@ export function MemberProfilePage() {
             value={ministries.length > 0 ? ministries.join(', ') : null}
             emptyText="Não serve em um ministério"
           />
+          {summary && (
+            <StatusRow>
+              <LinkButton
+                icon={<Pencil size={14} />}
+                onClick={() => open(<CommunityModal personId={id} community={summary} close={close} />)}
+              >
+                Alterar PG e ministérios
+              </LinkButton>
+            </StatusRow>
+          )}
         </Community>
       </HeroText>
 
