@@ -6,8 +6,8 @@ import { Pencil } from 'lucide-react';
 // Local
 import { Family, Relative } from '../../../repositories/family';
 import { AppRoute } from '../../../routes/paths';
-import { Field, FieldLabel, Fields, FieldValue, RelativeLinks } from '../styles';
-import { Panel, PanelHeader, PanelTitle } from '../../../components/Panel';
+import { RelativeLinks } from '../styles';
+import { Field, FieldLabel, FieldValue, Fields, Panel, PanelHeader, PanelTitle } from '../../../components/Panel';
 
 interface Props {
   family: Family;

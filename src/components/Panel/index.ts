@@ -1,5 +1,7 @@
 // Libs
 import styled from 'styled-components';
+// Local
+import { twoColumnsWhenRoom } from '../FormLayout';
 
 export const Panel = styled.section`
   display: flex;
@@ -72,3 +74,46 @@ export const ItemPicker = styled.div`
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.xs};
 `;
+
+export const Fields = styled.dl`
+  margin: 0;
+  ${twoColumnsWhenRoom}
+`;
+
+
+export const Field = styled.div<{ $wide: boolean }>`
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  grid-column: ${({ $wide }) => ($wide ? '1 / -1' : 'auto')};
+`;
+
+
+export const FieldLabel = styled.dt`
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 13px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.muted};
+`;
+
+
+export const FieldValue = styled.dd<{ $empty: boolean }>`
+  margin: 0;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: 15px;
+  color: ${({ theme, $empty }) => ($empty ? theme.colors.mutedSoft : theme.colors.ink)};
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  a {
+    color: ${({ theme }) => theme.colors.primaryActive};
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+`;
+

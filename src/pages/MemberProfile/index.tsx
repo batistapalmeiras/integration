@@ -7,7 +7,7 @@ import { HeartHandshake, Pencil, UsersRound } from 'lucide-react';
 import { NotesPanel } from '../../components/NotesPanel';
 import { PageHeader } from '../../components/PageHeader';
 import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
-import { Panel, PanelHeader, PanelTitle } from '../../components/Panel';
+import { Field, FieldLabel, Fields, FieldValue, Panel, PanelHeader, PanelTitle } from '../../components/Panel';
 // Local
 import { InfoLine, InfoPanel } from '../../components/InfoLine';
 import { MembershipAlerts } from '../../components/MembershipAlerts';
@@ -28,15 +28,7 @@ import { CommunityModal } from './components/CommunityModal';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
-import {
-  Field,
-  FieldLabel,
-  Fields,
-  FieldValue,
-  HeroText,
-  AddressLines,
-  StatusRow,
-} from './styles';
+import { AddressLines, HeroText, StatusRow } from './styles';
 
 const MEMBERSHIP_SECTION = 'membership';
 const SIDE_SECTIONS = ['contact'];
