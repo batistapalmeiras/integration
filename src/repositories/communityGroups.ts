@@ -144,8 +144,10 @@ async function deleteGroup(table: Table, id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function listMembers(): Promise<PersonInGroup[]> {
-  const { data, error } = await supabase.from('people').select('id, name, status').eq('status', 'member').order('name');
+export async function listMembers({ activeOnly = false } = {}): Promise<PersonInGroup[]> {
+  const members = supabase.from('people').select('id, name, status').eq('status', 'member');
+  const filtered = activeOnly ? members.in('membership_status', COUNTED_MEMBERSHIP_STATUSES) : members;
+  const { data, error } = await filtered.order('name');
   if (error) throw error;
   return (data ?? []).map(toPersonInGroup);
 }

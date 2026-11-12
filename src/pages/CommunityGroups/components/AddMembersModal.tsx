@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function AddMembersModal({ title, currentIds, close, onAdd }: Props) {
-  const members = useMemberNames().data ?? [];
+  const members = useMemberNames(true).data ?? [];
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 

@@ -11,7 +11,8 @@ export const useSmallGroups = (enabled = true) =>
 export const useMinistries = (enabled = true) =>
   useQuery(queryKeys.ministries, listMinistries, { enabled, staleTime: REFERENCE_STALE_TIME });
 
-export const useMemberNames = () => useQuery(queryKeys.memberNames, listMembers);
+export const useMemberNames = (activeOnly = false) =>
+  useQuery(queryKeys.memberNames(activeOnly), () => listMembers({ activeOnly }));
 
 export const useCohortNames = () => useQuery(queryKeys.cohortNames, listCohortNames);
 
