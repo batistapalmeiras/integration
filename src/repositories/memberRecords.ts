@@ -12,7 +12,9 @@ import {
   toPendencyField,
 } from '../domain/memberRecords';
 import { EntryType, toEntryType } from '../types/church';
+import { CouncilDate } from '../domain/councils';
 import { nameFilter, phoneDigits } from '../domain/search';
+import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
 
 interface MemberPendency {
@@ -103,11 +105,8 @@ const blankToNull = (value: string) => (value.trim() === '' ? null : value.trim(
 
 const digitsOrNull = (value: string) => blankToNull(onlyDigits(value));
 
-export async function getMemberProfile(personId: string): Promise<MemberProfile> {
-  const { data, error } = await supabase.from('member_profiles').select('*').eq('person_id', personId).maybeSingle();
-  if (error) throw error;
-
-  const profileRow = (data ?? {}) as Record<string, string | number | boolean | null>;
+function toMemberProfile(row: Record<string, string | number | boolean | null> | null): MemberProfile {
+  const profileRow = row ?? {};
   const profileValues = Object.fromEntries(
     (Object.entries(PROFILE_COLUMNS) as [ProfileKey, string][]).map(([key, column]) => [
       key,
@@ -124,47 +123,67 @@ export async function getMemberProfile(personId: string): Promise<MemberProfile>
   };
 }
 
-export async function getMemberRecord(personId: string): Promise<MemberRecord> {
-  const [person, profile, sensitive] = await Promise.all([
-    supabase.from('people').select('name, phone, email, membership_status, entry_type, council_id').eq('id', personId).single(),
-    getMemberProfile(personId),
-    supabase.from('person_sensitive').select('birth_date, origin_church').eq('person_id', personId).maybeSingle(),
-  ]);
-  const failure = person.error ?? sensitive.error;
-  if (failure) throw failure;
-  const member = person.data;
-  if (!member) throw new Error('Membro não encontrado.');
-
-  return {
-    ...profile,
-    name: member.name,
-    phone: member.phone ? maskPhone(member.phone) : '',
-    email: member.email ?? '',
-    membershipStatus: toMembershipStatus(member.membership_status ?? ''),
-    birthDate: sensitive.data?.birth_date ?? '',
-    entryType: toEntryType(member.entry_type) ?? '',
-    originChurch: sensitive.data?.origin_church ?? '',
-    councilId: member.council_id ?? '',
-  };
+export async function getMemberProfile(personId: string): Promise<MemberProfile> {
+  const { data, error } = await supabase.from('member_profiles').select('*').eq('person_id', personId).maybeSingle();
+  if (error) throw error;
+  return toMemberProfile(data);
 }
 
-export interface MemberRecordInfo {
+interface MemberRecordInfo {
   createdAt: string;
   origin: string;
   statuteAgreedAt: string | null;
+  council: CouncilDate | null;
 }
 
-export async function getMemberRecordInfo(personId: string): Promise<MemberRecordInfo> {
-  const { data, error } = await supabase
-    .from('people')
-    .select('created_at, origin, statute_agreed_at')
-    .eq('id', personId)
-    .single();
+export interface MemberCommunity {
+  smallGroupId: string | null;
+  smallGroupName: string | null;
+  ministryIds: string[];
+  ministryNames: string[];
+}
+
+export interface MemberPage {
+  record: MemberRecord;
+  info: MemberRecordInfo;
+  community: MemberCommunity;
+}
+
+const MEMBER_PAGE_COLUMNS =
+  'name, phone, email, membership_status, entry_type, council_id, created_at, origin, statute_agreed_at, small_group_id, council:councils(id, meeting_date), member_profiles(*), person_sensitive(birth_date, origin_church), small_group:small_groups!people_small_group_id_fkey(name), person_ministries(ministry_id, ministry:ministries!person_ministries_ministry_id_fkey(name))';
+
+export async function getMemberPage(personId: string): Promise<MemberPage> {
+  const { data: member, error } = await supabase.from('people').select(MEMBER_PAGE_COLUMNS).eq('id', personId).single();
   if (error) throw error;
+
+  const ministries = member.person_ministries
+    .flatMap((item) => (item.ministry ? [{ id: item.ministry_id, name: item.ministry.name }] : []))
+    .sort(byName);
+
   return {
-    createdAt: data.created_at,
-    origin: data.origin,
-    statuteAgreedAt: data.statute_agreed_at,
+    record: {
+      ...toMemberProfile(member.member_profiles),
+      name: member.name,
+      phone: member.phone ? maskPhone(member.phone) : '',
+      email: member.email ?? '',
+      membershipStatus: toMembershipStatus(member.membership_status ?? ''),
+      birthDate: member.person_sensitive?.birth_date ?? '',
+      entryType: toEntryType(member.entry_type) ?? '',
+      originChurch: member.person_sensitive?.origin_church ?? '',
+      councilId: member.council_id ?? '',
+    },
+    info: {
+      createdAt: member.created_at,
+      origin: member.origin,
+      statuteAgreedAt: member.statute_agreed_at,
+      council: member.council ? { id: member.council.id, meetingDate: member.council.meeting_date } : null,
+    },
+    community: {
+      smallGroupId: member.small_group_id,
+      smallGroupName: member.small_group?.name ?? null,
+      ministryIds: ministries.map((ministry) => ministry.id),
+      ministryNames: ministries.map((ministry) => ministry.name),
+    },
   };
 }
 

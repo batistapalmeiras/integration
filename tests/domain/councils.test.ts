@@ -1,7 +1,7 @@
 // Local
 import { currentCouncil } from '../../src/domain/councils';
 
-const council = (id: string, meetingDate: string) => ({ id, meetingDate, members: [] });
+const council = (id: string, meetingDate: string) => ({ id, meetingDate, memberCount: 0 });
 
 describe('currentCouncil', () => {
   it('is the council with the latest meeting date, whatever the order', () => {

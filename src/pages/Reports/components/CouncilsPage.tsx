@@ -44,7 +44,7 @@ export function CouncilsPage() {
               {councils.map((council) => (
                 <Tr key={council.id} $clickable onClick={() => navigate(councilPath(council.id))}>
                   <Td>{formatDate(council.meetingDate)}</Td>
-                  <Td $shrink>{council.members.length}</Td>
+                  <Td $shrink>{council.memberCount}</Td>
                 </Tr>
               ))}
             </tbody>

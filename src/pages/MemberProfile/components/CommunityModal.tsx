@@ -11,13 +11,13 @@ import { queryKeys } from '../../../lib/queryKeys';
 import { usePersonSensitive } from '../../../queries/person';
 import { useMinistries, useSmallGroups } from '../../../queries/reference';
 import { savePersonCommunity } from '../../../repositories/communityGroups';
-import { PersonProfileSummary } from '../../../repositories/people';
+import { MemberCommunity } from '../../../repositories/memberRecords';
 import { CommunityFields } from '../../Visitors/components/CommunityFields';
 import { CommunityFormValues, communitySchema } from '../../Visitors/validators';
 
 interface Props {
   personId: string;
-  community: Pick<PersonProfileSummary, 'smallGroupId' | 'ministryIds'>;
+  community: Pick<MemberCommunity, 'smallGroupId' | 'ministryIds'>;
   close: () => void;
 }
 
@@ -39,7 +39,7 @@ export function CommunityModal({ personId, community, close }: Props) {
     try {
       await savePersonCommunity(personId, values.smallGroupId || null, values.ministryIds);
       await markPipelineStale();
-      await invalidateQueries(queryKeys.personProfile(personId));
+      await invalidateQueries(queryKeys.memberPage(personId));
       close();
     } catch (e) {
       showToast(e instanceof Error ? e.message : 'Não foi possível salvar.');

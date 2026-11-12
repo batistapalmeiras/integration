@@ -36,9 +36,9 @@ const record: MemberRecord = {
 describe('saveRecord', () => {
   afterEach(() => clearQueries());
 
-  it('reloads the small group and ministries shown on the profile', async () => {
+  it('reloads the member page so the small group and ministries stay current', async () => {
     const summary = vi.fn().mockResolvedValue({ smallGroupName: 'PG Teste' });
-    const { result } = renderHook(() => useQuery(queryKeys.personProfile('p1'), summary));
+    const { result } = renderHook(() => useQuery(queryKeys.memberPage('p1'), summary));
     await waitFor(() => expect(result.current.data).toBeDefined());
 
     await saveRecord('p1', record);

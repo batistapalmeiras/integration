@@ -2,15 +2,16 @@
 import { useParams } from 'react-router-dom';
 // Libs
 import { Empty, LinkButton, Skeleton, useModal } from 'bp-kit';
-import { HeartHandshake, LucideIcon, Pencil, UsersRound } from 'lucide-react';
+import { HeartHandshake, Pencil, UsersRound } from 'lucide-react';
 // Components
 import { NotesPanel } from '../../components/NotesPanel';
 import { PageHeader } from '../../components/PageHeader';
 import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
 import { Panel, PanelHeader, PanelTitle } from '../../components/Panel';
 // Local
+import { InfoLine, InfoPanel } from '../../components/InfoLine';
 import { MembershipAlerts } from '../../components/MembershipAlerts';
-import { Council } from '../../domain/councils';
+import { CouncilDate } from '../../domain/councils';
 import { TonePill } from '../../components/StatusPill';
 import { formatTimestampDate } from '../../domain/dates';
 import {
@@ -21,23 +22,13 @@ import {
 } from '../../domain/memberRecords';
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
 import { errorMessage } from '../../lib/queryCache';
-import { useCouncils } from '../../queries/councils';
 import { MEMBERSHIP_ANSWER_LABELS } from '../../types/church';
-import {
-  useFamily,
-  useMemberRecord,
-  useMemberRecordInfo,
-  usePersonNotes,
-  usePersonProfileSummary,
-} from '../../queries/person';
+import { useFamily, useMemberPage, usePersonNotes } from '../../queries/person';
 import { CommunityModal } from './components/CommunityModal';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
 import {
-  Community,
-  CommunityBadge,
-  CommunityItem,
   Field,
   FieldLabel,
   Fields,
@@ -61,21 +52,19 @@ const MAIN = MEMBER_RECORD_SECTIONS.filter(
 export function MemberProfilePage() {
   const { id = '' } = useParams<{ id: string }>();
   const { open, close, modal } = useModal('drawer');
-  const recordQuery = useMemberRecord(id);
-  const summaryQuery = usePersonProfileSummary(id);
+  const pageQuery = useMemberPage(id);
   const notesQuery = usePersonNotes(id);
   const family = useFamily(id).data;
-  const info = useMemberRecordInfo(id).data;
-  const councils = useCouncils().data ?? [];
-  const record = recordQuery.data ?? null;
-  const loadError = errorMessage(recordQuery.error);
+  const page = pageQuery.data ?? null;
+  const loadError = errorMessage(pageQuery.error);
 
   if (loadError) return <Empty title="Membro não encontrado" description={loadError} />;
-  if (!record) return <Skeleton $h="320px" />;
+  if (!page) return <Skeleton $h="320px" />;
 
-  const summary = summaryQuery.data;
-  const smallGroup = summary?.smallGroupName ?? null;
-  const ministries = summary?.ministryNames ?? [];
+  const { record, info, community } = page;
+  const councils = info.council ? [info.council] : [];
+  const smallGroup = community.smallGroupName;
+  const ministries = community.ministryNames;
   const notes = notesQuery.data ?? [];
 
   const edit = (section: RecordSection) =>
@@ -84,20 +73,18 @@ export function MemberProfilePage() {
         personId={id}
         record={record}
         section={section}
-        optionalPhone={canLeavePhoneEmpty(info?.origin)}
+        optionalPhone={canLeavePhoneEmpty(info.origin)}
         close={close}
       />,
     );
 
-  const churchInfo: InfoField[] = info
-    ? [
-        { label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) },
-        {
-          label: MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,
-          value: info.statuteAgreedAt ? formatTimestampDate(info.statuteAgreedAt) : '',
-        },
-      ]
-    : [];
+  const churchInfo: InfoField[] = [
+    { label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) },
+    {
+      label: MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,
+      value: info.statuteAgreedAt ? formatTimestampDate(info.statuteAgreedAt) : '',
+    },
+  ];
 
   const renderPanel = (section: RecordSection) => (
     <SectionPanel
@@ -125,24 +112,26 @@ export function MemberProfilePage() {
             </LinkButton>
           )}
         </StatusRow>
-        <Community>
-          <CommunityLine icon={UsersRound} value={smallGroup} emptyText="Não participa de um PG" />
-          <CommunityLine
+        <InfoPanel>
+          <InfoLine icon={UsersRound} label="Pequeno Grupo" empty={!smallGroup}>
+            {smallGroup ?? 'Não participa de um PG'}
+          </InfoLine>
+          <InfoLine
             icon={HeartHandshake}
-            value={ministries.length > 0 ? ministries.join(', ') : null}
-            emptyText="Não serve em um ministério"
-          />
-          {summary && (
-            <StatusRow>
-              <LinkButton
-                icon={<Pencil size={14} />}
-                onClick={() => open(<CommunityModal personId={id} community={summary} close={close} />)}
-              >
-                Alterar PG e ministérios
-              </LinkButton>
-            </StatusRow>
-          )}
-        </Community>
+            label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}
+            empty={ministries.length === 0}
+          >
+            {ministries.length > 0 ? ministries.join(', ') : 'Não serve em um ministério'}
+          </InfoLine>
+        </InfoPanel>
+        <StatusRow>
+          <LinkButton
+            icon={<Pencil size={14} />}
+            onClick={() => open(<CommunityModal personId={id} community={community} close={close} />)}
+          >
+            Alterar PG e ministérios
+          </LinkButton>
+        </StatusRow>
       </HeroText>
 
       <MembershipAlerts personId={id} onlyPending />
@@ -171,23 +160,6 @@ export function MemberProfilePage() {
   );
 }
 
-interface CommunityLineProps {
-  icon: LucideIcon;
-  value: string | null;
-  emptyText: string;
-}
-
-function CommunityLine({ icon: Icon, value, emptyText }: CommunityLineProps) {
-  return (
-    <CommunityItem $empty={!value}>
-      <CommunityBadge $empty={!value}>
-        <Icon size={18} aria-hidden="true" />
-      </CommunityBadge>
-      {value ?? emptyText}
-    </CommunityItem>
-  );
-}
-
 interface InfoField {
   label: string;
   value: string;
@@ -197,7 +169,7 @@ interface InfoField {
 interface SectionPanelProps {
   section: RecordSection;
   record: MemberRecord;
-  councils: Council[];
+  councils: CouncilDate[];
   info: InfoField[];
   onEdit: () => void;
 }

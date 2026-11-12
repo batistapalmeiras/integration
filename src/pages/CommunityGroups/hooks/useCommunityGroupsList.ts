@@ -10,7 +10,7 @@ import {
 import { errorMessage, invalidateQueries, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 
-export type GroupRow = Pick<CommunityGroupWithCount, 'id' | 'name' | 'meetingDay' | 'peopleCount'>;
+export type GroupRow = CommunityGroupWithCount;
 
 type GroupType = 'small-groups' | 'ministries';
 
@@ -33,7 +33,7 @@ function useGroupsList(
     await refreshGroupLists(type);
   };
 
-  return { rows: (query.data ?? []) as GroupRow[], loading: query.loading, error: errorMessage(query.error), add };
+  return { rows: query.data ?? [], loading: query.loading, error: errorMessage(query.error), add };
 }
 
 export const useMinistriesList = () => useGroupsList('ministries', listMinistriesWithCounts, createMinistry);

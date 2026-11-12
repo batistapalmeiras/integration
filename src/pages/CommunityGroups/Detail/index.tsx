@@ -13,11 +13,13 @@ import {
   useModal,
   useToast,
 } from 'bp-kit';
-import { Pencil, Plus, Trash2, UserMinus } from 'lucide-react';
+import { CalendarDays, Crown, House, LucideIcon, Pencil, Plus, Trash2, UserMinus } from 'lucide-react';
 // Components
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AddButton } from '../../../components/AddButton';
+import { InfoLine, InfoPanel } from '../../../components/InfoLine';
+import { PeopleCount } from '../../../components/PeopleCount';
 import { TonePill } from '../../../components/StatusPill';
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { CommunityGroup, GroupInput, PersonInGroup, WEEK_DAY_LABELS } from '../../../domain/communityGroups';
@@ -41,7 +43,7 @@ import { refreshGroupLists } from '../hooks/useCommunityGroupsList';
 import { AppRoute } from '../../../routes/paths';
 import { AddMembersModal } from '../components/AddMembersModal';
 import { GroupModal } from '../components/GroupModal';
-import { GroupSummary, LeaderList, NameCell, Stack, SummaryItem } from '../styles';
+import { LeaderList, NameCell, Stack } from '../styles';
 
 type GroupType = 'ministerios' | 'pgs';
 
@@ -82,6 +84,8 @@ export function CommunityGroupDetailPage() {
     [group.leaderIds.includes(personId) && 'Líder', group.hostIds.includes(personId) && 'Anfitrião'].filter(
       (role): role is string => !!role,
     );
+  const profilePath = (person: PersonInGroup) =>
+    `${person.isMember ? AppRoute.Members : AppRoute.Visitors}/${person.id}`;
   const namesOf = (ids: string[]) => people.filter((person) => ids.includes(person.id));
 
   const save = async (input: GroupInput) => {
@@ -196,72 +200,79 @@ export function CommunityGroupDetailPage() {
         }
       />
 
-      <GroupSummary>
+      <InfoPanel>
         {isPg && (
-          <SummaryItem>
-            <Typography type="label">Dia</Typography>
-            <Typography type="caption">
-              {group.meetingDay ? WEEK_DAY_LABELS[group.meetingDay] : 'Nenhum dia cadastrado.'}
-            </Typography>
-          </SummaryItem>
+          <InfoLine icon={CalendarDays} label="Dia" empty={!group.meetingDay}>
+            {group.meetingDay ? WEEK_DAY_LABELS[group.meetingDay] : 'Nenhum dia cadastrado'}
+          </InfoLine>
         )}
-        <SummaryItem>
-          <Typography type="label">Líder(es)</Typography>
-          <PeoplePills people={namesOf(group.leaderIds)} emptyText="Nenhum líder cadastrado." />
-        </SummaryItem>
+        <RolePeople
+          icon={Crown}
+          singular="Líder"
+          plural="Líderes"
+          people={namesOf(group.leaderIds)}
+          emptyText="Nenhum líder cadastrado"
+        />
         {isPg && (
-          <SummaryItem>
-            <Typography type="label">Anfitrião(ões)</Typography>
-            <PeoplePills people={namesOf(group.hostIds)} emptyText="Nenhum anfitrião cadastrado." />
-          </SummaryItem>
+          <RolePeople
+            icon={House}
+            singular="Anfitrião"
+            plural="Anfitriões"
+            people={namesOf(group.hostIds)}
+            emptyText="Nenhum anfitrião cadastrado"
+          />
         )}
-      </GroupSummary>
+      </InfoPanel>
+
 
       {people.length === 0 && (
         <Empty title="Ninguém vinculado ainda" description="Use o botão acima para adicionar pessoas." />
       )}
 
       {people.length > 0 && (
-        <TableWrapper>
-          <Table>
-            <thead>
-              <tr>
-                <Th>{text.fields.name}</Th>
-                <Th $shrink />
-              </tr>
-            </thead>
-            <tbody>
-              {people.map((person) => (
-                <Tr key={person.id} $clickable onClick={() => navigate(`${person.isMember ? AppRoute.Members : AppRoute.Visitors}/${person.id}`)}>
-                  <Td data-label={text.fields.name}>
-                    <NameCell>
-                      {person.name}
-                      {roleOf(person.id).map((role) => (
-                        <TonePill key={role} $tone="success">
-                          {role}
-                        </TonePill>
-                      ))}
-                    </NameCell>
-                  </Td>
-                  <Td $shrink>
-                    <IconButton
-                      icon={<UserMinus size={14} />}
-                      iconPosition="center"
-                      variant="secondary"
-                      size="sm"
-                      aria-label={`Remover ${person.name}`}
-                      title="Remover"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openRemovePerson(person);
-                      }}
-                    />
-                  </Td>
-                </Tr>
-              ))}
-            </tbody>
-          </Table>
-        </TableWrapper>
+        <div>
+          <PeopleCount count={people.length} />
+          <TableWrapper>
+            <Table>
+              <thead>
+                <tr>
+                  <Th>{text.fields.name}</Th>
+                  <Th $shrink />
+                </tr>
+              </thead>
+              <tbody>
+                {people.map((person) => (
+                  <Tr key={person.id} $clickable onClick={() => navigate(profilePath(person))}>
+                    <Td data-label={text.fields.name}>
+                      <NameCell>
+                        {person.name}
+                        {roleOf(person.id).map((role) => (
+                          <TonePill key={role} $tone="success">
+                            {role}
+                          </TonePill>
+                        ))}
+                      </NameCell>
+                    </Td>
+                    <Td $shrink>
+                      <IconButton
+                        icon={<UserMinus size={14} />}
+                        iconPosition="center"
+                        variant="secondary"
+                        size="sm"
+                        aria-label={`Remover ${person.name}`}
+                        title="Remover"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openRemovePerson(person);
+                        }}
+                      />
+                    </Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableWrapper>
+        </div>
       )}
 
       <AddButton type="button" onClick={openAddMembers}>
@@ -275,20 +286,28 @@ export function CommunityGroupDetailPage() {
   );
 }
 
-interface PeoplePillsProps {
+interface RolePeopleProps {
+  icon: LucideIcon;
+  singular: string;
+  plural: string;
   people: PersonInGroup[];
   emptyText: string;
 }
 
-function PeoplePills({ people, emptyText }: PeoplePillsProps) {
-  if (people.length === 0) return <Typography type="caption">{emptyText}</Typography>;
+function RolePeople({ icon, singular, plural, people, emptyText }: RolePeopleProps) {
   return (
-    <LeaderList>
-      {people.map((person) => (
-        <TonePill key={person.id} $tone="success">
-          {person.name}
-        </TonePill>
-      ))}
-    </LeaderList>
+    <InfoLine icon={icon} label={people.length === 1 ? singular : plural} empty={people.length === 0}>
+      {people.length === 0 ? (
+        emptyText
+      ) : (
+        <LeaderList>
+          {people.map((person) => (
+            <TonePill key={person.id} $tone="success">
+              {person.name}
+            </TonePill>
+          ))}
+        </LeaderList>
+      )}
+    </InfoLine>
   );
 }

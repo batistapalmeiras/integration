@@ -4,25 +4,21 @@ import styled from 'styled-components';
 export const Stack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xl};
-`;
-
-export const GroupSummary = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const SummaryItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xs};
 `;
 
 export const LeaderList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing.xs};
+  min-width: 0;
+
+  & > * {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `;
 
 export const DangerZone = styled.div`

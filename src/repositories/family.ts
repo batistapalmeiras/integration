@@ -22,42 +22,17 @@ export interface FamilyLinks {
 }
 
 export async function getFamily(personId: string): Promise<Family> {
-  const [spouses, parents, children] = await Promise.all([
-    supabase
-      .from('spouse_links')
-      .select('person_a_id, person_b_id')
-      .or(`person_a_id.eq.${personId},person_b_id.eq.${personId}`),
-    supabase.from('parent_links').select('parent_id, role').eq('child_id', personId),
-    supabase.from('parent_links').select('child_id').eq('parent_id', personId),
-  ]);
-  const failure = spouses.error ?? parents.error ?? children.error;
-  if (failure) throw failure;
+  const { data, error } = await supabase.rpc('get_family', { p_person_id: personId });
+  if (error) throw error;
 
-  const spouseRow = spouses.data?.[0];
-  const spouseId = spouseRow
-    ? spouseRow.person_a_id === personId
-      ? spouseRow.person_b_id
-      : spouseRow.person_a_id
-    : null;
-  const fatherId = parents.data?.find((row) => row.role === 'father')?.parent_id ?? null;
-  const motherId = parents.data?.find((row) => row.role === 'mother')?.parent_id ?? null;
-  const childIds = (children.data ?? []).map((row) => row.child_id);
-
-  const ids = [spouseId, fatherId, motherId, ...childIds].filter((id): id is string => !!id);
-  const names = new Map<string, string>();
-  if (ids.length > 0) {
-    const { data, error } = await supabase.from('people').select('id, name').in('id', ids);
-    if (error) throw error;
-    (data ?? []).forEach((person) => names.set(person.id, person.name));
-  }
-
-  const relative = (id: string | null): Relative | null => (id ? { id, name: names.get(id) ?? '' } : null);
+  const relatives = (relation: string) =>
+    data.filter((row) => row.relation === relation).map((row) => ({ id: row.person_id, name: row.name }));
 
   return {
-    spouse: relative(spouseId),
-    father: relative(fatherId),
-    mother: relative(motherId),
-    children: childIds.map((id) => ({ id, name: names.get(id) ?? '' })).sort(byName),
+    spouse: relatives('spouse')[0] ?? null,
+    father: relatives('father')[0] ?? null,
+    mother: relatives('mother')[0] ?? null,
+    children: relatives('child').sort(byName),
   };
 }
 

@@ -1,7 +1,7 @@
 // Local
 import { EntryType } from '../types/church';
 
-export interface CouncilMember {
+interface CouncilMember {
   personId: string;
   name: string;
   entryType: EntryType | null;
@@ -10,8 +10,15 @@ export interface CouncilMember {
 export interface Council {
   id: string;
   meetingDate: string;
+  memberCount: number;
+}
+
+export interface CouncilRoster {
+  council: Council;
   members: CouncilMember[];
 }
+
+export type CouncilDate = Pick<Council, 'id' | 'meetingDate'>;
 
 export const currentCouncil = (councils: Council[]): Council | null =>
   councils.reduce<Council | null>(

@@ -1,7 +1,7 @@
 // Libs
 import { maskCEP, text } from 'bp-kit';
 // Local
-import { Council } from '../../domain/councils';
+import { CouncilDate } from '../../domain/councils';
 import { formatDate } from '../../domain/dates';
 import {
   GENDER_LABELS,
@@ -115,7 +115,7 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
   },
 ];
 
-export function displayValue(record: Partial<MemberRecord>, field: RecordField, councils: Council[] = []): string {
+export function displayValue(record: Partial<MemberRecord>, field: RecordField, councils: CouncilDate[] = []): string {
   const value = record[field.name];
   if (!value) return '';
   if (field.kind === 'council') {

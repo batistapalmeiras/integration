@@ -11,7 +11,7 @@ import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { formatDate } from '../../../domain/dates';
 import { CouncilModal } from '../../../features/councils';
 import { errorMessage } from '../../../lib/queryCache';
-import { useCouncils } from '../../../queries/councils';
+import { useCouncilRoster } from '../../../queries/councils';
 import { AppRoute, COUNCILS_PATH } from '../../../routes/paths';
 import { ENTRY_TYPE_LABELS } from '../../../types/church';
 import { UserRole } from '../../../types/enums';
@@ -21,8 +21,9 @@ export function CouncilRosterPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const { open, close, modal } = useModal('drawer');
-  const { data: councils, loading, error } = useCouncils();
-  const council = councils?.find((item) => item.id === id);
+  const { data, loading, error } = useCouncilRoster(id ?? '');
+  const council = data?.council;
+  const members = data?.members ?? [];
   const isPastor = user?.role === UserRole.Pastor;
 
   if (loading) return <Skeleton $h="320px" />;
@@ -55,9 +56,9 @@ export function CouncilRosterPage() {
         }
       />
 
-      <PeopleCount count={council.members.length} />
+      <PeopleCount count={members.length} />
 
-      {council.members.length === 0 ? (
+      {members.length === 0 ? (
         <Empty
           title="Ninguém aprovado ainda"
           description="Quem for confirmado como membro com este Conselho Administrativo aparece aqui."
@@ -72,7 +73,7 @@ export function CouncilRosterPage() {
               </tr>
             </thead>
             <tbody>
-              {council.members.map((member) => (
+              {members.map((member) => (
                 <Tr
                   key={member.personId}
                   $clickable={isPastor}

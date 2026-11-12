@@ -10,7 +10,6 @@ import { usePerson } from './usePerson';
 const EMPTY_PROFILE: PersonProfileSummary = {
   coffeeDate: null,
   cohortName: null,
-  smallGroupId: null,
   smallGroupName: null,
   ministryNames: [],
   ministryIds: [],

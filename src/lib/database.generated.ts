@@ -1134,6 +1134,14 @@ export type Database = {
           lesson_dates: string[]
         }[]
       }
+      get_family: {
+        Args: { p_person_id: string }
+        Returns: {
+          name: string
+          person_id: string
+          relation: string
+        }[]
+      }
       get_makeup_attendance_context: {
         Args: { p_token: string }
         Returns: {

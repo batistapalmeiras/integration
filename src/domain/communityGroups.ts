@@ -25,7 +25,9 @@ export interface PersonInGroup {
   isMember: boolean;
 }
 
-export interface CommunityGroupWithCount extends CommunityGroup {
+export type GroupOption = Pick<CommunityGroup, 'id' | 'name'>;
+
+export interface CommunityGroupWithCount extends Pick<CommunityGroup, 'id' | 'name' | 'meetingDay'> {
   peopleCount: number;
 }
 

@@ -5,7 +5,7 @@ import { queryKeys } from '../lib/queryKeys';
 import { listMemberBirthdays } from '../repositories/birthdays';
 import { getPersonLessonMakeups } from '../repositories/lessonMakeups';
 import { getFamily } from '../repositories/family';
-import { getMemberProfile, getMemberRecord, getMemberRecordInfo } from '../repositories/memberRecords';
+import { getMemberPage, getMemberProfile } from '../repositories/memberRecords';
 import { listMembershipAlerts } from '../repositories/membership';
 import { listPersonNotes } from '../repositories/personNotes';
 import { fetchPersonProfileSummary } from '../repositories/people';
@@ -20,8 +20,8 @@ export const usePersonMakeups = (personId: string, enabled = true) =>
     enabled: enabled && !!personId,
   });
 
-export const useMemberRecord = (personId: string) =>
-  useQuery(queryKeys.memberRecord(personId), () => getMemberRecord(personId), { enabled: !!personId });
+export const useMemberPage = (personId: string) =>
+  useQuery(queryKeys.memberPage(personId), () => getMemberPage(personId), { enabled: !!personId });
 
 export const useMemberProfile = (personId: string, enabled = true) =>
   useQuery(queryKeys.memberProfile(personId), () => getMemberProfile(personId), { enabled: enabled && !!personId });
@@ -38,5 +38,3 @@ export const usePersonProfileSummary = (personId: string) =>
 export const useFamily = (personId: string) =>
   useQuery(queryKeys.personFamily(personId), () => getFamily(personId), { enabled: !!personId });
 
-export const useMemberRecordInfo = (personId: string) =>
-  useQuery(queryKeys.memberRecordInfo(personId), () => getMemberRecordInfo(personId), { enabled: !!personId });

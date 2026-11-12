@@ -5,6 +5,7 @@ import {
   CommunityGroupWithCount,
   CommunityOverview,
   GroupInput,
+  GroupOption,
   PersonInGroup,
   WeekDay,
 } from '../domain/communityGroups';
@@ -89,35 +90,37 @@ async function replaceGroupRoles(table: Table, id: string, input: GroupInput): P
   if (error) throw error;
 }
 
-async function listGroups(table: Table): Promise<CommunityGroup[]> {
-  if (isSmallGroups(table)) {
-    const { data, error } = await supabase
-      .from('small_groups')
-      .select(SMALL_GROUP_COLUMNS)
-      .order('name');
-    if (error) throw error;
-    return data.map(fromSmallGroup);
-  }
-  const { data, error } = await supabase.from('ministries').select(MINISTRY_COLUMNS).order('name');
+async function listGroups(table: Table): Promise<GroupOption[]> {
+  const { data, error } = await supabase.from(table).select('id, name').order('name');
   if (error) throw error;
-  return data.map(fromMinistry);
+  return data;
 }
 
 async function listGroupsWithCounts(table: Table): Promise<CommunityGroupWithCount[]> {
   if (isSmallGroups(table)) {
     const { data, error } = await supabase
       .from('small_groups')
-      .select(`${SMALL_GROUP_COLUMNS}, people!people_small_group_id_fkey(count)`)
+      .select('id, name, meeting_day, people!people_small_group_id_fkey(count)')
       .order('name');
     if (error) throw error;
-    return data.map((row) => ({ ...fromSmallGroup(row), peopleCount: row.people[0]?.count ?? 0 }));
+    return data.map((row) => ({
+      id: row.id,
+      name: row.name,
+      meetingDay: toWeekDay(row.meeting_day),
+      peopleCount: row.people[0]?.count ?? 0,
+    }));
   }
   const { data, error } = await supabase
     .from('ministries')
-    .select(`${MINISTRY_COLUMNS}, person_ministries!person_ministries_ministry_id_fkey(count)`)
+    .select('id, name, person_ministries!person_ministries_ministry_id_fkey(count)')
     .order('name');
   if (error) throw error;
-  return data.map((row) => ({ ...fromMinistry(row), peopleCount: row.person_ministries[0]?.count ?? 0 }));
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    meetingDay: null,
+    peopleCount: row.person_ministries[0]?.count ?? 0,
+  }));
 }
 
 async function createGroup(table: Table, input: GroupInput): Promise<void> {
@@ -218,7 +221,10 @@ export async function savePersonCommunity(
   smallGroupId: string | null,
   ministryIds: string[],
 ): Promise<Person> {
-  const person = await updatePersonFields(personId, { small_group_id: smallGroupId, updated_at: new Date().toISOString() });
+  const person = await updatePersonFields(personId, {
+    small_group_id: smallGroupId,
+    updated_at: new Date().toISOString(),
+  });
   await setPersonMinistries(personId, ministryIds);
   return person;
 }

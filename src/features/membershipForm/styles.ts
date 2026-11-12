@@ -1,12 +1,6 @@
 // Libs
 import styled from 'styled-components';
 
-export const Stack = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
-`;
-
 export const Hint = styled.p`
   margin: calc(-1 * ${({ theme }) => theme.spacing.sm}) 0 0;
   font-size: ${({ theme }) => theme.typography.caption.fontSize};

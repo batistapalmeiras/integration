@@ -15,23 +15,8 @@ export interface KnownVisitor {
 
 const identity = storedValue<VisitorIdentity>('visitor-identity');
 
-function legacyPhone(): string | null {
-  try {
-    return localStorage.getItem(LEGACY_MEMBERSHIP_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export function loadVisitorIdentity(): VisitorIdentity | null {
-  const saved = identity.load();
-  if (saved) return saved;
-  const phone = legacyPhone();
-  return phone ? { phone } : null;
-}
-
 export function loadKnownVisitor(): KnownVisitor | null {
-  const saved = loadVisitorIdentity();
+  const saved = identity.load();
   return saved?.name ? { phone: saved.phone, name: saved.name } : null;
 }
 

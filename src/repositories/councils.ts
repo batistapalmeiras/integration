@@ -1,5 +1,5 @@
 // Local
-import { Council } from '../domain/councils';
+import { Council, CouncilRoster } from '../domain/councils';
 import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
 import { toEntryType } from '../types/church';
@@ -9,16 +9,27 @@ const UNIQUE_VIOLATION = '23505';
 export async function listCouncils(): Promise<Council[]> {
   const { data, error } = await supabase
     .from('councils')
-    .select('id, meeting_date, people(id, name, entry_type)')
+    .select('id, meeting_date, people(count)')
     .order('meeting_date', { ascending: false });
   if (error) throw error;
   return (data ?? []).map((row) => ({
     id: row.id,
     meetingDate: row.meeting_date,
-    members: row.people
-      .map((person) => ({ personId: person.id, name: person.name, entryType: toEntryType(person.entry_type) }))
-      .sort(byName),
+    memberCount: row.people[0]?.count ?? 0,
   }));
+}
+
+export async function getCouncilRoster(id: string): Promise<CouncilRoster> {
+  const { data, error } = await supabase
+    .from('councils')
+    .select('id, meeting_date, people(id, name, entry_type)')
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  const members = data.people
+    .map((person) => ({ personId: person.id, name: person.name, entryType: toEntryType(person.entry_type) }))
+    .sort(byName);
+  return { council: { id: data.id, meetingDate: data.meeting_date, memberCount: members.length }, members };
 }
 
 function throwCouncilError(error: { code?: string } | null): void {

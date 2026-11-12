@@ -2,7 +2,7 @@
 import { MultiSelect, Select } from 'bp-kit';
 import { Control, Controller } from 'react-hook-form';
 // Local
-import { CommunityGroup } from '../../../domain/communityGroups';
+import { GroupOption } from '../../../domain/communityGroups';
 import { CommunityDeclines } from '../../../domain/membership';
 import { Hint } from '../Detail/styles';
 import { FieldStack } from '../../../components/FormLayout';
@@ -11,11 +11,11 @@ import { CommunityFormValues } from '../validators';
 interface Props {
   control: Control<CommunityFormValues>;
   declines: CommunityDeclines;
-  smallGroups: CommunityGroup[];
-  ministries: CommunityGroup[];
+  smallGroups: GroupOption[];
+  ministries: GroupOption[];
 }
 
-const toOptions = (groups: CommunityGroup[]) => groups.map((g) => ({ value: g.id, label: g.name }));
+const toOptions = (groups: GroupOption[]) => groups.map((g) => ({ value: g.id, label: g.name }));
 
 export function CommunityFields({ control, declines, smallGroups, ministries }: Props) {
   return (

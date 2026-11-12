@@ -25,7 +25,7 @@ interface Props {
 const refreshCouncils = () =>
   Promise.all([
     invalidateQueries(queryKeys.councils),
-    invalidateQueries((key) => key[0] === 'person' && key[2] === 'record-info'),
+    invalidateQueries((key) => key[0] === 'person' && key[2] === 'member-page'),
   ]);
 
 export function CouncilModal({ council, close, onDeleted }: Props) {
@@ -67,7 +67,7 @@ export function CouncilModal({ council, close, onDeleted }: Props) {
   };
 
   if (council && confirmingDelete) {
-    const approved = council.members.length;
+    const approved = council.memberCount;
     return (
       <>
         <ModalTitle onClose={close}>Excluir Conselho Administrativo?</ModalTitle>
