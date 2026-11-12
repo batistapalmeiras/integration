@@ -9,6 +9,7 @@ import {
   listSmallGroupsWithCounts,
 } from '../../../repositories/communityGroups';
 import { errorMessage, invalidateQueries, useQuery } from '../../../lib/queryCache';
+import { countMembers } from '../../../repositories/memberRecords';
 import { queryKeys } from '../../../lib/queryKeys';
 
 export type GroupRow = CommunityGroupWithCount;
@@ -38,6 +39,8 @@ function useGroupsList(
 }
 
 export const useMinistriesList = () => useGroupsList('ministries', listMinistriesWithCounts, createMinistry);
+
+export const useMemberTotal = () => useQuery(queryKeys.memberTotal, countMembers).data;
 
 export const useMinistryVolunteerCount = () => useQuery(queryKeys.ministryVolunteerCount, countMinistryVolunteers).data;
 

@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import { HeartHandshake, Users } from 'lucide-react';
 // Local
-import { BadgeRow, CountBadge } from '../../../components/CountBadge';
+import { BadgeRow, CountBadge, TextBadge } from '../../../components/CountBadge';
+import { percentOf } from '../../../domain/communityGroups';
 import { AppRoute } from '../../../routes/paths';
 import { GroupTable } from '../components/GroupTable';
-import { useMinistriesList, useMinistryVolunteerCount } from '../hooks/useCommunityGroupsList';
+import { useMemberTotal, useMinistriesList, useMinistryVolunteerCount } from '../hooks/useCommunityGroupsList';
 
 export function MinistriesPage() {
   const navigate = useNavigate();
   const { rows, loading, error, add } = useMinistriesList();
   const volunteerCount = useMinistryVolunteerCount();
+  const memberTotal = useMemberTotal();
 
   return (
     <GroupTable
@@ -22,6 +24,9 @@ export function MinistriesPage() {
       error={error}
       counts={
         <BadgeRow>
+          {volunteerCount !== undefined && memberTotal !== undefined && (
+            <TextBadge>{`${percentOf(volunteerCount, memberTotal)}% membros`}</TextBadge>
+          )}
           <CountBadge icon={HeartHandshake} count={rows.length} singular="ministério" plural="ministérios" />
           {volunteerCount !== undefined && (
             <CountBadge icon={Users} count={volunteerCount} singular="voluntário" plural="voluntários" />

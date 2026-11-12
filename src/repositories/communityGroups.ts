@@ -1,4 +1,5 @@
 // Local
+import { COUNTED_MEMBERSHIP_STATUSES } from '../domain/memberRecords';
 import { byName } from '../domain/text';
 import {
   CommunityGroup,
@@ -283,15 +284,27 @@ export const listMinistries = () => listGroups('ministries');
 
 export const listMinistriesWithCounts = () => listGroupsWithCounts('ministries');
 
-async function countDistinctPeople(table: 'person_ministries' | 'person_small_groups'): Promise<number> {
-  const { data, error } = await supabase.from(table).select('person_id');
+const distinctPeople = (rows: { person_id: string }[]) => new Set(rows.map((row) => row.person_id)).size;
+
+export async function countMinistryVolunteers(): Promise<number> {
+  const { data, error } = await supabase
+    .from('person_ministries')
+    .select('person_id, person:people!person_ministries_person_id_fkey!inner(id)')
+    .eq('person.status', 'member')
+    .in('person.membership_status', COUNTED_MEMBERSHIP_STATUSES);
   if (error) throw error;
-  return new Set(data.map((row) => row.person_id)).size;
+  return distinctPeople(data);
 }
 
-export const countMinistryVolunteers = () => countDistinctPeople('person_ministries');
-
-export const countSmallGroupPeople = () => countDistinctPeople('person_small_groups');
+export async function countSmallGroupPeople(): Promise<number> {
+  const { data, error } = await supabase
+    .from('person_small_groups')
+    .select('person_id, person:people!person_small_groups_person_id_fkey!inner(id)')
+    .eq('person.status', 'member')
+    .in('person.membership_status', COUNTED_MEMBERSHIP_STATUSES);
+  if (error) throw error;
+  return distinctPeople(data);
+}
 
 export const createMinistry = (input: GroupInput) => createGroup('ministries', input);
 

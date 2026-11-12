@@ -39,6 +39,8 @@ export interface CommunityOverview {
   ministries: number;
 }
 
+export const percentOf = (part: number, total: number) => (total === 0 ? 0 : Math.round((part / total) * 100));
+
 export interface GroupNames {
   ids: string[];
   names: string[];

@@ -3,6 +3,10 @@ import { LucideIcon } from 'lucide-react';
 // Local
 import { Badge } from './styles';
 
+export function TextBadge({ children }: { children: string }) {
+  return <Badge>{children}</Badge>;
+}
+
 interface Props {
   icon: LucideIcon;
   count: number;
@@ -14,7 +18,7 @@ export function CountBadge({ icon: Icon, count, singular, plural }: Props) {
   return (
     <Badge>
       <Icon size={14} />
-      {count} {count === 1 ? singular : plural}
+      {`${count} ${count === 1 ? singular : plural}`}
     </Badge>
   );
 }
