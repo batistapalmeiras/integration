@@ -1,6 +1,6 @@
 // React
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
 import { Button, Empty, Form, InfoBox, Select, Skeleton, useModal, useToast } from 'bp-kit';
@@ -12,7 +12,7 @@ import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
 import { PageHeader } from '../../components/PageHeader';
 import { PanelTitle } from '../../components/Panel';
 // Local
-import { Council, currentCouncil } from '../../domain/councils';
+import { Council } from '../../domain/councils';
 import { formatDate } from '../../domain/dates';
 import { communityDeclines } from '../../domain/membership';
 import { PersonSensitive } from '../../domain/personSensitive';
@@ -80,16 +80,15 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
     values: { smallGroupIds, ministryIds: [] },
   });
   const familyForm = useForm<FamilyFormValues>({ defaultValues: familyFormValues(family) });
-  const councilForm = useForm<{ councilId: string }>({
-    values: { councilId: currentCouncil(councils)?.id ?? '' },
-  });
+  const councilForm = useForm<{ councilId: string }>({ defaultValues: { councilId: '' } });
+  const councilId = useWatch({ control: councilForm.control, name: 'councilId' });
   const hasCouncil = councils.length > 0;
 
   const submit = community.handleSubmit(async (values) => {
     try {
       if (familyForm.formState.isDirty) await saveFamily(person.id, family, familyForm.getValues());
       await confirmMember({
-        councilId: councilForm.getValues('councilId'),
+        councilId,
         smallGroupIds: values.smallGroupIds,
         ministryIds: values.ministryIds,
       });
@@ -119,6 +118,7 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
               {hasCouncil ? (
                 <FieldGrid>
                   <Select label="Aprovado no Conselho Administrativo de" control={councilForm.control} name="councilId">
+                    <option value="">Selecione</option>
                     {councils.map((council) => (
                       <option key={council.id} value={council.id}>
                         {formatDate(council.meetingDate)}
@@ -163,7 +163,12 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
             </SectionDivider>
 
             <Actions>
-              <Button type="submit" variant="primary" disabled={!hasCouncil || community.formState.isSubmitting}>
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                disabled={!councilId || community.formState.isSubmitting}
+              >
                 {community.formState.isSubmitting ? (
                   'Confirmando...'
                 ) : (

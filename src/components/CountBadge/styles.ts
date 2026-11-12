@@ -21,8 +21,37 @@ export const Badge = styled.div`
   }
 `;
 
+const NARROW_SCREEN = '480px';
+const VERY_NARROW_SCREEN = '400px';
+const SMALLEST_SCREEN = '380px';
+
 export const BadgeRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing.sm};
+
+  @media (max-width: ${NARROW_SCREEN}) {
+    flex-wrap: nowrap;
+    gap: ${({ theme }) => theme.spacing.xs};
+
+    & > * {
+      flex-shrink: 0;
+      gap: ${({ theme }) => theme.spacing.xs};
+      padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+      font-size: 13px;
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: ${VERY_NARROW_SCREEN}) {
+    & > * svg {
+      display: none;
+    }
+  }
+
+  @media (max-width: ${SMALLEST_SCREEN}) {
+    & > * {
+      font-size: 12px;
+    }
+  }
 `;

@@ -11,7 +11,7 @@ import { currentCouncil } from '../../domain/councils';
 import { CouncilModal } from '../../features/councils';
 import { formatDate } from '../../domain/dates';
 import { useCouncils } from '../../queries/councils';
-import { AppRoute, councilPath } from '../../routes/paths';
+import { AppRoute, COUNCILS_PATH } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { ENTRY_TYPE_LABELS } from '../../types/church';
 // Local
@@ -48,7 +48,7 @@ export function MembershipPage() {
             : 'Nenhum Conselho Administrativo criado'}
         </CouncilLabel>
         {council && (
-          <LinkButton icon={<ChevronRight size={16} />} onClick={() => navigate(councilPath(council.id))}>
+          <LinkButton icon={<ChevronRight size={16} />} onClick={() => navigate(COUNCILS_PATH)}>
             Ver lista
           </LinkButton>
         )}

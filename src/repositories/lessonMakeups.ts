@@ -6,29 +6,33 @@ export async function listRecentMakeupNotes(limit: number): Promise<MakeupNote[]
   const { data, error } = await supabase
     .from('lesson_makeups')
     .select(
-      'confirmed_at, notes, attendance:lesson_attendance!inner(enrollment:enrollments!inner(person:people!inner(id, name)), lesson:lessons(number, cohort:cohorts(name)))',
+      'notes, attendance:lesson_attendance!inner(enrollment:enrollments!inner(person:people!inner(id, name)), lesson:lessons(number, date, cohort:cohorts(name)))',
     )
     .not('notes', 'is', null)
-    .neq('notes', '')
-    .order('confirmed_at', { ascending: false, nullsFirst: false })
-    .limit(limit);
+    .neq('notes', '');
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    personId: row.attendance.enrollment.person.id,
-    personName: row.attendance.enrollment.person.name,
-    lessonNumber: row.attendance.lesson.number,
-    cohortName: row.attendance.lesson.cohort.name,
-    confirmedAt: row.confirmed_at,
-    notes: row.notes,
-  }));
+  return (data ?? [])
+    .sort(
+      (a, b) =>
+        b.attendance.lesson.date.localeCompare(a.attendance.lesson.date) ||
+        b.attendance.lesson.number - a.attendance.lesson.number,
+    )
+    .slice(0, limit)
+    .map((row) => ({
+      personId: row.attendance.enrollment.person.id,
+      personName: row.attendance.enrollment.person.name,
+      lessonNumber: row.attendance.lesson.number,
+      cohortName: row.attendance.lesson.cohort.name,
+      notes: row.notes,
+    }));
 }
 
 export async function getPersonLessonMakeups(personId: string): Promise<LessonMakeup[]> {
   const { data, error } = await supabase
     .from('lesson_makeups')
     .select(
-      'confirmed_at, notes, attendance:lesson_attendance!inner(enrollment:enrollments!inner(person_id), lesson:lessons(number, cohort:cohorts(name)))',
+      'notes, attendance:lesson_attendance!inner(enrollment:enrollments!inner(person_id), lesson:lessons(number, cohort:cohorts(name)))',
     )
     .eq('attendance.enrollment.person_id', personId);
   if (error) throw error;
@@ -37,7 +41,6 @@ export async function getPersonLessonMakeups(personId: string): Promise<LessonMa
     .map((row) => ({
       lessonNumber: row.attendance.lesson.number,
       cohortName: row.attendance.lesson.cohort.name,
-      confirmedAt: row.confirmed_at,
       notes: row.notes,
     }))
     .sort((a, b) => a.lessonNumber - b.lessonNumber);

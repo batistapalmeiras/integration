@@ -284,17 +284,14 @@ export type Database = {
       }
       lesson_makeups: {
         Row: {
-          confirmed_at: string | null
           lesson_attendance_id: string
           notes: string | null
         }
         Insert: {
-          confirmed_at?: string | null
           lesson_attendance_id: string
           notes?: string | null
         }
         Update: {
-          confirmed_at?: string | null
           lesson_attendance_id?: string
           notes?: string | null
         }

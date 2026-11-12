@@ -1,7 +1,7 @@
 // Libs
 import { maskPhone } from 'bp-kit';
 // Local
-import { formatDate, formatTimestampDate } from '../../../domain/dates';
+import { formatDate } from '../../../domain/dates';
 import { LessonMakeup } from '../../../domain/lessonMakeups';
 import { communityDeclines } from '../../../domain/membership';
 import { MemberProfile, MemberRecord } from '../../../domain/memberRecords';
@@ -126,9 +126,6 @@ export function membershipSections(
 export function makeupEntries(makeup: LessonMakeup): InfoEntry[] {
   return [
     entry('Aula', `Aula ${makeup.lessonNumber} — ${makeup.cohortName}`),
-    makeup.confirmedAt
-      ? entry('Assistiu à aula em', formatTimestampDate(makeup.confirmedAt))
-      : { label: 'Assistiu à aula em', value: 'Data não registrada', answered: false, wide: false },
     entry('Declarou ter assistido à aula até o final', 'Sim'),
     wideEntry('Teve alguma dúvida ou algo chamou a atenção', makeup.notes),
   ];

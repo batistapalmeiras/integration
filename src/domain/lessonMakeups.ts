@@ -12,7 +12,6 @@ export function getMakeupVideoId(lessonNumber: number): string | null {
 export interface LessonMakeup {
   lessonNumber: number;
   cohortName: string;
-  confirmedAt: string | null;
   notes: string | null;
 }
 
