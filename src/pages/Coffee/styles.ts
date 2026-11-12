@@ -45,12 +45,11 @@ export const IconAction = styled.button<{ $tone?: 'positive' | 'negative' }>`
   }
 `;
 
-export const Hint = styled.p`
+export const DateHint = styled.p`
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
   color: ${({ theme }) => theme.colors.muted};
-  margin-top: 0;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
+  margin: 0;
 `;
 
 export const PresenceTag = styled(TonePill).attrs({ as: 'button', type: 'button' })`
@@ -68,4 +67,14 @@ export const PresenceChoices = styled.div`
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.sm};
   margin-top: ${({ theme }) => theme.spacing.base};
+`;
+
+export const FormButtons = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+
+  & > button {
+    width: 100%;
+  }
 `;

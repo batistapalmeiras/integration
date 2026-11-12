@@ -1,5 +1,5 @@
 // Local
-import { activeNavPath, findNavArea, INTEGRATION_TEAM_NAV_AREAS, PASTOR_NAV_AREAS } from '../../src/routes/navigation';
+import { activeNavPath, findNavArea, isTabPath, INTEGRATION_TEAM_NAV_AREAS, PASTOR_NAV_AREAS } from '../../src/routes/navigation';
 import { AppRoute } from '../../src/routes/paths';
 
 describe('pastor modules', () => {
@@ -29,5 +29,18 @@ describe('active menu item', () => {
   it('picks the most specific path, so Pendências does not light up Membros', () => {
     expect(activeNavPath('/membros/pendencias', [AppRoute.Members, AppRoute.MemberPendencies])).toBe(AppRoute.MemberPendencies);
     expect(activeNavPath('/membros/123', [AppRoute.Members, AppRoute.MemberPendencies])).toBe(AppRoute.Members);
+  });
+});
+
+describe('isTabPath', () => {
+  it('keeps a tab list on screen while its filters live in the path', () => {
+    expect(isTabPath('/cafe-de-boas-vindas/2026-12-06', AppRoute.Coffee)).toBe(true);
+    expect(isTabPath('/visitantes/contato-inicial', AppRoute.Visitors)).toBe(true);
+  });
+
+  it('does not treat details or other screens under a tab as the tab itself', () => {
+    expect(isTabPath('/visitantes/cc3b3af8-00d1-440c-8734-56b412890040', AppRoute.Visitors)).toBe(false);
+    expect(isTabPath(AppRoute.NewVisitor, AppRoute.Visitors)).toBe(false);
+    expect(isTabPath(AppRoute.ArchivedVisitors, AppRoute.Visitors)).toBe(false);
   });
 });

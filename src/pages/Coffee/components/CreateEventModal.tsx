@@ -8,7 +8,7 @@ import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { Hint } from '../styles';
+import { DateHint, FormButtons } from '../styles';
 
 const schema = z.object({ eventDate: z.string().min(1, text.validation.required('a data')) });
 type FormValues = z.infer<typeof schema>;
@@ -76,9 +76,9 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
       <ModalTitle onClose={close}>{initialDate ? 'Editar café de boas-vindas' : 'Novo café de boas-vindas'}</ModalTitle>
       <Form onSubmit={submit}>
         <DatePicker label="Data" control={control} name="eventDate" isDateDisabled={(date) => date.getDay() !== 0} />
-        {eventDate && <Hint>Agendado para {formatDate(eventDate)}, 17h30.</Hint>}
+        {eventDate && <DateHint>Agendado para {formatDate(eventDate)}, 17h30.</DateHint>}
 
-        <ModalActions>
+        <FormButtons>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? (
               'Salvando...'
@@ -89,14 +89,13 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
               </>
             )}
           </Button>
-        </ModalActions>
-
-        {onDelete && (
-          <Button type="button" variant="danger" fullWidth onClick={() => setConfirmingDelete(true)}>
-            <Trash2 size={16} />
-            Cancelar café agendado
-          </Button>
-        )}
+          {onDelete && (
+            <Button type="button" variant="danger" onClick={() => setConfirmingDelete(true)}>
+              <Trash2 size={16} />
+              Cancelar café agendado
+            </Button>
+          )}
+        </FormButtons>
       </Form>
     </>
   );

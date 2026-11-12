@@ -9,6 +9,7 @@ import {
   activeNavPath,
   areaItems,
   findNavArea,
+  isTabPath,
   isNavGroup,
   MORE_TAB_ICON,
   MORE_TAB_LABEL,
@@ -84,7 +85,7 @@ export function Layout({ children }: ILayoutProps) {
     </SideNavLink>
   );
   const hasSidebar = useMediaQuery(SIDEMENU_MEDIA);
-  const isSidebarDestination = navPaths.includes(pathname);
+  const isSidebarDestination = navPaths.some((navPath) => isTabPath(pathname, navPath));
 
   const homeRoute = homeRouteFor();
 
@@ -186,7 +187,7 @@ export function Layout({ children }: ILayoutProps) {
       {shouldShowBottomBar && (
         <BottomBar>
           {bottomTabs.map((item) => {
-            const active = pathname === item.path;
+            const active = isTabPath(pathname, item.path);
             return (
               <BottomTab key={item.path} to={item.path} $active={active}>
                 <TabIcon>

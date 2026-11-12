@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 // Local
 import { UserRole } from '../types/enums';
-import { AppRoute, COUNCILS_PATH } from './paths';
+import { AppRoute, COUNCILS_PATH, isEntityId } from './paths';
 
 export interface NavItem {
   label: string;
@@ -169,8 +169,17 @@ function areaTabPaths(area: NavArea): string[] {
   return [...area.tabs.map((item) => item.path), ...(area.morePath ? [area.morePath] : [])];
 }
 
+const STATIC_ROUTES: string[] = Object.values(AppRoute);
+
+export function isTabPath(pathname: string, tabPath: string): boolean {
+  if (pathname === tabPath) return true;
+  if (!pathname.startsWith(`${tabPath}/`) || STATIC_ROUTES.includes(pathname)) return false;
+  const [firstSegment] = pathname.slice(tabPath.length + 1).split('/');
+  return !isEntityId(firstSegment);
+}
+
 export function findNavArea(areas: NavArea[], pathname: string): NavArea | undefined {
-  return areas.find((area) => areaTabPaths(area).includes(pathname));
+  return areas.find((area) => areaTabPaths(area).some((tabPath) => isTabPath(pathname, tabPath)));
 }
 
 export function findNavAreaById(areas: NavArea[], id: string): NavArea | undefined {
