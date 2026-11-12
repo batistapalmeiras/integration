@@ -24,12 +24,12 @@ export function MinistriesPage() {
       error={error}
       counts={
         <BadgeRow>
-          {volunteerCount !== undefined && memberTotal !== undefined && (
-            <TextBadge>{`${percentOf(volunteerCount, memberTotal)}% membros`}</TextBadge>
-          )}
           <CountBadge icon={HeartHandshake} count={rows.length} singular="ministério" plural="ministérios" />
           {volunteerCount !== undefined && (
             <CountBadge icon={Users} count={volunteerCount} singular="voluntário" plural="voluntários" />
+          )}
+          {volunteerCount !== undefined && memberTotal !== undefined && (
+            <TextBadge>{`${percentOf(volunteerCount, memberTotal)}% membros`}</TextBadge>
           )}
         </BadgeRow>
       }

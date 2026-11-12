@@ -25,11 +25,11 @@ export function SmallGroupsPage() {
       smallGroup
       counts={
         <BadgeRow>
+          <CountBadge icon={UsersRound} count={rows.length} singular="PG" plural="PGs" />
+          {peopleCount !== undefined && <CountBadge icon={Users} count={peopleCount} singular="pessoa" plural="pessoas" />}
           {peopleCount !== undefined && memberTotal !== undefined && (
             <TextBadge>{`${percentOf(peopleCount, memberTotal)}% membros`}</TextBadge>
           )}
-          <CountBadge icon={UsersRound} count={rows.length} singular="PG" plural="PGs" />
-          {peopleCount !== undefined && <CountBadge icon={Users} count={peopleCount} singular="pessoa" plural="pessoas" />}
         </BadgeRow>
       }
       onAdd={add}
