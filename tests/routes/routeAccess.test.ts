@@ -5,6 +5,7 @@ import { canAccess } from '../../src/routes/table';
 import { UserRole } from '../../src/types/enums';
 
 const ROLES = Object.values(UserRole);
+const ID = '5f3c2b1a-9d8e-4f7a-b6c5-1234567890ab';
 
 describe('route access', () => {
   it('lets every role open the dashboard and the profile', () => {
@@ -24,8 +25,8 @@ describe('route access', () => {
   });
 
   it('keeps member records and pastoral screens with the pastor', () => {
-    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/abc`)).toBe(true);
-    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/abc`)).toBe(false);
+    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/${ID}`)).toBe(true);
+    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/${ID}`)).toBe(false);
     expect(canAccess(UserRole.Admin, AppRoute.Birthdays)).toBe(false);
     expect(canAccess(UserRole.Teacher, AppRoute.Visitors)).toBe(false);
   });
@@ -33,7 +34,16 @@ describe('route access', () => {
   it('matches the most specific route, so the new-visitor form is not taken for a visitor id', () => {
     expect(canAccess(UserRole.IntegrationTeam, AppRoute.NewVisitor)).toBe(true);
     expect(canAccess(UserRole.Teacher, AppRoute.NewVisitor)).toBe(false);
-    expect(canAccess(UserRole.Teacher, `${AppRoute.Visitors}/abc`)).toBe(true);
+    expect(canAccess(UserRole.Teacher, `${AppRoute.Visitors}/${ID}`)).toBe(true);
+  });
+
+  it('treats a segment that is not an id as list filters, with the list roles', () => {
+    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/ativo`)).toBe(true);
+    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/ativo/batismo`)).toBe(true);
+    expect(canAccess(UserRole.Teacher, `${AppRoute.Visitors}/arquivado`)).toBe(false);
+    expect(canAccess(UserRole.IntegrationTeam, `${AppRoute.Visitors}/arquivado`)).toBe(true);
+    expect(canAccess(UserRole.Pastor, `${AppRoute.MemberPendencies}/telefone`)).toBe(true);
+    expect(canAccess(UserRole.Admin, `${AppRoute.MemberPendencies}/telefone`)).toBe(false);
   });
 
   it('denies unknown paths and missing roles', () => {

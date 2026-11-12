@@ -1,3 +1,5 @@
+// React
+import { ReactNode } from 'react';
 // Libs
 import { Button, Empty, Skeleton, text, useModal } from 'bp-kit';
 // Components
@@ -16,11 +18,12 @@ interface Props {
   loading: boolean;
   error: string | null;
   smallGroup?: boolean;
+  counts: ReactNode;
   onAdd: (input: GroupInput) => Promise<void>;
   onRowClick: (id: string) => void;
 }
 
-export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup, onAdd, onRowClick }: Props) {
+export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup, counts, onAdd, onRowClick }: Props) {
   const { open, close, modal } = useModal('drawer');
 
   const openAdd = () =>
@@ -37,6 +40,8 @@ export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup
   return (
     <div>
       <PageHeader title={title} back action={<Button onClick={openAdd}>Adicionar</Button>} />
+
+      {!loading && !error && counts}
 
       {loading && <Skeleton $h="240px" />}
       {!loading && error && <Empty title={text.feedback.loadError} description={error} />}

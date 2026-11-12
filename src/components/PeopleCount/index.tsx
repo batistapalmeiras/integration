@@ -1,17 +1,12 @@
 // Libs
 import { Users } from 'lucide-react';
 // Local
-import { Badge } from './styles';
+import { CountBadge } from '../CountBadge';
 
 interface Props {
   count: number;
 }
 
 export function PeopleCount({ count }: Props) {
-  return (
-    <Badge>
-      <Users size={14} />
-      {count} {count === 1 ? 'pessoa' : 'pessoas'}
-    </Badge>
-  );
+  return <CountBadge icon={Users} count={count} singular="pessoa" plural="pessoas" />;
 }

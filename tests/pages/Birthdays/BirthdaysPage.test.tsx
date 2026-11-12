@@ -28,7 +28,7 @@ describe('birthdays page', () => {
     expect(await screen.findByText(`Aniversariantes ${YEAR}`)).toBeInTheDocument();
     const names = screen.getAllByText(/^(Ana|Bruno|Carla)$/).map((node) => node.textContent);
     expect(names).toEqual(['Bruno', 'Ana']);
-    expect(screen.getByText('2 aniversariantes')).toBeInTheDocument();
+    expect(screen.getByText('2 pessoas')).toBeInTheDocument();
   });
 
   it('copies date, name and phone for each person', async () => {

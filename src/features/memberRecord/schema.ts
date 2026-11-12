@@ -17,7 +17,7 @@ export const memberRecordSchema = (optionalPhone: boolean) =>
           optionalPhone ? text.validation.phoneIncomplete : text.validation.required('o celular'),
         ),
       email: z.union([z.string().email(text.validation.emailInvalid), z.literal('')]),
-      membershipStatus: z.enum(['active', 'pending_review', 'inactive', 'transferred', 'removed', 'deceased']),
+      membershipStatus: z.enum(['active', 'transferred', 'removed', 'deceased']),
       birthDate: optional,
       gender: z.enum(['male', 'female', '']),
       maritalStatus: z.enum(['single', 'married', 'widowed', 'divorced', 'stable_union', '']),
@@ -35,6 +35,7 @@ export const memberRecordSchema = (optionalPhone: boolean) =>
       baptismChurch: optional,
       entryType: z.enum(['baptism', 'transfer_letter', 'acclamation', 'reconciliation', '']),
       originChurch: optional,
+      councilId: optional,
     })
     .refine((record) => !isSamePhone(record.otherPhone, record.phone), {
       path: ['otherPhone'],

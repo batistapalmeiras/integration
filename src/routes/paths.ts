@@ -34,3 +34,7 @@ export const confirmMemberPath = (personId: string) => `${AppRoute.Membership}/$
 export const COUNCILS_PATH = `${AppRoute.Reports}/conselho-administrativo`;
 
 export const councilPath = (councilId: string) => `${COUNCILS_PATH}/${councilId}`;
+
+const ENTITY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const isEntityId = (segment: string | undefined) => !!segment && ENTITY_ID.test(segment);

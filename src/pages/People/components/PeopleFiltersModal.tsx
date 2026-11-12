@@ -5,6 +5,7 @@ import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect, RawSel
 import { FilterX } from 'lucide-react';
 // Local
 import { INTEGRATION_STATUSES, PersonStatus, STATUS_META } from '../../../types/person';
+import { ALL_COHORTS } from '../persistence';
 
 const STATUS_OPTIONS = INTEGRATION_STATUSES.map((value) => ({ value, label: STATUS_META[value].label }));
 
@@ -21,7 +22,7 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
   const [cohort, setCohort] = useState(cohortFilter);
   const [statusError, setStatusError] = useState<string | undefined>();
 
-  const noFilters = status.length === 0 && cohort === 'all';
+  const noFilters = status.length === 0 && cohort === ALL_COHORTS;
 
   const apply = () => {
     if (status.length === 0) {
@@ -33,7 +34,7 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
   };
 
   const clear = () => {
-    onApply([], 'all');
+    onApply([], ALL_COHORTS);
     close();
   };
 
@@ -55,7 +56,7 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
         />
 
         <RawSelect label="Turma" value={cohort} onChange={(e) => setCohort(e.target.value)}>
-          <option value="all">Todas</option>
+          <option value={ALL_COHORTS}>Todas</option>
           {cohortNames.map((name) => (
             <option key={name} value={name}>
               {name}

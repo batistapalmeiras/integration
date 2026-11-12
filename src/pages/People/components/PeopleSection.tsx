@@ -11,6 +11,7 @@ import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { AppRoute } from '../../../routes/paths';
 // Local
 import { usePeopleList } from '../hooks/usePeopleList';
+import { ALL_COHORTS } from '../persistence';
 import { PeopleFiltersModal } from './PeopleFiltersModal';
 
 export function PeopleSection() {
@@ -23,9 +24,8 @@ export function PeopleSection() {
     loading,
     error,
     statusFilter,
-    setStatusFilter,
     cohortFilter,
-    setCohortFilter,
+    setFilters,
     search,
     setSearch,
     page,
@@ -34,7 +34,7 @@ export function PeopleSection() {
     hasFilter,
   } = usePeopleList();
 
-  const activeFilterCount = (statusFilter.length > 0 ? 1 : 0) + (cohortFilter !== 'all' ? 1 : 0);
+  const activeFilterCount = (statusFilter.length > 0 ? 1 : 0) + (cohortFilter !== ALL_COHORTS ? 1 : 0);
 
   const openFilters = () =>
     open(
@@ -43,10 +43,7 @@ export function PeopleSection() {
         statusFilter={statusFilter}
         cohortFilter={cohortFilter}
         cohortNames={cohortNames}
-        onApply={(status, cohort) => {
-          setStatusFilter(status);
-          setCohortFilter(cohort);
-        }}
+        onApply={setFilters}
       />,
     );
 

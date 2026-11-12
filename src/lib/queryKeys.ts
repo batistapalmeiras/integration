@@ -52,6 +52,7 @@ export const queryKeys = {
   smallGroups: ['reference', 'small-groups'] as const,
   ministries: ['reference', 'ministries'] as const,
   groupsWithCounts: (type: 'small-groups' | 'ministries') => ['groups', type] as const,
+  ministryVolunteerCount: ['groups', 'ministries', 'volunteer-count'] as const,
   groupDetail: (type: 'small-groups' | 'ministries', id: string) => ['groups', type, id] as const,
 
   volunteers: ['volunteers', 'list'] as const,

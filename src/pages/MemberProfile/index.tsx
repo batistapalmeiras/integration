@@ -10,8 +10,9 @@ import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
 import { Panel, PanelHeader, PanelTitle } from '../../components/Panel';
 // Local
 import { MembershipAlerts } from '../../components/MembershipAlerts';
+import { Council } from '../../domain/councils';
 import { TonePill } from '../../components/StatusPill';
-import { formatDate, formatTimestampDate } from '../../domain/dates';
+import { formatTimestampDate } from '../../domain/dates';
 import {
   canLeavePhoneEmpty,
   MemberRecord,
@@ -20,6 +21,7 @@ import {
 } from '../../domain/memberRecords';
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
 import { errorMessage } from '../../lib/queryCache';
+import { useCouncils } from '../../queries/councils';
 import { MEMBERSHIP_ANSWER_LABELS } from '../../types/church';
 import {
   useFamily,
@@ -63,6 +65,7 @@ export function MemberProfilePage() {
   const notesQuery = usePersonNotes(id);
   const family = useFamily(id).data;
   const info = useMemberRecordInfo(id).data;
+  const councils = useCouncils().data ?? [];
   const record = recordQuery.data ?? null;
   const loadError = errorMessage(recordQuery.error);
 
@@ -86,7 +89,6 @@ export function MemberProfilePage() {
 
   const churchInfo: InfoField[] = info
     ? [
-        { label: 'Aprovado no Conselho Administrativo de', value: info.councilDate ? formatDate(info.councilDate) : '' },
         { label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) },
         {
           label: MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,
@@ -100,6 +102,7 @@ export function MemberProfilePage() {
       key={section.id}
       section={section}
       record={record}
+      councils={councils}
       info={section.id === CHURCH_SECTION ? churchInfo : []}
       onEdit={() => edit(section)}
     />
@@ -182,15 +185,16 @@ interface InfoField {
 interface SectionPanelProps {
   section: RecordSection;
   record: MemberRecord;
+  councils: Council[];
   info: InfoField[];
   onEdit: () => void;
 }
 
-function SectionPanel({ section, record, info, onEdit }: SectionPanelProps) {
+function SectionPanel({ section, record, councils, info, onEdit }: SectionPanelProps) {
   const fields: InfoField[] = [
     ...section.fields.map((field) => ({
       label: field.label,
-      value: displayValue(record, field),
+      value: displayValue(record, field, councils),
       wide: field.kind === 'textarea',
     })),
     ...info,

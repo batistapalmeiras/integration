@@ -1,5 +1,5 @@
 // React
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
@@ -33,11 +33,13 @@ import {
 import { runPipelineMaintenance } from '../../../repositories/integrationPeople';
 import { errorMessage, fetchQuery, setQueryData, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
+import { datePathFilter } from '../../../lib/pathFilters';
+import { useListParams } from '../../../lib/useListParams';
+import { AppRoute } from '../../../routes/paths';
 import { todayKey } from '../../../domain/dates';
 import { comparePeopleByPipeline, toPersonStatus } from '../../../types/person';
 import { AttendeeRow, CoffeeEvent } from '../types';
 
-const PAGE_SIZE = 10;
 const MAX_EVENTS = 2;
 
 type AttendeeState = Pick<AttendeeRow, 'coffee_event_id' | 'presence' | 'presenceEditable' | 'returning'>;
@@ -74,12 +76,14 @@ function buildAttendees(board: CoffeeBoard, selected: CoffeeEvent, open: CoffeeE
   return [...seated, ...returning].sort((a, b) => comparePeopleByPipeline(a.person, b.person));
 }
 
+const FILTERS = [datePathFilter('cafe')];
+
 export function useCoffee() {
   const { user } = useAuthCtx();
+  const list = useListParams({ basePath: AppRoute.Coffee, filters: FILTERS });
+  const selectedDate = list.filter('cafe')[0] ?? null;
   const boardQuery = useQuery(queryKeys.coffeeBoard, fetchCoffeeBoard);
   const board = boardQuery.data;
-  const [selectedEventIdState, setSelectedEventIdState] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
 
   const refreshBoard = () => fetchQuery(queryKeys.coffeeBoard, fetchCoffeeBoard);
 
@@ -94,7 +98,7 @@ export function useCoffee() {
     return selectOpenCoffeeEvents(board.events as CoffeeEvent[], countQueuedFrom(current), todayKey());
   }, [board]);
 
-  const event = events.find((e) => e.id === selectedEventIdState) ?? events.at(-1) ?? null;
+  const event = events.find((e) => e.event_date === selectedDate) ?? events.at(-1) ?? null;
   const selectedEventId = event?.id ?? null;
 
   const allAttendees = useMemo(
@@ -102,38 +106,35 @@ export function useCoffee() {
     [board, event, events],
   );
 
-  const selectEvent = (eventId: string | null) => {
-    setSelectedEventIdState(eventId);
-    setPage(1);
-  };
+  const selectDate = (eventDate: string | null) => list.setFilter('cafe', eventDate ? [eventDate] : []);
 
   const createEvent = async (eventDate: string) => {
     if (events.length >= MAX_EVENTS) {
       throw new Error(`Só é possível ter ${MAX_EVENTS} cafés ao mesmo tempo — encerre um antes de criar outro.`);
     }
-    const newId = await insertCoffeeEvent(eventDate);
-    selectEvent(newId);
+    await insertCoffeeEvent(eventDate);
+    selectDate(eventDate);
     await refreshAfterEventChange();
   };
 
   const updateEvent = async (eventDate: string) => {
     if (!selectedEventId) return;
     await updateCoffeeEventDate(selectedEventId, eventDate);
-    setPage(1);
+    selectDate(eventDate);
     await refreshAfterEventChange();
   };
 
   const deleteSelectedEvent = async () => {
     if (!selectedEventId) return;
     await deleteCoffeeEvent(selectedEventId);
-    selectEvent(null);
+    selectDate(null);
     await refreshAfterEventChange();
   };
 
   const enrollPerson = async (person: EnrollableCoffeePerson) => {
     if (!selectedEventId) return;
     await placeInCoffee(person.id, selectedEventId);
-    setPage(1);
+    list.setPage(1);
     await refreshBoard();
   };
 
@@ -147,7 +148,7 @@ export function useCoffee() {
     } else {
       await unmarkCoffeePresence(attendanceId, personId, personStatus, user?.id);
     }
-    setPage(1);
+    list.setPage(1);
     await refreshBoard();
   };
 
@@ -171,23 +172,21 @@ export function useCoffee() {
     }));
   };
 
-  const totalPages = Math.max(1, Math.ceil(allAttendees.length / PAGE_SIZE));
-  const clampedPage = Math.min(page, totalPages);
-  const attendees = allAttendees.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
+  const { items: attendees, page, totalPages } = list.paginate(allAttendees);
 
   return {
     events,
     canCreateEvent: events.length < MAX_EVENTS,
     event,
     selectedEventId,
-    selectEvent: (eventId: string) => selectEvent(eventId),
+    selectEvent: (eventId: string) => selectDate(events.find((e) => e.id === eventId)?.event_date ?? null),
     attendees,
     totalCount: allAttendees.length,
     loading: boardQuery.loading,
     error: errorMessage(boardQuery.error),
-    page: clampedPage,
+    page,
     totalPages,
-    setPage,
+    setPage: list.setPage,
     createEvent,
     updateEvent,
     deleteSelectedEvent,

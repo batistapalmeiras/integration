@@ -4,23 +4,19 @@ import { EntryType } from '../types/church';
 import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membership';
 import { toOptions } from './text';
 
-export type MembershipStatus = 'active' | 'pending_review' | 'inactive' | 'transferred' | 'removed' | 'deceased';
+export type MembershipStatus = 'active' | 'transferred' | 'removed' | 'deceased';
 
-export const COUNTED_MEMBERSHIP_STATUSES: MembershipStatus[] = ['active', 'pending_review'];
+export const COUNTED_MEMBERSHIP_STATUSES: MembershipStatus[] = ['active'];
 
 export const MEMBERSHIP_STATUS_LABELS: Record<MembershipStatus, string> = {
   active: 'Ativo',
-  pending_review: 'A confirmar',
-  inactive: 'Inativo',
   transferred: 'Transferido',
   removed: 'Desligado',
   deceased: 'Falecido',
 };
 
-export const MEMBERSHIP_STATUS_TONES: Record<MembershipStatus, 'success' | 'warning' | 'neutral'> = {
+export const MEMBERSHIP_STATUS_TONES: Record<MembershipStatus, 'success' | 'neutral'> = {
   active: 'success',
-  pending_review: 'warning',
-  inactive: 'neutral',
   transferred: 'neutral',
   removed: 'neutral',
   deceased: 'neutral',
@@ -47,7 +43,6 @@ export const MARITAL_STATUS_OPTIONS = toOptions(MARITAL_STATUS_LABELS);
 
 export type PendencyField =
   | MembershipAlertCode
-  | 'membership_status'
   | 'phone'
   | 'email'
   | 'birth_date'
@@ -58,7 +53,6 @@ export type PendencyField =
 
 export const PENDENCY_LABELS: Record<PendencyField, string> = {
   ...MEMBERSHIP_ALERT_LABELS,
-  membership_status: 'Situação a confirmar',
   phone: 'Telefone',
   email: 'E-mail',
   birth_date: 'Nascimento',
@@ -69,7 +63,7 @@ export const PENDENCY_LABELS: Record<PendencyField, string> = {
 };
 
 export function isReviewPendency(field: PendencyField): boolean {
-  return field === 'membership_status' || field in MEMBERSHIP_ALERT_LABELS;
+  return field in MEMBERSHIP_ALERT_LABELS;
 }
 
 export interface MemberRecord {
@@ -94,6 +88,7 @@ export interface MemberRecord {
   baptismChurch: string;
   entryType: EntryType | '';
   originChurch: string;
+  councilId: string;
 }
 
 export type MemberProfile = Pick<

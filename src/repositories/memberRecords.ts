@@ -126,7 +126,7 @@ export async function getMemberProfile(personId: string): Promise<MemberProfile>
 
 export async function getMemberRecord(personId: string): Promise<MemberRecord> {
   const [person, profile, sensitive] = await Promise.all([
-    supabase.from('people').select('name, phone, email, membership_status, entry_type').eq('id', personId).single(),
+    supabase.from('people').select('name, phone, email, membership_status, entry_type, council_id').eq('id', personId).single(),
     getMemberProfile(personId),
     supabase.from('person_sensitive').select('birth_date, origin_church').eq('person_id', personId).maybeSingle(),
   ]);
@@ -144,6 +144,7 @@ export async function getMemberRecord(personId: string): Promise<MemberRecord> {
     birthDate: sensitive.data?.birth_date ?? '',
     entryType: toEntryType(member.entry_type) ?? '',
     originChurch: sensitive.data?.origin_church ?? '',
+    councilId: member.council_id ?? '',
   };
 }
 
@@ -151,13 +152,12 @@ export interface MemberRecordInfo {
   createdAt: string;
   origin: string;
   statuteAgreedAt: string | null;
-  councilDate: string | null;
 }
 
 export async function getMemberRecordInfo(personId: string): Promise<MemberRecordInfo> {
   const { data, error } = await supabase
     .from('people')
-    .select('created_at, origin, statute_agreed_at, council:councils(meeting_date)')
+    .select('created_at, origin, statute_agreed_at')
     .eq('id', personId)
     .single();
   if (error) throw error;
@@ -165,7 +165,6 @@ export async function getMemberRecordInfo(personId: string): Promise<MemberRecor
     createdAt: data.created_at,
     origin: data.origin,
     statuteAgreedAt: data.statute_agreed_at,
-    councilDate: data.council?.meeting_date ?? null,
   };
 }
 
@@ -189,6 +188,7 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
         email: blankToNull(record.email),
         membership_status: record.membershipStatus,
         entry_type: record.entryType || null,
+        council_id: record.councilId || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', personId),

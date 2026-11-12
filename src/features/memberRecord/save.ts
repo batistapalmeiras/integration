@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FieldErrors, Resolver } from 'react-hook-form';
 // Local
 import { MemberRecord } from '../../domain/memberRecords';
-import { markPipelineStale, setQueryData } from '../../lib/queryCache';
+import { invalidateQueries, markPipelineStale, setQueryData } from '../../lib/queryCache';
 import { queryKeys } from '../../lib/queryKeys';
 import { saveMemberRecord } from '../../repositories/memberRecords';
 import { memberRecordSchema } from './schema';
@@ -26,4 +26,5 @@ export async function saveRecord(personId: string, record: MemberRecord): Promis
   await saveMemberRecord(personId, record);
   setQueryData(queryKeys.memberRecord(personId), record);
   await markPipelineStale();
+  await invalidateQueries(queryKeys.personProfile(personId));
 }

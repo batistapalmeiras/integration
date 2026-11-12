@@ -1,77 +1,46 @@
-// React
-import { useEffect, useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
+import { pickFrom, useListParams } from '../../../lib/useListParams';
 import { matchesNameOrPhone } from '../../../domain/search';
-import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
-import { visitorFilters, VisitorView } from '../persistence';
+import { VISITOR_FILTERS, visitorFilters, VisitorView } from '../persistence';
 import { Person } from '../../../features/visitors';
 import { listVisitors } from '../../../repositories/people';
 import { VISITOR_QUEUE_STATUSES } from '../../../types/person';
-
-const PAGE_SIZE = 10;
+import { AppRoute } from '../../../routes/paths';
 
 export function useVisitors() {
   const query = useQuery(queryKeys.visitors, listVisitors);
   const rows = query.data ?? [];
-  const [page, setPage] = useState(1);
+  const list = useListParams({ basePath: AppRoute.Visitors, filters: VISITOR_FILTERS, stored: visitorFilters });
+  const view: VisitorView = list.filter('view').includes('archived') ? 'archived' : 'queue';
+  const statusFilter = pickFrom(list.filter('status'), VISITOR_QUEUE_STATUSES);
 
-  const [saved] = useState(() => visitorFilters.load() ?? {});
-  const { search, setSearch: setSearchState, debouncedSearch } = useDebouncedSearch(saved.search ?? '');
-  const [view, setViewState] = useState<VisitorView>(saved.view ?? 'queue');
-  const [statusFilter, setStatusFilterState] = useState<Person['status'][]>(() =>
-    (saved.statusFilter ?? []).filter((status) => VISITOR_QUEUE_STATUSES.includes(status)),
-  );
-
-  useEffect(() => {
-    visitorFilters.save({ view, search, statusFilter });
-  }, [view, search, statusFilter]);
-
-  const setSearch = (value: string) => {
-    setSearchState(value);
-    setPage(1);
-  };
-
-  const setView = (value: VisitorView) => {
-    setViewState(value);
-    setPage(1);
-  };
-
-  const setStatusFilter = (value: Person['status'][]) => {
-    setStatusFilterState(value);
-    setPage(1);
-  };
-
-  const matchesSearch = (person: Person) => matchesNameOrPhone(person, debouncedSearch);
   const queue = rows.filter((person) => VISITOR_QUEUE_STATUSES.includes(person.status));
   const archived = rows.filter((person) => person.status === 'archived');
   const filtered = (view === 'queue' ? queue : archived).filter(
     (person) =>
-      matchesSearch(person) &&
+      matchesNameOrPhone(person, list.debouncedSearch) &&
       (view === 'archived' || statusFilter.length === 0 || statusFilter.includes(person.status)),
   );
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const clampedPage = Math.min(page, totalPages);
-  const pageRows = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
+  const { items, page, totalPages } = list.paginate(filtered);
 
   return {
-    rows: pageRows,
+    rows: items,
     totalCount: filtered.length,
     loading: query.loading,
     error: errorMessage(query.error),
-    page: clampedPage,
+    page,
     totalPages,
-    setPage,
-    search,
-    setSearch,
+    setPage: list.setPage,
+    search: list.search,
+    setSearch: list.setSearch,
     view,
-    setView,
+    setView: (value: VisitorView) => list.setFilter('view', value === 'archived' ? [value] : []),
     queueCount: queue.length,
     archivedCount: archived.length,
     statusFilter,
-    setStatusFilter,
-    hasFilter: !!search.trim() || (view === 'queue' && statusFilter.length > 0),
+    setStatusFilter: (value: Person['status'][]) => list.setFilter('status', value),
+    hasFilter: !!list.search.trim() || (view === 'queue' && statusFilter.length > 0),
   };
 }

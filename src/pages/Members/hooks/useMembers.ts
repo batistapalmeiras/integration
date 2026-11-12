@@ -1,62 +1,40 @@
-// React
-import { useEffect, useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
+import { pickKeys, useListParams } from '../../../lib/useListParams';
 import { matchesNameOrPhone } from '../../../domain/search';
-import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
-import { MembershipStatus } from '../../../domain/memberRecords';
-import { EntryType } from '../../../types/church';
-import { membersFilters } from '../persistence';
+import { MEMBERSHIP_STATUS_LABELS, MembershipStatus } from '../../../domain/memberRecords';
+import { ENTRY_TYPE_LABELS, EntryType } from '../../../types/church';
+import { MEMBERS_FILTERS, membersFilters } from '../persistence';
 import { listMemberRows } from '../../../repositories/memberRecords';
-
-const PAGE_SIZE = 10;
+import { AppRoute } from '../../../routes/paths';
 
 export function useMembers() {
   const query = useQuery(queryKeys.members, listMemberRows);
-  const members = query.data ?? [];
-  const [page, setPage] = useState(1);
-  const [saved] = useState(() => membersFilters.load() ?? {});
-  const { search, setSearch: setSearchState, debouncedSearch } = useDebouncedSearch(saved.search ?? '');
-  const [membershipStatusFilter, setMembershipStatusFilterState] = useState<MembershipStatus[]>(
-    saved.membershipStatusFilter ?? [],
-  );
-  const [entryTypeFilter, setEntryTypeFilterState] = useState<EntryType[]>(saved.entryTypeFilter ?? []);
+  const list = useListParams({ basePath: AppRoute.Members, filters: MEMBERS_FILTERS, stored: membersFilters });
+  const membershipStatusFilter = pickKeys(list.filter('status'), MEMBERSHIP_STATUS_LABELS);
+  const entryTypeFilter = pickKeys(list.filter('entryType'), ENTRY_TYPE_LABELS);
 
-  useEffect(() => {
-    membersFilters.save({ search, membershipStatusFilter, entryTypeFilter });
-  }, [search, membershipStatusFilter, entryTypeFilter]);
-
-  const resetPage =
-    <T>(setter: (value: T) => void) =>
-    (value: T) => {
-      setter(value);
-      setPage(1);
-    };
-
-  const filtered = members.filter(
+  const filtered = (query.data ?? []).filter(
     (member) =>
-      matchesNameOrPhone(member, debouncedSearch) &&
+      matchesNameOrPhone(member, list.debouncedSearch) &&
       (membershipStatusFilter.length === 0 || membershipStatusFilter.includes(member.membership_status)) &&
       (entryTypeFilter.length === 0 || (!!member.entry_type && entryTypeFilter.includes(member.entry_type))),
   );
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
+  const { items, page, totalPages } = list.paginate(filtered);
 
   return {
-    members: filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    members: items,
     totalCount: filtered.length,
-    page: currentPage,
+    page,
     totalPages,
-    setPage,
-    search,
-    setSearch: resetPage(setSearchState),
+    setPage: list.setPage,
+    search: list.search,
+    setSearch: list.setSearch,
     membershipStatusFilter,
-    setMembershipStatusFilter: resetPage(setMembershipStatusFilterState),
     entryTypeFilter,
-    setEntryTypeFilter: resetPage(setEntryTypeFilterState),
-    hasFilter: !!search.trim() || membershipStatusFilter.length > 0 || entryTypeFilter.length > 0,
+    setFilters: (status: MembershipStatus[], entryType: EntryType[]) => list.setFilters({ status, entryType }),
+    hasFilter: !!list.search.trim() || membershipStatusFilter.length > 0 || entryTypeFilter.length > 0,
     loading: query.loading,
     error: errorMessage(query.error),
   };

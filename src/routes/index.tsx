@@ -7,10 +7,12 @@ import { AuthProvider, Skeleton } from 'bp-kit';
 import { Layout } from '../components/Layout';
 import { PasswordGate } from '../components/PasswordGate';
 import { QueryCacheReset } from '../components/QueryCacheReset';
+import { ScrollRestoration } from '../components/ScrollRestoration';
 // Local
 import { supabase } from '../lib/supabase';
 import { memberProfileSource } from '../repositories/profiles';
 import { HomeRedirect } from './HomeRedirect';
+import { IdOrListRoute } from './IdOrListRoute';
 import { AuthPages, ForgotPasswordPage, LoginPage, ResetPasswordPage } from './pages';
 import { AppRoute } from './paths';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -21,6 +23,7 @@ export function AppRouter() {
     <BrowserRouter>
       <AuthProvider client={supabase} profileSource={memberProfileSource}>
         <QueryCacheReset />
+        <ScrollRestoration />
         <Suspense fallback={null}>
           <Routes>
             <Route element={<AuthPages />}>
@@ -39,11 +42,19 @@ export function AppRouter() {
                     <Layout>
                       <Suspense fallback={<Skeleton $h="480px" />}>
                         <Routes>
-                          {PRIVATE_ROUTES.map(({ path, element, roles }) => (
+                          {PRIVATE_ROUTES.map(({ path, element, roles, list }) => (
                             <Route
                               key={path}
                               path={path}
-                              element={roles ? <ProtectedRoute roles={roles}>{element}</ProtectedRoute> : element}
+                              element={
+                                list ? (
+                                  <IdOrListRoute detail={{ element, roles }} list={list} />
+                                ) : roles ? (
+                                  <ProtectedRoute roles={roles}>{element}</ProtectedRoute>
+                                ) : (
+                                  element
+                                )
+                              }
                             />
                           ))}
                           <Route path="*" element={<HomeRedirect />} />

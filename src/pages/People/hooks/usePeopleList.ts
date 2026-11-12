@@ -1,68 +1,41 @@
-// React
-import { useEffect, useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
-import { useDebouncedSearch } from '../../../lib/useDebouncedSearch';
+import { pickFrom, useListParams } from '../../../lib/useListParams';
 import { useCohortNames } from '../../../queries/reference';
 import { INTEGRATION_STATUSES, PersonStatus } from '../../../types/person';
-import { peopleFilters } from '../persistence';
+import { ALL_COHORTS, peopleFilters, peopleFiltersFor } from '../persistence';
 import { listPeople } from '../../../repositories/people';
-
-const PAGE_SIZE = 10;
+import { AppRoute } from '../../../routes/paths';
 
 export function usePeopleList() {
-  const [saved] = useState(() => peopleFilters.load() ?? {});
-  const [statusFilter, setStatusFilterState] = useState<PersonStatus[]>(() =>
-    (saved.statusFilter ?? []).filter((status) => INTEGRATION_STATUSES.includes(status)),
-  );
-  const [cohortFilter, setCohortFilterState] = useState<string>(saved.cohortFilter ?? 'all');
-  const { search, setSearch: setSearchState, debouncedSearch } = useDebouncedSearch(saved.search ?? '');
-  const [page, setPage] = useState(1);
+  const cohortQuery = useCohortNames();
+  const cohortNames = cohortQuery.data ?? [];
+  const list = useListParams({ basePath: AppRoute.People, filters: peopleFiltersFor(cohortNames), stored: peopleFilters });
+  const statusFilter = pickFrom(list.filter('status'), INTEGRATION_STATUSES);
+  const cohortFilter = list.filter('cohort')[0] ?? ALL_COHORTS;
 
-  useEffect(() => {
-    peopleFilters.save({ statusFilter, cohortFilter, search });
-  }, [statusFilter, cohortFilter, search]);
-
-  const filters = { statusFilter, cohortFilter, search: debouncedSearch };
-  const query = useQuery(queryKeys.peopleList(filters), () => listPeople(filters));
+  const filters = { statusFilter, cohortFilter, search: list.debouncedSearch };
+  const waitingForCohorts = list.unresolved && cohortQuery.loading;
+  const query = useQuery(queryKeys.peopleList(filters), () => listPeople(filters), { enabled: !waitingForCohorts });
   const allPeople = query.data ?? [];
-  const cohortNames = useCohortNames().data ?? [];
-
-  const totalCount = allPeople.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const people = allPeople.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const setSearch = (value: string) => {
-    setSearchState(value);
-    setPage(1);
-  };
-
-  const setStatusFilter = (value: PersonStatus[]) => {
-    setStatusFilterState(value);
-    setPage(1);
-  };
-
-  const setCohortFilter = (value: string) => {
-    setCohortFilterState(value);
-    setPage(1);
-  };
+  const { items, page, totalPages } = list.paginate(allPeople);
 
   return {
-    people,
+    people: items,
     cohortNames,
-    totalCount,
-    loading: query.loading,
+    totalCount: allPeople.length,
+    loading: query.loading || waitingForCohorts,
     error: errorMessage(query.error),
     statusFilter,
-    setStatusFilter,
     cohortFilter,
-    setCohortFilter,
-    search,
-    setSearch,
+    setFilters: (status: PersonStatus[], cohort: string) =>
+      list.setFilters({ status, cohort: cohort === ALL_COHORTS ? [] : [cohort] }),
+    search: list.search,
+    setSearch: list.setSearch,
     page,
     totalPages,
-    setPage,
-    hasFilter: !!search.trim() || statusFilter.length > 0 || cohortFilter !== 'all',
+    setPage: list.setPage,
+    hasFilter: !!list.search.trim() || statusFilter.length > 0 || cohortFilter !== ALL_COHORTS,
   };
 }

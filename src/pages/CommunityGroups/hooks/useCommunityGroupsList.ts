@@ -1,6 +1,7 @@
 // Local
 import { CommunityGroupWithCount, GroupInput } from '../../../domain/communityGroups';
 import {
+  countMinistryVolunteers,
   createMinistry,
   createSmallGroup,
   listMinistriesWithCounts,
@@ -36,5 +37,7 @@ function useGroupsList(
 }
 
 export const useMinistriesList = () => useGroupsList('ministries', listMinistriesWithCounts, createMinistry);
+
+export const useMinistryVolunteerCount = () => useQuery(queryKeys.ministryVolunteerCount, countMinistryVolunteers).data;
 
 export const useSmallGroupsList = () => useGroupsList('small-groups', listSmallGroupsWithCounts, createSmallGroup);

@@ -1,6 +1,7 @@
 // Libs
 import { maskCEP, text } from 'bp-kit';
 // Local
+import { Council } from '../../domain/councils';
 import { formatDate } from '../../domain/dates';
 import {
   GENDER_LABELS,
@@ -17,7 +18,8 @@ type FieldKind =
   | { kind: 'email' }
   | { kind: 'date' }
   | { kind: 'textarea'; rows: number }
-  | { kind: 'select'; labels: Record<string, string>; emptyLabel?: string };
+  | { kind: 'select'; labels: Record<string, string>; emptyLabel?: string }
+  | { kind: 'council' };
 
 export type RecordField = { name: keyof MemberRecord; label: string } & FieldKind;
 
@@ -93,6 +95,7 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
         emptyLabel: 'Não informado',
       },
       { name: 'originChurch', label: MEMBERSHIP_ANSWER_LABELS.originChurch, kind: 'text' },
+      { name: 'councilId', label: 'Aprovado no Conselho Administrativo de', kind: 'council' },
     ],
   },
   {
@@ -112,9 +115,13 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
   },
 ];
 
-export function displayValue(record: Partial<MemberRecord>, field: RecordField): string {
+export function displayValue(record: Partial<MemberRecord>, field: RecordField, councils: Council[] = []): string {
   const value = record[field.name];
   if (!value) return '';
+  if (field.kind === 'council') {
+    const council = councils.find((item) => item.id === value);
+    return council ? formatDate(council.meetingDate) : '';
+  }
   if (field.kind === 'date') return formatDate(value);
   if (field.kind === 'select') return field.labels[value] ?? '';
   return value;

@@ -75,7 +75,7 @@ function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember 
   const ministries = useMinistries().data ?? [];
   const community = useForm<CommunityFormValues>({
     resolver: zodResolver(communitySchema),
-    values: { smallGroupIds: person.small_group_id ? [person.small_group_id] : [], ministryIds: [] },
+    values: { smallGroupId: person.small_group_id ?? '', ministryIds: [] },
   });
   const familyForm = useForm<FamilyFormValues>({ defaultValues: familyFormValues(family) });
   const councilForm = useForm<{ councilId: string }>({
@@ -88,7 +88,7 @@ function ConfirmMemberForm({ person, family, sensitive, councils, confirmMember 
       if (familyForm.formState.isDirty) await saveFamily(person.id, family, familyForm.getValues());
       await confirmMember({
         councilId: councilForm.getValues('councilId'),
-        smallGroupId: values.smallGroupIds[0] ?? null,
+        smallGroupId: values.smallGroupId || null,
         ministryIds: values.ministryIds,
       });
       navigate(AppRoute.Membership);

@@ -8,6 +8,7 @@ import { ArrowSwitcher } from '../../components/ArrowSwitcher';
 import { DateBadge } from '../../components/DateBadge';
 import { List, ListChevron, ListGrow, ListItem } from '../../components/List';
 import { PageHeader } from '../../components/PageHeader';
+import { PeopleCount } from '../../components/PeopleCount';
 import { TonePill } from '../../components/StatusPill';
 import {
   birthdayAgeLabel,
@@ -44,7 +45,6 @@ export function BirthdaysPage() {
   const label = monthName(month);
   const birthdays = birthdaysInMonth(data ?? [], month);
   const count = birthdays.length;
-  const caption = loading ? undefined : count === 1 ? '1 aniversariante' : `${count} aniversariantes`;
 
   const copyList = async () => {
     const list = birthdaysListText(birthdays, currentYear, label.toLowerCase(), maskPhone);
@@ -73,12 +73,13 @@ export function BirthdaysPage() {
 
       <ArrowSwitcher
         title={label}
-        caption={caption}
         previousLabel="Mês anterior"
         nextLabel="Próximo mês"
         onPrevious={month > 1 ? () => selectMonth(month - 1) : undefined}
         onNext={month < 12 ? () => selectMonth(month + 1) : undefined}
       />
+
+      {!loading && !error && <PeopleCount count={count} />}
 
       {loading && <Skeleton $h="240px" />}
 

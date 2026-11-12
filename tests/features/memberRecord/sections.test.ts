@@ -29,6 +29,7 @@ const blank: MemberRecord = {
   baptismChurch: '',
   entryType: '',
   originChurch: '',
+  councilId: '',
 };
 
 const section = (id: string) => MEMBER_RECORD_SECTIONS.find((item) => item.id === id)!;
@@ -56,6 +57,12 @@ describe('displayValue', () => {
     expect(displayValue(record, field('gender'))).toBe('Feminino');
     expect(displayValue(record, field('maritalStatus'))).toBe('Casado(a)');
     expect(displayValue(record, field('membershipStatus'))).toBe('Ativo');
+  });
+
+  it('shows the council by its meeting date', () => {
+    const council = { id: 'c1', meetingDate: '2026-11-10', members: [] };
+    expect(displayValue({ ...blank, councilId: 'c1' }, field('councilId'), [council])).toBe('10/11/2026');
+    expect(displayValue({ ...blank, councilId: 'c1' }, field('councilId'))).toBe('');
   });
 
   it('leaves missing data blank', () => {

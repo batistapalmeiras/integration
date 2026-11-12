@@ -1,6 +1,9 @@
 // React
 import { useNavigate } from 'react-router-dom';
+// Libs
+import { UsersRound } from 'lucide-react';
 // Local
+import { CountBadge } from '../../../components/CountBadge';
 import { AppRoute } from '../../../routes/paths';
 import { GroupTable } from '../components/GroupTable';
 import { useSmallGroupsList } from '../hooks/useCommunityGroupsList';
@@ -17,6 +20,7 @@ export function SmallGroupsPage() {
       loading={loading}
       error={error}
       smallGroup
+      counts={<CountBadge icon={UsersRound} count={rows.length} singular="PG" plural="PGs" />}
       onAdd={add}
       onRowClick={(id) => navigate(`${AppRoute.CommunityGroups}/pgs/${id}`)}
     />

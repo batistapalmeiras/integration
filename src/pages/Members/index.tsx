@@ -8,10 +8,10 @@ import { PageHeader } from '../../components/PageHeader';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
-import { MEMBERSHIP_STATUS_LABELS } from '../../domain/memberRecords';
+import { TonePill } from '../../components/StatusPill';
+import { MEMBERSHIP_STATUS_LABELS, MEMBERSHIP_STATUS_TONES } from '../../domain/memberRecords';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
-import { ENTRY_TYPE_LABELS } from '../../types/church';
 import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
 import { useMembers } from './hooks/useMembers';
@@ -29,9 +29,8 @@ export function MembersPage() {
     search,
     setSearch,
     membershipStatusFilter,
-    setMembershipStatusFilter,
     entryTypeFilter,
-    setEntryTypeFilter,
+    setFilters,
     hasFilter,
     loading,
     error,
@@ -46,10 +45,7 @@ export function MembersPage() {
         close={close}
         membershipStatusFilter={membershipStatusFilter}
         entryTypeFilter={entryTypeFilter}
-        onApply={(status, entryType) => {
-          setMembershipStatusFilter(status);
-          setEntryTypeFilter(entryType);
-        }}
+        onApply={setFilters}
       />,
     );
 
@@ -88,9 +84,6 @@ export function MembersPage() {
                 <tr>
                   <Th>{text.fields.name}</Th>
                   <Th $shrink>Situação</Th>
-                  <Th $shrink $hideOnMobile>
-                    Forma de entrada
-                  </Th>
                 </tr>
               </thead>
               <tbody>
@@ -103,9 +96,10 @@ export function MembersPage() {
                     <Td $truncate title={member.name}>
                       {member.name}
                     </Td>
-                    <Td $shrink>{MEMBERSHIP_STATUS_LABELS[member.membership_status]}</Td>
-                    <Td $shrink $hideOnMobile>
-                      {member.entry_type ? ENTRY_TYPE_LABELS[member.entry_type] : '—'}
+                    <Td $shrink>
+                      <TonePill $tone={MEMBERSHIP_STATUS_TONES[member.membership_status]}>
+                        {MEMBERSHIP_STATUS_LABELS[member.membership_status]}
+                      </TonePill>
                     </Td>
                   </Tr>
                 ))}

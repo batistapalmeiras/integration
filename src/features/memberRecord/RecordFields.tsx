@@ -3,9 +3,10 @@ import { Control } from 'react-hook-form';
 // Libs
 import { DatePicker, Select, Textarea, TextInput, text } from 'bp-kit';
 // Local
-import { isFutureDate } from '../../domain/dates';
+import { formatDate, isFutureDate } from '../../domain/dates';
 import { MemberRecord } from '../../domain/memberRecords';
 import { PHONE_PLACEHOLDER } from '../../domain/text';
+import { useCouncils } from '../../queries/councils';
 import { RecordField, RecordSection } from './sections';
 
 interface FieldProps {
@@ -35,6 +36,8 @@ function RecordFieldInput({ field, control }: FieldProps) {
           ))}
         </Select>
       );
+    case 'council':
+      return <CouncilSelect field={field} control={control} />;
     default:
       return (
         <TextInput
@@ -45,6 +48,20 @@ function RecordFieldInput({ field, control }: FieldProps) {
         />
       );
   }
+}
+
+function CouncilSelect({ field, control }: FieldProps) {
+  const councils = useCouncils().data ?? [];
+  return (
+    <Select label={field.label} control={control} name={field.name}>
+      <option value="">Não informado</option>
+      {councils.map((council) => (
+        <option key={council.id} value={council.id}>
+          {formatDate(council.meetingDate)}
+        </option>
+      ))}
+    </Select>
+  );
 }
 
 interface SectionProps {

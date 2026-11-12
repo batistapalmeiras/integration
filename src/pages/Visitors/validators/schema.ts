@@ -18,7 +18,7 @@ export const contactAttemptSchema = z.object({
 export type ContactAttemptFormValues = z.infer<typeof contactAttemptSchema>;
 
 export const communitySchema = z.object({
-  smallGroupIds: z.array(z.string()).max(1),
+  smallGroupId: z.string(),
   ministryIds: z.array(z.string()),
 });
 

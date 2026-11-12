@@ -61,6 +61,10 @@ export const STATUS_META: Record<
   archived: { label: 'Arquivado', tone: 'danger', icon: Archive },
 };
 
+export const STATUS_LABELS: Record<string, string> = Object.fromEntries(
+  Object.entries(STATUS_META).map(([status, meta]) => [status, meta.label]),
+);
+
 export const VISITOR_QUEUE_STATUSES: PersonStatus[] = ['initial_contact', 'retry_contact'];
 
 export const INTEGRATION_STATUSES = (Object.keys(STATUS_META) as PersonStatus[]).filter(

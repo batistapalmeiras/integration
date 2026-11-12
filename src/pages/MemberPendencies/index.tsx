@@ -7,13 +7,13 @@ import { AlertTriangle } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
 import { NameCell, NameText, ReviewFlag, Subline, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
-import { isReviewPendency, PENDENCY_LABELS, PendencyField } from '../../domain/memberRecords';
+import { isReviewPendency, PENDENCY_LABELS } from '../../domain/memberRecords';
 import { AppRoute } from '../../routes/paths';
 import { PageFlexBody, PageFlexWrap, PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 // Local
 import { useMemberPendencies } from './hooks/useMemberPendencies';
 
-const FIELD_OPTIONS = Object.entries(PENDENCY_LABELS) as [PendencyField, string][];
+const FIELD_OPTIONS = Object.entries(PENDENCY_LABELS);
 
 export function MemberPendenciesPage() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export function MemberPendenciesPage() {
             aria-label="Pendência"
             size="sm"
             value={field ?? ''}
-            onChange={(e) => setField((e.target.value || null) as PendencyField | null)}
+            onChange={(e) => setField(e.target.value)}
           >
             <option value="">Todas as pendências</option>
             {FIELD_OPTIONS.map(([value, label]) => (

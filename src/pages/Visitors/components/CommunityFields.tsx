@@ -1,5 +1,5 @@
 // Libs
-import { MultiSelect } from 'bp-kit';
+import { MultiSelect, Select } from 'bp-kit';
 import { Control, Controller } from 'react-hook-form';
 // Local
 import { CommunityGroup } from '../../../domain/communityGroups';
@@ -21,22 +21,14 @@ export function CommunityFields({ control, declines, smallGroups, ministries }: 
   return (
     <>
       <FieldStack>
-        <Controller
-          control={control}
-          name="smallGroupIds"
-          render={({ field, fieldState }) => (
-            <MultiSelect
-              label="Pequeno Grupo"
-              options={toOptions(smallGroups)}
-              value={field.value}
-              onChange={field.onChange}
-              placeholder="Nenhum por enquanto"
-              max={1}
-              searchable={false}
-              error={fieldState.error?.message}
-            />
-          )}
-        />
+        <Select label="Pequeno Grupo" control={control} name="smallGroupId">
+          <option value="">Nenhum por enquanto</option>
+          {smallGroups.map((group) => (
+            <option key={group.id} value={group.id}>
+              {group.name}
+            </option>
+          ))}
+        </Select>
         {declines.smallGroup && <Hint>Na ficha, a pessoa disse que não quer participar de um PG neste momento.</Hint>}
       </FieldStack>
       <FieldStack>

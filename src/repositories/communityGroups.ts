@@ -187,6 +187,12 @@ export const listMinistries = () => listGroups('ministries');
 
 export const listMinistriesWithCounts = () => listGroupsWithCounts('ministries');
 
+export async function countMinistryVolunteers(): Promise<number> {
+  const { data, error } = await supabase.from('person_ministries').select('person_id');
+  if (error) throw error;
+  return new Set(data.map((row) => row.person_id)).size;
+}
+
 export const createMinistry = (input: GroupInput) => createGroup('ministries', input);
 
 export const updateMinistry = (id: string, input: GroupInput) => updateGroup('ministries', id, input);
