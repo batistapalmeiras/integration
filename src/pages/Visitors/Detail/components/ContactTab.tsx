@@ -14,9 +14,10 @@ const RESULT_OPTIONS = Object.entries(RESULT_LABELS).map(([value, label]) => ({ 
 
 interface Props {
   onSubmit: (values: ContactAttemptFormValues) => Promise<void>;
+  onBack: () => void;
 }
 
-export function ContactTab({ onSubmit }: Props) {
+export function ContactTab({ onSubmit, onBack }: Props) {
   const {
     control,
     handleSubmit,
@@ -54,6 +55,9 @@ export function ContactTab({ onSubmit }: Props) {
               Registrar
             </>
           )}
+        </Button>
+        <Button type="button" variant="secondary" onClick={onBack} disabled={isSubmitting}>
+          Voltar
         </Button>
       </FormActions>
     </Form>

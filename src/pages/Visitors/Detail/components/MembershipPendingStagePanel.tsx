@@ -1,12 +1,15 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Card, Typography } from 'bp-kit';
+import { Button } from 'bp-kit';
+import { Check } from 'lucide-react';
+// Components
+import { FormActions } from '../../../../components/FormLayout';
 // Local
-import { RowActions } from '../../../../components/Table';
 import { Person } from '../../../../features/visitors';
 import { confirmMemberPath } from '../../../../routes/paths';
-import { CardHeader, StagePanel } from '../styles';
+import { Hint } from '../styles';
+import { StageCard } from './StageCard';
 
 interface Props {
   person: Person;
@@ -16,17 +19,14 @@ export function MembershipPendingStagePanel({ person }: Props) {
   const navigate = useNavigate();
 
   return (
-    <StagePanel>
-      <Card>
-        <CardHeader>
-          <Typography type="label">Concluiu as 4 aulas e aguarda confirmação como membro</Typography>
-        </CardHeader>
-        <RowActions>
-          <Button variant="primary" onClick={() => navigate(confirmMemberPath(person.id))}>
-            Confirmar como membro
-          </Button>
-        </RowActions>
-      </Card>
-    </StagePanel>
+    <StageCard title="Confirmar como membro">
+      <Hint>Concluiu as 4 aulas e aguarda a confirmação como membro.</Hint>
+      <FormActions>
+        <Button variant="primary" onClick={() => navigate(confirmMemberPath(person.id))}>
+          <Check size={16} />
+          Confirmar como membro
+        </Button>
+      </FormActions>
+    </StageCard>
   );
 }

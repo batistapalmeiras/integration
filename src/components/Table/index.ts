@@ -83,14 +83,6 @@ export const Td = styled.td<{ $hideOnMobile?: boolean; $truncate?: boolean; $shr
     `}
 `;
 
-export const RowActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.xs};
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-`;
-
 export const NameCell = styled.div`
   display: flex;
   flex-direction: column;

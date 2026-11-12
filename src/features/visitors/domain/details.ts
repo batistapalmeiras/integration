@@ -1,34 +1,26 @@
 // Local
-import { formatDate } from '../../../domain/dates';
 import { Person } from './types';
 
-export interface DetailRow {
-  label: string;
-  value: string;
+export type DetailTab = 'integration' | 'membership' | 'makeup';
+
+export const DETAIL_TAB_LABELS: Record<DetailTab, string> = {
+  integration: 'Integração',
+  membership: 'Membresia',
+  makeup: 'Reposição',
+};
+
+const INTEGRATION_REACHED = ['integration', 'membership_pending', 'member'];
+const MEMBERSHIP_REACHED = ['membership_pending', 'member'];
+
+interface DetailAccess {
+  canSeeAnswers: boolean;
+  makeupCount: number;
 }
 
-interface ProfileDetails {
-  coffeeDate: string | null;
-  cohortName: string | null;
-  smallGroupNames: string[];
-  ministryNames: string[];
-}
-
-export function generalDetailRows(person: Person, profile: ProfileDetails, withCommunity: boolean): DetailRow[] {
+export function detailTabs(person: Person, { canSeeAnswers, makeupCount }: DetailAccess): DetailTab[] {
   return [
-    person.visited_on && { label: 'Visitou em', value: formatDate(person.visited_on) },
-    profile.cohortName && { label: 'Turma', value: profile.cohortName },
-    profile.coffeeDate && { label: 'Café', value: formatDate(profile.coffeeDate) },
-    withCommunity &&
-      profile.smallGroupNames.length > 0 && {
-        label: profile.smallGroupNames.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos',
-        value: profile.smallGroupNames.join(', '),
-      },
-    withCommunity &&
-      profile.ministryNames.length > 0 && { label: 'Ministérios', value: profile.ministryNames.join(', ') },
-  ].filter((row): row is DetailRow => !!row);
-}
-
-export function hasPersonDetails(person: Person, profile: ProfileDetails): boolean {
-  return person.status === 'member' || generalDetailRows(person, profile, true).length > 0;
+    canSeeAnswers && INTEGRATION_REACHED.includes(person.status) && ('integration' as const),
+    canSeeAnswers && MEMBERSHIP_REACHED.includes(person.status) && ('membership' as const),
+    makeupCount > 0 && ('makeup' as const),
+  ].filter((tab): tab is DetailTab => !!tab);
 }

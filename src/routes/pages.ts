@@ -33,7 +33,6 @@ export const ProfilePage = lazyPage(() => import('../pages/Profile'), 'ProfilePa
 export const VisitorsPage = lazyPage(() => import('../pages/Visitors'), 'VisitorsPage');
 export const NewVisitorPage = lazyPage(() => import('../pages/Visitors/New'), 'NewVisitorPage');
 export const VisitorDetailPage = lazyPage(() => import('../pages/Visitors/Detail'), 'VisitorDetailPage');
-export const VisitorEditPage = lazyPage(() => import('../pages/Visitors/Edit'), 'VisitorEditPage');
 export const VisitorInfoPage = lazyPage(() => import('../pages/Visitors/Info'), 'VisitorInfoPage');
 export const CoffeePage = lazyPage(() => import('../pages/Coffee'), 'CoffeePage');
 export const ClassesPage = lazyPage(() => import('../pages/Classes'), 'ClassesPage');

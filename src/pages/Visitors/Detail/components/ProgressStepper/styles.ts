@@ -10,9 +10,9 @@ export const Wrapper = styled.div`
   border-radius: ${({ theme }) => theme.rounded.md};
 `;
 
-export const Bars = styled.div`
+export const Bars = styled.div<{ $stages: number }>`
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(${({ $stages }) => $stages}, minmax(0, 1fr));
   gap: ${({ theme }) => theme.spacing.xs};
 `;
 
@@ -22,9 +22,9 @@ export const Bar = styled.span<{ $filled: boolean }>`
   background: ${({ theme, $filled }) => ($filled ? theme.colors.primary : theme.colors.hairline)};
 `;
 
-export const Labels = styled.div`
+export const Labels = styled.div<{ $stages: number }>`
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(${({ $stages }) => $stages}, minmax(0, 1fr));
   gap: ${({ theme }) => theme.spacing.xs};
 `;
 

@@ -2,25 +2,24 @@
 import { ChevronRight } from 'lucide-react';
 import { Card, Typography } from 'bp-kit';
 // Local
-import { hasPersonDetails, Person } from '../../../../features/visitors';
-import { PersonProfileSummary } from '../../../../repositories/people';
+import { DETAIL_TAB_LABELS, Person, useDetailTabs } from '../../../../features/visitors';
 import { PersonCardInfo, PersonCardRow } from '../styles';
 
 interface Props {
   person: Person;
-  profile: PersonProfileSummary;
   onClick: () => void;
 }
 
-export function PersonDetailsCard({ person, profile, onClick }: Props) {
-  if (!hasPersonDetails(person, profile)) return null;
+export function PersonDetailsCard({ person, onClick }: Props) {
+  const { tabs } = useDetailTabs(person);
+  if (tabs.length === 0) return null;
 
   return (
     <Card $hoverable onClick={onClick} role="button" tabIndex={0}>
       <PersonCardRow>
         <PersonCardInfo>
           <Typography type="h6">Detalhes</Typography>
-          <Typography type="caption">Turma, café e comunidade</Typography>
+          <Typography type="caption">{tabs.map((tab) => DETAIL_TAB_LABELS[tab]).join(' · ')}</Typography>
         </PersonCardInfo>
         <ChevronRight size={18} />
       </PersonCardRow>

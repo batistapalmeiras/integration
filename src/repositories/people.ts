@@ -76,12 +76,6 @@ export async function createVisitor(visitor: NewVisitor): Promise<void> {
   if (error) throw error;
 }
 
-export async function fetchPerson(id: string): Promise<Person> {
-  const { data, error } = await supabase.from('people').select('*').eq('id', id).single();
-  if (error) throw error;
-  return toPerson(data);
-}
-
 export async function updatePersonFields(id: string, fields: TableUpdate<'people'>): Promise<Person> {
   const { data, error } = await supabase.from('people').update(fields).eq('id', id).select('*').single();
   if (error) throw error;
@@ -134,33 +128,46 @@ export interface PersonProfileSummary {
   ministryIds: string[];
 }
 
-export async function fetchPersonProfileSummary(personId: string): Promise<PersonProfileSummary> {
-  const { data, error } = await supabase
-    .from('people')
-    .select(
-      'person_small_groups!person_small_groups_person_id_fkey(small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(ministry:ministries!person_ministries_ministry_id_fkey(id, name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))',
-    )
-    .eq('id', personId)
-    .single();
+export interface PersonWithProfile {
+  person: Person;
+  profile: PersonProfileSummary;
+}
+
+export const EMPTY_PROFILE: PersonProfileSummary = {
+  coffeeDate: null,
+  cohortName: null,
+  smallGroupIds: [],
+  smallGroupNames: [],
+  ministryNames: [],
+  ministryIds: [],
+};
+
+const PERSON_WITH_PROFILE_COLUMNS =
+  '*, person_small_groups!person_small_groups_person_id_fkey(small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(ministry:ministries!person_ministries_ministry_id_fkey(id, name)), enrollments(created_at, cohort:cohorts(name)), coffee_attendance(attended, coffee_event:coffee_events(event_date))';
+
+export async function fetchPersonWithProfile(id: string): Promise<PersonWithProfile> {
+  const { data, error } = await supabase.from('people').select(PERSON_WITH_PROFILE_COLUMNS).eq('id', id).single();
+  if (error?.code === 'PGRST116') throw new Error('Este cadastro foi excluído.');
   if (error) throw error;
 
-  const row = data;
-  const latestEnrollment = [...row.enrollments].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
-  const attendedDates = row.coffee_attendance
-    .filter((a) => a.attended && a.coffee_event)
-    .map((a) => a.coffee_event!.event_date)
+  const { person_small_groups, person_ministries, enrollments, coffee_attendance, ...row } = data;
+  const latestEnrollment = [...enrollments].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+  const attendedDates = coffee_attendance
+    .flatMap((attendance) => (attendance.attended && attendance.coffee_event ? [attendance.coffee_event.event_date] : []))
     .sort();
-
-  const smallGroups = groupNames(row.person_small_groups.flatMap((link) => (link.small_group ? [link.small_group] : [])));
-  const ministries = groupNames(row.person_ministries.flatMap((link) => (link.ministry ? [link.ministry] : [])));
+  const smallGroups = groupNames(person_small_groups.flatMap((link) => (link.small_group ? [link.small_group] : [])));
+  const ministries = groupNames(person_ministries.flatMap((link) => (link.ministry ? [link.ministry] : [])));
 
   return {
-    coffeeDate: attendedDates.at(-1) ?? null,
-    cohortName: latestEnrollment?.cohort?.name ?? null,
-    smallGroupIds: smallGroups.ids,
-    smallGroupNames: smallGroups.names,
-    ministryNames: ministries.names,
-    ministryIds: ministries.ids,
+    person: toPerson(row),
+    profile: {
+      coffeeDate: attendedDates.at(-1) ?? null,
+      cohortName: latestEnrollment?.cohort?.name ?? null,
+      smallGroupIds: smallGroups.ids,
+      smallGroupNames: smallGroups.names,
+      ministryNames: ministries.names,
+      ministryIds: ministries.ids,
+    },
   };
 }
 

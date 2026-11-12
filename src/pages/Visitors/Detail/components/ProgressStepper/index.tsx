@@ -7,7 +7,6 @@ const STAGES: { statuses: PersonStatus[]; label: string }[] = [
   { statuses: ['welcome_coffee', 'pending_signup'], label: 'Café' },
   { statuses: ['integration'], label: 'Integração' },
   { statuses: ['membership_pending'], label: 'Membresia' },
-  { statuses: ['member'], label: 'Membro' },
 ];
 
 interface Props {
@@ -15,18 +14,18 @@ interface Props {
 }
 
 export function ProgressStepper({ status }: Props) {
-  if (status === 'archived') return null;
+  if (status === 'archived' || status === 'member') return null;
 
   const currentIndex = STAGES.findIndex((stage) => stage.statuses.includes(status));
 
   return (
     <Wrapper aria-label={`Etapa ${currentIndex + 1} de ${STAGES.length}: ${STAGES[currentIndex].label}`}>
-      <Bars>
+      <Bars $stages={STAGES.length}>
         {STAGES.map((stage, index) => (
           <Bar key={stage.label} $filled={index <= currentIndex} />
         ))}
       </Bars>
-      <Labels>
+      <Labels $stages={STAGES.length}>
         {STAGES.map((stage, index) => (
           <Label key={stage.label} $current={index === currentIndex}>
             {stage.label}

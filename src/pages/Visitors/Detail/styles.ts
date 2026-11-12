@@ -4,6 +4,68 @@ import styled from 'styled-components';
 
 export { Form } from 'bp-kit';
 
+export const Hero = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+
+  @media (max-width: ${({ theme }) => `calc(${theme.breakpoints.tablet} - 1px)`}) {
+    & > :last-child {
+      flex-direction: column;
+    }
+
+    & > :last-child > * + * {
+      border-left: 0;
+      border-top: 1px solid ${({ theme }) => theme.colors.hairline};
+    }
+  }
+`;
+
+export const Layout = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'action' 'side' 'notes';
+  gap: ${({ theme }) => theme.spacing.base};
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-areas: 'action side' 'notes side';
+    align-items: start;
+  }
+`;
+
+export const ActionArea = styled.div`
+  grid-area: action;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.base};
+  min-width: 0;
+`;
+
+export const SideArea = styled.div`
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.base};
+  min-width: 0;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    position: sticky;
+    top: ${({ theme }) => theme.spacing.base};
+  }
+`;
+
+export const NotesArea = styled.div`
+  grid-area: notes;
+  min-width: 0;
+`;
+
+export const StatusLine = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+`;
+
 export const PersonCardRow = styled.div`
   display: flex;
   align-items: center;
@@ -54,31 +116,10 @@ export const SectionStack = styled.div`
   gap: ${({ theme }) => theme.spacing.xl};
 `;
 
-export const DetailsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-export const DetailRow = styled.div`
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.base};
-`;
-
 export const DetailLabel = styled.span`
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
   color: ${({ theme }) => theme.colors.muted};
-`;
-
-export const DetailValue = styled.span`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  font-weight: 400;
-  color: ${({ theme }) => theme.colors.ink};
-  text-align: right;
 `;
 
 export const InfoBoxAction = styled.div`
@@ -113,38 +154,46 @@ export const SensitiveValue = styled.span<{ $muted?: boolean }>`
   overflow-wrap: anywhere;
 `;
 
-export const Steps = styled.ol`
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const Step = styled.li`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-`;
-
-export const StepNumber = styled.span<{ $active: boolean }>`
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: ${({ theme }) => theme.rounded.full};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
-  font-weight: ${({ theme }) => theme.typography.microLabel.fontWeight};
-  background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.surfaceStrong)};
-  color: ${({ theme, $active }) => ($active ? theme.colors.onPrimary : theme.colors.muted)};
-`;
-
 export const StepBody = styled.div`
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.sm};
+`;
+
+export const CompactRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: 0 ${({ theme }) => theme.spacing.xs};
+
+  & > :first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  & > :last-child {
+    flex-shrink: 0;
+    width: auto;
+  }
+`;
+
+export const NoticeBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+`;
+
+export const NoticeText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xxs};
+  min-width: 0;
+`;
+
+export const StageStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.base};
 `;

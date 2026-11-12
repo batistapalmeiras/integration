@@ -1,5 +1,6 @@
 // Libs
 import { InfoBox, Typography } from 'bp-kit';
+import { CheckCircle2 } from 'lucide-react';
 // Local
 import { formatDate } from '../../../domain/dates';
 import { CohortSchedule } from '../../../repositories/publicForms';
@@ -12,9 +13,10 @@ interface Props {
 export function ConfirmationStep({ result }: Props) {
   return (
     <StepStack>
-      <Typography type="p">
-        Inscrição confirmada na turma <strong>{result.cohort_name}</strong>! Suas aulas serão:
-      </Typography>
+      <InfoBox variant="success" icon={CheckCircle2}>
+        Inscrição confirmada na turma <strong>{result.cohort_name}</strong>!
+      </InfoBox>
+      <Typography type="p">Suas aulas serão:</Typography>
       <ConfirmationList>
         {result.lesson_dates.map((date, i) => (
           <li key={date}>

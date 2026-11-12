@@ -6,8 +6,10 @@ import { queryKeys } from '../../../lib/queryKeys';
 import { reactivatePerson } from '../services/reactivatePerson';
 import {
   deletePersonRow,
-  fetchPerson,
+  EMPTY_PROFILE,
+  fetchPersonWithProfile,
   insertStatusHistory,
+  PersonWithProfile,
   updatePersonFields,
   updatePersonStatus,
 } from '../../../repositories/people';
@@ -17,12 +19,16 @@ const MEMBERSHIP_PENDING: PersonStatus = 'membership_pending';
 
 export function usePerson(id: string) {
   const { user } = useAuthCtx();
-  const query = useQuery(queryKeys.person(id), () => fetchPerson(id), { enabled: !!id });
-  const person = query.data ?? null;
+  const query = useQuery(queryKeys.person(id), () => fetchPersonWithProfile(id), { enabled: !!id });
+  const person = query.data?.person ?? null;
+  const profile = query.data?.profile ?? EMPTY_PROFILE;
 
   const applyPerson = (updated: Person) => {
     const previousStatus = person?.status;
-    setQueryData(queryKeys.person(id), updated);
+    setQueryData<PersonWithProfile>(queryKeys.person(id), (current) => ({
+      person: updated,
+      profile: current?.profile ?? EMPTY_PROFILE,
+    }));
     if (previousStatus !== updated.status && [previousStatus, updated.status].includes(MEMBERSHIP_PENDING)) {
       refreshMembershipPendingCount();
     }
@@ -66,6 +72,7 @@ export function usePerson(id: string) {
 
   return {
     person,
+    profile,
     setPerson: applyPerson,
     loading: query.loading,
     error: errorMessage(query.error),

@@ -1,100 +1,46 @@
 // React
 import { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, LinkButton, Skeleton, Tab, useAuthCtx } from 'bp-kit';
-import { Check, Save, UserRound } from 'lucide-react';
+import { Button, LinkButton, Skeleton, Tab, useAuthCtx } from 'bp-kit';
+import { Check, UserRound } from 'lucide-react';
 // Components
 import { Callout, CalloutContent } from '../../../components/Callout';
+import { NotFound } from '../../../components/NotFound';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
-import { communityDeclines } from '../../../domain/membership';
 import { AppRoute, confirmMemberPath } from '../../../routes/paths';
-import { hasRole, LEADERSHIP_ROLES, TEACHING_ROLES, UserRole } from '../../../types/enums';
-import { generalDetailRows, useVisitorProfile } from '../../../features/visitors';
-import { CommunityFields } from '../components/CommunityFields';
-import { communitySchema, CommunityFormValues } from '../validators';
-import { useMemberProfile, usePersonMakeups, usePersonSensitive } from '../../../queries/person';
-import { useMinistries, useSmallGroups } from '../../../queries/reference';
-import {
-  DetailLabel,
-  DetailRow,
-  DetailsList,
-  DetailValue,
-  Form,
-  InfoTabBar,
-  SectionStack,
-} from '../Detail/styles';
-import {
-  DetailContent,
-  EndActions,
-  FieldGrid,
-  Section,
-  SectionDivider,
-  Sections,
-} from '../../../components/FormLayout';
+import { UserRole } from '../../../types/enums';
+import { DETAIL_TAB_LABELS, DetailTab, useDetailTabs, useVisitorProfile } from '../../../features/visitors';
+import { usePersonRecords } from '../../../queries/person';
+import { InfoTabBar, SectionStack } from '../Detail/styles';
+import { DetailContent, Section, SectionDivider, Sections } from '../../../components/FormLayout';
 import { PanelTitle } from '../../../components/Panel';
 import { EntryList } from './EntryList';
 import { integrationEntries, makeupEntries, membershipSections } from './sensitive';
 
-type InfoTab = 'general' | 'integration' | 'membership' | 'makeup';
+const isDetailTab = (value: string | null): value is DetailTab => !!value && value in DETAIL_TAB_LABELS;
 
 export function VisitorInfoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthCtx();
-  const {
-    person,
-    loading,
-    error,
-    profile,
-    updateCommunity,
-  } = useVisitorProfile(id ?? '');
+  const { person, loading, error, profile } = useVisitorProfile(id ?? '');
+  const { tabs, canSeeAnswers, makeups } = useDetailTabs(person);
 
   const [searchParams] = useSearchParams();
-  const [tab, setTab] = useState<InfoTab>(() => (searchParams.get('tab') as InfoTab | null) ?? 'general');
+  const requestedTab = searchParams.get('tab');
+  const [tab, setTab] = useState<DetailTab | null>(isDetailTab(requestedTab) ? requestedTab : null);
   const fromMembershipQueue = searchParams.get('from') === 'membership';
 
-  const canSeeSensitive = hasRole(user?.role, LEADERSHIP_ROLES);
-  const canSeeMakeups = hasRole(user?.role, TEACHING_ROLES);
-  const sensitive = usePersonSensitive(id ?? '', canSeeSensitive).data ?? null;
-  const makeups = usePersonMakeups(id ?? '', canSeeMakeups).data ?? [];
-  const declines = communityDeclines(sensitive);
-  const reachedMembership = !!person && ['membership_pending', 'member'].includes(person.status);
-  const memberProfile = useMemberProfile(id ?? '', canSeeSensitive && reachedMembership).data ?? null;
-
-  const canEditCommunity = user?.role === UserRole.Pastor && person?.status === 'member';
-  const smallGroups = useSmallGroups(canEditCommunity).data ?? [];
-  const ministries = useMinistries(canEditCommunity).data ?? [];
-
-  const {
-    control,
-    handleSubmit,
-    formState: { isSubmitting, isDirty },
-  } = useForm<CommunityFormValues>({
-    resolver: zodResolver(communitySchema),
-    values: { smallGroupIds: profile.smallGroupIds, ministryIds: profile.ministryIds },
-  });
+  const records = usePersonRecords(id ?? '', canSeeAnswers && tabs.length > 0).data;
+  const sensitive = records?.sensitive ?? null;
+  const memberProfile = records?.memberProfile ?? null;
 
   if (loading) return <Skeleton $h="240px" />;
-  if (error || !person) return <Empty title="Visitante não encontrado" description={error ?? ''} />;
+  if (error || !person) return <NotFound title="Cadastro não encontrado" description={error ?? ''} backTo={AppRoute.Visitors} backLabel="Voltar para visitantes" />;
 
-  const reachedIntegration = ['integration', 'membership_pending', 'member'].includes(person.status);
-
-  const tabs: { key: InfoTab; label: string }[] = [
-    { key: 'general', label: 'Geral' },
-    ...(canSeeSensitive && reachedIntegration ? [{ key: 'integration' as InfoTab, label: 'Integração' }] : []),
-    ...(canSeeSensitive && reachedMembership ? [{ key: 'membership' as InfoTab, label: 'Membresia' }] : []),
-    ...(canSeeMakeups && makeups.length > 0 ? [{ key: 'makeup' as InfoTab, label: 'Reposição' }] : []),
-  ];
-
-  const current = tabs.some((t) => t.key === tab) ? tab : 'general';
-
-  const rows = generalDetailRows(person, profile, !canEditCommunity);
-
-  const submit = handleSubmit((values) => updateCommunity(values.smallGroupIds, values.ministryIds));
+  const current = tab && tabs.includes(tab) ? tab : tabs[0];
 
   const showConfirmMember =
     fromMembershipQueue && user?.role === UserRole.Pastor && person.status === 'membership_pending';
@@ -131,22 +77,11 @@ export function VisitorInfoPage() {
       {tabs.length > 1 && (
         <InfoTabBar>
           {tabs.map((item) => (
-            <Tab key={item.key} $active={current === item.key} onClick={() => setTab(item.key)}>
-              {item.label}
+            <Tab key={item} $active={current === item} onClick={() => setTab(item)}>
+              {DETAIL_TAB_LABELS[item]}
             </Tab>
           ))}
         </InfoTabBar>
-      )}
-
-      {current === 'general' && rows.length > 0 && (
-        <DetailsList>
-          {rows.map((row) => (
-            <DetailRow key={row.label}>
-              <DetailLabel>{row.label}</DetailLabel>
-              <DetailValue>{row.value}</DetailValue>
-            </DetailRow>
-          ))}
-        </DetailsList>
       )}
 
       {current === 'integration' && <EntryList entries={integrationEntries(sensitive)} />}
@@ -174,27 +109,6 @@ export function VisitorInfoPage() {
             ),
           )}
         </SectionStack>
-      )}
-
-      {current === 'general' && canEditCommunity && (
-        <Form onSubmit={submit}>
-          <FieldGrid>
-            <CommunityFields control={control} declines={declines} smallGroups={smallGroups} ministries={ministries} />
-          </FieldGrid>
-
-          <EndActions>
-            <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
-              {isSubmitting ? (
-                'Salvando...'
-              ) : (
-                <>
-                  <Save size={16} />
-                  Salvar
-                </>
-              )}
-            </Button>
-          </EndActions>
-        </Form>
       )}
     </DetailContent>
   );

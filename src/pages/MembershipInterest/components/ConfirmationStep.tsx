@@ -16,7 +16,7 @@ export function ConfirmationStep({ eligibility }: Props) {
   return (
     <>
       <InfoBox variant="success" icon={CheckCircle2}>
-        Olá! Recebemos sua ficha de interesse em se tornar membro da nossa igreja.
+        Recebemos sua ficha de interesse em se tornar membro da nossa igreja.
       </InfoBox>
 
       <Typography type="p">Agora, é necessário aguardar a próxima reunião do Conselho Administrativo.</Typography>

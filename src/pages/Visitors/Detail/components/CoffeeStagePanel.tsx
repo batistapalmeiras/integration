@@ -2,12 +2,13 @@
 import { Button, InfoBox, Skeleton, Typography } from 'bp-kit';
 import { Check, Clock, X } from 'lucide-react';
 // Local
-import { RowActions } from '../../../../components/Table';
+import { FormActions } from '../../../../components/FormLayout';
 import { PersonCoffeeAttendance, canMarkCoffeeAttendance } from '../../../../domain/cafeSchedule';
 import { formatDate, todayKey } from '../../../../domain/dates';
 import { classInviteMessage } from '../../../../domain/whatsapp';
 import { Person } from '../../../../features/visitors';
-import { CardHeader, StagePanel } from '../styles';
+import { Hint, StepBody } from '../styles';
+import { StageCard } from './StageCard';
 import { WhatsAppMessageBox } from './WhatsAppMessageBox';
 
 interface Props {
@@ -37,82 +38,72 @@ export function CoffeeStagePanel({
 
   if (!attendance) {
     return (
-      <StagePanel>
-        <CardHeader>
-          <Typography type="label">Presença no café</Typography>
-        </CardHeader>
-        <Typography type="p">
-          Ainda sem vaga em um café. Assim que houver um café agendado, a pessoa entra na lista automaticamente.
-        </Typography>
-      </StagePanel>
+      <StageCard title="Café">
+        <Hint>Ainda sem vaga em um café. Assim que houver um café agendado, a pessoa entra na lista automaticamente.</Hint>
+      </StageCard>
     );
   }
 
   if (!attendance.attended && !canMarkCoffeeAttendance(attendance.eventDate, todayKey())) {
     return (
-      <StagePanel>
-        <CardHeader>
-          <Typography type="label">Presença no café</Typography>
-        </CardHeader>
-        <Typography type="p">
+      <StageCard title="Aguardando o café">
+        <Hint>
           Inscrita no café de {formatDate(attendance.eventDate)}. A presença só pode ser marcada a partir do dia do café.
-        </Typography>
-      </StagePanel>
+        </Hint>
+      </StageCard>
     );
   }
 
   if (!attendance.attended) {
     return (
-      <StagePanel>
-        <CardHeader>
-          <Typography type="label">Presença no café</Typography>
-        </CardHeader>
-        <RowActions>
-          <Button size="sm" variant="secondary" onClick={onMarkNotAttended}>
+      <StageCard title="Registrar presença">
+        <FormActions>
+          <Button variant="secondary" onClick={onMarkNotAttended}>
             <X size={16} />
             Não compareceu
           </Button>
-          <Button size="sm" variant="primary" onClick={onMarkAttended}>
+          <Button variant="primary" onClick={onMarkAttended}>
             <Check size={16} />
             Compareceu
           </Button>
-        </RowActions>
-      </StagePanel>
+        </FormActions>
+      </StageCard>
     );
   }
 
   if (hasCohort === false) {
     return (
-      <StagePanel>
+      <StageCard title="Convidar para a turma">
         <InfoBox variant="warning">
           A próxima turma de Integração ainda não foi aberta. Peça ao pastor ou ao administrador para abrir antes de convidar.
         </InfoBox>
-      </StagePanel>
+      </StageCard>
     );
   }
 
   return (
-    <StagePanel>
+    <StageCard title="Convidar para a turma">
       <WhatsAppMessageBox
         person={person}
         defaultMessage={classInviteMessage(person.name)}
         buttonLabel="Convidar p/ turma"
         rows={12}
+        bare
         onOpen={onClassInviteSent}
       />
-      <CardHeader>
+      <StepBody>
         <Typography type="label">Resposta ao convite</Typography>
-      </CardHeader>
-      <RowActions>
-        <Button size="sm" variant="secondary" onClick={onNoResponse}>
-          <Clock size={16} />
-          Não respondeu
-        </Button>
-        <Button size="sm" variant="secondary" onClick={onDeclined}>
-          <X size={16} />
-          Recusou
-        </Button>
-      </RowActions>
-    </StagePanel>
+        <FormActions>
+          <Button variant="secondary" onClick={onNoResponse}>
+            <Clock size={16} />
+            Não respondeu
+          </Button>
+          <Button variant="secondary" onClick={onDeclined}>
+            <X size={16} />
+            Recusou
+          </Button>
+        </FormActions>
+      </StepBody>
+    </StageCard>
   );
 }

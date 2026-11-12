@@ -1,5 +1,5 @@
 // Local
-import { generalDetailRows, hasPersonDetails, Person } from '../../../../src/features/visitors';
+import { detailTabs, Person } from '../../../../src/features/visitors';
 
 const person: Person = {
   id: 'p1',
@@ -22,25 +22,20 @@ const person: Person = {
   updated_at: '2026-10-04T00:00:00Z',
 };
 
-const emptyProfile = { coffeeDate: null, cohortName: null, smallGroupNames: [], ministryNames: [] };
-
-describe('person details', () => {
-  it('has details when the visit date is known', () => {
-    expect(hasPersonDetails({ ...person, visited_on: '2026-10-04' }, emptyProfile)).toBe(true);
+describe('detailTabs', () => {
+  it('shows the form answers to the leadership once the person reached each stage', () => {
+    expect(detailTabs(person, { canSeeAnswers: true, makeupCount: 0 })).toEqual([]);
+    expect(detailTabs({ ...person, status: 'integration' }, { canSeeAnswers: true, makeupCount: 0 })).toEqual([
+      'integration',
+    ]);
+    expect(detailTabs({ ...person, status: 'member' }, { canSeeAnswers: true, makeupCount: 0 })).toEqual([
+      'integration',
+      'membership',
+    ]);
   });
 
-  it('has no details for a visitor with nothing recorded yet', () => {
-    expect(hasPersonDetails(person, emptyProfile)).toBe(false);
-  });
-
-  it('always has details for a member', () => {
-    expect(hasPersonDetails({ ...person, status: 'member' }, emptyProfile)).toBe(true);
-  });
-
-  it('leaves the community rows out when they are edited on the page', () => {
-    const profile = { ...emptyProfile, smallGroupNames: ['PG Centro'], ministryNames: ['Louvor'] };
-
-    expect(generalDetailRows(person, profile, true).map((row) => row.label)).toEqual(['Pequeno Grupo', 'Ministérios']);
-    expect(generalDetailRows(person, profile, false)).toEqual([]);
+  it('hides the answers from who cannot see them and shows makeups only when there are any', () => {
+    expect(detailTabs({ ...person, status: 'member' }, { canSeeAnswers: false, makeupCount: 0 })).toEqual([]);
+    expect(detailTabs(person, { canSeeAnswers: false, makeupCount: 2 })).toEqual(['makeup']);
   });
 });

@@ -9,6 +9,7 @@ import { ContactStagePanel } from './ContactStagePanel';
 import { IntegrationStagePanel } from './IntegrationStagePanel';
 import { LastContactCard } from './LastContactCard';
 import { MembershipPendingStagePanel } from './MembershipPendingStagePanel';
+import { ArchivedNotice, WaitingNotice } from './StatusNotice';
 
 interface Props {
   detail: ReturnType<typeof useVisitorDetail>;
@@ -29,9 +30,32 @@ export function NextStep({ detail, onContactRegistered }: Props) {
     onContactRegistered();
   };
 
+  const waitingFor = () => {
+    switch (person.status) {
+      case 'initial_contact':
+      case 'retry_contact':
+      case 'welcome_coffee':
+      case 'pending_signup':
+        return canManage ? null : 'a equipe de integração';
+      case 'integration':
+        return canRecordAttendance ? null : 'os professores';
+      case 'membership_pending':
+        return isPastor ? null : 'o pastor';
+      default:
+        return null;
+    }
+  };
+  const waiting = waitingFor();
+
   return (
     <>
-      {canManage && detail.lastAttempt && (
+      {person.status === 'archived' && (
+        <ArchivedNotice canReactivate={canManage} onReactivate={detail.reactivate} />
+      )}
+
+      {waiting && <WaitingNotice who={waiting} />}
+
+      {canManage && person.status !== 'archived' && detail.lastAttempt && (
         <LastContactCard result={detail.lastAttempt.result} onSave={detail.editLastContactAttempt} />
       )}
 

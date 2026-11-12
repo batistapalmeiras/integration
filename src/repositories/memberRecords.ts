@@ -14,6 +14,7 @@ import {
 import { EntryType, toEntryType } from '../types/church';
 import { groupNames } from '../domain/communityGroups';
 import { CouncilDate } from '../domain/councils';
+import { PersonSensitive } from '../domain/personSensitive';
 import { nameFilter, phoneDigits } from '../domain/search';
 import { supabase } from '../lib/supabase';
 
@@ -123,10 +124,22 @@ function toMemberProfile(row: Record<string, string | number | boolean | null> |
   };
 }
 
-export async function getMemberProfile(personId: string): Promise<MemberProfile> {
-  const { data, error } = await supabase.from('member_profiles').select('*').eq('person_id', personId).maybeSingle();
+export interface PersonRecords {
+  sensitive: PersonSensitive | null;
+  memberProfile: MemberProfile | null;
+}
+
+export async function getPersonRecords(personId: string): Promise<PersonRecords> {
+  const { data, error } = await supabase
+    .from('people')
+    .select('person_sensitive(*), member_profiles(*)')
+    .eq('id', personId)
+    .single();
   if (error) throw error;
-  return toMemberProfile(data);
+  return {
+    sensitive: data.person_sensitive,
+    memberProfile: data.member_profiles ? toMemberProfile(data.member_profiles) : null,
+  };
 }
 
 interface MemberRecordInfo {

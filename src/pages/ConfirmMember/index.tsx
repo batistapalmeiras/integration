@@ -8,7 +8,7 @@ import { Check, Plus } from 'lucide-react';
 // Components
 import { EndActions, FieldGrid, Section, SectionDivider, Sections } from '../../components/FormLayout';
 import { MembershipAlerts } from '../../components/MembershipAlerts';
-import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
+import { Columns, WideContent } from '../../components/PageColumns';
 import { PageHeader } from '../../components/PageHeader';
 import { PanelTitle } from '../../components/Panel';
 // Local
@@ -29,7 +29,7 @@ import { CommunityFields } from '../Visitors/components/CommunityFields';
 import { EntryList } from '../Visitors/Info/EntryList';
 import { membershipCommunityEntries } from '../Visitors/Info/sensitive';
 import { CommunityFormValues, communitySchema } from '../Visitors/validators';
-import { Actions } from './styles';
+import { Actions, Answers, CommunityGrid } from './styles';
 
 export function ConfirmMemberPage() {
   const { id = '' } = useParams<{ id: string }>();
@@ -103,29 +103,27 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
       <PageHeader title="Confirmar membro" subtitle={person.name} back />
 
       <Columns>
-        <SideColumn>
+        <Answers>
           <Section aria-label="Respostas da ficha">
             <PanelTitle>Respostas da ficha</PanelTitle>
             <EntryList entries={membershipCommunityEntries(sensitive)} />
           </Section>
           <MembershipAlerts personId={person.id} boxed />
-        </SideColumn>
+        </Answers>
 
         <Form onSubmit={submit}>
           <Sections>
             <Section aria-label="Conselho Administrativo">
               <PanelTitle>Conselho Administrativo</PanelTitle>
               {hasCouncil ? (
-                <FieldGrid>
-                  <Select label="Aprovado no Conselho Administrativo de" control={councilForm.control} name="councilId">
-                    <option value="">Selecione</option>
-                    {councils.map((council) => (
-                      <option key={council.id} value={council.id}>
-                        {formatDate(council.meetingDate)}
-                      </option>
-                    ))}
-                  </Select>
-                </FieldGrid>
+                <Select label="Aprovado no Conselho Administrativo de" control={councilForm.control} name="councilId">
+                  <option value="">Selecione</option>
+                  {councils.map((council) => (
+                    <option key={council.id} value={council.id}>
+                      {formatDate(council.meetingDate)}
+                    </option>
+                  ))}
+                </Select>
               ) : (
                 <>
                   <InfoBox variant="warning">Nenhum Conselho Administrativo criado. Crie um para confirmar.</InfoBox>
@@ -142,14 +140,14 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
             <SectionDivider>
               <Section aria-label="Comunidade">
                 <PanelTitle>Comunidade</PanelTitle>
-                <FieldGrid>
+                <CommunityGrid>
                   <CommunityFields
                     control={community.control}
                     declines={communityDeclines(sensitive)}
                     smallGroups={smallGroups}
                     ministries={ministries}
                   />
-                </FieldGrid>
+                </CommunityGrid>
               </Section>
             </SectionDivider>
 
