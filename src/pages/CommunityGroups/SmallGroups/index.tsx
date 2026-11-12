@@ -1,16 +1,17 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { UsersRound } from 'lucide-react';
+import { Users, UsersRound } from 'lucide-react';
 // Local
-import { CountBadge } from '../../../components/CountBadge';
+import { BadgeRow, CountBadge } from '../../../components/CountBadge';
 import { AppRoute } from '../../../routes/paths';
 import { GroupTable } from '../components/GroupTable';
-import { useSmallGroupsList } from '../hooks/useCommunityGroupsList';
+import { useSmallGroupPeopleCount, useSmallGroupsList } from '../hooks/useCommunityGroupsList';
 
 export function SmallGroupsPage() {
   const navigate = useNavigate();
   const { rows, loading, error, add } = useSmallGroupsList();
+  const peopleCount = useSmallGroupPeopleCount();
 
   return (
     <GroupTable
@@ -20,7 +21,12 @@ export function SmallGroupsPage() {
       loading={loading}
       error={error}
       smallGroup
-      counts={<CountBadge icon={UsersRound} count={rows.length} singular="PG" plural="PGs" />}
+      counts={
+        <BadgeRow>
+          <CountBadge icon={UsersRound} count={rows.length} singular="PG" plural="PGs" />
+          {peopleCount !== undefined && <CountBadge icon={Users} count={peopleCount} singular="pessoa" plural="pessoas" />}
+        </BadgeRow>
+      }
       onAdd={add}
       onRowClick={(id) => navigate(`${AppRoute.CommunityGroups}/pgs/${id}`)}
     />

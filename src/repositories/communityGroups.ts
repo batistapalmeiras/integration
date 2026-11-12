@@ -196,7 +196,7 @@ export async function removePersonFromMinistry(ministryId: string, personId: str
 async function listSmallGroupPeople(id: string): Promise<PersonInGroup[]> {
   const { data, error } = await supabase
     .from('person_small_groups')
-    .select('person:people(id, name, status)')
+    .select('person:people!person_small_groups_person_id_fkey(id, name, status)')
     .eq('small_group_id', id);
   if (error) throw error;
   return (data ?? []).map((row) => toPersonInGroup(row.person)).sort(byName);
@@ -283,11 +283,15 @@ export const listMinistries = () => listGroups('ministries');
 
 export const listMinistriesWithCounts = () => listGroupsWithCounts('ministries');
 
-export async function countMinistryVolunteers(): Promise<number> {
-  const { data, error } = await supabase.from('person_ministries').select('person_id');
+async function countDistinctPeople(table: 'person_ministries' | 'person_small_groups'): Promise<number> {
+  const { data, error } = await supabase.from(table).select('person_id');
   if (error) throw error;
   return new Set(data.map((row) => row.person_id)).size;
 }
+
+export const countMinistryVolunteers = () => countDistinctPeople('person_ministries');
+
+export const countSmallGroupPeople = () => countDistinctPeople('person_small_groups');
 
 export const createMinistry = (input: GroupInput) => createGroup('ministries', input);
 
