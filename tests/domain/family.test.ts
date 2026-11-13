@@ -2,7 +2,7 @@
 import { FAMILY_RELATIONS, relationLabel } from '../../src/domain/family';
 
 describe('family relations', () => {
-  it('keeps each relation to one person, so father and mother are two different options', () => {
+  it('keeps father and mother apart, since they are different words', () => {
     expect(relationLabel('father')).toBe('Pai');
     expect(relationLabel('mother')).toBe('Mãe');
     expect(relationLabel('son_in_law')).toBe('Genro');
@@ -10,23 +10,29 @@ describe('family relations', () => {
     expect(relationLabel('stepmother')).toBe('Madrasta');
   });
 
-  it('never joins two relations in one option', () => {
-    for (const relation of FAMILY_RELATIONS) {
-      expect(relationLabel(relation)).not.toMatch(/ ou |\(|\//);
-    }
+  it('uses one option when the two forms only differ by the ending', () => {
+    expect(relationLabel('child')).toBe('Filho(a)');
+    expect(relationLabel('sibling')).toBe('Irmão(ã)');
+    expect(relationLabel('cousin')).toBe('Primo(a)');
+  });
+
+  it('names the single options by the gender of the relative when it is known', () => {
+    expect(relationLabel('child', 'male')).toBe('Filho');
+    expect(relationLabel('child', 'female')).toBe('Filha');
+    expect(relationLabel('uncle', 'female')).toBe('Tia');
+    expect(relationLabel('sibling', null)).toBe('Irmão(ã)');
+    expect(relationLabel('father', 'female')).toBe('Pai');
   });
 
   it('starts with the spouse and the children, then the grandparents, parents and siblings', () => {
-    expect(FAMILY_RELATIONS.slice(0, 9)).toEqual([
+    expect(FAMILY_RELATIONS.slice(0, 7)).toEqual([
       'spouse',
-      'son',
-      'daughter',
+      'child',
       'grandfather',
       'grandmother',
       'father',
       'mother',
-      'brother',
-      'sister',
+      'sibling',
     ]);
   });
 });

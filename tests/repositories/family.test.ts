@@ -10,10 +10,10 @@ const { calls, supabase } = vi.hoisted(() => {
         calls.push({ fn, args });
         return Promise.resolve({
           data: [
-            { relation: 'mother', person_id: 'p1', name: 'Ana' },
-            { relation: 'son', person_id: 'c1', name: 'Zeca' },
-            { relation: 'spouse', person_id: 's1', name: 'Maria' },
-            { relation: 'unknown', person_id: 'x1', name: 'Fora' },
+            { relation: 'mother', person_id: 'p1', name: 'Ana', gender: 'female' },
+            { relation: 'child', person_id: 'c1', name: 'Zeca', gender: 'male' },
+            { relation: 'spouse', person_id: 's1', name: 'Maria', gender: null },
+            { relation: 'unknown', person_id: 'x1', name: 'Fora', gender: null },
           ],
           error: null,
         });
@@ -31,14 +31,14 @@ describe('family repository', () => {
     const family = await getFamily('me');
 
     expect(family.map((relative) => relative.name)).toEqual(['Maria', 'Zeca', 'Ana']);
-    expect(family[1].relation).toBe('son');
+    expect(family[1]).toMatchObject({ relation: 'child', gender: 'male' });
   });
 
   it('saves every link of the person in one call', async () => {
-    await setFamily('me', [{ relativeId: 'c1', relation: 'son' }]);
+    await setFamily('me', [{ relativeId: 'c1', relation: 'child' }]);
 
     expect(calls).toEqual([
-      { fn: 'set_family_links', args: { p_person_id: 'me', p_links: [{ relative_id: 'c1', relation: 'son' }] } },
+      { fn: 'set_family_links', args: { p_person_id: 'me', p_links: [{ relative_id: 'c1', relation: 'child' }] } },
     ]);
   });
 });

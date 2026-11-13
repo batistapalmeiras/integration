@@ -1,7 +1,6 @@
 // Libs
 import { maskPhone } from 'bp-kit';
 // Local
-import { formatDate } from '../../../domain/dates';
 import { LessonMakeup } from '../../../domain/lessonMakeups';
 import { communityDeclines } from '../../../domain/membership';
 import { MemberProfile, MemberRecord } from '../../../domain/memberRecords';
@@ -110,10 +109,6 @@ export function membershipSections(
     {
       title: SERVE_STEP_TITLE,
       entries: [
-        entry(
-          MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,
-          person.statute_agreed_at ? formatDate(person.statute_agreed_at.slice(0, 10)) : null,
-        ),
         entry(MEMBERSHIP_ANSWER_LABELS.secretSociety, data?.secret_society),
         wideEntry(MEMBERSHIP_ANSWER_LABELS.wantsSmallGroup, smallGroupAnswer(data, smallGroupNames)),
         { ...ministryInterests, wide: true },

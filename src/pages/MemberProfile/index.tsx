@@ -24,7 +24,6 @@ import {
 } from '../../domain/memberRecords';
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
 import { errorMessage } from '../../lib/queryCache';
-import { MEMBERSHIP_ANSWER_LABELS } from '../../types/church';
 import { useFamily, useMemberPage, usePersonNotes } from '../../queries/person';
 import { CommunityModal } from './components/CommunityModal';
 import { EditSectionModal } from './components/EditSectionModal';
@@ -75,10 +74,6 @@ export function MemberProfilePage() {
 
   const churchInfo: InfoField[] = [
     { label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) },
-    {
-      label: MEMBERSHIP_ANSWER_LABELS.statuteAgreedAt,
-      value: info.statuteAgreedAt ? formatTimestampDate(info.statuteAgreedAt) : '',
-    },
   ];
 
   const renderPanel = (section: RecordSection) => (
@@ -144,7 +139,7 @@ export function MemberProfilePage() {
                   <FamilyPanel
                     key="family"
                     family={family}
-                    onEdit={() => open(<FamilyModal personId={id} family={family} close={close} />)}
+                    onEdit={() => open(<FamilyModal personId={id} personName={record.name} family={family} close={close} />)}
                   />,
                 ]
               : [renderPanel(section)],

@@ -1,8 +1,9 @@
 // Local
 import { STATUS_LABELS } from '../types/person';
+import { isDirectSignup } from './origin';
 import { formatDate, timestampDateKey } from './dates';
 import { MEMBERSHIP_STATUS_LABELS } from './memberRecords';
-import { actorName, sortTimeline, TimelineEntry } from './timeline';
+import { actorName, sortTimeline, SYSTEM_ACTOR, TimelineEntry } from './timeline';
 
 interface StatusChangeSource {
   fromStatus: string | null;
@@ -19,6 +20,16 @@ export interface TimelineSource {
   cohortName: string | null;
   membershipInterestSentAt: string | null;
 }
+
+const AUTOMATIC_NOTES = [
+  'Não se inscreveu na turma até o início da primeira aula',
+  'Concluiu as aulas de Integração com a ficha de interesse já preenchida',
+];
+
+const changeActor = (change: StatusChangeSource): string | null => {
+  if (change.authorName) return actorName(change.authorName);
+  return change.note && AUTOMATIC_NOTES.includes(change.note) ? SYSTEM_ACTOR : null;
+};
 
 const statusName = (status: string | null) => (status ? (STATUS_LABELS[status] ?? status) : 'Sem status');
 
@@ -57,7 +68,7 @@ export function visitTimeline(source: TimelineSource): TimelineEntry[] {
       at: change.changedAt,
       label,
       detail: change.note && change.note !== label ? change.note : null,
-      actor: actorName(change.authorName),
+      actor: changeActor(change),
     });
   });
 
@@ -97,7 +108,6 @@ interface MemberEventSource {
 export interface MembershipSource {
   origin: string;
   createdAt: string;
-  statuteAgreedAt: string | null;
   membershipInterestSentAt: string | null;
   councilDate: string | null;
   changes: StatusChangeSource[];
@@ -107,6 +117,7 @@ export interface MembershipSource {
 }
 
 const BULK_JOIN_WINDOW_MS = 24 * 60 * 60 * 1000;
+const PASTOR_ACTOR = 'Pastor';
 const SAME_SAVE_WINDOW_MS = 60 * 1000;
 
 const ROLE_LABELS: Record<string, string> = { leader: 'Líder', host: 'Anfitrião' };
@@ -179,8 +190,19 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
       ),
     );
   }
-  if (source.statuteAgreedAt) {
-    entries.push(entry(timestampDateKey(source.statuteAgreedAt), source.statuteAgreedAt, 'Aceitou o estatuto'));
+  if (isDirectSignup(source.origin)) {
+    source.changes
+      .filter((change) => change.toStatus === 'membership_pending')
+      .forEach((change) => {
+        entries.push(
+          entry(
+            timestampDateKey(change.changedAt),
+            change.changedAt,
+            'Preencheu o cadastro de membresia',
+            changeActor(change),
+          ),
+        );
+      });
   }
   source.changes
     .filter((change) => change.toStatus === 'member')
@@ -190,7 +212,7 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
           timestampDateKey(change.changedAt),
           change.changedAt,
           'Confirmado como membro',
-          actorName(change.authorName),
+          changeActor(change),
         ),
       );
     });
@@ -203,7 +225,7 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
   const recordedJoin = (kind: string, name: string) =>
     source.events.some((event) => event.event === `${kind}_joined` && event.name === name);
   source.communityJoins
-    .filter((join) => new Date(join.joinedAt).getTime() - memberSince > BULK_JOIN_WINDOW_MS)
+    .filter((join) => source.origin !== 'imported' || new Date(join.joinedAt).getTime() - memberSince > BULK_JOIN_WINDOW_MS)
     .filter((join) => !recordedJoin(join.kind, join.name))
     .forEach((join) => {
       entries.push(
@@ -211,6 +233,7 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
           timestampDateKey(join.joinedAt),
           join.joinedAt,
           join.kind === 'small_group' ? `Entrou no Pequeno Grupo ${join.name}` : `Passou a servir em ${join.name}`,
+          PASTOR_ACTOR,
         ),
       );
     });

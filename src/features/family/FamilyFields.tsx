@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Control, Controller, useForm } from 'react-hook-form';
 // Libs
-import { BaseInput, Button, IconButton, LinkButton, Select } from 'bp-kit';
+import { Button, IconButton, LinkButton, Select, Typography } from 'bp-kit';
 import { Plus, Trash2 } from 'lucide-react';
 // Components
 import { WideField } from '../../components/FormLayout';
@@ -15,6 +15,7 @@ import { Relative } from '../../repositories/family';
 import { FamilyFormValues, FamilyLinkValue } from './form';
 
 interface ListProps {
+  personName: string;
   value: FamilyLinkValue[];
   onChange: (links: FamilyLinkValue[]) => void;
   candidates: { id: string; name: string }[];
@@ -27,11 +28,12 @@ interface PickerValues {
 
 const EMPTY_PICK: PickerValues = { relation: '', relativeId: '' };
 
-function FamilyList({ value, onChange, candidates }: ListProps) {
+function FamilyList({ personName, value, onChange, candidates }: ListProps) {
   const [picking, setPicking] = useState(false);
   const picker = useForm<PickerValues>({ defaultValues: EMPTY_PICK });
   const picked = picker.watch();
   const names = new Map(candidates.map((candidate) => [candidate.id, candidate.name]));
+  const pickedName = names.get(picked.relativeId);
   const available = candidates.filter((candidate) => !value.some((link) => link.relativeId === candidate.id));
 
   const rows = value
@@ -54,8 +56,7 @@ function FamilyList({ value, onChange, candidates }: ListProps) {
   };
 
   return (
-    <BaseInput label="Família">
-      <ItemStack>
+    <ItemStack>
         {rows.length > 0 && (
           <ItemRows>
             {rows.map((row) => (
@@ -96,7 +97,12 @@ function FamilyList({ value, onChange, candidates }: ListProps) {
                 </option>
               ))}
             </Select>
-            <Button type="button" variant="primary" disabled={!picked.relation || !picked.relativeId} onClick={add}>
+            {pickedName && isFamilyRelation(picked.relation) && (
+            <Typography type="caption">
+              {pickedName} é {relationLabel(picked.relation).toLowerCase()} de {personName}.
+            </Typography>
+          )}
+          <Button type="button" variant="primary" disabled={!picked.relation || !picked.relativeId} onClick={add}>
               <Plus size={16} />
               Adicionar
             </Button>
@@ -110,18 +116,18 @@ function FamilyList({ value, onChange, candidates }: ListProps) {
             {rows.length > 0 ? 'Adicionar outro familiar' : 'Adicionar familiar'}
           </Button>
         )}
-      </ItemStack>
-    </BaseInput>
+    </ItemStack>
   );
 }
 
 interface Props {
   personId: string;
+  personName: string;
   family: Relative[];
   control: Control<FamilyFormValues>;
 }
 
-export function FamilyFields({ personId, family, control }: Props) {
+export function FamilyFields({ personId, personName, family, control }: Props) {
   const members = (useMemberNames().data ?? []).filter((member) => member.id !== personId);
   const candidates = [...members, ...family.filter((relative) => !members.some((member) => member.id === relative.id))];
 
@@ -130,7 +136,9 @@ export function FamilyFields({ personId, family, control }: Props) {
       <Controller
         control={control}
         name="links"
-        render={({ field }) => <FamilyList value={field.value} onChange={field.onChange} candidates={candidates} />}
+        render={({ field }) => (
+          <FamilyList personName={personName} value={field.value} onChange={field.onChange} candidates={candidates} />
+        )}
       />
     </WideField>
   );

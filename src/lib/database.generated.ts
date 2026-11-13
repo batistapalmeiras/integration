@@ -602,6 +602,7 @@ export type Database = {
           phone: string | null
           signup_window_from: string | null
           status: string
+          membership_form_at: string | null
           statute_agreed_at: string | null
           updated_at: string
           visited_on: string | null
@@ -623,6 +624,7 @@ export type Database = {
           phone?: string | null
           signup_window_from?: string | null
           status?: string
+          membership_form_at?: string | null
           statute_agreed_at?: string | null
           updated_at?: string
           visited_on?: string | null
@@ -644,6 +646,7 @@ export type Database = {
           phone?: string | null
           signup_window_from?: string | null
           status?: string
+          membership_form_at?: string | null
           statute_agreed_at?: string | null
           updated_at?: string
           visited_on?: string | null
@@ -1164,6 +1167,7 @@ export type Database = {
       get_family: {
         Args: { p_person_id: string }
         Returns: {
+          gender: string | null
           name: string
           person_id: string
           relation: string
@@ -1194,6 +1198,7 @@ export type Database = {
       get_family_links: {
         Args: { p_person_id: string }
         Returns: {
+          gender: string | null
           name: string
           person_id: string
           relation: string

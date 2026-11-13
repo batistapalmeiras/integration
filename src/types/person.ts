@@ -35,7 +35,6 @@ export interface Person {
   signup_window_from: string | null;
   membership_interest_sent_at: string | null;
   entry_type: string | null;
-  statute_agreed_at: string | null;
   coffee_retry_used: boolean;
   origin: string;
   membership_status: string | null;

@@ -27,7 +27,7 @@ set local request.jwt.claims = '{"sub": "f0000000-0000-4000-8000-0000000003a1", 
 
 select lives_ok(
   $$ select public.set_family_links('f0000000-0000-4000-8000-0000000003b2', '[
-       {"relative_id": "f0000000-0000-4000-8000-0000000003b3", "relation": "daughter"},
+       {"relative_id": "f0000000-0000-4000-8000-0000000003b3", "relation": "child"},
        {"relative_id": "f0000000-0000-4000-8000-0000000003b4", "relation": "spouse"}
      ]'::jsonb) $$,
   'the pastor saves the family links of a member'
@@ -99,8 +99,7 @@ select lives_ok(
 
 select throws_ok(
   $$ select public.set_family_links('f0000000-0000-4000-8000-0000000003b2', '[
-       {"relative_id": "f0000000-0000-4000-8000-0000000003b3", "relation": "aunt"},
-       {"relative_id": "f0000000-0000-4000-8000-0000000003b4", "relation": "cousin"}
+       {"relative_id": "f0000000-0000-4000-8000-0000000003b3", "relation": "aunt"}
      ]'::jsonb) $$,
   'P0001',
   'Vínculo familiar inválido.',

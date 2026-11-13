@@ -13,7 +13,7 @@ export const SYSTEM_ACTOR = 'Sistema';
 
 const PREVIEW_HEAD = 3;
 
-export const actorName = (authorName: string | null): string => (authorName ? firstNameOf(authorName) : SYSTEM_ACTOR);
+export const actorName = (authorName: string | null): string | null => (authorName ? firstNameOf(authorName) : null);
 
 export type TimelinePreview = { kind: 'entry'; entry: TimelineEntry } | { kind: 'gap' };
 

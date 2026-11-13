@@ -47,7 +47,7 @@ describe('visitTimeline', () => {
     expect(entries[4].detail).toBe('Inscrição via formulário público');
   });
 
-  it('says the first name of who did each change, and that the system did the ones without an author', () => {
+  it('says the first name of who did each change and nothing when no one is recorded', () => {
     const [, byPerson, bySystem] = visitTimeline({
       ...base,
       changes: [
@@ -57,7 +57,7 @@ describe('visitTimeline', () => {
     });
 
     expect(byPerson.actor).toBe('Ana');
-    expect(bySystem.actor).toBe('Sistema');
+    expect(bySystem.actor).toBeNull();
   });
 
   it('calls a coffee no-show by its name and not as a contact without answer', () => {
@@ -95,11 +95,40 @@ describe('visitTimeline', () => {
   });
 });
 
+describe('actor of a change without an author', () => {
+  it('says the system did it when an automatic routine moved the person', () => {
+    const [, entry] = visitTimeline({
+      ...base,
+      changes: [
+        change('archived', '2026-10-20T13:00:00Z', {
+          fromStatus: 'pending_signup',
+          note: 'Não se inscreveu na turma até o início da primeira aula',
+        }),
+      ],
+    });
+
+    expect(entry.actor).toBe('Sistema');
+  });
+
+  it('shows no one when the person filled in the public form', () => {
+    const [, entry] = visitTimeline({
+      ...base,
+      changes: [
+        change('membership_pending', '2026-11-12T01:11:00Z', {
+          fromStatus: 'integration',
+          note: 'Ficha de Interesse de Membresia preenchida',
+        }),
+      ],
+    });
+
+    expect(entry.actor).toBeNull();
+  });
+});
+
 describe('membershipTimeline', () => {
   const source = {
     origin: 'integration',
     createdAt: '2026-09-06T12:00:00Z',
-    statuteAgreedAt: null,
     membershipInterestSentAt: null,
     councilDate: null,
     changes: [],
@@ -108,11 +137,10 @@ describe('membershipTimeline', () => {
     fieldLabel: (column: string) => column,
   };
 
-  it('tells the story of the membership: ficha, statute, confirmation by whom, council and community', () => {
+  it('tells the story of the membership: ficha, confirmation by whom, council and community', () => {
     const entries = membershipTimeline({
       ...source,
       membershipInterestSentAt: '2026-10-20T15:00:00Z',
-      statuteAgreedAt: '2026-10-21T15:00:00Z',
       councilDate: '2026-11-10',
       changes: [
         {
@@ -128,7 +156,6 @@ describe('membershipTimeline', () => {
 
     expect(entries.map((entry) => entry.label)).toEqual([
       'Ficha de Interesse enviada',
-      'Aceitou o estatuto',
       'Aprovado no Conselho Administrativo',
       'Confirmado como membro',
       'Entrou no Pequeno Grupo PG Centro',
@@ -217,5 +244,36 @@ describe('membershipTimeline', () => {
     });
 
     expect(entries.map((entry) => entry.label)).toEqual(['Aprovado no Conselho Administrativo de 10/11/2026']);
+  });
+
+  it('shows when the person filled in the direct signup, with no author', () => {
+    const entries = membershipTimeline({
+      ...source,
+      origin: 'membership_signup',
+      changes: [
+        {
+          fromStatus: null,
+          toStatus: 'membership_pending',
+          note: 'Cadastro direto de membresia',
+          changedAt: '2026-11-10T20:47:00Z',
+          authorName: null,
+        },
+      ],
+    });
+
+    expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([
+      ['Preencheu o cadastro de membresia', null],
+    ]);
+  });
+
+  it('shows the groups joined on the day of the signup and says the pastor placed the person', () => {
+    const entries = membershipTimeline({
+      ...source,
+      origin: 'membership_signup',
+      createdAt: '2026-11-10T20:47:00Z',
+      communityJoins: [{ kind: 'ministry', name: 'Kids Palmeiras', joinedAt: '2026-11-10T21:00:28Z' }],
+    });
+
+    expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([['Passou a servir em Kids Palmeiras', 'Pastor']]);
   });
 });

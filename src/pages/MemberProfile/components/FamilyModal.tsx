@@ -9,11 +9,12 @@ import { Relative } from '../../../repositories/family';
 
 interface Props {
   personId: string;
+  personName: string;
   family: Relative[];
   close: () => void;
 }
 
-export function FamilyModal({ personId, family, close }: Props) {
+export function FamilyModal({ personId, personName, family, close }: Props) {
   const { show: showToast, toast } = useToast();
   const {
     control,
@@ -34,7 +35,7 @@ export function FamilyModal({ personId, family, close }: Props) {
     <>
       <ModalTitle onClose={close}>Família</ModalTitle>
       <Form onSubmit={submit}>
-        <FamilyFields personId={personId} family={family} control={control} />
+        <FamilyFields personId={personId} personName={personName} family={family} control={control} />
         <ModalActions>
           <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
             {isSubmitting ? (

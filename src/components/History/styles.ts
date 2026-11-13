@@ -151,3 +151,25 @@ export const EmptyText = styled.p`
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
   color: ${({ theme }) => theme.colors.muted};
 `;
+
+export const SectionBlock = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.base};
+
+  & + & {
+    margin-top: ${({ theme }) => theme.spacing.xl};
+    padding-top: ${({ theme }) => theme.spacing.xl};
+    border-top: 1px solid ${({ theme }) => theme.colors.hairline};
+  }
+`;
+
+export const SectionHeading = styled.h4`
+  margin: 0;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.muted};
+`;

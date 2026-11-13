@@ -3,6 +3,7 @@ import { HistoryCard } from '../../../components/History';
 // Local
 import { isDirectSignup } from '../../../domain/origin';
 import { membershipTimeline, visitTimeline } from '../../../domain/personTimeline';
+import { sortTimeline } from '../../../domain/timeline';
 import { recordFieldLabel } from '../../../features/memberRecord';
 import { useMemberEvents, usePersonHistory } from '../../../queries/person';
 import { MemberPage } from '../../../repositories/memberRecords';
@@ -30,7 +31,6 @@ export function MemberHistory({ personId, name, info }: Props) {
   const membership = membershipTimeline({
     origin: info.origin,
     createdAt: info.createdAt,
-    statuteAgreedAt: info.statuteAgreedAt,
     membershipInterestSentAt: info.membershipInterestSentAt,
     councilDate: info.council?.meetingDate ?? null,
     changes,
@@ -40,9 +40,14 @@ export function MemberHistory({ personId, name, info }: Props) {
   });
 
   return (
-    <>
-      <HistoryCard title="Histórico da Integração" modalTitle={`Integração de ${name}`} entries={integration} />
-      <HistoryCard title="Histórico da Membresia" modalTitle={`Membresia de ${name}`} entries={membership} />
-    </>
+    <HistoryCard
+      title="Histórico"
+      modalTitle={`Histórico de ${name}`}
+      entries={sortTimeline([...integration, ...membership])}
+      sections={[
+        { title: 'Integração', entries: integration },
+        { title: 'Membro', entries: membership },
+      ]}
+    />
   );
 }

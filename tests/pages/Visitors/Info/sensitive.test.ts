@@ -16,7 +16,6 @@ const person: Person = {
   signup_window_from: null,
   membership_interest_sent_at: null,
   entry_type: 'transfer_letter',
-  statute_agreed_at: '2026-11-11T12:00:00Z',
   coffee_retry_used: false,
   origin: 'visitor',
   membership_status: null,

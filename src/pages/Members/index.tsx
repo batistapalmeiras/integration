@@ -7,11 +7,9 @@ import { SlidersHorizontal } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
-import { DirectSignupFlag } from '../../components/DirectSignupFlag';
-import { NameLine, NameText, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { TonePill } from '../../components/StatusPill';
 import { MEMBERSHIP_STATUS_LABELS, MEMBERSHIP_STATUS_TONES } from '../../domain/memberRecords';
-import { isDirectSignup } from '../../domain/origin';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
@@ -96,10 +94,7 @@ export function MembersPage() {
                     onClick={canOpenRecord ? () => navigate(`${AppRoute.Members}/${member.id}`) : undefined}
                   >
                     <Td $truncate title={member.name}>
-                      <NameLine>
-                        <NameText>{member.name}</NameText>
-                        {isDirectSignup(member.origin) && <DirectSignupFlag />}
-                      </NameLine>
+                      {member.name}
                     </Td>
                     <Td $shrink>
                       <TonePill $tone={MEMBERSHIP_STATUS_TONES[member.membership_status]}>

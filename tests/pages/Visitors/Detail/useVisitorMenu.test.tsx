@@ -19,7 +19,6 @@ const person: Person = {
   signup_window_from: null,
   membership_interest_sent_at: null,
   entry_type: null,
-  statute_agreed_at: null,
   coffee_retry_used: false,
   origin: 'integration',
   membership_status: null,

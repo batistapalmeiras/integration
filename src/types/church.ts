@@ -41,5 +41,4 @@ export const MEMBERSHIP_ANSWER_LABELS = {
   wantsSmallGroup: 'Quer participar de um PG',
   secretSociety: 'Sociedade secreta',
   membershipNote: 'Observações',
-  statuteAgreedAt: 'Estatuto aceito em',
 };

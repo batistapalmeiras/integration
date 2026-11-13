@@ -145,7 +145,6 @@ export async function getPersonRecords(personId: string): Promise<PersonRecords>
 interface MemberRecordInfo {
   createdAt: string;
   origin: string;
-  statuteAgreedAt: string | null;
   visitedOn: string | null;
   membershipInterestSentAt: string | null;
   communityJoins: CommunityJoin[];
@@ -172,7 +171,7 @@ export interface MemberPage {
 }
 
 const MEMBER_PAGE_COLUMNS =
-  'name, phone, email, membership_status, entry_type, council_id, created_at, origin, statute_agreed_at, visited_on, membership_interest_sent_at, council:councils(id, meeting_date), member_profiles(*), person_sensitive(birth_date, origin_church), person_small_groups!person_small_groups_person_id_fkey(created_at, small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(created_at, ministry:ministries!person_ministries_ministry_id_fkey(id, name))';
+  'name, phone, email, membership_status, entry_type, council_id, created_at, origin, visited_on, membership_interest_sent_at, council:councils(id, meeting_date), member_profiles(*), person_sensitive(birth_date, origin_church), person_small_groups!person_small_groups_person_id_fkey(created_at, small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(created_at, ministry:ministries!person_ministries_ministry_id_fkey(id, name))';
 
 export async function getMemberPage(personId: string): Promise<MemberPage> {
   const { data: member, error } = await supabase.from('people').select(MEMBER_PAGE_COLUMNS).eq('id', personId).single();
@@ -196,7 +195,6 @@ export async function getMemberPage(personId: string): Promise<MemberPage> {
     info: {
       createdAt: member.created_at,
       origin: member.origin,
-      statuteAgreedAt: member.statute_agreed_at,
       visitedOn: member.visited_on,
       membershipInterestSentAt: member.membership_interest_sent_at,
       communityJoins: [
@@ -262,13 +260,12 @@ export interface MemberRow {
   phone: string | null;
   entry_type: EntryType | null;
   membership_status: MembershipStatus;
-  origin: string;
 }
 
 export async function listMemberRows(): Promise<MemberRow[]> {
   const { data, error } = await supabase
     .from('people')
-    .select('id, name, phone, entry_type, membership_status, origin')
+    .select('id, name, phone, entry_type, membership_status')
     .eq('status', 'member')
     .order('name', { ascending: true });
   if (error) throw error;

@@ -28,7 +28,7 @@ export function FamilyPanel({ family, onEdit }: Props) {
         <Fields>
           {family.map((relative) => (
             <Field key={relative.id} $wide>
-              <FieldLabel>{relationLabel(relative.relation)}</FieldLabel>
+              <FieldLabel>{relationLabel(relative.relation, relative.gender)}</FieldLabel>
               <FieldValue $empty={false}>
                 <Link to={`${AppRoute.Members}/${relative.id}`}>{relative.name}</Link>
               </FieldValue>

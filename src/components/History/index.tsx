@@ -11,6 +11,8 @@ import {
   EmptyText,
   GapDots,
   ModalHeading,
+  SectionBlock,
+  SectionHeading,
   TimelineActor,
   TimelineBody,
   TimelineDate,
@@ -29,6 +31,10 @@ interface EntryProps {
   detailed: boolean;
 }
 
+function ActorIcon({ actor }: { actor: string }) {
+  return actor === SYSTEM_ACTOR ? <Bot size={14} aria-hidden="true" /> : <User size={14} aria-hidden="true" />;
+}
+
 function HistoryEntry({ entry, detailed }: EntryProps) {
   const when = detailed && entry.at ? formatTimestamp(entry.at) : formatDate(entry.date);
 
@@ -40,7 +46,7 @@ function HistoryEntry({ entry, detailed }: EntryProps) {
           <TimelineDate>{when}</TimelineDate>
           {detailed && entry.actor && (
             <TimelineActor>
-              {entry.actor === SYSTEM_ACTOR ? <Bot size={14} aria-hidden="true" /> : <User size={14} aria-hidden="true" />}
+              <ActorIcon actor={entry.actor} />
               {entry.actor}
             </TimelineActor>
           )}
@@ -54,14 +60,20 @@ function HistoryEntry({ entry, detailed }: EntryProps) {
 
 const entryKey = (entry: TimelineEntry) => `${entry.at ?? entry.date}-${entry.label}-${entry.detail ?? ''}`;
 
+interface HistorySection {
+  title: string;
+  entries: TimelineEntry[];
+}
+
 interface Props {
   title: string;
   modalTitle: string;
   entries: TimelineEntry[];
+  sections?: HistorySection[];
   emptyText?: string;
 }
 
-export function HistoryCard({ title, modalTitle, entries, emptyText }: Props) {
+export function HistoryCard({ title, modalTitle, entries, sections, emptyText }: Props) {
   const { open, close, modal } = useModal('drawer', { fullScreenOnMobile: true });
 
   if (entries.length === 0 && !emptyText) return null;
@@ -75,11 +87,26 @@ export function HistoryCard({ title, modalTitle, entries, emptyText }: Props) {
             {modalTitle}
           </ModalHeading>
         </ModalTitle>
-        <TimelineList>
-          {entries.map((entry) => (
-            <HistoryEntry key={entryKey(entry)} entry={entry} detailed />
-          ))}
-        </TimelineList>
+        {sections ? (
+          sections
+            .filter((section) => section.entries.length > 0)
+            .map((section, _, filled) => (
+              <SectionBlock key={section.title}>
+                {filled.length > 1 && <SectionHeading>{section.title}</SectionHeading>}
+                <TimelineList>
+                  {section.entries.map((entry) => (
+                    <HistoryEntry key={entryKey(entry)} entry={entry} detailed />
+                  ))}
+                </TimelineList>
+              </SectionBlock>
+            ))
+        ) : (
+          <TimelineList>
+            {entries.map((entry) => (
+              <HistoryEntry key={entryKey(entry)} entry={entry} detailed />
+            ))}
+          </TimelineList>
+        )}
       </>,
     );
 

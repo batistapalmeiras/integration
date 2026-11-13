@@ -50,4 +50,44 @@ describe('history card', () => {
     expect(screen.getByText('Membresia de Ana')).toBeInTheDocument();
     expect(screen.getAllByText('Bruno')).toHaveLength(2);
   });
+
+  it('splits the modal in titled sections when the history has more than one part', async () => {
+    const integration = [entry(1, 'Primeira visita')];
+    const membership = [entry(5, 'Confirmado como membro', 'Ana')];
+    renderScreen(
+      <HistoryCard
+        title="Histórico"
+        modalTitle="Histórico de Ana"
+        entries={[...integration, ...membership]}
+        sections={[
+          { title: 'Integração', entries: integration },
+          { title: 'Membresia', entries: membership },
+        ]}
+      />,
+    );
+
+    await userEvent.click(screen.getByText('Ver histórico completo'));
+
+    expect(await screen.findByText('Integração')).toBeInTheDocument();
+    expect(screen.getByText('Membresia')).toBeInTheDocument();
+  });
+
+  it('leaves the section title out when only one part has events', async () => {
+    renderScreen(
+      <HistoryCard
+        title="Histórico"
+        modalTitle="Histórico de Ana"
+        entries={[entry(5, 'Confirmado como membro')]}
+        sections={[
+          { title: 'Integração', entries: [] },
+          { title: 'Membresia', entries: [entry(5, 'Confirmado como membro')] },
+        ]}
+      />,
+    );
+
+    await userEvent.click(screen.getByText('Ver histórico completo'));
+
+    expect(await screen.findByText('Histórico de Ana')).toBeInTheDocument();
+    expect(screen.queryByText('Membresia')).not.toBeInTheDocument();
+  });
 });
