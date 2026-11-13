@@ -75,6 +75,12 @@ export const ItemPicker = styled.div`
   gap: ${({ theme }) => theme.spacing.xs};
 `;
 
+export const ItemStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+`;
+
 export const Fields = styled.dl`
   margin: 0;
   ${twoColumnsWhenRoom}

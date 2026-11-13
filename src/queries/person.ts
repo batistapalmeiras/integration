@@ -8,6 +8,7 @@ import { getFamily } from '../repositories/family';
 import { getMemberPage, getPersonRecords } from '../repositories/memberRecords';
 import { listMembershipAlerts } from '../repositories/membership';
 import { listPersonNotes } from '../repositories/personNotes';
+import { listMemberEvents } from '../repositories/memberEvents';
 import { listStatusHistory } from '../repositories/people';
 
 export const usePersonSensitive = (personId: string, enabled = true) =>
@@ -31,6 +32,9 @@ export const usePersonNotes = (personId: string) =>
 
 export const usePersonHistory = (personId: string) =>
   useQuery(queryKeys.personHistory(personId), () => listStatusHistory(personId), { enabled: !!personId });
+
+export const useMemberEvents = (personId: string) =>
+  useQuery(queryKeys.memberEvents(personId), () => listMemberEvents(personId), { enabled: !!personId });
 
 export const useMembershipAlerts = (personId: string) =>
   useQuery(queryKeys.membershipAlerts(personId), () => listMembershipAlerts([personId]), { enabled: !!personId });

@@ -7,13 +7,15 @@ import { Check, UserRound } from 'lucide-react';
 // Components
 import { Callout, CalloutContent } from '../../../components/Callout';
 import { NotFound } from '../../../components/NotFound';
+import { DirectSignupFlag } from '../../../components/DirectSignupFlag';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AppRoute, confirmMemberPath } from '../../../routes/paths';
+import { isDirectSignup } from '../../../domain/origin';
 import { UserRole } from '../../../types/enums';
 import { DETAIL_TAB_LABELS, DetailTab, useDetailTabs, useVisitorProfile } from '../../../features/visitors';
 import { usePersonRecords } from '../../../queries/person';
-import { InfoTabBar, SectionStack } from '../Detail/styles';
+import { FlagRow, InfoTabBar, SectionStack } from '../Detail/styles';
 import { DetailContent, Section, SectionDivider, Sections } from '../../../components/FormLayout';
 import { PanelTitle } from '../../../components/Panel';
 import { EntryList } from './EntryList';
@@ -61,6 +63,12 @@ export function VisitorInfoPage() {
           )
         }
       />
+
+      {isDirectSignup(person.origin) && (
+        <FlagRow>
+          <DirectSignupFlag />
+        </FlagRow>
+      )}
 
       {showConfirmMember && (
         <Callout>

@@ -1191,6 +1191,23 @@ export type Database = {
           name: string
         }[]
       }
+      get_family_links: {
+        Args: { p_person_id: string }
+        Returns: {
+          name: string
+          person_id: string
+          relation: string
+        }[]
+      }
+      list_member_events: {
+        Args: { p_person_id: string }
+        Returns: {
+          author_name: string | null
+          created_at: string
+          detail: Json
+          event: string
+        }[]
+      }
       list_person_history: {
         Args: { p_person_id: string }
         Returns: {
@@ -1211,6 +1228,10 @@ export type Database = {
           id: string
           private: boolean
         }[]
+      }
+      set_family_links: {
+        Args: { p_links: Json; p_person_id: string }
+        Returns: undefined
       }
       list_small_groups: {
         Args: never

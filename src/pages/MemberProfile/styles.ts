@@ -25,11 +25,3 @@ export const AddressLines = styled.div`
   gap: 2px;
 `;
 
-export const RelativeLinks = styled.ul`
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xs};
-`;

@@ -12,8 +12,10 @@ import { Field, FieldLabel, Fields, FieldValue, Panel, PanelHeader, PanelTitle }
 import { InfoLine, InfoPanel } from '../../components/InfoLine';
 import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { CouncilDate } from '../../domain/councils';
+import { DirectSignupFlag } from '../../components/DirectSignupFlag';
 import { TonePill } from '../../components/StatusPill';
 import { formatTimestampDate } from '../../domain/dates';
+import { isDirectSignup } from '../../domain/origin';
 import {
   canLeavePhoneEmpty,
   MemberRecord,
@@ -28,6 +30,7 @@ import { CommunityModal } from './components/CommunityModal';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
+import { MemberHistory } from './components/MemberHistory';
 import { AddressLines, HeroText, StatusRow } from './styles';
 
 const MEMBERSHIP_SECTION = 'membership';
@@ -98,28 +101,27 @@ export function MemberProfilePage() {
           <TonePill $tone={MEMBERSHIP_STATUS_TONES[record.membershipStatus]}>
             {MEMBERSHIP_STATUS_LABELS[record.membershipStatus]}
           </TonePill>
+          {isDirectSignup(info.origin) && <DirectSignupFlag />}
           {MEMBERSHIP && (
             <LinkButton icon={<Pencil size={14} />} onClick={() => edit(MEMBERSHIP)}>
               Alterar
             </LinkButton>
           )}
         </StatusRow>
-        <InfoPanel>
-          <InfoLine
-            icon={UsersRound}
-            label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}
-            empty={smallGroups.length === 0}
-          >
-            {smallGroups.length > 0 ? smallGroups.join(', ') : 'Não participa de um PG'}
-          </InfoLine>
-          <InfoLine
-            icon={HeartHandshake}
-            label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}
-            empty={ministries.length === 0}
-          >
-            {ministries.length > 0 ? ministries.join(', ') : 'Não serve em um ministério'}
-          </InfoLine>
-        </InfoPanel>
+        {(smallGroups.length > 0 || ministries.length > 0) && (
+          <InfoPanel>
+            {smallGroups.length > 0 && (
+              <InfoLine icon={UsersRound} label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}>
+                {smallGroups.join(', ')}
+              </InfoLine>
+            )}
+            {ministries.length > 0 && (
+              <InfoLine icon={HeartHandshake} label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}>
+                {ministries.join(', ')}
+              </InfoLine>
+            )}
+          </InfoPanel>
+        )}
         <StatusRow>
           <LinkButton
             icon={<Pencil size={14} />}
@@ -147,6 +149,7 @@ export function MemberProfilePage() {
                 ]
               : [renderPanel(section)],
           )}
+          <MemberHistory personId={id} name={record.name} info={info} />
           <NotesPanel personId={id} notes={notes} />
         </div>
       </Columns>
@@ -191,12 +194,14 @@ function SectionPanel({ section, record, councils, info, onEdit }: SectionPanelP
         <SummaryLines lines={section.summary(record)} />
       ) : (
         <Fields>
-          {fields.map((field) => (
-            <Field key={field.label} $wide={!!field.wide}>
-              <FieldLabel>{field.label}</FieldLabel>
-              <FieldValue $empty={!field.value}>{field.value || '—'}</FieldValue>
-            </Field>
-          ))}
+          {fields
+            .filter((field) => field.value)
+            .map((field) => (
+              <Field key={field.label} $wide={!!field.wide}>
+                <FieldLabel>{field.label}</FieldLabel>
+                <FieldValue $empty={false}>{field.value}</FieldValue>
+              </Field>
+            ))}
         </Fields>
       )}
     </Panel>
@@ -204,7 +209,7 @@ function SectionPanel({ section, record, councils, info, onEdit }: SectionPanelP
 }
 
 function SummaryLines({ lines }: { lines: string[] }) {
-  if (lines.length === 0) return <FieldValue as="p" $empty>—</FieldValue>;
+  if (lines.length === 0) return null;
   return (
     <AddressLines>
       {lines.map((line) => (

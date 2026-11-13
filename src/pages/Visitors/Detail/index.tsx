@@ -7,11 +7,13 @@ import { NotFound } from '../../../components/NotFound';
 import { NotesPanel } from '../../../components/NotesPanel';
 import { WideContent } from '../../../components/PageColumns';
 import { OptionsMenuButton } from '../../../components/OptionsMenu';
+import { DirectSignupFlag } from '../../../components/DirectSignupFlag';
 import { PageHeader } from '../../../components/PageHeader';
 import { StatusPill } from '../../../components/StatusPill';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES, UserRole } from '../../../types/enums';
+import { isDirectSignup } from '../../../domain/origin';
 import { Person, useVisitorDetail } from '../../../features/visitors';
 import { usePersonNotes } from '../../../queries/person';
 import { ContactPanel } from './components/ContactPanel';
@@ -69,6 +71,7 @@ function VisitorDetailContent({ detail, person }: ContentProps) {
           />
           <StatusLine>
             <StatusPill person={person} />
+            {isDirectSignup(person.origin) && <DirectSignupFlag />}
           </StatusLine>
         </div>
         <ProgressStepper status={person.status} />

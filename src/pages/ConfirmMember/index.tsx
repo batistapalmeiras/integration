@@ -23,7 +23,7 @@ import { errorMessage } from '../../lib/queryCache';
 import { useCouncils } from '../../queries/councils';
 import { useFamily, usePersonSensitive } from '../../queries/person';
 import { useMinistries, useSmallGroups } from '../../queries/reference';
-import { Family } from '../../repositories/family';
+import { Relative } from '../../repositories/family';
 import { AppRoute } from '../../routes/paths';
 import { CommunityFields } from '../Visitors/components/CommunityFields';
 import { EntryList } from '../Visitors/Info/EntryList';
@@ -63,7 +63,7 @@ export function ConfirmMemberPage() {
 interface FormProps {
   person: Person;
   smallGroupIds: string[];
-  family: Family;
+  family: Relative[];
   sensitive: PersonSensitive | null;
   councils: Council[];
   confirmMember: (confirmation: MemberConfirmation) => Promise<void>;
@@ -86,7 +86,7 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
 
   const submit = community.handleSubmit(async (values) => {
     try {
-      if (familyForm.formState.isDirty) await saveFamily(person.id, family, familyForm.getValues());
+      if (familyForm.formState.isDirty) await saveFamily(person.id, familyForm.getValues());
       await confirmMember({
         councilId,
         smallGroupIds: values.smallGroupIds,

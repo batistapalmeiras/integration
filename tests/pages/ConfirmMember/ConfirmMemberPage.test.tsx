@@ -55,7 +55,7 @@ vi.mock('../../../src/repositories/people', async (importOriginal) => ({
 }));
 vi.mock('../../../src/repositories/family', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../src/repositories/family')>()),
-  getFamily: vi.fn().mockResolvedValue({ spouse: null, father: null, mother: null, children: [] }),
+  getFamily: vi.fn().mockResolvedValue([]),
 }));
 vi.mock('../../../src/repositories/personSensitive', () => ({ getPersonSensitive: vi.fn().mockResolvedValue(null) }));
 vi.mock('../../../src/repositories/membership', async (importOriginal) => ({

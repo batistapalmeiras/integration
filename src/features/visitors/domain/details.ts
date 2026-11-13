@@ -1,4 +1,5 @@
 // Local
+import { isDirectSignup } from '../../../domain/origin';
 import { Person } from './types';
 
 export type DetailTab = 'integration' | 'membership' | 'makeup';
@@ -19,7 +20,10 @@ interface DetailAccess {
 
 export function detailTabs(person: Person, { canSeeAnswers, makeupCount }: DetailAccess): DetailTab[] {
   return [
-    canSeeAnswers && INTEGRATION_REACHED.includes(person.status) && ('integration' as const),
+    canSeeAnswers &&
+      !isDirectSignup(person.origin) &&
+      INTEGRATION_REACHED.includes(person.status) &&
+      ('integration' as const),
     canSeeAnswers && MEMBERSHIP_REACHED.includes(person.status) && ('membership' as const),
     makeupCount > 0 && ('makeup' as const),
   ].filter((tab): tab is DetailTab => !!tab);

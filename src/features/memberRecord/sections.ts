@@ -126,3 +126,11 @@ export function displayValue(record: Partial<MemberRecord>, field: RecordField, 
   if (field.kind === 'select') return field.labels[value] ?? '';
   return value;
 }
+
+const camelCase = (column: string) => column.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
+
+const FIELD_LABELS: Record<string, string> = Object.fromEntries(
+  MEMBER_RECORD_SECTIONS.flatMap((section) => section.fields.map((field) => [field.name, field.label])),
+);
+
+export const recordFieldLabel = (column: string): string => FIELD_LABELS[camelCase(column)] ?? column;

@@ -6,6 +6,7 @@ import {
   MembershipAlertCode,
   toMembershipAlertCode,
 } from '../domain/membership';
+import { isDirectSignup } from '../domain/origin';
 import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
 
@@ -55,13 +56,14 @@ export interface MembershipQueueRow {
   id: string;
   name: string;
   entryType: EntryType | null;
+  directSignup: boolean;
   reviewReasons: string[];
 }
 
 export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
   const { data: people, error: peopleError } = await supabase
     .from('people')
-    .select('id, name, entry_type')
+    .select('id, name, entry_type, origin')
     .eq('status', 'membership_pending');
   if (peopleError) throw peopleError;
 
@@ -76,6 +78,7 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
       id: person.id,
       name: person.name,
       entryType: person.entry_type,
+      directSignup: isDirectSignup(person.origin),
       reviewReasons: alerts
         .filter((alert) => alert.person_id === person.id && !alert.resolved)
         .map((alert) => MEMBERSHIP_ALERT_LABELS[alert.code]),

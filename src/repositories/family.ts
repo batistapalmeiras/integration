@@ -1,48 +1,36 @@
 // Local
+import { FamilyRelation, isFamilyRelation, relationRank } from '../domain/family';
 import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
 
 export interface Relative {
   id: string;
   name: string;
+  relation: FamilyRelation;
 }
 
-export interface Family {
-  spouse: Relative | null;
-  father: Relative | null;
-  mother: Relative | null;
-  children: Relative[];
+export interface FamilyLink {
+  relativeId: string;
+  relation: FamilyRelation;
 }
 
-export interface FamilyLinks {
-  spouseId: string | null;
-  fatherId: string | null;
-  motherId: string | null;
-  childIds: string[];
-}
-
-export async function getFamily(personId: string): Promise<Family> {
-  const { data, error } = await supabase.rpc('get_family', { p_person_id: personId });
+export async function getFamily(personId: string): Promise<Relative[]> {
+  const { data, error } = await supabase.rpc('get_family_links', { p_person_id: personId });
   if (error) throw error;
 
-  const relatives = (relation: string) =>
-    data.filter((row) => row.relation === relation).map((row) => ({ id: row.person_id, name: row.name }));
-
-  return {
-    spouse: relatives('spouse')[0] ?? null,
-    father: relatives('father')[0] ?? null,
-    mother: relatives('mother')[0] ?? null,
-    children: relatives('child').sort(byName),
-  };
+  return data
+    .flatMap((row) =>
+      isFamilyRelation(row.relation)
+        ? [{ id: row.person_id, name: row.name, relation: row.relation }]
+        : [],
+    )
+    .sort((a, b) => relationRank(a.relation) - relationRank(b.relation) || byName(a, b));
 }
 
-export async function setFamily(personId: string, links: FamilyLinks): Promise<void> {
-  const { error } = await supabase.rpc('set_family', {
+export async function setFamily(personId: string, links: FamilyLink[]): Promise<void> {
+  const { error } = await supabase.rpc('set_family_links', {
     p_person_id: personId,
-    p_spouse_id: links.spouseId ?? undefined,
-    p_father_id: links.fatherId ?? undefined,
-    p_mother_id: links.motherId ?? undefined,
-    p_child_ids: links.childIds,
+    p_links: links.map((link) => ({ relative_id: link.relativeId, relation: link.relation })),
   });
   if (error) throw error;
 }

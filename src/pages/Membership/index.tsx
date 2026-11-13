@@ -6,17 +6,19 @@ import { AlertTriangle, CalendarDays, ChevronRight, Plus } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
-import { NameCell, NameText, ReviewFlag, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
+import { DirectSignupFlag } from '../../components/DirectSignupFlag';
+import { TonePill } from '../../components/StatusPill';
+import { NameCell, NameLine, NameText, ReviewFlag, Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { currentCouncil } from '../../domain/councils';
 import { CouncilModal } from '../../features/councils';
 import { formatDate } from '../../domain/dates';
 import { useCouncils } from '../../queries/councils';
 import { AppRoute, COUNCILS_PATH } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
-import { ENTRY_TYPE_LABELS } from '../../types/church';
+import { ENTRY_TYPE_LABELS, ENTRY_TYPE_TONES } from '../../types/church';
 // Local
 import { useMembershipQueue } from './hooks/useMembershipQueue';
-import { CouncilBar, CouncilLabel } from './styles';
+import { CouncilBar, CouncilLabel, WideOnly } from './styles';
 
 export function MembershipPage() {
   const navigate = useNavigate();
@@ -73,7 +75,9 @@ export function MembershipPage() {
               <thead>
                 <tr>
                   <Th>{text.fields.name}</Th>
-                  <Th $shrink>Forma de entrada</Th>
+                  <Th $shrink>
+                    <WideOnly>Forma de entrada</WideOnly>
+                  </Th>
                 </tr>
               </thead>
               <tbody>
@@ -85,7 +89,10 @@ export function MembershipPage() {
                   >
                     <Td $truncate title={row.name}>
                       <NameCell>
-                        <NameText>{row.name}</NameText>
+                        <NameLine>
+                          <NameText>{row.name}</NameText>
+                          {row.directSignup && <DirectSignupFlag />}
+                        </NameLine>
                         {row.reviewReasons.map((reason) => (
                           <ReviewFlag key={reason}>
                             <AlertTriangle size={12} />
@@ -94,7 +101,13 @@ export function MembershipPage() {
                         ))}
                       </NameCell>
                     </Td>
-                    <Td $shrink>{row.entryType ? ENTRY_TYPE_LABELS[row.entryType] : '—'}</Td>
+                    <Td $shrink>
+                      {row.entryType ? (
+                        <TonePill $tone={ENTRY_TYPE_TONES[row.entryType]}>{ENTRY_TYPE_LABELS[row.entryType]}</TonePill>
+                      ) : (
+                        '—'
+                      )}
+                    </Td>
                   </Tr>
                 ))}
               </tbody>
