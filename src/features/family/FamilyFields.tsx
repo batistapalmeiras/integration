@@ -1,21 +1,24 @@
 // React
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Control, Controller, useForm } from 'react-hook-form';
 // Libs
 import { Button, IconButton, LinkButton, Select, Typography } from 'bp-kit';
 import { Plus, Trash2 } from 'lucide-react';
 // Components
 import { WideField } from '../../components/FormLayout';
-import { ItemRow, ItemRows, ItemStack } from '../../components/Panel';
+import { ItemStack } from '../../components/Panel';
 // Local
 import { FAMILY_RELATIONS, isFamilyRelation, relationLabel, relationRank } from '../../domain/family';
 import { byName } from '../../domain/text';
 import { useMemberNames } from '../../queries/reference';
 import { Relative } from '../../repositories/family';
 import { FamilyFormValues, FamilyLinkValue } from './form';
+import { AddLink, FamilyRow, FamilyRows } from './styles';
 
 interface ListProps {
   personName: string;
+  startOpen: boolean;
+  onPickingChange?: (picking: boolean) => void;
   value: FamilyLinkValue[];
   onChange: (links: FamilyLinkValue[]) => void;
   candidates: { id: string; name: string }[];
@@ -28,8 +31,13 @@ interface PickerValues {
 
 const EMPTY_PICK: PickerValues = { relation: '', relativeId: '' };
 
-function FamilyList({ personName, value, onChange, candidates }: ListProps) {
-  const [picking, setPicking] = useState(false);
+function FamilyList({ personName, startOpen, onPickingChange, value, onChange, candidates }: ListProps) {
+  const [picking, setPicking] = useState(startOpen && value.length === 0);
+
+  useEffect(() => {
+    onPickingChange?.(picking);
+  }, [picking, onPickingChange]);
+
   const picker = useForm<PickerValues>({ defaultValues: EMPTY_PICK });
   const picked = picker.watch();
   const names = new Map(candidates.map((candidate) => [candidate.id, candidate.name]));
@@ -58,9 +66,9 @@ function FamilyList({ personName, value, onChange, candidates }: ListProps) {
   return (
     <ItemStack>
         {rows.length > 0 && (
-          <ItemRows>
+          <FamilyRows>
             {rows.map((row) => (
-              <ItemRow key={row.relativeId}>
+              <FamilyRow key={row.relativeId}>
                 <span>
                   {isFamilyRelation(row.relation) ? relationLabel(row.relation) : row.relation}: {row.name}
                 </span>
@@ -74,15 +82,15 @@ function FamilyList({ personName, value, onChange, candidates }: ListProps) {
                   title="Remover"
                   onClick={() => onChange(value.filter((link) => link.relativeId !== row.relativeId))}
                 />
-              </ItemRow>
+              </FamilyRow>
             ))}
-          </ItemRows>
+          </FamilyRows>
         )}
 
         {picking ? (
           <ItemStack>
             <Select label="Parentesco" control={picker.control} name="relation">
-              <option value="">Selecione</option>
+              <option value="">Selecione o parentesco</option>
               {FAMILY_RELATIONS.map((relation) => (
                 <option key={relation} value={relation}>
                   {relationLabel(relation)}
@@ -111,10 +119,11 @@ function FamilyList({ personName, value, onChange, candidates }: ListProps) {
             </LinkButton>
           </ItemStack>
         ) : (
-          <Button type="button" variant="secondary" onClick={() => setPicking(true)}>
-            <Plus size={16} />
-            {rows.length > 0 ? 'Adicionar outro familiar' : 'Adicionar familiar'}
-          </Button>
+          <AddLink>
+            <LinkButton type="button" icon={<Plus size={14} />} onClick={() => setPicking(true)}>
+              {rows.length > 0 ? 'Adicionar outro familiar' : 'Adicionar familiar'}
+            </LinkButton>
+          </AddLink>
         )}
     </ItemStack>
   );
@@ -123,11 +132,13 @@ function FamilyList({ personName, value, onChange, candidates }: ListProps) {
 interface Props {
   personId: string;
   personName: string;
+  startOpen?: boolean;
+  onPickingChange?: (picking: boolean) => void;
   family: Relative[];
   control: Control<FamilyFormValues>;
 }
 
-export function FamilyFields({ personId, personName, family, control }: Props) {
+export function FamilyFields({ personId, personName, startOpen = false, onPickingChange, family, control }: Props) {
   const members = (useMemberNames().data ?? []).filter((member) => member.id !== personId);
   const candidates = [...members, ...family.filter((relative) => !members.some((member) => member.id === relative.id))];
 
@@ -137,7 +148,14 @@ export function FamilyFields({ personId, personName, family, control }: Props) {
         control={control}
         name="links"
         render={({ field }) => (
-          <FamilyList personName={personName} value={field.value} onChange={field.onChange} candidates={candidates} />
+          <FamilyList
+            personName={personName}
+            startOpen={startOpen}
+            onPickingChange={onPickingChange}
+            value={field.value}
+            onChange={field.onChange}
+            candidates={candidates}
+          />
         )}
       />
     </WideField>

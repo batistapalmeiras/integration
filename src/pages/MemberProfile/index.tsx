@@ -46,6 +46,7 @@ const MAIN = MEMBER_RECORD_SECTIONS.filter(
 export function MemberProfilePage() {
   const { id = '' } = useParams<{ id: string }>();
   const { open, close, modal } = useModal('drawer');
+  const familyModal = useModal('drawer', { fullScreenOnMobile: true });
   const pageQuery = useMemberPage(id);
   const notesQuery = usePersonNotes(id);
   const family = useFamily(id).data;
@@ -139,7 +140,16 @@ export function MemberProfilePage() {
                   <FamilyPanel
                     key="family"
                     family={family}
-                    onEdit={() => open(<FamilyModal personId={id} personName={record.name} family={family} close={close} />)}
+                    onEdit={() =>
+                      familyModal.open(
+                        <FamilyModal
+                          personId={id}
+                          personName={record.name}
+                          family={family}
+                          close={familyModal.close}
+                        />,
+                      )
+                    }
                   />,
                 ]
               : [renderPanel(section)],
@@ -150,6 +160,7 @@ export function MemberProfilePage() {
       </Columns>
 
       {modal}
+      {familyModal.modal}
     </WideContent>
   );
 }

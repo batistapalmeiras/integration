@@ -1,4 +1,5 @@
 // React
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 // Libs
 import { Button, Form, ModalActions, ModalTitle, useToast } from 'bp-kit';
@@ -16,6 +17,7 @@ interface Props {
 
 export function FamilyModal({ personId, personName, family, close }: Props) {
   const { show: showToast, toast } = useToast();
+  const [picking, setPicking] = useState(false);
   const {
     control,
     handleSubmit,
@@ -35,19 +37,28 @@ export function FamilyModal({ personId, personName, family, close }: Props) {
     <>
       <ModalTitle onClose={close}>Família</ModalTitle>
       <Form onSubmit={submit}>
-        <FamilyFields personId={personId} personName={personName} family={family} control={control} />
-        <ModalActions>
-          <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
-            {isSubmitting ? (
-              'Salvando...'
-            ) : (
-              <>
-                <Save size={16} />
-                Salvar
-              </>
-            )}
-          </Button>
-        </ModalActions>
+        <FamilyFields
+          personId={personId}
+          personName={personName}
+          family={family}
+          control={control}
+          startOpen
+          onPickingChange={setPicking}
+        />
+        {!picking && (
+          <ModalActions>
+            <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
+              {isSubmitting ? (
+                'Salvando...'
+              ) : (
+                <>
+                  <Save size={16} />
+                  Salvar
+                </>
+              )}
+            </Button>
+          </ModalActions>
+        )}
       </Form>
       {toast}
     </>
