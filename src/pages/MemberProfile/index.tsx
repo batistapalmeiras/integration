@@ -29,8 +29,9 @@ import { CommunityModal } from './components/CommunityModal';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
+import { GroupNames } from './components/GroupNames';
 import { MemberHistory } from './components/MemberHistory';
-import { AddressLines, HeroText, StatusRow } from './styles';
+import { HeroText, StatusRow } from './styles';
 
 const MEMBERSHIP_SECTION = 'membership';
 const SIDE_SECTIONS = ['contact'];
@@ -61,6 +62,19 @@ export function MemberProfilePage() {
   const smallGroups = community.smallGroupNames;
   const ministries = community.ministryNames;
   const notes = notesQuery.data ?? [];
+  const smallGroupsWithRoles = community.smallGroupIds.map((groupId, index) => ({
+    id: groupId,
+    name: community.smallGroupNames[index],
+    roles: [
+      ...(community.leaderOfSmallGroupIds.includes(groupId) ? ['Líder'] : []),
+      ...(community.hostOfSmallGroupIds.includes(groupId) ? ['Anfitrião'] : []),
+    ],
+  }));
+  const ministriesWithRoles = community.ministryIds.map((ministryId, index) => ({
+    id: ministryId,
+    name: community.ministryNames[index],
+    roles: community.leaderOfMinistryIds.includes(ministryId) ? ['Líder'] : [],
+  }));
 
   const edit = (section: RecordSection) =>
     open(
@@ -104,20 +118,22 @@ export function MemberProfilePage() {
             </LinkButton>
           )}
         </StatusRow>
-        {(smallGroups.length > 0 || ministries.length > 0) && (
-          <InfoPanel>
-            {smallGroups.length > 0 && (
-              <InfoLine icon={UsersRound} label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}>
-                {smallGroups.join(', ')}
-              </InfoLine>
-            )}
-            {ministries.length > 0 && (
-              <InfoLine icon={HeartHandshake} label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}>
-                {ministries.join(', ')}
-              </InfoLine>
-            )}
-          </InfoPanel>
-        )}
+        <InfoPanel>
+          <InfoLine
+            icon={UsersRound}
+            label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}
+            empty={smallGroups.length === 0}
+          >
+            {smallGroups.length > 0 ? <GroupNames groups={smallGroupsWithRoles} /> : 'Não participa de um PG'}
+          </InfoLine>
+          <InfoLine
+            icon={HeartHandshake}
+            label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}
+            empty={ministries.length === 0}
+          >
+            {ministries.length > 0 ? <GroupNames groups={ministriesWithRoles} /> : 'Não serve em um ministério'}
+          </InfoLine>
+        </InfoPanel>
         <StatusRow>
           <LinkButton
             icon={<Pencil size={14} />}
@@ -144,7 +160,6 @@ export function MemberProfilePage() {
                       familyModal.open(
                         <FamilyModal
                           personId={id}
-                          personName={record.name}
                           family={family}
                           close={familyModal.close}
                         />,
@@ -200,14 +215,12 @@ function SectionPanel({ section, record, councils, info, onEdit }: SectionPanelP
         <SummaryLines lines={section.summary(record)} />
       ) : (
         <Fields>
-          {fields
-            .filter((field) => field.value)
-            .map((field) => (
-              <Field key={field.label} $wide={!!field.wide}>
-                <FieldLabel>{field.label}</FieldLabel>
-                <FieldValue $empty={false}>{field.value}</FieldValue>
-              </Field>
-            ))}
+          {fields.map((field) => (
+            <Field key={field.label} $wide={!!field.wide}>
+              <FieldLabel>{field.label}</FieldLabel>
+              <FieldValue $empty={!field.value}>{field.value || '—'}</FieldValue>
+            </Field>
+          ))}
         </Fields>
       )}
     </Panel>
@@ -215,14 +228,10 @@ function SectionPanel({ section, record, councils, info, onEdit }: SectionPanelP
 }
 
 function SummaryLines({ lines }: { lines: string[] }) {
-  if (lines.length === 0) return null;
+  if (lines.length === 0) return <FieldValue as="p" $empty>—</FieldValue>;
   return (
-    <AddressLines>
-      {lines.map((line) => (
-        <FieldValue as="p" key={line} $empty={false}>
-          {line}
-        </FieldValue>
-      ))}
-    </AddressLines>
+    <FieldValue as="p" $empty={false}>
+      {lines.join(' · ')}
+    </FieldValue>
   );
 }

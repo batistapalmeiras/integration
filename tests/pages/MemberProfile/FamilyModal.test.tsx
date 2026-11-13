@@ -11,7 +11,7 @@ vi.mock('../../../src/queries/reference', () => ({
 
 describe('family modal', () => {
   it('opens straight on the relation and the member when the member has no family yet', () => {
-    renderScreen(<FamilyModal personId="p1" personName="Ana Lima" family={[]} close={vi.fn()} />, {
+    renderScreen(<FamilyModal personId="p1" family={[]} close={vi.fn()} />, {
       role: UserRole.Pastor,
     });
 
@@ -23,7 +23,7 @@ describe('family modal', () => {
     renderScreen(
       <FamilyModal
         personId="p1"
-        personName="Ana Lima"
+       
         family={[{ id: 'm1', name: 'Pedro Souza', relation: 'child', gender: 'male' }]}
         close={vi.fn()}
       />,

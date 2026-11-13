@@ -7,6 +7,8 @@ export interface MemberEvent {
   authorName: string | null;
   name: string | null;
   role: string | null;
+  relation: string | null;
+  gender: string | null;
   from: string | null;
   to: string | null;
   fields: string[];
@@ -33,6 +35,8 @@ export async function listMemberEvents(personId: string): Promise<MemberEvent[]>
       authorName: row.author_name,
       name: text(detail.name),
       role: text(detail.role),
+      relation: text(detail.relation),
+      gender: text(detail.gender),
       from: text(detail.from),
       to: text(detail.to),
       fields: Array.isArray(detail.fields) ? detail.fields.flatMap((field) => (typeof field === 'string' ? [field] : [])) : [],

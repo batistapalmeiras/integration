@@ -7,7 +7,11 @@ describe('family relations', () => {
     expect(relationLabel('mother')).toBe('Mãe');
     expect(relationLabel('son_in_law')).toBe('Genro');
     expect(relationLabel('daughter_in_law')).toBe('Nora');
-    expect(relationLabel('stepmother')).toBe('Madrasta');
+  });
+
+  it('no longer offers the step relations for now', () => {
+    expect(FAMILY_RELATIONS).toHaveLength(15);
+    expect(FAMILY_RELATIONS).not.toContain('stepfather');
   });
 
   it('uses one option when the two forms only differ by the ending', () => {

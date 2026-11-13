@@ -246,6 +246,8 @@ describe('membershipTimeline', () => {
     authorName: 'Pastor Silva Souza',
     name: null,
     role: null,
+    relation: null,
+    gender: null,
     from: null,
     to: null,
     fields: [],
@@ -270,6 +272,23 @@ describe('membershipTimeline', () => {
       'Deixou de servir em Louvor',
     ]);
     expect(entries[0].actor).toBe('Pastor');
+  });
+
+  it('says which relative was added or removed and by whom', () => {
+    const entries = membershipTimeline({
+      ...source,
+      events: [
+        event('family_added', '2026-11-12T10:00:00Z', { relation: 'child', gender: 'male', name: 'Pedro Souza' }),
+        event('family_added', '2026-11-12T10:00:01Z', { relation: 'parent_in_law', gender: null, name: 'Ana Lima' }),
+        event('family_removed', '2026-11-13T10:00:00Z', { relation: 'sibling', gender: 'female', name: 'Lia Souza' }),
+      ],
+    });
+
+    expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([
+      ['Adicionou Filho: Pedro Souza', 'Pastor'],
+      ['Adicionou Sogro(a): Ana Lima', 'Pastor'],
+      ['Removeu Irmã: Lia Souza', 'Pastor'],
+    ]);
   });
 
   it('joins the edits of one save into a single entry and names the fields', () => {

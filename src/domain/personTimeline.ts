@@ -2,6 +2,7 @@
 import { STATUS_LABELS } from '../types/person';
 import { isDirectSignup } from './origin';
 import { formatDate, timestampDateKey } from './dates';
+import { isFamilyRelation, relationLabel } from './family';
 import { MEMBERSHIP_STATUS_LABELS } from './memberRecords';
 import { actorName, sortTimeline, SYSTEM_ACTOR, TimelineEntry } from './timeline';
 
@@ -160,6 +161,8 @@ interface MemberEventSource {
   authorName: string | null;
   name: string | null;
   role: string | null;
+  relation: string | null;
+  gender: string | null;
   from: string | null;
   to: string | null;
   fields: string[];
@@ -183,6 +186,14 @@ const ROLE_LABELS: Record<string, string> = { leader: 'Líder', host: 'Anfitriã
 
 const membershipStatusName = (status: string | null) =>
   Object.entries(MEMBERSHIP_STATUS_LABELS).find(([key]) => key === status)?.[1] ?? status ?? '';
+
+const toGender = (value: string | null) => (value === 'male' || value === 'female' ? value : null);
+
+function familyRelation(event: MemberEventSource): string {
+  return event.relation && isFamilyRelation(event.relation)
+    ? relationLabel(event.relation, toGender(event.gender))
+    : 'familiar';
+}
 
 function eventLabel(event: MemberEventSource, fieldLabel: (column: string) => string): string {
   const name = event.name ?? 'grupo removido';
@@ -209,6 +220,10 @@ function eventLabel(event: MemberEventSource, fieldLabel: (column: string) => st
       return `Passou a liderar ${name}`;
     case 'ministry_leader_removed':
       return `Deixou de liderar ${name}`;
+    case 'family_added':
+      return `Adicionou ${familyRelation(event)}: ${event.name}`;
+    case 'family_removed':
+      return `Removeu ${familyRelation(event)}: ${event.name}`;
     default:
       return `Dados alterados: ${event.fields.map(fieldLabel).join(', ')}`;
   }

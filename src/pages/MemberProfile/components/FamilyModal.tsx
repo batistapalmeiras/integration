@@ -10,12 +10,11 @@ import { Relative } from '../../../repositories/family';
 
 interface Props {
   personId: string;
-  personName: string;
   family: Relative[];
   close: () => void;
 }
 
-export function FamilyModal({ personId, personName, family, close }: Props) {
+export function FamilyModal({ personId, family, close }: Props) {
   const { show: showToast, toast } = useToast();
   const [picking, setPicking] = useState(false);
   const {
@@ -39,7 +38,6 @@ export function FamilyModal({ personId, personName, family, close }: Props) {
       <Form onSubmit={submit}>
         <FamilyFields
           personId={personId}
-          personName={personName}
           family={family}
           control={control}
           startOpen

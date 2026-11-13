@@ -162,6 +162,9 @@ export interface MemberCommunity {
   smallGroupNames: string[];
   ministryIds: string[];
   ministryNames: string[];
+  leaderOfSmallGroupIds: string[];
+  hostOfSmallGroupIds: string[];
+  leaderOfMinistryIds: string[];
 }
 
 export interface MemberPage {
@@ -174,8 +177,15 @@ const MEMBER_PAGE_COLUMNS =
   'name, phone, email, membership_status, entry_type, council_id, created_at, origin, visited_on, membership_interest_sent_at, council:councils(id, meeting_date), member_profiles(*), person_sensitive(birth_date, origin_church), person_small_groups!person_small_groups_person_id_fkey(created_at, small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(created_at, ministry:ministries!person_ministries_ministry_id_fkey(id, name))';
 
 export async function getMemberPage(personId: string): Promise<MemberPage> {
-  const { data: member, error } = await supabase.from('people').select(MEMBER_PAGE_COLUMNS).eq('id', personId).single();
-  if (error) throw error;
+  const [memberResult, roles, ministryLeaders] = await Promise.all([
+    supabase.from('people').select(MEMBER_PAGE_COLUMNS).eq('id', personId).single(),
+    supabase.from('small_group_roles').select('small_group_id, role').eq('person_id', personId),
+    supabase.from('ministry_leaders').select('ministry_id').eq('person_id', personId),
+  ]);
+  if (memberResult.error) throw memberResult.error;
+  const member = memberResult.data;
+  if (roles.error) throw roles.error;
+  if (ministryLeaders.error) throw ministryLeaders.error;
 
   const smallGroups = groupNames(member.person_small_groups.flatMap((link) => (link.small_group ? [link.small_group] : [])));
   const ministries = groupNames(member.person_ministries.flatMap((link) => (link.ministry ? [link.ministry] : [])));
@@ -214,6 +224,9 @@ export async function getMemberPage(personId: string): Promise<MemberPage> {
       smallGroupNames: smallGroups.names,
       ministryIds: ministries.ids,
       ministryNames: ministries.names,
+      leaderOfSmallGroupIds: roles.data.filter((row) => row.role === 'leader').map((row) => row.small_group_id),
+      hostOfSmallGroupIds: roles.data.filter((row) => row.role === 'host').map((row) => row.small_group_id),
+      leaderOfMinistryIds: ministryLeaders.data.map((row) => row.ministry_id),
     },
   };
 }

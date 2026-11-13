@@ -13,6 +13,12 @@ const { supabase } = vi.hoisted(() => ({
             author_name: 'Pastor Silva',
           },
           {
+            event: 'family_added',
+            detail: { relation: 'child', name: 'Pedro Souza', gender: 'male' },
+            created_at: '2026-11-12T10:03:00Z',
+            author_name: 'Pastor Silva',
+          },
+          {
             event: 'small_group_joined',
             detail: { name: 'PG Centro' },
             created_at: '2026-11-12T10:05:00Z',
@@ -31,6 +37,7 @@ describe('listMemberEvents', () => {
     const events = await listMemberEvents('p1');
 
     expect(events[0]).toMatchObject({ event: 'record_updated', fields: ['cpf', 'address_zip'], authorName: 'Pastor Silva' });
-    expect(events[1]).toMatchObject({ event: 'small_group_joined', name: 'PG Centro', fields: [], authorName: null });
+    expect(events[1]).toMatchObject({ event: 'family_added', relation: 'child', gender: 'male', name: 'Pedro Souza' });
+    expect(events[2]).toMatchObject({ event: 'small_group_joined', name: 'PG Centro', fields: [], authorName: null });
   });
 });

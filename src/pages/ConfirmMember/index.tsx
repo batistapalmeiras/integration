@@ -155,7 +155,7 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
               <Section aria-label="Família">
                 <PanelTitle>Família</PanelTitle>
                 <FieldGrid>
-                  <FamilyFields personId={person.id} personName={person.name} family={family} control={familyForm.control} />
+                  <FamilyFields personId={person.id} family={family} control={familyForm.control} />
                 </FieldGrid>
               </Section>
             </SectionDivider>

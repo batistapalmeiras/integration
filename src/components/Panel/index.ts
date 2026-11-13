@@ -38,8 +38,6 @@ export const ItemRows = styled.ul`
   margin: 0;
   padding: 0;
   list-style: none;
-  border: 1px solid ${({ theme }) => theme.colors.hairline};
-  border-radius: ${({ theme }) => theme.rounded.sm};
 `;
 
 export const ItemRow = styled.li`
@@ -48,15 +46,11 @@ export const ItemRow = styled.li`
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.md};
   min-height: 52px;
-  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.xs}
-    ${({ theme }) => theme.spacing.md};
+  padding: ${({ theme }) => theme.spacing.sm} 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.hairline};
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
   color: ${({ theme }) => theme.colors.ink};
-
-  & + & {
-    border-top: 1px solid ${({ theme }) => theme.colors.hairline};
-  }
 
   & > :first-child {
     min-width: 0;
