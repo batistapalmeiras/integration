@@ -37,7 +37,7 @@ function CorrectionForm({ result, onSave, onClose }: FormProps) {
         onChange={(next) => setValue(next as ContactResult)}
       />
       <FormActions>
-        <Button type="button" variant="primary" onClick={save} disabled={saving}>
+        <Button type="button" variant="primary" onClick={save} disabled={saving || value === result}>
           {saving ? (
             'Salvando...'
           ) : (

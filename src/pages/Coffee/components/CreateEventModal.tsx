@@ -27,7 +27,7 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
     control,
     watch,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { eventDate: initialDate ?? '' } });
 
   const eventDate = watch('eventDate');
@@ -79,7 +79,7 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
         {eventDate && <DateHint>Agendado para {formatDate(eventDate)}, 17h30.</DateHint>}
 
         <FormButtons>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit" variant="primary" disabled={isSubmitting || (!!initialDate && !isDirty)}>
             {isSubmitting ? (
               'Salvando...'
             ) : (

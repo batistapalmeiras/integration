@@ -4,6 +4,7 @@ import { membershipTimeline, visitTimeline } from '../../src/domain/personTimeli
 const base = {
   visitedOn: '2026-10-04',
   changes: [],
+  events: [],
   upcomingCoffeeDate: null,
   cohortName: null,
   membershipInterestSentAt: null,
@@ -92,6 +93,66 @@ describe('visitTimeline', () => {
 
   it('is empty when nothing is known yet', () => {
     expect(visitTimeline({ ...base, visitedOn: null })).toEqual([]);
+  });
+});
+
+describe('visitor events', () => {
+  const visitorEvent = (kind: string, at: string, overrides = {}) => ({
+    event: kind,
+    at,
+    authorName: 'Ana Souza',
+    fields: [],
+    lesson: null,
+    cohort: null,
+    ...overrides,
+  });
+
+  it('adds what the volunteers did with the visitor, with who did it', () => {
+    const entries = visitTimeline({
+      ...base,
+      events: [
+        visitorEvent('whatsapp_opened', '2026-10-05T13:00:00Z'),
+        visitorEvent('class_invite_sent', '2026-10-12T13:00:00Z'),
+        visitorEvent('lesson_attended', '2026-10-20T13:00:00Z', {
+          authorName: 'Bruno Lima',
+          lesson: 2,
+          cohort: 'Turma 15/11/2026',
+        }),
+        visitorEvent('lesson_unmarked', '2026-10-21T13:00:00Z', { lesson: 2, cohort: 'Turma 15/11/2026' }),
+      ],
+    });
+
+    expect(entries.slice(1).map((entry) => [entry.label, entry.actor])).toEqual([
+      ['WhatsApp aberto para o contato', 'Ana'],
+      ['Convite para a turma enviado', 'Ana'],
+      ['Presença na aula 2 marcada', 'Bruno'],
+      ['Presença na aula 2 desmarcada', 'Ana'],
+    ]);
+    expect(entries[3].detail).toBe('Turma 15/11/2026');
+  });
+
+  it('joins the edits of one save in a single entry with the names of the fields', () => {
+    const entries = visitTimeline({
+      ...base,
+      events: [
+        visitorEvent('record_updated', '2026-10-05T13:00:00Z', { fields: ['name'] }),
+        visitorEvent('record_updated', '2026-10-05T13:00:03Z', { fields: ['phone', 'email'] }),
+      ],
+    });
+
+    expect(entries).toHaveLength(2);
+    expect(entries[1].label).toBe('Dados alterados: Nome, Celular, E-mail');
+    expect(entries[1].detail).toBeNull();
+  });
+
+  it('does not repeat the ficha sent when the event was recorded', () => {
+    const entries = visitTimeline({
+      ...base,
+      membershipInterestSentAt: '2026-10-30T13:00:00Z',
+      events: [visitorEvent('membership_interest_sent', '2026-10-30T13:00:00Z')],
+    });
+
+    expect(entries.filter((entry) => entry.label === 'Ficha de Interesse enviada')).toHaveLength(1);
   });
 });
 
@@ -222,8 +283,8 @@ describe('membershipTimeline', () => {
     });
 
     expect(entries).toHaveLength(1);
-    expect(entries[0].label).toBe('Ficha atualizada');
-    expect(entries[0].detail).toBe('Campos: CPF, Estado civil');
+    expect(entries[0].label).toBe('Dados alterados: CPF, Estado civil');
+    expect(entries[0].detail).toBeNull();
   });
 
   it('does not repeat a join that was already recorded as an event', () => {

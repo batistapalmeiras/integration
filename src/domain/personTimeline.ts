@@ -13,12 +13,68 @@ interface StatusChangeSource {
   authorName: string | null;
 }
 
+interface VisitorEventSource {
+  event: string;
+  at: string;
+  authorName: string | null;
+  fields: string[];
+  lesson: number | null;
+  cohort: string | null;
+}
+
 export interface TimelineSource {
   visitedOn: string | null;
   changes: StatusChangeSource[];
+  events: VisitorEventSource[];
   upcomingCoffeeDate: string | null;
   cohortName: string | null;
   membershipInterestSentAt: string | null;
+}
+
+const SAME_SAVE_WINDOW_MS = 60 * 1000;
+
+function mergeSavedRecords<T extends { event: string; at: string; authorName: string | null; fields: string[] }>(
+  events: T[],
+): T[] {
+  return events.reduce<T[]>((merged, event) => {
+    const previous = merged.at(-1);
+    const sameSave =
+      event.event === 'record_updated' &&
+      previous?.event === 'record_updated' &&
+      previous.authorName === event.authorName &&
+      new Date(event.at).getTime() - new Date(previous.at).getTime() <= SAME_SAVE_WINDOW_MS;
+    if (!sameSave) return [...merged, event];
+    return [...merged.slice(0, -1), { ...previous, fields: [...new Set([...previous.fields, ...event.fields])] }];
+  }, []);
+}
+
+const VISITOR_FIELD_LABELS: Record<string, string> = {
+  name: 'Nome',
+  phone: 'Celular',
+  age: 'Idade',
+  email: 'E-mail',
+};
+
+function visitorEventEntry(event: VisitorEventSource): TimelineEntry {
+  const base = { date: timestampDateKey(event.at), at: event.at, actor: actorName(event.authorName) };
+  switch (event.event) {
+    case 'whatsapp_opened':
+      return { ...base, label: 'WhatsApp aberto para o contato', detail: null };
+    case 'class_invite_sent':
+      return { ...base, label: 'Convite para a turma enviado', detail: null };
+    case 'membership_interest_sent':
+      return { ...base, label: 'Ficha de Interesse enviada', detail: null };
+    case 'lesson_attended':
+      return { ...base, label: `Presença na aula ${event.lesson} marcada`, detail: event.cohort };
+    case 'lesson_unmarked':
+      return { ...base, label: `Presença na aula ${event.lesson} desmarcada`, detail: event.cohort };
+    default:
+      return {
+        ...base,
+        label: `Dados alterados: ${event.fields.map((field) => VISITOR_FIELD_LABELS[field] ?? field).join(', ')}`,
+        detail: null,
+      };
+  }
 }
 
 const AUTOMATIC_NOTES = [
@@ -81,7 +137,10 @@ export function visitTimeline(source: TimelineSource): TimelineEntry[] {
       actor: null,
     });
   }
-  if (source.membershipInterestSentAt) {
+  if (
+    source.membershipInterestSentAt &&
+    !source.events.some((event) => event.event === 'membership_interest_sent')
+  ) {
     entries.push({
       date: timestampDateKey(source.membershipInterestSentAt),
       at: source.membershipInterestSentAt,
@@ -90,6 +149,7 @@ export function visitTimeline(source: TimelineSource): TimelineEntry[] {
       actor: null,
     });
   }
+  mergeSavedRecords(source.events).forEach((event) => entries.push(visitorEventEntry(event)));
 
   return sortTimeline(entries);
 }
@@ -118,14 +178,13 @@ export interface MembershipSource {
 
 const BULK_JOIN_WINDOW_MS = 24 * 60 * 60 * 1000;
 const PASTOR_ACTOR = 'Pastor';
-const SAME_SAVE_WINDOW_MS = 60 * 1000;
 
 const ROLE_LABELS: Record<string, string> = { leader: 'Líder', host: 'Anfitrião' };
 
 const membershipStatusName = (status: string | null) =>
   Object.entries(MEMBERSHIP_STATUS_LABELS).find(([key]) => key === status)?.[1] ?? status ?? '';
 
-function eventLabel(event: MemberEventSource): string {
+function eventLabel(event: MemberEventSource, fieldLabel: (column: string) => string): string {
   const name = event.name ?? 'grupo removido';
   switch (event.event) {
     case 'membership_status_changed':
@@ -151,21 +210,8 @@ function eventLabel(event: MemberEventSource): string {
     case 'ministry_leader_removed':
       return `Deixou de liderar ${name}`;
     default:
-      return 'Ficha atualizada';
+      return `Dados alterados: ${event.fields.map(fieldLabel).join(', ')}`;
   }
-}
-
-function mergeSavedRecords(events: MemberEventSource[]): MemberEventSource[] {
-  return events.reduce<MemberEventSource[]>((merged, event) => {
-    const previous = merged.at(-1);
-    const sameSave =
-      event.event === 'record_updated' &&
-      previous?.event === 'record_updated' &&
-      previous.authorName === event.authorName &&
-      new Date(event.at).getTime() - new Date(previous.at).getTime() <= SAME_SAVE_WINDOW_MS;
-    if (!sameSave) return [...merged, event];
-    return [...merged.slice(0, -1), { ...previous, fields: [...new Set([...previous.fields, ...event.fields])] }];
-  }, []);
 }
 
 export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
@@ -243,9 +289,8 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
       entry(
         timestampDateKey(event.at),
         event.at,
-        eventLabel(event),
+        eventLabel(event, source.fieldLabel),
         actorName(event.authorName),
-        event.event === 'record_updated' ? `Campos: ${event.fields.map(source.fieldLabel).join(', ')}` : null,
       ),
     );
   });

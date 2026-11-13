@@ -11,6 +11,7 @@ import { SelectField } from '../../../components/SelectField';
 import { CommunityGroup, GroupInput, PersonInGroup, WEEK_DAY_LABELS, WeekDay } from '../../../domain/communityGroups';
 import { toOptions } from '../../../domain/text';
 import { DangerZone } from '../styles';
+import { sameItems } from '../../../lib/sameItems';
 
 const WEEK_DAY_OPTIONS = toOptions(WEEK_DAY_LABELS);
 
@@ -53,7 +54,7 @@ export function GroupModal({
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(schemaFor(smallGroup)) as Resolver<FormValues>,
     defaultValues: { name: group?.name ?? '', meetingDay: group?.meetingDay ?? '' },
@@ -63,6 +64,7 @@ export function GroupModal({
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
     .map((member) => ({ value: member.id, label: member.name }));
   const canPickPeople = options.length > 0;
+  const unchanged = !!group && !isDirty && sameItems(leaderIds, group.leaderIds) && sameItems(hostIds, group.hostIds);
 
   const submit = handleSubmit(async (values) => {
     await onSave({
@@ -110,7 +112,7 @@ export function GroupModal({
         )}
 
         <ModalActions>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit" variant="primary" disabled={isSubmitting || unchanged}>
             {isSubmitting ? (
               'Salvando...'
             ) : (

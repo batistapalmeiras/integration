@@ -1204,6 +1204,15 @@ export type Database = {
           relation: string
         }[]
       }
+      list_visitor_events: {
+        Args: { p_person_id: string }
+        Returns: {
+          author_name: string | null
+          created_at: string
+          detail: Json
+          event: string
+        }[]
+      }
       list_member_events: {
         Args: { p_person_id: string }
         Returns: {

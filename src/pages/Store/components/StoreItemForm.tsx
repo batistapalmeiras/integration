@@ -9,6 +9,7 @@ import { z } from 'zod';
 // Local
 import { FormActions } from '../styles';
 import { SIZE_OPTIONS, StoreItem } from '../types';
+import { sameItems } from '../../../lib/sameItems';
 
 const schema = z.object({
   name: z.string().min(1, text.validation.required('o nome')),
@@ -33,11 +34,21 @@ export function StoreItemForm({ item, onSubmit }: Props) {
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: item?.name ?? '', deadline: item?.deadline ?? '' },
   });
+
+  const unchanged =
+    !!item &&
+    !isDirty &&
+    active === item.active &&
+    sameItems(sizes, item.sizes ?? []) &&
+    sameItems(
+      images.map((image) => image.url),
+      item.imageUrls ?? [],
+    );
 
   const submit = handleSubmit((values) =>
     onSubmit({
@@ -62,7 +73,7 @@ export function StoreItemForm({ item, onSubmit }: Props) {
       <Switch label="Item ativo" checked={active} onChange={(e) => setActive(e.target.checked)} />
 
       <FormActions>
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+        <Button type="submit" variant="primary" disabled={isSubmitting || unchanged}>
           {isSubmitting ? (
             'Salvando...'
           ) : (

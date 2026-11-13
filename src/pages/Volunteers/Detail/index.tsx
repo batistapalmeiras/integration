@@ -73,7 +73,7 @@ export function VolunteerDetailPage() {
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = useForm<FormValues>({
     resolver: (values, context, options) =>
       zodResolver(volunteerSchema(optionalPhoneRef.current))(values, context, options),
@@ -173,7 +173,7 @@ export function VolunteerDetailPage() {
 
         {canEdit && (
           <>
-            <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
+            <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting || !isDirty}>
               {isSubmitting ? (
                 'Salvando...'
               ) : (

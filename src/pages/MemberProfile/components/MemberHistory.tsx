@@ -5,7 +5,7 @@ import { isDirectSignup } from '../../../domain/origin';
 import { membershipTimeline, visitTimeline } from '../../../domain/personTimeline';
 import { sortTimeline } from '../../../domain/timeline';
 import { recordFieldLabel } from '../../../features/memberRecord';
-import { useMemberEvents, usePersonHistory } from '../../../queries/person';
+import { useMemberEvents, usePersonHistory, useVisitorEvents } from '../../../queries/person';
 import { MemberPage } from '../../../repositories/memberRecords';
 
 interface Props {
@@ -17,12 +17,14 @@ interface Props {
 export function MemberHistory({ personId, name, info }: Props) {
   const changes = usePersonHistory(personId).data ?? [];
   const events = useMemberEvents(personId).data ?? [];
+  const visitorEvents = useVisitorEvents(personId).data ?? [];
 
   const integration = isDirectSignup(info.origin)
     ? []
     : visitTimeline({
         visitedOn: info.visitedOn,
         changes: changes.filter((change) => change.toStatus !== 'member'),
+        events: visitorEvents,
         upcomingCoffeeDate: null,
         cohortName: null,
         membershipInterestSentAt: null,

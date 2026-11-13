@@ -29,7 +29,7 @@ export function EditVisitorForm({ person, onSave, onBack }: Props) {
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = useForm<CreateVisitorFormValues>({
     resolver: zodResolver(createVisitorSchema),
     defaultValues: {
@@ -50,7 +50,7 @@ export function EditVisitorForm({ person, onSave, onBack }: Props) {
     <VisitorForm control={control} onSubmit={handleSubmit(onSave)} disabled={!canEditFields}>
       <VisitorFormActions>
         {canEditFields && (
-          <Button type="submit" variant="primary" disabled={isSubmitting || person.status === 'archived'}>
+          <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty || person.status === 'archived'}>
             {isSubmitting ? (
               'Salvando...'
             ) : (

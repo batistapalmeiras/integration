@@ -3,6 +3,7 @@ import { getUpcomingCoffeeRoster } from '../../../repositories/cafeSchedule';
 import { getUpcomingCohortWithLessons } from '../../../repositories/classesRoster';
 import { firstLessonDate } from '../../../domain/cohortSchedule';
 import { countIntegrationPeopleByStatus } from '../../../repositories/integrationPeople';
+import { countMembershipPending } from '../../../repositories/membership';
 import { MakeupNote } from '../../../domain/lessonMakeups';
 import { listRecentMakeupNotes } from '../../../repositories/lessonMakeups';
 import { UpcomingCoffee, UpcomingCohort } from '../components/AgendaPanel';
@@ -18,15 +19,16 @@ export interface IntegrationOverview {
 }
 
 export async function loadIntegrationOverview(): Promise<IntegrationOverview> {
-  const [funnel, coffee, cohort, makeupNotes] = await Promise.all([
+  const [funnel, membershipPending, coffee, cohort, makeupNotes] = await Promise.all([
     countIntegrationPeopleByStatus(),
+    countMembershipPending(),
     getUpcomingCoffeeRoster(),
     getUpcomingCohortWithLessons(),
     listRecentMakeupNotes(MAKEUP_NOTES_LIMIT),
   ]);
   const firstLesson = cohort ? firstLessonDate(cohort.lessons) : null;
   return {
-    funnel,
+    funnel: { ...funnel, membership_pending: membershipPending },
     coffee,
     cohort: cohort && firstLesson ? { name: cohort.cohort.name, firstLesson } : null,
     makeupNotes,

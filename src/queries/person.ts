@@ -10,6 +10,7 @@ import { listMembershipAlerts } from '../repositories/membership';
 import { listPersonNotes } from '../repositories/personNotes';
 import { listMemberEvents } from '../repositories/memberEvents';
 import { listStatusHistory } from '../repositories/people';
+import { listVisitorEvents } from '../repositories/visitorEvents';
 
 export const usePersonSensitive = (personId: string, enabled = true) =>
   useQuery(queryKeys.personSensitive(personId), () => getPersonSensitive(personId), { enabled: enabled && !!personId });
@@ -32,6 +33,9 @@ export const usePersonNotes = (personId: string) =>
 
 export const usePersonHistory = (personId: string) =>
   useQuery(queryKeys.personHistory(personId), () => listStatusHistory(personId), { enabled: !!personId });
+
+export const useVisitorEvents = (personId: string) =>
+  useQuery(queryKeys.visitorEvents(personId), () => listVisitorEvents(personId), { enabled: !!personId });
 
 export const useMemberEvents = (personId: string) =>
   useQuery(queryKeys.memberEvents(personId), () => listMemberEvents(personId), { enabled: !!personId });

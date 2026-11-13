@@ -29,7 +29,7 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -55,7 +55,7 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
         <DatePicker label="Aula 4" control={control} name="date4" />
 
         <ModalActions>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>
             {isSubmitting ? (
               'Salvando...'
             ) : (
