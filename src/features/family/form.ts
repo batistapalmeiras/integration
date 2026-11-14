@@ -10,9 +10,11 @@ export interface FamilyLinkValue {
 
 export interface FamilyFormValues {
   links: FamilyLinkValue[];
+  hidden: string[];
 }
 
 export const familyFormValues = (family: Relative[]): FamilyFormValues => ({
+  hidden: [],
   links: family
     .filter((relative) => !relative.derived)
     .map((relative) => ({ relativeId: relative.id, relation: relative.relation })),
@@ -24,6 +26,6 @@ export async function saveFamily(personId: string, values: FamilyFormValues): Pr
       ? [{ relativeId: link.relativeId, relation: link.relation }]
       : [],
   );
-  await setFamily(personId, links);
-  await invalidateQueries((key) => key[0] === 'person' && key[2] === 'family');
+  await setFamily(personId, links, values.hidden);
+  await invalidateQueries((key) => (key[0] === 'person' && key[2] === 'family') || key[0] === 'family');
 }

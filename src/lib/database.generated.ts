@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.15"
   }
@@ -239,6 +241,131 @@ export type Database = {
           },
         ]
       }
+      family_hidden: {
+        Row: {
+          created_at: string
+          person_id: string
+          relative_id: string
+        }
+        Insert: {
+          created_at?: string
+          person_id: string
+          relative_id: string
+        }
+        Update: {
+          created_at?: string
+          person_id?: string
+          relative_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_hidden_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "family_hidden_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "family_hidden_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_hidden_relative_id_fkey"
+            columns: ["relative_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "family_hidden_relative_id_fkey"
+            columns: ["relative_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "family_hidden_relative_id_fkey"
+            columns: ["relative_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_links: {
+        Row: {
+          created_at: string
+          person_id: string
+          relation: string
+          relative_id: string
+        }
+        Insert: {
+          created_at?: string
+          person_id: string
+          relation: string
+          relative_id: string
+        }
+        Update: {
+          created_at?: string
+          person_id?: string
+          relation?: string
+          relative_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_links_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "family_links_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "family_links_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_links_relative_id_fkey"
+            columns: ["relative_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "family_links_relative_id_fkey"
+            columns: ["relative_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "family_links_relative_id_fkey"
+            columns: ["relative_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_attendance: {
         Row: {
           attended: boolean
@@ -330,6 +457,62 @@ export type Database = {
             columns: ["cohort_id"]
             isOneToOne: false
             referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_events: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          detail: Json
+          event: string
+          id: string
+          person_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          detail?: Json
+          event: string
+          id?: string
+          person_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          detail?: Json
+          event?: string
+          id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_events_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "member_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "member_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
             referencedColumns: ["id"]
           },
         ]
@@ -464,19 +647,16 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          leaders: string[]
           name: string
         }
         Insert: {
           created_at?: string
           id?: string
-          leaders?: string[]
           name: string
         }
         Update: {
           created_at?: string
           id?: string
-          leaders?: string[]
           name?: string
         }
         Relationships: []
@@ -530,7 +710,50 @@ export type Database = {
           parent_id?: string
           role?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "parent_links_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "parent_links_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "parent_links_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parent_links_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "parent_links_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "parent_links_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pastoral_notes: {
         Row: {
@@ -539,6 +762,7 @@ export type Database = {
           created_by: string | null
           id: string
           person_id: string
+          private: boolean
         }
         Insert: {
           body: string
@@ -546,6 +770,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           person_id: string
+          private?: boolean
         }
         Update: {
           body?: string
@@ -553,6 +778,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           person_id?: string
+          private?: boolean
         }
         Relationships: [
           {
@@ -595,15 +821,14 @@ export type Database = {
           email: string | null
           entry_type: string | null
           id: string
-          origin: string
+          membership_form_at: string | null
           membership_interest_sent_at: string | null
           membership_status: string | null
           name: string
+          origin: string
           phone: string | null
           signup_window_from: string | null
           status: string
-          membership_form_at: string | null
-          statute_agreed_at: string | null
           updated_at: string
           visited_on: string | null
           whatsapp_opened_at: string | null
@@ -617,15 +842,14 @@ export type Database = {
           email?: string | null
           entry_type?: string | null
           id?: string
-          origin?: string
+          membership_form_at?: string | null
           membership_interest_sent_at?: string | null
           membership_status?: string | null
           name: string
+          origin?: string
           phone?: string | null
           signup_window_from?: string | null
           status?: string
-          membership_form_at?: string | null
-          statute_agreed_at?: string | null
           updated_at?: string
           visited_on?: string | null
           whatsapp_opened_at?: string | null
@@ -639,15 +863,14 @@ export type Database = {
           email?: string | null
           entry_type?: string | null
           id?: string
-          origin?: string
+          membership_form_at?: string | null
           membership_interest_sent_at?: string | null
           membership_status?: string | null
           name?: string
+          origin?: string
           phone?: string | null
           signup_window_from?: string | null
           status?: string
-          membership_form_at?: string | null
-          statute_agreed_at?: string | null
           updated_at?: string
           visited_on?: string | null
           whatsapp_opened_at?: string | null
@@ -705,39 +928,6 @@ export type Database = {
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      person_small_groups: {
-        Row: {
-          created_at: string
-          person_id: string
-          small_group_id: string
-        }
-        Insert: {
-          created_at?: string
-          person_id: string
-          small_group_id: string
-        }
-        Update: {
-          created_at?: string
-          person_id?: string
-          small_group_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "person_small_groups_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_small_groups_small_group_id_fkey"
-            columns: ["small_group_id"]
-            isOneToOne: false
-            referencedRelation: "small_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -812,6 +1002,53 @@ export type Database = {
           },
         ]
       }
+      person_small_groups: {
+        Row: {
+          created_at: string
+          person_id: string
+          small_group_id: string
+        }
+        Insert: {
+          created_at?: string
+          person_id: string
+          small_group_id: string
+        }
+        Update: {
+          created_at?: string
+          person_id?: string
+          small_group_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_small_groups_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "person_small_groups_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "person_small_groups_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_small_groups_small_group_id_fkey"
+            columns: ["small_group_id"]
+            isOneToOne: false
+            referencedRelation: "small_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active: boolean
@@ -861,24 +1098,6 @@ export type Database = {
           },
         ]
       }
-      spouse_links: {
-        Row: {
-          created_at: string
-          person_a_id: string
-          person_b_id: string
-        }
-        Insert: {
-          created_at?: string
-          person_a_id: string
-          person_b_id: string
-        }
-        Update: {
-          created_at?: string
-          person_a_id?: string
-          person_b_id?: string
-        }
-        Relationships: []
-      }
       small_group_roles: {
         Row: {
           person_id: string
@@ -896,6 +1115,13 @@ export type Database = {
           small_group_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "small_group_roles_membership_fkey"
+            columns: ["person_id", "small_group_id"]
+            isOneToOne: false
+            referencedRelation: "person_small_groups"
+            referencedColumns: ["person_id", "small_group_id"]
+          },
           {
             foreignKeyName: "small_group_roles_person_id_fkey"
             columns: ["person_id"]
@@ -918,13 +1144,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "small_group_roles_membership_fkey"
-            columns: ["person_id", "small_group_id"]
-            isOneToOne: false
-            referencedRelation: "person_small_groups"
-            referencedColumns: ["person_id", "small_group_id"]
-          },
-          {
             foreignKeyName: "small_group_roles_small_group_id_fkey"
             columns: ["small_group_id"]
             isOneToOne: false
@@ -936,29 +1155,84 @@ export type Database = {
       small_groups: {
         Row: {
           created_at: string
-          hosts: string[]
           id: string
-          leaders: string[]
           meeting_day: string | null
           name: string
         }
         Insert: {
           created_at?: string
-          hosts?: string[]
           id?: string
-          leaders?: string[]
           meeting_day?: string | null
           name: string
         }
         Update: {
           created_at?: string
-          hosts?: string[]
           id?: string
-          leaders?: string[]
           meeting_day?: string | null
           name?: string
         }
         Relationships: []
+      }
+      spouse_links: {
+        Row: {
+          created_at: string
+          person_a_id: string
+          person_b_id: string
+        }
+        Insert: {
+          created_at?: string
+          person_a_id: string
+          person_b_id: string
+        }
+        Update: {
+          created_at?: string
+          person_a_id?: string
+          person_b_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spouse_links_person_a_id_fkey"
+            columns: ["person_a_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "spouse_links_person_a_id_fkey"
+            columns: ["person_a_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "spouse_links_person_a_id_fkey"
+            columns: ["person_a_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spouse_links_person_b_id_fkey"
+            columns: ["person_b_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "spouse_links_person_b_id_fkey"
+            columns: ["person_b_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "spouse_links_person_b_id_fkey"
+            columns: ["person_b_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       status_history: {
         Row: {
@@ -1012,6 +1286,62 @@ export type Database = {
           },
           {
             foreignKeyName: "status_history_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visitor_events: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          detail: Json
+          event: string
+          id: string
+          person_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          detail?: Json
+          event: string
+          id?: string
+          person_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          detail?: Json
+          event?: string
+          id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_events_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "visitor_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "visitor_events_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
@@ -1090,8 +1420,21 @@ export type Database = {
           welcome_coffee: number
         }[]
       }
+      can_edit_person_note: { Args: { p_created_by: string }; Returns: boolean }
+      can_manage_person_notes: {
+        Args: { p_person_id: string }
+        Returns: boolean
+      }
       can_read_person: { Args: { p_status: string }; Returns: boolean }
+      can_see_person_note: {
+        Args: { p_created_by: string; p_private: boolean }
+        Returns: boolean
+      }
       can_write_person: { Args: { p_status: string }; Returns: boolean }
+      changed_fields: {
+        Args: { p_new: Json; p_old: Json; p_skip: string[] }
+        Returns: string[]
+      }
       check_membership_interest_phone: {
         Args: { p_phone: string }
         Returns: {
@@ -1126,6 +1469,10 @@ export type Database = {
           wants_small_group: string
         }[]
       }
+      check_membership_signup_cpf: {
+        Args: { p_cpf: string }
+        Returns: undefined
+      }
       check_welcome_coffee_phone: {
         Args: { p_phone: string }
         Returns: {
@@ -1152,11 +1499,29 @@ export type Database = {
         }[]
       }
       current_role: { Args: never; Returns: string }
+      derive_family: {
+        Args: { p_person_id: string }
+        Returns: {
+          relation: string
+          relative_id: string
+        }[]
+      }
+      drop_derivable_links: { Args: never; Returns: undefined }
+      family_inverse: {
+        Args: { p_gender: string; p_relation: string }
+        Returns: string
+      }
+      family_mirror: {
+        Args: { p_relation: string; p_relative_gender: string }
+        Returns: string
+      }
+      family_relation_gender: { Args: { p_relation: string }; Returns: string }
       find_membership_interest_person: {
         Args: { p_phone: string }
         Returns: string
       }
       find_welcome_coffee_person: { Args: { p_phone: string }; Returns: string }
+      format_person_name: { Args: { p_name: string }; Returns: string }
       get_active_cohort_schedule: {
         Args: never
         Returns: {
@@ -1167,7 +1532,16 @@ export type Database = {
       get_family: {
         Args: { p_person_id: string }
         Returns: {
-          gender: string | null
+          name: string
+          person_id: string
+          relation: string
+        }[]
+      }
+      get_family_links: {
+        Args: { p_person_id: string }
+        Returns: {
+          derived: boolean
+          gender: string
           name: string
           person_id: string
           relation: string
@@ -1188,6 +1562,15 @@ export type Database = {
           year: number
         }[]
       }
+      list_member_events: {
+        Args: { p_person_id: string }
+        Returns: {
+          author_name: string
+          created_at: string
+          detail: Json
+          event: string
+        }[]
+      }
       list_ministries: {
         Args: never
         Returns: {
@@ -1195,41 +1578,13 @@ export type Database = {
           name: string
         }[]
       }
-      get_family_links: {
-        Args: { p_person_id: string }
-        Returns: {
-          derived: boolean
-          gender: string | null
-          name: string
-          person_id: string
-          relation: string
-        }[]
-      }
-      list_visitor_events: {
-        Args: { p_person_id: string }
-        Returns: {
-          author_name: string | null
-          created_at: string
-          detail: Json
-          event: string
-        }[]
-      }
-      list_member_events: {
-        Args: { p_person_id: string }
-        Returns: {
-          author_name: string | null
-          created_at: string
-          detail: Json
-          event: string
-        }[]
-      }
       list_person_history: {
         Args: { p_person_id: string }
         Returns: {
-          author_name: string | null
+          author_name: string
           created_at: string
-          from_status: string | null
-          note: string | null
+          from_status: string
+          note: string
           to_status: string
         }[]
       }
@@ -1244,10 +1599,6 @@ export type Database = {
           private: boolean
         }[]
       }
-      set_family_links: {
-        Args: { p_links: Json; p_person_id: string }
-        Returns: undefined
-      }
       list_small_groups: {
         Args: never
         Returns: {
@@ -1255,6 +1606,24 @@ export type Database = {
           leaders: string[]
           name: string
         }[]
+      }
+      list_visitor_events: {
+        Args: { p_person_id: string }
+        Returns: {
+          author_name: string
+          created_at: string
+          detail: Json
+          event: string
+        }[]
+      }
+      log_family_changes: { Args: { p_before: Json }; Returns: undefined }
+      log_member_event: {
+        Args: { p_detail: Json; p_event: string; p_person_id: string }
+        Returns: undefined
+      }
+      log_visitor_event: {
+        Args: { p_detail: Json; p_event: string; p_person_id: string }
+        Returns: undefined
       }
       mark_coffee_attended: {
         Args: {
@@ -1275,44 +1644,13 @@ export type Database = {
         Args: { p_coffee_event_id: string; p_person_id: string }
         Returns: string
       }
+      propagate_family_to_spouse: {
+        Args: { p_person_id: string }
+        Returns: undefined
+      }
+      prune_family_shares: { Args: { p_before: Json }; Returns: undefined }
       run_pipeline_maintenance: { Args: never; Returns: Json }
-      set_lesson_dates: {
-        Args: { p_cohort_id: string; p_lesson_dates: string[] }
-        Returns: undefined
-      }
-      set_family: {
-        Args: {
-          p_child_ids?: string[]
-          p_father_id?: string
-          p_mother_id?: string
-          p_person_id: string
-          p_spouse_id?: string
-        }
-        Returns: undefined
-      }
-      check_membership_signup_cpf: {
-        Args: { p_cpf: string }
-        Returns: undefined
-      }
-      submit_integration_signup: {
-        Args: {
-          p_attending_since: string
-          p_baptism_info: string
-          p_conversion_testimony: string
-          p_marital_status_story: string
-          p_phone: string
-          p_previous_church: string
-        }
-        Returns: {
-          cohort_name: string
-          lesson_dates: string[]
-        }[]
-      }
-      submit_makeup_attendance: {
-        Args: { p_notes: string; p_token: string }
-        Returns: undefined
-      }
-      submit_membership_signup: {
+      save_membership_answers: {
         Args: {
           p_address_city: string
           p_address_complement: string
@@ -1334,11 +1672,56 @@ export type Database = {
           p_ministry_interests: string[]
           p_name: string
           p_other_phone: string
-          p_phone: string
+          p_person_id: string
           p_secret_society: string
           p_small_group_id: string
           p_wants_small_group: string
         }
+        Returns: undefined
+      }
+      service_sunday: { Args: { p_at: string }; Returns: string }
+      set_family: {
+        Args: {
+          p_child_ids?: string[]
+          p_father_id?: string
+          p_mother_id?: string
+          p_person_id: string
+          p_spouse_id?: string
+        }
+        Returns: undefined
+      }
+      set_family_links: {
+        Args: { p_hidden?: Json; p_links: Json; p_person_id: string }
+        Returns: undefined
+      }
+      set_lesson_dates: {
+        Args: { p_cohort_id: string; p_lesson_dates: string[] }
+        Returns: undefined
+      }
+      share_family_link: {
+        Args: {
+          p_relation_of_spouse: string
+          p_relative: string
+          p_target: string
+        }
+        Returns: undefined
+      }
+      submit_integration_signup: {
+        Args: {
+          p_attending_since: string
+          p_baptism_info: string
+          p_conversion_testimony: string
+          p_marital_status_story: string
+          p_phone: string
+          p_previous_church: string
+        }
+        Returns: {
+          cohort_name: string
+          lesson_dates: string[]
+        }[]
+      }
+      submit_makeup_attendance: {
+        Args: { p_notes: string; p_token: string }
         Returns: undefined
       }
       submit_membership_form: {
@@ -1373,10 +1756,36 @@ export type Database = {
           lessons_total: number
         }[]
       }
-      update_volunteer_identity: {
-        Args: { p_email: string; p_name: string; p_phone: string; p_profile_id: string }
+      submit_membership_signup: {
+        Args: {
+          p_address_city: string
+          p_address_complement: string
+          p_address_neighborhood: string
+          p_address_number: string
+          p_address_state: string
+          p_address_street: string
+          p_address_zip: string
+          p_baptism_church: string
+          p_baptism_date: string
+          p_birth_date: string
+          p_cpf: string
+          p_email: string
+          p_entry_type: string
+          p_gender: string
+          p_last_church: string
+          p_marital_status: string
+          p_membership_note: string
+          p_ministry_interests: string[]
+          p_name: string
+          p_other_phone: string
+          p_phone: string
+          p_secret_society: string
+          p_small_group_id: string
+          p_wants_small_group: string
+        }
         Returns: undefined
       }
+      sync_family_couples: { Args: never; Returns: undefined }
       team_contacts: {
         Args: { p_stage: string }
         Returns: {
@@ -1386,6 +1795,15 @@ export type Database = {
       }
       update_own_identity: {
         Args: { p_email: string; p_name: string }
+        Returns: undefined
+      }
+      update_volunteer_identity: {
+        Args: {
+          p_email: string
+          p_name: string
+          p_phone: string
+          p_profile_id: string
+        }
         Returns: undefined
       }
     }

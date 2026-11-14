@@ -36,10 +36,13 @@ describe('family repository', () => {
   });
 
   it('saves every link of the person in one call', async () => {
-    await setFamily('me', [{ relativeId: 'c1', relation: 'child' }]);
+    await setFamily('me', [{ relativeId: 'c1', relation: 'child' }], ['g1']);
 
     expect(calls).toEqual([
-      { fn: 'set_family_links', args: { p_person_id: 'me', p_links: [{ relative_id: 'c1', relation: 'child' }] } },
+      {
+        fn: 'set_family_links',
+        args: { p_person_id: 'me', p_links: [{ relative_id: 'c1', relation: 'child' }], p_hidden: ['g1'] },
+      },
     ]);
   });
 });

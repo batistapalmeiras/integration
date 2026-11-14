@@ -4,7 +4,7 @@ import { useQuery } from '../lib/queryCache';
 import { queryKeys } from '../lib/queryKeys';
 import { listMemberBirthdays } from '../repositories/birthdays';
 import { getPersonLessonMakeups } from '../repositories/lessonMakeups';
-import { getFamily } from '../repositories/family';
+import { getFamily, listFamilyTraits } from '../repositories/family';
 import { getMemberPage, getPersonRecords } from '../repositories/memberRecords';
 import { listMembershipAlerts } from '../repositories/membership';
 import { listPersonNotes } from '../repositories/personNotes';
@@ -43,7 +43,7 @@ export const useMemberEvents = (personId: string) =>
 export const useMembershipAlerts = (personId: string) =>
   useQuery(queryKeys.membershipAlerts(personId), () => listMembershipAlerts([personId]), { enabled: !!personId });
 
-
 export const useFamily = (personId: string) =>
   useQuery(queryKeys.personFamily(personId), () => getFamily(personId), { enabled: !!personId });
 
+export const useFamilyTraits = () => useQuery(queryKeys.familyTraits, listFamilyTraits);

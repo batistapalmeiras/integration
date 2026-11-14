@@ -43,6 +43,7 @@ export const queryKeys = {
   cohortBoard: ['cohorts', 'board'] as const,
   hasUpcomingCohort: ['cohorts', 'has-upcoming'] as const,
   cohortNames: ['cohorts', 'names'] as const,
+  familyTraits: ['family', 'traits'] as const,
   cohortsReport: ['cohorts', 'report'] as const,
   cohortRoster: (id: string) => ['cohorts', 'roster', id] as const,
 

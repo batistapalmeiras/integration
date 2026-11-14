@@ -1,5 +1,5 @@
 // Local
-import { FAMILY_RELATIONS, relationLabel } from '../../src/domain/family';
+import { availableRelations, FAMILY_RELATIONS, relationLabel } from '../../src/domain/family';
 
 describe('family relations', () => {
   it('keeps father and mother apart, since they are different words', () => {
@@ -38,5 +38,14 @@ describe('family relations', () => {
       'mother',
       'sibling',
     ]);
+  });
+
+  it('stops offering the spouse, the father and the mother once each one is registered', () => {
+    expect(availableRelations([])).toEqual([...FAMILY_RELATIONS]);
+    expect(availableRelations(['spouse'])).not.toContain('spouse');
+    expect(availableRelations(['spouse'])).toContain('father');
+    expect(availableRelations(['father', 'mother'])).not.toContain('father');
+    expect(availableRelations(['father', 'mother'])).not.toContain('mother');
+    expect(availableRelations(['child', 'child'])).toContain('child');
   });
 });

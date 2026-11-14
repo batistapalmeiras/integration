@@ -9,5 +9,6 @@ describe('family form values', () => {
     ]);
 
     expect(values.links).toEqual([{ relativeId: 'a', relation: 'spouse' }]);
+    expect(values.hidden).toEqual([]);
   });
 });

@@ -1,9 +1,14 @@
 // Libs
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 // Local
 import { FamilyModal } from '../../../src/pages/MemberProfile/components/FamilyModal';
 import { UserRole } from '../../../src/types/enums';
 import { renderScreen } from '../../support/render';
+
+vi.mock('../../../src/queries/person', () => ({
+  useFamilyTraits: () => ({ data: { m1: { gender: 'male', spouseId: null, fatherId: null, motherId: null } } }),
+}));
 
 vi.mock('../../../src/queries/reference', () => ({
   useMemberNames: () => ({ data: [{ id: 'm1', name: 'Pedro Souza' }] }),
@@ -23,15 +28,30 @@ describe('family modal', () => {
     renderScreen(
       <FamilyModal
         personId="p1"
-       
         family={[{ id: 'm1', name: 'Pedro Souza', relation: 'child', gender: 'male', derived: false }]}
         close={vi.fn()}
       />,
       { role: UserRole.Pastor },
     );
 
-    expect(screen.getByText('Filho(a): Pedro Souza')).toBeInTheDocument();
+    expect(screen.getByText('Filho: Pedro Souza')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Adicionar outro familiar/ })).toBeInTheDocument();
     expect(screen.queryByText('Selecione o parentesco')).not.toBeInTheDocument();
+  });
+
+  it('lets the pastor remove a relation the system works out, the same way as any other', async () => {
+    renderScreen(
+      <FamilyModal
+        personId="p1"
+        family={[{ id: 'g1', name: 'Gabrielle Soares', relation: 'grandchild', gender: 'female', derived: true }]}
+        close={vi.fn()}
+      />,
+      { role: UserRole.Pastor },
+    );
+
+    expect(screen.getByText('Neta: Gabrielle Soares')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Remover Gabrielle Soares' }));
+
+    expect(screen.queryByText('Neta: Gabrielle Soares')).not.toBeInTheDocument();
   });
 });
