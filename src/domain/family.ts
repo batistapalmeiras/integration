@@ -9,6 +9,7 @@ export const FAMILY_RELATIONS = [
   'father',
   'mother',
   'sibling',
+  'friend',
   'grandchild',
   'parent_in_law',
   'son_in_law',
@@ -17,7 +18,6 @@ export const FAMILY_RELATIONS = [
   'uncle',
   'nephew',
   'cousin',
-  'friend',
 ] as const;
 
 export type FamilyRelation = (typeof FAMILY_RELATIONS)[number];

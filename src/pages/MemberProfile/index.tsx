@@ -104,7 +104,7 @@ export function MemberProfilePage() {
 
   return (
     <WideContent>
-      <PageHeader title={record.name} back />
+      <PageHeader title={record.name} back sticky />
 
       <HeroText>
         <StatusRow>

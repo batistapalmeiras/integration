@@ -51,7 +51,7 @@ export function MembersPage() {
 
   return (
     <div>
-      <PageHeader title="Membros" back />
+      <PageHeader title="Membros" back sticky />
 
       {!loading && !error && <PeopleCount count={totalCount} />}
 

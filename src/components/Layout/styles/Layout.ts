@@ -300,13 +300,16 @@ export const SideNavCount = styled.span`
   text-align: center;
 `;
 
-export const Main = styled.main<{ $hasBottomBar: boolean }>`
+const MODULE_BAR_HEIGHT = 'calc(48px + env(safe-area-inset-top))';
+
+export const Main = styled.main<{ $hasBottomBar: boolean; $hasModuleBar: boolean }>`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: ${({ theme }) => theme.colors.canvas};
 
   @media (max-width: 744px) {
+    --sticky-top: ${({ $hasModuleBar }) => ($hasModuleBar ? MODULE_BAR_HEIGHT : '0px')};
     padding-bottom: ${({ $hasBottomBar }) => ($hasBottomBar ? 'calc(56px + env(safe-area-inset-bottom))' : '0')};
   }
 
@@ -325,8 +328,9 @@ export const ModuleBar = styled(Link)`
     display: flex;
     align-items: center;
     gap: ${({ theme }) => theme.spacing.xs};
-    padding: calc(${({ theme }) => theme.spacing.md} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base}
-      ${({ theme }) => theme.spacing.md};
+    box-sizing: border-box;
+    height: ${MODULE_BAR_HEIGHT};
+    padding: env(safe-area-inset-top) ${({ theme }) => theme.spacing.base} 0;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -340,6 +344,7 @@ export const ModuleBar = styled(Link)`
 `;
 
 export const MainInner = styled.div`
+  --page-gutter: ${({ theme }) => theme.spacing.xl};
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
@@ -350,6 +355,7 @@ export const MainInner = styled.div`
   animation: ${fadeUp} 0.25s ease;
 
   @media (max-width: 744px) {
+    --page-gutter: ${({ theme }) => theme.spacing.base};
     padding: calc(${({ theme }) => theme.spacing.lg} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base}
       ${({ theme }) => theme.spacing.lg};
   }

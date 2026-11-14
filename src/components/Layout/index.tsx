@@ -172,7 +172,7 @@ export function Layout({ children }: ILayoutProps) {
         </SideFooter>
       </SideMenu>
 
-      <Main $hasBottomBar={shouldShowBottomBar}>
+      <Main $hasBottomBar={shouldShowBottomBar} $hasModuleBar={!!currentArea}>
         {currentArea && (
           <ModuleBar to={AppRoute.Dashboard}>
             <ChevronLeft size={20} />
