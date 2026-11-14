@@ -62,7 +62,7 @@ export function useListParams<K extends string>({ basePath, filters, stored }: O
   };
   const debouncedSearch = useDebouncedValue(current.search.trim());
 
-  const write = (next: ListState<K>) => {
+  const write = (next: ListState<K>, rebuildPath = false) => {
     const query = new URLSearchParams(params);
     query.delete(SEARCH_PARAM);
     query.delete(PAGE_PARAM);
@@ -70,7 +70,10 @@ export function useListParams<K extends string>({ basePath, filters, stored }: O
     if (next.page > 1) query.set(PAGE_PARAM, String(next.page));
     const search = query.toString();
     navigate(
-      { pathname: [basePath, ...encodePathFilters(filters, next.filters)].join('/'), search: search && `?${search}` },
+      {
+        pathname: rebuildPath ? [basePath, ...encodePathFilters(filters, next.filters)].join('/') : location.pathname,
+        search: search && `?${search}`,
+      },
       { replace: true },
     );
   };
@@ -79,7 +82,7 @@ export function useListParams<K extends string>({ basePath, filters, stored }: O
     const next = { ...current.filters, ...changes };
     setSaved(next);
     stored?.save(next);
-    write({ ...current, filters: next, page: 1 });
+    write({ ...current, filters: next, page: 1 }, true);
   };
 
   const setFilter = (key: K, chosen: string[]) => {

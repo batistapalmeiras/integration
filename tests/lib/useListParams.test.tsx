@@ -64,6 +64,15 @@ describe('useListParams', () => {
     expect(store.load()).toBeNull();
   });
 
+  it('keeps the path while typing a search, even with saved filters, so the screen is not remounted', () => {
+    store.save({ status: ['active'] });
+    const { result } = renderList('/lista');
+    act(() => result.current.list.setSearch('a'));
+    expect(result.current.location.pathname).toBe('/lista');
+    expect(result.current.location.search).toBe('?q=a');
+    expect(result.current.list.filter('status')).toEqual(['active']);
+  });
+
   it('keeps the page in the query and stays within the last one', () => {
     const { result } = renderList();
     act(() => result.current.list.setPage(3));
