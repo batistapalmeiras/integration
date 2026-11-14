@@ -30,7 +30,7 @@ select public.set_family_links('f0000000-0000-4000-8000-0000000008b2', '[
 ]'::jsonb);
 
 select results_eq(
-  $$ select event || ':' || (detail ->> 'relation') from public.list_member_events('f0000000-0000-4000-8000-0000000008b2') order by detail ->> 'relation' $$,
+  $$ select event || ':' || (detail ->> 'relation') from public.list_member_events('f0000000-0000-4000-8000-0000000008b2') where event like 'family_%' order by detail ->> 'relation' $$,
   $$ values ('family_added:child'::text), ('family_added:spouse'::text) $$,
   'each relative added to the person is recorded with the relation'
 );
@@ -53,7 +53,7 @@ select public.set_family_links('f0000000-0000-4000-8000-0000000008b2', '[
 ]'::jsonb);
 
 select is(
-  (select count(*) from public.list_member_events('f0000000-0000-4000-8000-0000000008b2')),
+  (select count(*) from public.list_member_events('f0000000-0000-4000-8000-0000000008b2') where event like 'family_%'),
   2::bigint,
   'saving the same family again records nothing'
 );

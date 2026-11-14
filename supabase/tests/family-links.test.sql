@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(11);
+select plan(14);
 
 insert into auth.users (id) values ('f0000000-0000-4000-8000-0000000003a1');
 
@@ -34,15 +34,15 @@ select lives_ok(
 );
 
 select results_eq(
-  $$ select relation from public.get_family_links('f0000000-0000-4000-8000-0000000003b3') $$,
-  $$ values ('mother'::text) $$,
-  'the other side of a link is written with the inverse relation, by the gender of the person'
+  $$ select relation from public.get_family_links('f0000000-0000-4000-8000-0000000003b3') order by relation $$,
+  $$ values ('father'::text), ('mother'::text) $$,
+  'the other side of a link is written with the inverse relation, by the gender of the person, and the child is shared with the spouse'
 );
 
 select results_eq(
-  $$ select relation from public.get_family_links('f0000000-0000-4000-8000-0000000003b4') $$,
-  $$ values ('spouse'::text) $$,
-  'a spouse is a spouse on both sides'
+  $$ select relation from public.get_family_links('f0000000-0000-4000-8000-0000000003b4') order by relation $$,
+  $$ values ('child'::text), ('spouse'::text) $$,
+  'a spouse is a spouse on both sides, and shares the children'
 );
 
 select throws_ok(
@@ -104,6 +104,29 @@ select throws_ok(
   'P0001',
   'Vínculo familiar inválido.',
   'a relation that does not exist is refused'
+);
+
+select lives_ok(
+  $$ select public.set_family_links('f0000000-0000-4000-8000-0000000003b2', '[
+       {"relative_id": "f0000000-0000-4000-8000-0000000003b3", "relation": "friend"}
+     ]'::jsonb) $$,
+  'a friend is accepted'
+);
+
+select results_eq(
+  $$ select relation from public.get_family_links('f0000000-0000-4000-8000-0000000003b3') where person_id = 'f0000000-0000-4000-8000-0000000003b2' $$,
+  $$ values ('friend'::text) $$,
+  'a friend is a friend on both sides'
+);
+
+select throws_ok(
+  $$ select public.set_family_links('f0000000-0000-4000-8000-0000000003b2', '[
+       {"relative_id": "f0000000-0000-4000-8000-0000000003b4", "relation": "father"},
+       {"relative_id": "f0000000-0000-4000-8000-0000000003b1", "relation": "father"}
+     ]'::jsonb) $$,
+  'P0001',
+  'Só pode haver um pai.',
+  'a person cannot have two fathers'
 );
 
 select * from finish();

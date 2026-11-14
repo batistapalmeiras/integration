@@ -32,6 +32,10 @@ export function MembershipInterestPage() {
   const open = (phone: string, found: MembershipInterestCheck) => {
     saveVisitorIdentity({ phone, name: found.name });
     setEligibility(found);
+    if (found.alreadySubmitted) {
+      show('done');
+      return;
+    }
     if (!initialValues || !isSamePhone(initialValues.phone, phone)) {
       interestFormProgress.clear();
       setInitialValues(prefilledForm(phone, found));
