@@ -90,20 +90,6 @@ export const NameCell = styled.div`
   min-width: 0;
 `;
 
-export const NameLine = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: ${({ theme }) => theme.spacing.xxs};
-  min-width: 0;
-
-  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    flex-direction: row;
-    align-items: center;
-    gap: ${({ theme }) => theme.spacing.sm};
-  }
-`;
-
 export const NameText = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
@@ -128,5 +114,17 @@ export const ReviewFlag = styled.span`
 
   svg {
     flex-shrink: 0;
+  }
+`;
+
+export const WideLabel = styled.span`
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
+  }
+`;
+
+export const NarrowLabel = styled.span`
+  @media (min-width: calc(${({ theme }) => theme.breakpoints.mobile} + 1px)) {
+    display: none;
   }
 `;

@@ -22,9 +22,3 @@ export const CouncilLabel = styled.span`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
 `;
-
-export const WideOnly = styled.span`
-  @media (max-width: calc(${({ theme }) => theme.breakpoints.mobile} - 1px)) {
-    display: none;
-  }
-`;

@@ -150,7 +150,7 @@ export async function fetchCohortBoard(): Promise<CohortBoard> {
 }
 
 export async function listCohortNames(): Promise<string[]> {
-  const { data, error } = await supabase.from('cohorts').select('name').order('name');
+  const { data, error } = await supabase.from('cohorts').select('name, enrollments!inner(id)').order('name');
   if (error) throw error;
   return (data ?? []).map((cohort) => cohort.name);
 }

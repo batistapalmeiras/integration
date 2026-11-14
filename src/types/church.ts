@@ -10,13 +10,6 @@ export const ENTRY_TYPE_LABELS: Record<EntryType, string> = {
   reconciliation: 'Reconciliação',
 };
 
-export const ENTRY_TYPE_TONES: Record<EntryType, string> = {
-  baptism: 'success',
-  transfer_letter: 'warning',
-  acclamation: 'neutral',
-  reconciliation: 'neutral',
-};
-
 export const ENTRY_TYPE_DESCRIPTIONS: Record<EntryType, string> = {
   baptism: 'Para quem ainda não é batizado(a) e deseja se batizar na Igreja Batista Palmeiras.',
   transfer_letter: 'Para quem é membro de outra igreja Batista da Convenção Batista Brasileira.',

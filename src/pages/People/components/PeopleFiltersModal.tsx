@@ -20,15 +20,10 @@ interface Props {
 export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNames, onApply }: Props) {
   const [status, setStatus] = useState(statusFilter);
   const [cohort, setCohort] = useState(cohortFilter);
-  const [statusError, setStatusError] = useState<string | undefined>();
 
   const noFilters = status.length === 0 && cohort === ALL_COHORTS;
 
   const apply = () => {
-    if (status.length === 0) {
-      setStatusError('Selecione pelo menos um status');
-      return;
-    }
     onApply(status, cohort);
     close();
   };
@@ -47,12 +42,8 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
           label={text.fields.status}
           options={STATUS_OPTIONS}
           value={status}
-          onChange={(value) => {
-            setStatus(value as PersonStatus[]);
-            setStatusError(undefined);
-          }}
+          onChange={(value) => setStatus(value as PersonStatus[])}
           placeholder="Buscar status…"
-          error={statusError}
         />
 
         <RawSelect label="Turma" value={cohort} onChange={(e) => setCohort(e.target.value)}>

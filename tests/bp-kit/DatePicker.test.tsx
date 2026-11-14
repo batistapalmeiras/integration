@@ -20,7 +20,7 @@ describe('DatePicker', () => {
     const user = userEvent.setup();
     renderScreen(<BirthDateField initial="2026-11-08" />);
 
-    await user.click(screen.getByRole('button', { name: /8 de novembro de 2026/ }));
+    await user.click(screen.getByRole('button', { name: 'Abrir calendário' }));
     await user.click(screen.getByRole('button', { name: 'Escolher mês e ano' }));
     for (let page = 0; page < 3; page++) await user.click(screen.getByRole('button', { name: 'Anos anteriores' }));
     await user.click(screen.getByRole('button', { name: '1990' }));
@@ -28,15 +28,29 @@ describe('DatePicker', () => {
     await user.click(screen.getByRole('button', { name: '15' }));
 
     expect(submitted).toBe('1990-03-15');
-    expect(screen.getByRole('button', { name: /15 de março de 1990/ })).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveValue('15/03/1990');
   });
 
   it('still moves month by month from the days view', async () => {
     const user = userEvent.setup();
     renderScreen(<BirthDateField initial="2026-01-10" />);
 
-    await user.click(screen.getByRole('button', { name: /10 de janeiro de 2026/ }));
+    await user.click(screen.getByRole('button', { name: 'Abrir calendário' }));
     await user.click(screen.getByRole('button', { name: 'Mês anterior' }));
     expect(screen.getByRole('button', { name: 'Escolher mês e ano' })).toHaveTextContent('dezembro de 2025');
+  });
+
+  it('takes a typed date and keeps the field empty until it is a real date', async () => {
+    const user = userEvent.setup();
+    renderScreen(<BirthDateField />);
+
+    await user.type(screen.getByRole('textbox'), '3102');
+    expect(screen.getByRole('textbox')).toHaveValue('31/02');
+    expect(submitted).toBe('');
+
+    await user.clear(screen.getByRole('textbox'));
+    await user.type(screen.getByRole('textbox'), '06011978');
+    expect(screen.getByRole('textbox')).toHaveValue('06/01/1978');
+    expect(submitted).toBe('1978-01-06');
   });
 });

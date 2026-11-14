@@ -46,7 +46,7 @@ const MAIN = MEMBER_RECORD_SECTIONS.filter(
 
 export function MemberProfilePage() {
   const { id = '' } = useParams<{ id: string }>();
-  const { open, close, modal } = useModal('drawer');
+  const { open, close, modal } = useModal('drawer', { fullScreenOnMobile: true });
   const familyModal = useModal('drawer', { fullScreenOnMobile: true });
   const pageQuery = useMemberPage(id);
   const notesQuery = usePersonNotes(id);
