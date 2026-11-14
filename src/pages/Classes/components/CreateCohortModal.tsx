@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, DatePicker, Form, InfoBox, ModalActions, ModalTitle, text, parseDateKey, toDateKey } from 'bp-kit';
+import { Button, DatePicker, Form, InfoBox, ModalActions, ModalTitle, text, toDateKey } from 'bp-kit';
 import { Plus } from 'lucide-react';
 import { z } from 'zod';
 // Local
@@ -54,7 +54,6 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
           control={control}
           name="firstDate"
           isDateDisabled={minDate ? (date) => toDateKey(date) < minDate : undefined}
-          initialMonth={minDate ? (parseDateKey(minDate) ?? undefined) : undefined}
         />
 
         <ModalActions>
