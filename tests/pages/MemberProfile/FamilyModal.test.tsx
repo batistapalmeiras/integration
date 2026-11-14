@@ -24,7 +24,7 @@ describe('family modal', () => {
       <FamilyModal
         personId="p1"
        
-        family={[{ id: 'm1', name: 'Pedro Souza', relation: 'child', gender: 'male' }]}
+        family={[{ id: 'm1', name: 'Pedro Souza', relation: 'child', gender: 'male', derived: false }]}
         close={vi.fn()}
       />,
       { role: UserRole.Pastor },

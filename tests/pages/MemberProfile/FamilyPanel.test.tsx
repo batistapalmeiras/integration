@@ -17,10 +17,10 @@ describe('family panel', () => {
     renderScreen(
       <FamilyPanel
         family={[
-          { id: 'a', name: 'Maria Souza', relation: 'spouse', gender: 'female' },
-          { id: 'b', name: 'Pedro Souza', relation: 'child', gender: 'male' },
-          { id: 'c', name: 'Lia Souza', relation: 'child', gender: 'female' },
-          { id: 'd', name: 'Gabriel Lima', relation: 'sibling', gender: 'male' },
+          { id: 'a', name: 'Maria Souza', relation: 'spouse', gender: 'female', derived: false },
+          { id: 'b', name: 'Pedro Souza', relation: 'child', gender: 'male', derived: false },
+          { id: 'c', name: 'Lia Souza', relation: 'child', gender: 'female', derived: false },
+          { id: 'd', name: 'Gabriel Lima', relation: 'sibling', gender: 'male', derived: false },
         ]}
         onEdit={vi.fn()}
       />,
@@ -36,7 +36,7 @@ describe('family panel', () => {
 
   it('falls back to the neutral name when the gender of another relative is not known', () => {
     renderScreen(
-      <FamilyPanel family={[{ id: 'c', name: 'Lia Souza', relation: 'sibling', gender: null }]} onEdit={vi.fn()} />,
+      <FamilyPanel family={[{ id: 'c', name: 'Lia Souza', relation: 'sibling', gender: null, derived: false }]} onEdit={vi.fn()} />,
     );
 
     expect(screen.getByText('Irmão(ã)')).toBeInTheDocument();

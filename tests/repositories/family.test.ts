@@ -10,10 +10,11 @@ const { calls, supabase } = vi.hoisted(() => {
         calls.push({ fn, args });
         return Promise.resolve({
           data: [
-            { relation: 'mother', person_id: 'p1', name: 'Ana', gender: 'female' },
-            { relation: 'child', person_id: 'c1', name: 'Zeca', gender: 'male' },
-            { relation: 'spouse', person_id: 's1', name: 'Maria', gender: null },
-            { relation: 'unknown', person_id: 'x1', name: 'Fora', gender: null },
+            { relation: 'mother', person_id: 'p1', name: 'Ana', gender: 'female', derived: false },
+            { relation: 'child', person_id: 'c1', name: 'Zeca', gender: 'male', derived: false },
+            { relation: 'spouse', person_id: 's1', name: 'Maria', gender: null, derived: false },
+            { relation: 'sibling_in_law', person_id: 'k1', name: 'Zélia', gender: 'female', derived: true },
+            { relation: 'unknown', person_id: 'x1', name: 'Fora', gender: null, derived: false },
           ],
           error: null,
         });
@@ -30,8 +31,8 @@ describe('family repository', () => {
   it('lists the spouse and children first, then the rest of the family, and leaves out kinds it does not know', async () => {
     const family = await getFamily('me');
 
-    expect(family.map((relative) => relative.name)).toEqual(['Maria', 'Zeca', 'Ana']);
-    expect(family[1]).toMatchObject({ relation: 'child', gender: 'male' });
+    expect(family.map((relative) => relative.name)).toEqual(['Maria', 'Zeca', 'Ana', 'Zélia']);
+    expect(family[1]).toMatchObject({ relation: 'child', gender: 'male', derived: false });
   });
 
   it('saves every link of the person in one call', async () => {

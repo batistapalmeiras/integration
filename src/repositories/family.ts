@@ -9,6 +9,7 @@ export interface Relative {
   name: string;
   relation: FamilyRelation;
   gender: Gender | null;
+  derived: boolean;
 }
 
 export interface FamilyLink {
@@ -25,7 +26,15 @@ export async function getFamily(personId: string): Promise<Relative[]> {
   return data
     .flatMap((row) =>
       isFamilyRelation(row.relation)
-        ? [{ id: row.person_id, name: row.name, relation: row.relation, gender: toGender(row.gender) }]
+        ? [
+            {
+              id: row.person_id,
+              name: row.name,
+              relation: row.relation,
+              gender: toGender(row.gender),
+              derived: row.derived,
+            },
+          ]
         : [],
     )
     .sort((a, b) => relationRank(a.relation) - relationRank(b.relation) || byName(a, b));

@@ -1198,6 +1198,7 @@ export type Database = {
       get_family_links: {
         Args: { p_person_id: string }
         Returns: {
+          derived: boolean
           gender: string | null
           name: string
           person_id: string
