@@ -17,6 +17,7 @@ export const FAMILY_RELATIONS = [
   'uncle',
   'nephew',
   'cousin',
+  'friend',
 ] as const;
 
 export type FamilyRelation = (typeof FAMILY_RELATIONS)[number];
@@ -48,6 +49,7 @@ const RELATION_LABELS: Record<FamilyRelation, RelationLabel> = {
   uncle: { option: 'Tio(a)', male: 'Tio', female: 'Tia' },
   nephew: { option: 'Sobrinho(a)', male: 'Sobrinho', female: 'Sobrinha' },
   cousin: { option: 'Primo(a)', male: 'Primo', female: 'Prima' },
+  friend: { option: 'Amigo(a)', male: 'Amigo', female: 'Amiga' },
 };
 
 export const isFamilyRelation = (value: string): value is FamilyRelation =>

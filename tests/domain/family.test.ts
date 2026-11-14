@@ -10,7 +10,7 @@ describe('family relations', () => {
   });
 
   it('no longer offers the step relations for now', () => {
-    expect(FAMILY_RELATIONS).toHaveLength(15);
+    expect(FAMILY_RELATIONS).toHaveLength(16);
     expect(FAMILY_RELATIONS).not.toContain('stepfather');
   });
 
@@ -18,6 +18,8 @@ describe('family relations', () => {
     expect(relationLabel('child')).toBe('Filho(a)');
     expect(relationLabel('sibling')).toBe('Irmão(ã)');
     expect(relationLabel('cousin')).toBe('Primo(a)');
+    expect(relationLabel('friend')).toBe('Amigo(a)');
+    expect(relationLabel('friend', 'female')).toBe('Amiga');
   });
 
   it('names the single options by the gender of the relative when it is known', () => {
