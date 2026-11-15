@@ -517,6 +517,42 @@ export type Database = {
           },
         ]
       }
+      member_flags: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          flag: string
+          person_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          flag: string
+          person_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          flag?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_flags_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_flags_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_profiles: {
         Row: {
           address_city: string | null

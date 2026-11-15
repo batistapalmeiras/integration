@@ -11,6 +11,7 @@ export interface MemberEvent {
   gender: string | null;
   from: string | null;
   to: string | null;
+  flag: string | null;
   fields: string[];
 }
 
@@ -39,6 +40,7 @@ export async function listMemberEvents(personId: string): Promise<MemberEvent[]>
       gender: text(detail.gender),
       from: text(detail.from),
       to: text(detail.to),
+      flag: text(detail.flag),
       fields: Array.isArray(detail.fields) ? detail.fields.flatMap((field) => (typeof field === 'string' ? [field] : [])) : [],
     };
   });

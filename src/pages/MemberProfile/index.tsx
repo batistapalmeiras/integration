@@ -16,6 +16,7 @@ import { CouncilDate } from '../../domain/councils';
 import { DirectSignupFlag } from '../../components/DirectSignupFlag';
 import { TonePill } from '../../components/StatusPill';
 import { formatTimestampDate } from '../../domain/dates';
+import { MEMBER_FLAG_LABELS } from '../../domain/memberFlags';
 import { isDirectSignup } from '../../domain/origin';
 import {
   canLeavePhoneEmpty,
@@ -68,7 +69,7 @@ export function MemberProfilePage() {
   if (loadError) return <Empty title="Membro não encontrado" description={loadError} />;
   if (!page) return <Skeleton $h="320px" />;
 
-  const { record, info, community } = page;
+  const { record, info, community, flags } = page;
   const councils = info.council ? [info.council] : [];
   const smallGroups = community.smallGroupNames;
   const ministries = community.ministryNames;
@@ -128,6 +129,7 @@ export function MemberProfilePage() {
         record={record}
         section={section}
         optionalPhone={canLeavePhoneEmpty(info.origin)}
+        flags={section.id === MEMBERSHIP_SECTION ? flags : undefined}
         close={close}
       />,
     );
@@ -185,6 +187,11 @@ export function MemberProfilePage() {
             {MEMBERSHIP_STATUS_LABELS[record.membershipStatus]}
           </TonePill>
           {isDirectSignup(info.origin) && <DirectSignupFlag />}
+          {flags.map((flag) => (
+            <TonePill key={flag} $tone="warning">
+              {MEMBER_FLAG_LABELS[flag]}
+            </TonePill>
+          ))}
           {MEMBERSHIP && (
             <LinkButton icon={<Pencil size={14} />} onClick={() => edit(MEMBERSHIP)}>
               Alterar

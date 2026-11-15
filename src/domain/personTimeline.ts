@@ -3,6 +3,7 @@ import { STATUS_LABELS } from '../types/person';
 import { isDirectSignup } from './origin';
 import { formatDate, timestampDateKey } from './dates';
 import { isFamilyRelation, relationLabel } from './family';
+import { isMemberFlag, MEMBER_FLAG_LABELS } from './memberFlags';
 import { MEMBERSHIP_STATUS_LABELS } from './memberRecords';
 import { actorName, sortTimeline, SYSTEM_ACTOR, TimelineEntry } from './timeline';
 
@@ -165,6 +166,7 @@ interface MemberEventSource {
   gender: string | null;
   from: string | null;
   to: string | null;
+  flag: string | null;
   fields: string[];
 }
 
@@ -205,6 +207,9 @@ function familyRelation(event: MemberEventSource): string {
     : 'familiar';
 }
 
+const flagName = (flag: string | null) =>
+  (flag && isMemberFlag(flag) ? MEMBER_FLAG_LABELS[flag] : 'sinalização').toLowerCase();
+
 function eventLabel(event: MemberEventSource, fieldLabel: (column: string) => string): string {
   const name = event.name ?? 'grupo removido';
   switch (event.event) {
@@ -234,6 +239,10 @@ function eventLabel(event: MemberEventSource, fieldLabel: (column: string) => st
       return `Adicionou ${familyRelation(event)}: ${event.name}`;
     case 'family_removed':
       return `Removeu ${familyRelation(event)}: ${event.name}`;
+    case 'flag_added':
+      return `Sinalizado como ${flagName(event.flag)}`;
+    case 'flag_removed':
+      return `Sinalização removida: ${flagName(event.flag)}`;
     default:
       return recordUpdatedLabel(event.fields, fieldLabel);
   }

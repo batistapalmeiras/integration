@@ -52,7 +52,7 @@ export function addressLines(record: MemberProfile): string[] {
 export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
   {
     id: 'membership',
-    title: 'Membresia',
+    title: 'Situação do membro',
     fields: [{ name: 'membershipStatus', label: 'Situação', kind: 'select', labels: MEMBERSHIP_STATUS_LABELS }],
   },
   {

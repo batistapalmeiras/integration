@@ -250,6 +250,7 @@ describe('membershipTimeline', () => {
     gender: null,
     from: null,
     to: null,
+    flag: null,
     fields: [],
     ...overrides,
   });
@@ -288,6 +289,21 @@ describe('membershipTimeline', () => {
       ['Adicionou Filho: Pedro Souza', 'Pastor'],
       ['Adicionou Sogro(a): Ana Lima', 'Pastor'],
       ['Removeu Irmã: Lia Souza', 'Pastor'],
+    ]);
+  });
+
+  it('tells when the pastor flags a member and removes the flag', () => {
+    const entries = membershipTimeline({
+      ...source,
+      events: [
+        event('flag_added', '2026-11-12T10:00:00Z', { flag: 'absent' }),
+        event('flag_removed', '2026-11-20T10:00:00Z', { flag: 'absent' }),
+      ],
+    });
+
+    expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([
+      ['Sinalizado como membro ausente', 'Pastor'],
+      ['Sinalização removida: membro ausente', 'Pastor'],
     ]);
   });
 
