@@ -2,14 +2,22 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 // Libs
 import { Button, ModalActions, ModalTitle, Typography, useToast } from 'bp-kit';
-import { Crop, Save, Trash2, Upload } from 'lucide-react';
+import { Check, Crop, Save, Trash2, Upload } from 'lucide-react';
 // Components
 import { MemberPhoto } from '../../../components/MemberPhoto';
 // Local
 import { centeredFrame, frameCrop, PhotoFrame } from '../../../lib/photoFrame';
 import { errorMessage, invalidateQueries } from '../../../lib/queryCache';
 import { loadImage, scaledJpeg, squareJpeg } from '../../../lib/squareImage';
-import { memberPhotoUrls, removeMemberPhoto, saveMemberPhoto } from '../../../repositories/memberPhotos';
+import { firstNameOf } from '../../../domain/text';
+import {
+  hasMemberPhoto,
+  MemberPhotoFiles,
+  memberPhotoUrls,
+  removeMemberPhoto,
+  saveMemberPhoto,
+} from '../../../repositories/memberPhotos';
+import { Relative } from '../../../repositories/family';
 import { HiddenFileInput, PhotoActions, PhotoPreview } from '../styles';
 import { PhotoCropper } from './PhotoCropper';
 
@@ -22,6 +30,7 @@ const ORIGINAL_MAX_SIDE = 1080;
 interface Props {
   personId: string;
   photoUrl: string | null;
+  spouse: Pick<Relative, 'id' | 'name'> | null;
   close: () => void;
 }
 
@@ -39,12 +48,25 @@ const refreshPhotos = (personId: string) =>
       (key[0] === 'person' && key[1] === personId),
   );
 
-export function PhotoModal({ personId, photoUrl, close }: Props) {
+export function PhotoModal({ personId, photoUrl, spouse, close }: Props) {
   const { show: showToast, toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [picked, setPicked] = useState<PickedPhoto | null>(null);
+  const [spouseOffer, setSpouseOffer] = useState<{
+    files: MemberPhotoFiles;
+    previewUrl: string;
+    replacing: boolean;
+  } | null>(null);
+  const offerPreview = spouseOffer?.previewUrl;
+
+  useEffect(
+    () => () => {
+      if (offerPreview) URL.revokeObjectURL(offerPreview);
+    },
+    [offerPreview],
+  );
 
   const pickedUrl = picked?.url;
 
@@ -106,16 +128,68 @@ export function PhotoModal({ personId, photoUrl, close }: Props) {
     }
   };
 
-  const save = (photo: PickedPhoto) =>
-    run(async () => {
+  const save = async (photo: PickedPhoto) => {
+    setSaving(true);
+    try {
       const crop = frameCrop(photo.frame);
       const [full, thumb, original] = await Promise.all([
         squareJpeg(photo.image, PHOTO_SIZE, crop),
         squareJpeg(photo.image, THUMB_SIZE, crop),
-        photo.isNew ? scaledJpeg(photo.image, ORIGINAL_MAX_SIDE) : undefined,
+        scaledJpeg(photo.image, ORIGINAL_MAX_SIDE),
       ]);
-      await saveMemberPhoto(personId, { photo: full, thumb, original });
-    }, 'Não foi possível enviar a foto.');
+      await saveMemberPhoto(personId, { photo: full, thumb, original: photo.isNew ? original : undefined });
+      await refreshPhotos(personId);
+      if (!spouse) {
+        close();
+        return;
+      }
+      const replacing = await hasMemberPhoto(spouse.id);
+      setPicked(null);
+      setSpouseOffer({ files: { photo: full, thumb, original }, previewUrl: URL.createObjectURL(full), replacing });
+      setSaving(false);
+    } catch (e) {
+      setSaving(false);
+      showToast(errorMessage(e) ?? 'Não foi possível enviar a foto.');
+    }
+  };
+
+  const shareWithSpouse = (files: MemberPhotoFiles) =>
+    spouse &&
+    run(async () => {
+      await saveMemberPhoto(spouse.id, files);
+      await refreshPhotos(spouse.id);
+    }, `Não foi possível salvar a foto de ${spouse.name}.`);
+
+  if (spouse && spouseOffer) {
+    return (
+      <>
+        <ModalTitle onClose={close}>Foto salva</ModalTitle>
+        <PhotoPreview>
+          <MemberPhoto url={spouseOffer.previewUrl} size={PREVIEW_SIZE} />
+        </PhotoPreview>
+        <Typography type="p">
+          Deseja atribuir essa imagem a {spouse.name}?
+          {spouseOffer.replacing && ` A foto atual de ${firstNameOf(spouse.name)} será substituída.`}
+        </Typography>
+        <ModalActions>
+          <Button type="button" variant="primary" disabled={saving} onClick={() => shareWithSpouse(spouseOffer.files)}>
+            {saving ? (
+              'Salvando...'
+            ) : (
+              <>
+                <Check size={16} />
+                Sim, usar para {firstNameOf(spouse.name)}
+              </>
+            )}
+          </Button>
+          <Button type="button" variant="secondary" disabled={saving} onClick={close}>
+            Não
+          </Button>
+        </ModalActions>
+        {toast}
+      </>
+    );
+  }
 
   if (picked) {
     return (

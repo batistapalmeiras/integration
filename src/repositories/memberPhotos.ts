@@ -38,6 +38,16 @@ export async function saveMemberPhoto(personId: string, files: MemberPhotoFiles)
   if (error) throw error;
 }
 
+export async function hasMemberPhoto(personId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('member_profiles')
+    .select('photo_updated_at')
+    .eq('person_id', personId)
+    .maybeSingle();
+  if (error) throw error;
+  return !!data?.photo_updated_at;
+}
+
 export async function removeMemberPhoto(personId: string): Promise<void> {
   const { error: removeError } = await supabase.storage
     .from(BUCKET)

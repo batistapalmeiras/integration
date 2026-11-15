@@ -113,7 +113,16 @@ export function MemberProfilePage() {
           type="button"
           $empty={!page.info.photoUpdatedAt}
           aria-label={page.info.photoUpdatedAt ? 'Trocar foto' : 'Adicionar foto'}
-          onClick={() => open(<PhotoModal personId={id} photoUrl={photoUrl} close={close} />)}
+          onClick={() =>
+            open(
+              <PhotoModal
+                personId={id}
+                photoUrl={photoUrl}
+                spouse={family?.find((relative) => relative.relation === 'spouse') ?? null}
+                close={close}
+              />,
+            )
+          }
         >
           {page.info.photoUpdatedAt ? (
             <>
