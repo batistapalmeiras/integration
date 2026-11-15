@@ -168,3 +168,16 @@ export const ZoomRange = styled.input`
   flex: 1;
   accent-color: ${({ theme }) => theme.colors.primary};
 `;
+
+export const PhotoActions = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-top: ${({ theme }) => theme.spacing.lg};
+
+  & > button {
+    width: 100%;
+    padding-left: ${({ theme }) => theme.spacing.sm};
+    padding-right: ${({ theme }) => theme.spacing.sm};
+  }
+`;

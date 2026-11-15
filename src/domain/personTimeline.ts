@@ -184,6 +184,16 @@ const PASTOR_ACTOR = 'Pastor';
 
 const ROLE_LABELS: Record<string, string> = { leader: 'Líder', host: 'Anfitrião' };
 
+const PHOTO_FIELDS = ['photo_updated_at', 'photo_folder'];
+
+function recordUpdatedLabel(fields: string[], fieldLabel: (column: string) => string): string {
+  const others = fields.filter((field) => !PHOTO_FIELDS.includes(field));
+  return [
+    ...(others.length < fields.length ? ['Foto do perfil alterada'] : []),
+    ...(others.length > 0 ? [`Dados alterados: ${others.map(fieldLabel).join(', ')}`] : []),
+  ].join(' · ');
+}
+
 const membershipStatusName = (status: string | null) =>
   Object.entries(MEMBERSHIP_STATUS_LABELS).find(([key]) => key === status)?.[1] ?? status ?? '';
 
@@ -225,7 +235,7 @@ function eventLabel(event: MemberEventSource, fieldLabel: (column: string) => st
     case 'family_removed':
       return `Removeu ${familyRelation(event)}: ${event.name}`;
     default:
-      return `Dados alterados: ${event.fields.map(fieldLabel).join(', ')}`;
+      return recordUpdatedLabel(event.fields, fieldLabel);
   }
 }
 

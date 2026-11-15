@@ -306,6 +306,18 @@ describe('membershipTimeline', () => {
     expect(entries[0].detail).toBeNull();
   });
 
+  it('names a photo change instead of showing the column', () => {
+    const labels = (fields: string[]) =>
+      membershipTimeline({
+        ...source,
+        fieldLabel: (column) => ({ cpf: 'CPF' })[column] ?? column,
+        events: [event('record_updated', '2026-11-12T10:00:00Z', { fields })],
+      }).map((entry) => entry.label);
+
+    expect(labels(['photo_updated_at'])).toEqual(['Foto do perfil alterada']);
+    expect(labels(['photo_updated_at', 'cpf'])).toEqual(['Foto do perfil alterada · Dados alterados: CPF']);
+  });
+
   it('does not repeat a join that was already recorded as an event', () => {
     const entries = membershipTimeline({
       ...source,
