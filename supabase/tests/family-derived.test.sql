@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(5);
+select plan(7);
 
 insert into auth.users (id) values ('f0000000-0000-4000-8000-0000000007a1');
 
@@ -12,7 +12,10 @@ insert into public.people (id, name, status) values
   ('f0000000-0000-4000-8000-0000000007b2', 'Teste Matheus', 'member'),
   ('f0000000-0000-4000-8000-0000000007b3', 'Teste Brenda', 'member'),
   ('f0000000-0000-4000-8000-0000000007b4', 'Teste Larissa', 'member'),
-  ('f0000000-0000-4000-8000-0000000007b5', 'Teste Elia', 'member');
+  ('f0000000-0000-4000-8000-0000000007b5', 'Teste Elia', 'member'),
+  ('f0000000-0000-4000-8000-0000000007b6', 'Teste Debora', 'member'),
+  ('f0000000-0000-4000-8000-0000000007b7', 'Teste Marinez', 'member'),
+  ('f0000000-0000-4000-8000-0000000007b8', 'Teste Lucas', 'member');
 
 insert into public.profiles (id, role, person_id) values
   ('f0000000-0000-4000-8000-0000000007a1', 'pastor', 'f0000000-0000-4000-8000-0000000007b1');
@@ -21,7 +24,10 @@ insert into public.member_profiles (person_id, gender) values
   ('f0000000-0000-4000-8000-0000000007b2', 'male'),
   ('f0000000-0000-4000-8000-0000000007b3', 'female'),
   ('f0000000-0000-4000-8000-0000000007b4', 'female'),
-  ('f0000000-0000-4000-8000-0000000007b5', 'female');
+  ('f0000000-0000-4000-8000-0000000007b5', 'female'),
+  ('f0000000-0000-4000-8000-0000000007b6', 'female'),
+  ('f0000000-0000-4000-8000-0000000007b7', 'female'),
+  ('f0000000-0000-4000-8000-0000000007b8', 'male');
 
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "f0000000-0000-4000-8000-0000000007a1", "role": "authenticated"}';
@@ -64,6 +70,23 @@ select public.set_family_links('f0000000-0000-4000-8000-0000000007b2', '[
 select is_empty(
   $$ select 1 from public.get_family_links('f0000000-0000-4000-8000-0000000007b4') where person_id = 'f0000000-0000-4000-8000-0000000007b3' $$,
   'removing the marriage removes the derived relation'
+);
+
+select public.set_family_links('f0000000-0000-4000-8000-0000000007b7', '[
+  {"relative_id": "f0000000-0000-4000-8000-0000000007b8", "relation": "spouse"},
+  {"relative_id": "f0000000-0000-4000-8000-0000000007b6", "relation": "nephew"}
+]'::jsonb);
+
+select results_eq(
+  $$ select relation, derived from public.get_family_links('f0000000-0000-4000-8000-0000000007b6') where person_id = 'f0000000-0000-4000-8000-0000000007b8' $$,
+  $$ values ('uncle'::text, true) $$,
+  'the husband of an aunt registered directly is also an uncle'
+);
+
+select results_eq(
+  $$ select relation, derived from public.get_family_links('f0000000-0000-4000-8000-0000000007b8') where person_id = 'f0000000-0000-4000-8000-0000000007b6' $$,
+  $$ values ('nephew'::text, true) $$,
+  'and he has her niece as his niece'
 );
 
 select * from finish();
