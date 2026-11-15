@@ -89,10 +89,7 @@ export function PhotoModal({ personId, photoUrl, spouse, close }: Props) {
     }
   };
 
-  const pick = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
+  const openFile = async (file: File) => {
     const url = URL.createObjectURL(file);
     try {
       const image = await loadImage(url);
@@ -107,6 +104,26 @@ export function PhotoModal({ personId, photoUrl, spouse, close }: Props) {
       showToast(errorMessage(e) ?? 'Não foi possível ler essa foto.');
     }
   };
+
+  const pick = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (file) void openFile(file);
+  };
+
+  const choosing = !picked && !spouseOffer && !confirmingRemove && !saving;
+
+  useEffect(() => {
+    if (!choosing) return undefined;
+    const paste = (event: ClipboardEvent) => {
+      const file = Array.from(event.clipboardData?.files ?? []).find((item) => item.type.startsWith('image/'));
+      if (!file) return;
+      event.preventDefault();
+      void openFile(file);
+    };
+    window.addEventListener('paste', paste);
+    return () => window.removeEventListener('paste', paste);
+  });
 
   const editCurrent = async () => {
     setSaving(true);
