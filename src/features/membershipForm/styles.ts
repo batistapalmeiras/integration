@@ -1,5 +1,7 @@
 // Libs
 import styled from 'styled-components';
+// Components
+import { ErrorMsg } from '../../components/PublicPage/styles';
 
 export const Hint = styled.p`
   margin: calc(-1 * ${({ theme }) => theme.spacing.sm}) 0 0;
@@ -230,14 +232,13 @@ export const PhotoPreview = styled.div`
 
 export const PhotoActions = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
-
-  & > button {
-    width: 100%;
-  }
+  justify-content: center;
 `;
 
 export const PhotoInput = styled.input`
   display: none;
+`;
+
+export const PhotoError = styled(ErrorMsg)`
+  text-align: center;
 `;

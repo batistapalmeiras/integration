@@ -11,6 +11,7 @@ import { LAST_CHURCH_PROMPTS, STEP_TITLES, WANTS_TO_SERVE_LABELS } from '../opti
 import { MembershipFormValues } from '../schema';
 import { PhotoPreview, ReviewHeader, ReviewItem, ReviewList, ReviewSection, ReviewTitle } from '../styles';
 import { MemberPhoto } from '../../../components/MemberPhoto';
+import { FramedPhoto } from '../../memberPhoto';
 
 const PHOTO_STEP = 1;
 const REVIEW_PHOTO_SIZE = 96;
@@ -108,7 +109,11 @@ export function ReviewStep({ values, smallGroups, onEdit }: Props) {
           </ReviewHeader>
           {step === PHOTO_STEP && (
             <PhotoPreview>
-              <MemberPhoto url={values.photoPreview || null} size={REVIEW_PHOTO_SIZE} />
+              {values.photo ? (
+                <FramedPhoto source={values.photo.source} frame={values.photo.frame} size={REVIEW_PHOTO_SIZE} />
+              ) : (
+                <MemberPhoto url={null} size={REVIEW_PHOTO_SIZE} />
+              )}
             </PhotoPreview>
           )}
           <ReviewList>

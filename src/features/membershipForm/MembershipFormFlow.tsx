@@ -118,7 +118,7 @@ export function MembershipFormFlow({
       {typeof step === 'number' && (
         <Form onSubmit={(event: FormEvent<HTMLFormElement>) => submitStep(step)(event)} noValidate>
           {step === 0 && <PersonalStep control={control} />}
-          {step === 1 && <PhotoStep control={control} setValue={setValue} />}
+          {step === 1 && <PhotoStep control={control} />}
           {step === 2 && <AddressStep control={control} setValue={setValue} optionalPhone={optionalPhone} />}
           {step === 3 && <JourneyStep control={control} />}
           {step === 4 && (

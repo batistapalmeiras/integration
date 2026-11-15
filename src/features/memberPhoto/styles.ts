@@ -51,3 +51,14 @@ export const ZoomRange = styled.input`
   flex: 1;
   accent-color: ${({ theme }) => theme.colors.primary};
 `;
+
+export const FramedCircle = styled.span<{ $size: number }>`
+  position: relative;
+  flex-shrink: 0;
+  display: inline-block;
+  width: ${({ $size }) => $size}px;
+  height: ${({ $size }) => $size}px;
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.rounded.full};
+  background: ${({ theme }) => theme.colors.surfaceSoft};
+`;

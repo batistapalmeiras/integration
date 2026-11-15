@@ -111,17 +111,20 @@ describe('toMembershipFormAnswers', () => {
   const filled = { ...prefilledForm(PHONE, check({})), entryType: 'transfer_letter' as const, baptismChurch: 'IBC' };
 
   it('drops what the chosen answers hide', () => {
-    const answers = toMembershipFormAnswers({
-      ...filled,
-      entryType: 'baptism',
-      baptismDate: '2001-05-06',
-      ministryInterests: ['Louvor'],
-      wantsToServe: 'no',
-      wantsSmallGroup: 'yes',
-      smallGroupId: 'pg-1',
-      secretSociety: 'no',
-      secretSocietyName: 'Maçonaria',
-    });
+    const answers = toMembershipFormAnswers(
+      {
+        ...filled,
+        entryType: 'baptism',
+        baptismDate: '2001-05-06',
+        ministryInterests: ['Louvor'],
+        wantsToServe: 'no',
+        wantsSmallGroup: 'yes',
+        smallGroupId: 'pg-1',
+        secretSociety: 'no',
+        secretSocietyName: 'Maçonaria',
+      },
+      '',
+    );
     expect(answers).toMatchObject({
       baptismChurch: '',
       baptismDate: null,
@@ -132,14 +135,22 @@ describe('toMembershipFormAnswers', () => {
   });
 
   it('keeps the details of the answers that ask for them', () => {
-    const answers = toMembershipFormAnswers({
-      ...filled,
-      wantsSmallGroup: 'already',
+    const answers = toMembershipFormAnswers(
+      {
+        ...filled,
+        wantsSmallGroup: 'already',
+        smallGroupId: 'pg-1',
+        secretSociety: 'yes',
+        secretSocietyName: ' Maçonaria ',
+      },
+      'token-1',
+    );
+    expect(answers).toMatchObject({
+      baptismChurch: 'IBC',
       smallGroupId: 'pg-1',
-      secretSociety: 'yes',
-      secretSocietyName: ' Maçonaria ',
+      secretSociety: 'Maçonaria',
+      photoToken: 'token-1',
     });
-    expect(answers).toMatchObject({ baptismChurch: 'IBC', smallGroupId: 'pg-1', secretSociety: 'Maçonaria' });
   });
 });
 

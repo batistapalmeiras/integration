@@ -3,6 +3,7 @@ import { useState } from 'react';
 // Local
 import { errorMessage } from '../../../lib/queryCache';
 import { MembershipFormAnswers } from '../../../repositories/publicForms';
+import { uploadChosenPhoto } from '../../memberPhoto';
 import { toMembershipFormAnswers } from '../answers';
 import { MembershipFormValues } from '../schema';
 
@@ -14,7 +15,8 @@ export function useSubmitMembershipAnswers<Result>(send: (answers: MembershipFor
     setSubmitting(true);
     setSubmitError(null);
     try {
-      return { result: await send(toMembershipFormAnswers(values)) };
+      const photoToken = values.photo ? await uploadChosenPhoto(values.photo) : '';
+      return { result: await send(toMembershipFormAnswers(values, photoToken)) };
     } catch (e) {
       setSubmitError(errorMessage(e));
       return null;

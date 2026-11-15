@@ -57,7 +57,7 @@ export function prefilledForm(phone: string, { name, saved }: MembershipInterest
   };
 }
 
-export function toMembershipFormAnswers(values: MembershipFormValues): MembershipFormAnswers {
+export function toMembershipFormAnswers(values: MembershipFormValues, photoToken: string): MembershipFormAnswers {
   const baptizedElsewhere = values.entryType !== 'baptism';
   return {
     name: values.name,
@@ -84,6 +84,6 @@ export function toMembershipFormAnswers(values: MembershipFormValues): Membershi
     smallGroupId: values.wantsSmallGroup === 'already' ? values.smallGroupId : null,
     secretSociety: values.secretSociety === 'yes' ? values.secretSocietyName.trim() : YES_NO_LABELS.no,
     membershipNote: values.membershipNote,
-    photoToken: values.photoToken,
+    photoToken,
   };
 }

@@ -25,8 +25,9 @@ describe('membership form journey step', () => {
 });
 
 describe('membership form photo step', () => {
-  it('does not move on without a sent photo', () => {
-    expect(photo.safeParse({ photoToken: '' }).success).toBe(false);
-    expect(photo.safeParse({ photoToken: '2f1d5c3e-1b2a-4c3d-9e8f-0a1b2c3d4e5f' }).success).toBe(true);
+  it('does not move on without a chosen photo', () => {
+    const frame = { imageWidth: 800, imageHeight: 600, viewport: 280, zoom: 1, offsetX: -46, offsetY: 0 };
+    expect(photo.safeParse({ photo: null }).success).toBe(false);
+    expect(photo.safeParse({ photo: { source: 'data:image/jpeg;base64,AAAA', frame } }).success).toBe(true);
   });
 });

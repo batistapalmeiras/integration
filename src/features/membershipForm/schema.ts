@@ -4,6 +4,7 @@ import { z } from 'zod';
 // Local
 import { todayKey } from '../../domain/dates';
 import { MaritalStatus } from '../../domain/memberRecords';
+import { ChosenPhoto } from '../memberPhoto';
 
 export type MembershipFormValues = {
   name: string;
@@ -33,8 +34,7 @@ export type MembershipFormValues = {
   secretSociety: 'yes' | 'no' | '';
   secretSocietyName: string;
   membershipNote: string;
-  photoToken: string;
-  photoPreview: string;
+  photo: ChosenPhoto | null;
 };
 
 export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
@@ -65,8 +65,7 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   secretSociety: '',
   secretSocietyName: '',
   membershipNote: '',
-  photoToken: '',
-  photoPreview: '',
+  photo: null,
 };
 
 const required = (what: string) => z.string().refine((value) => value.trim() !== '', text.validation.required(what));
@@ -123,8 +122,20 @@ const contactSchema = (optionalPhone: boolean) =>
       when: () => true,
     });
 
+const photoFrameSchema = z.object({
+  imageWidth: z.number(),
+  imageHeight: z.number(),
+  viewport: z.number(),
+  zoom: z.number(),
+  offsetX: z.number(),
+  offsetY: z.number(),
+});
+
 const photoSchema = z.object({
-  photoToken: z.string().refine((value) => value !== '', 'Envie sua foto para continuar.'),
+  photo: z
+    .object({ source: z.string(), frame: photoFrameSchema })
+    .nullable()
+    .refine((photo) => photo !== null && photo.source !== '', 'Escolha sua foto para continuar.'),
 });
 
 const journeySchema = z

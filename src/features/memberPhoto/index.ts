@@ -1,3 +1,4 @@
+export { FramedPhoto } from './FramedPhoto';
 export { PhotoCropper } from './PhotoCropper';
-export { openPhoto, preparePhotoFiles } from './prepare';
-export type { PickedPhoto } from './prepare';
+export { choosePhoto, openPhoto, preparePhotoFiles, uploadChosenPhoto } from './prepare';
+export type { ChosenPhoto, PickedPhoto } from './prepare';
