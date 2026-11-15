@@ -128,8 +128,8 @@ export function PhotoModal({ personId, photoUrl, spouse, close }: Props) {
   const editCurrent = async () => {
     setSaving(true);
     try {
-      const originals = await memberPhotoUrls([personId], 'original');
-      const url = originals[personId] ?? photoUrl;
+      const { original } = await memberPhotoUrls([personId], ['original']);
+      const url = original[personId] ?? photoUrl;
       if (!url) return;
       const image = await loadImage(url);
       setPicked({

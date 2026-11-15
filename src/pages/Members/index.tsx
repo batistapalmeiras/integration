@@ -1,10 +1,12 @@
 // React
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 import { SlidersHorizontal } from 'lucide-react';
 // Components
 import { MemberPhoto } from '../../components/MemberPhoto';
+import { ListView, ViewToggle } from '../../components/ViewToggle';
 import { PageHeader } from '../../components/PageHeader';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
@@ -17,12 +19,16 @@ import { UserRole } from '../../types/enums';
 import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
 import { useMembers } from './hooks/useMembers';
-import { MemberName } from './styles';
+import { membersView } from './persistence';
+import { MemberCard, MemberCardName, MemberGrid, MemberName, ViewRow } from './styles';
+
+const GRID_PAGE_SIZE = 15;
 
 export function MembersPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const { open, close, modal } = useModal('drawer');
+  const [view, setView] = useState<ListView>(() => membersView.load() ?? 'list');
   const {
     members,
     totalCount,
@@ -37,13 +43,19 @@ export function MembersPage() {
     hasFilter,
     loading,
     error,
-  } = useMembers();
+  } = useMembers(view === 'grid' ? GRID_PAGE_SIZE : undefined);
   const canOpenRecord = user?.role === UserRole.Pastor;
-  const photoUrls =
-    useMemberPhotoUrls(
-      members.filter((member) => member.hasPhoto).map((member) => member.id),
-      'thumb',
-    ).data ?? {};
+  const photoSet = useMemberPhotoUrls(
+    members.filter((member) => member.hasPhoto).map((member) => member.id),
+    ['thumb', 'photo'],
+  ).data;
+  const photoUrls = (view === 'grid' ? photoSet?.photo : photoSet?.thumb) ?? {};
+  const openMember = (memberId: string) => navigate(`${AppRoute.Members}/${memberId}`);
+
+  const changeView = (next: ListView) => {
+    setView(next);
+    membersView.save(next);
+  };
 
   const activeFilterCount = (membershipStatusFilter.length > 0 ? 1 : 0) + (entryTypeFilter.length > 0 ? 1 : 0);
 
@@ -71,6 +83,10 @@ export function MembersPage() {
         </Button>
       </SearchFiltersRow>
 
+      <ViewRow>
+        <ViewToggle value={view} onChange={changeView} />
+      </ViewRow>
+
       {loading && <Skeleton $h="240px" />}
 
       {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
@@ -86,37 +102,57 @@ export function MembersPage() {
 
       {!loading && !error && totalCount > 0 && (
         <>
-          <TableWrapper>
-            <Table>
-              <thead>
-                <tr>
-                  <Th>{text.fields.name}</Th>
-                  <Th $shrink>Situação</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {members.map((member) => (
-                  <Tr
-                    key={member.id}
-                    $clickable={canOpenRecord}
-                    onClick={canOpenRecord ? () => navigate(`${AppRoute.Members}/${member.id}`) : undefined}
-                  >
-                    <Td $truncate title={member.name}>
-                      <MemberName>
-                        <MemberPhoto url={photoUrls[member.id] ?? null} size={48} />
-                        <span>{member.name}</span>
-                      </MemberName>
-                    </Td>
-                    <Td $shrink>
-                      <TonePill $tone={MEMBERSHIP_STATUS_TONES[member.membership_status]}>
-                        {MEMBERSHIP_STATUS_LABELS[member.membership_status]}
-                      </TonePill>
-                    </Td>
-                  </Tr>
-                ))}
-              </tbody>
-            </Table>
-          </TableWrapper>
+          {view === 'grid' ? (
+            <MemberGrid>
+              {members.map((member) => (
+                <MemberCard
+                  key={member.id}
+                  as={canOpenRecord ? 'button' : 'div'}
+                  type={canOpenRecord ? 'button' : undefined}
+                  $clickable={canOpenRecord}
+                  onClick={canOpenRecord ? () => openMember(member.id) : undefined}
+                >
+                  <MemberPhoto url={photoUrls[member.id] ?? null} size={88} />
+                  <MemberCardName>{member.name}</MemberCardName>
+                  <TonePill $tone={MEMBERSHIP_STATUS_TONES[member.membership_status]}>
+                    {MEMBERSHIP_STATUS_LABELS[member.membership_status]}
+                  </TonePill>
+                </MemberCard>
+              ))}
+            </MemberGrid>
+          ) : (
+            <TableWrapper>
+              <Table>
+                <thead>
+                  <tr>
+                    <Th>{text.fields.name}</Th>
+                    <Th $shrink>Situação</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((member) => (
+                    <Tr
+                      key={member.id}
+                      $clickable={canOpenRecord}
+                      onClick={canOpenRecord ? () => openMember(member.id) : undefined}
+                    >
+                      <Td $truncate title={member.name}>
+                        <MemberName>
+                          <MemberPhoto url={photoUrls[member.id] ?? null} size={48} />
+                          <span>{member.name}</span>
+                        </MemberName>
+                      </Td>
+                      <Td $shrink>
+                        <TonePill $tone={MEMBERSHIP_STATUS_TONES[member.membership_status]}>
+                          {MEMBERSHIP_STATUS_LABELS[member.membership_status]}
+                        </TonePill>
+                      </Td>
+                    </Tr>
+                  ))}
+                </tbody>
+              </Table>
+            </TableWrapper>
+          )}
 
           {totalPages > 1 && (
             <PaginationWrap>

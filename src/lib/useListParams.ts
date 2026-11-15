@@ -91,10 +91,10 @@ export function useListParams<K extends string>({ basePath, filters, stored }: O
     setFilters(changes);
   };
 
-  const paginate = <T>(items: T[]) => {
-    const totalPages = Math.max(1, Math.ceil(items.length / LIST_PAGE_SIZE));
+  const paginate = <T>(items: T[], pageSize = LIST_PAGE_SIZE) => {
+    const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
     const page = Math.min(current.page, totalPages);
-    return { items: items.slice((page - 1) * LIST_PAGE_SIZE, page * LIST_PAGE_SIZE), page, totalPages };
+    return { items: items.slice((page - 1) * pageSize, page * pageSize), page, totalPages };
   };
 
   return {

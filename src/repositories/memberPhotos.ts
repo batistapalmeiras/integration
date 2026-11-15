@@ -58,14 +58,20 @@ export async function removeMemberPhoto(personId: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function memberPhotoUrls(personIds: string[], variant: PhotoVariant): Promise<Record<string, string>> {
-  if (personIds.length === 0) return {};
+export type PhotoUrls = Record<PhotoVariant, Record<string, string>>;
+
+export async function memberPhotoUrls(personIds: string[], variants: PhotoVariant[]): Promise<PhotoUrls> {
+  const urls: PhotoUrls = { photo: {}, thumb: {}, original: {} };
+  const requests = variants.flatMap((variant) => personIds.map((personId) => ({ variant, personId })));
+  if (requests.length === 0) return urls;
   const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(
-    personIds.map((personId) => photoPath(personId, variant)),
+    requests.map(({ variant, personId }) => photoPath(personId, variant)),
     URL_LIFETIME_SECONDS,
   );
   if (error) throw error;
-  return Object.fromEntries(
-    data.flatMap((item, index) => (item.signedUrl ? [[personIds[index], item.signedUrl]] : [])),
-  );
+  data.forEach((item, index) => {
+    const { variant, personId } = requests[index];
+    if (item.signedUrl) urls[variant][personId] = item.signedUrl;
+  });
+  return urls;
 }

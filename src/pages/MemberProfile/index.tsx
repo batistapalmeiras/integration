@@ -55,7 +55,7 @@ export function MemberProfilePage() {
   const notesQuery = usePersonNotes(id);
   const family = useFamily(id).data;
   const page = pageQuery.data ?? null;
-  const photoUrl = useMemberPhotoUrls(page?.info.photoUpdatedAt ? [id] : [], 'photo').data?.[id] ?? null;
+  const photoUrl = useMemberPhotoUrls(page?.info.photoUpdatedAt ? [id] : [], ['photo']).data?.photo[id] ?? null;
   const loadError = errorMessage(pageQuery.error);
 
   if (loadError) return <Empty title="Membro não encontrado" description={loadError} />;

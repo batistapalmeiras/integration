@@ -9,7 +9,7 @@ import { MEMBERS_FILTERS, membersFilters } from '../persistence';
 import { listMemberRows } from '../../../repositories/memberRecords';
 import { AppRoute } from '../../../routes/paths';
 
-export function useMembers() {
+export function useMembers(pageSize?: number) {
   const query = useQuery(queryKeys.members, listMemberRows);
   const list = useListParams({ basePath: AppRoute.Members, filters: MEMBERS_FILTERS, stored: membersFilters });
   const membershipStatusFilter = pickKeys(list.filter('status'), MEMBERSHIP_STATUS_LABELS);
@@ -21,7 +21,7 @@ export function useMembers() {
       (membershipStatusFilter.length === 0 || membershipStatusFilter.includes(member.membership_status)) &&
       (entryTypeFilter.length === 0 || (!!member.entry_type && entryTypeFilter.includes(member.entry_type))),
   );
-  const { items, page, totalPages } = list.paginate(filtered);
+  const { items, page, totalPages } = list.paginate(filtered, pageSize);
 
   return {
     members: items,

@@ -79,6 +79,7 @@ describe('useListParams', () => {
     expect(result.current.location.search).toBe('?page=3');
     expect(result.current.list.paginate(items)).toEqual({ items: items.slice(20), page: 3, totalPages: 3 });
     expect(result.current.list.paginate(items.slice(0, 5))).toEqual({ items: items.slice(0, 5), page: 1, totalPages: 1 });
+    expect(result.current.list.paginate(items, 15)).toEqual({ items: items.slice(15), page: 2, totalPages: 2 });
   });
 
   it('flags path segments that no filter recognises', () => {
