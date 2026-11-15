@@ -11,6 +11,8 @@ import { currentCouncil } from '../../domain/councils';
 import { CouncilModal } from '../../features/councils';
 import { formatDate } from '../../domain/dates';
 import { useCouncils } from '../../queries/councils';
+import { useMemberPhotoUrls } from '../../queries/memberPhotos';
+import { photoOwnersOf } from '../../repositories/memberPhotos';
 import { AppRoute, COUNCILS_PATH } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 // Local
@@ -22,6 +24,11 @@ export function MembershipPage() {
   const { user } = useAuthCtx();
   const { open, close, modal } = useModal('drawer');
   const { rows, loading, error } = useMembershipQueue();
+  const photoUrls =
+    useMemberPhotoUrls(
+      photoOwnersOf(rows),
+      ['thumb'],
+    ).data?.thumb ?? {};
   const council = currentCouncil(useCouncils().data ?? []);
   const isPastor = user?.role === UserRole.Pastor;
 
@@ -69,6 +76,7 @@ export function MembershipPage() {
           <PeopleCount count={rows.length} />
           <EntryTypeTable
             rows={rows}
+            photoUrls={photoUrls}
             onSelect={(id) => navigate(`${AppRoute.Visitors}/${id}/detalhes?tab=membership&from=membership`)}
           />
         </>

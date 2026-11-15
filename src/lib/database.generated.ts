@@ -534,6 +534,7 @@ export type Database = {
           marital_status: string | null
           other_phone: string | null
           person_id: string
+          photo_folder: string | null
           photo_updated_at: string | null
         }
         Insert: {
@@ -552,6 +553,7 @@ export type Database = {
           marital_status?: string | null
           other_phone?: string | null
           person_id: string
+          photo_folder?: string | null
           photo_updated_at?: string | null
         }
         Update: {
@@ -570,6 +572,7 @@ export type Database = {
           marital_status?: string | null
           other_phone?: string | null
           person_id?: string
+          photo_folder?: string | null
           photo_updated_at?: string | null
         }
         Relationships: [
@@ -1752,6 +1755,7 @@ export type Database = {
           p_name: string
           p_other_phone: string
           p_phone: string
+          p_photo_token: string
           p_secret_society: string
           p_small_group_id: string
           p_wants_small_group: string
@@ -1784,6 +1788,7 @@ export type Database = {
           p_name: string
           p_other_phone: string
           p_phone: string
+          p_photo_token: string
           p_secret_society: string
           p_small_group_id: string
           p_wants_small_group: string

@@ -4,6 +4,7 @@ import { AlertTriangle } from 'lucide-react';
 import styled from 'styled-components';
 // Local
 import { EntryType, ENTRY_TYPE_LABELS } from '../../types/church';
+import { PhotoName } from '../MemberPhoto';
 import { NarrowLabel, ReviewFlag, Table, TableWrapper, Td, Th, Tr, WideLabel } from '../Table';
 
 interface EntryTypeRow {
@@ -22,9 +23,10 @@ const EntryTh = styled(Th)`
 interface Props {
   rows: EntryTypeRow[];
   onSelect?: (id: string) => void;
+  photoUrls?: Record<string, string>;
 }
 
-export function EntryTypeTable({ rows, onSelect }: Props) {
+export function EntryTypeTable({ rows, onSelect, photoUrls }: Props) {
   return (
     <TableWrapper>
       <Table>
@@ -41,7 +43,7 @@ export function EntryTypeTable({ rows, onSelect }: Props) {
           {rows.map((row) => (
             <Tr key={row.id} $clickable={!!onSelect} onClick={onSelect ? () => onSelect(row.id) : undefined}>
               <Td $truncate title={row.name}>
-                {row.name}
+                {photoUrls ? <PhotoName url={photoUrls[row.id] ?? null}>{row.name}</PhotoName> : row.name}
                 {row.reviewReasons?.map((reason) => (
                   <div key={reason}>
                     <ReviewFlag>

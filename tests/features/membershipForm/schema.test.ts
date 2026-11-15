@@ -1,7 +1,8 @@
 // Local
 import { stepSchemas } from '../../../src/features/membershipForm/schema';
 
-const journey = stepSchemas(false)[2];
+const photo = stepSchemas(false)[1];
+const journey = stepSchemas(false)[3];
 
 const answers = (entryType: string, baptismChurch: string) => ({
   entryType,
@@ -20,5 +21,12 @@ describe('membership form journey step', () => {
 
   it('does not ask it from who is joining by baptism', () => {
     expect(journey.safeParse(answers('baptism', '')).success).toBe(true);
+  });
+});
+
+describe('membership form photo step', () => {
+  it('does not move on without a sent photo', () => {
+    expect(photo.safeParse({ photoToken: '' }).success).toBe(false);
+    expect(photo.safeParse({ photoToken: '2f1d5c3e-1b2a-4c3d-9e8f-0a1b2c3d4e5f' }).success).toBe(true);
   });
 });

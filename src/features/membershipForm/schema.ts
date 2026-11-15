@@ -33,6 +33,8 @@ export type MembershipFormValues = {
   secretSociety: 'yes' | 'no' | '';
   secretSocietyName: string;
   membershipNote: string;
+  photoToken: string;
+  photoPreview: string;
 };
 
 export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
@@ -63,6 +65,8 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   secretSociety: '',
   secretSocietyName: '',
   membershipNote: '',
+  photoToken: '',
+  photoPreview: '',
 };
 
 const required = (what: string) => z.string().refine((value) => value.trim() !== '', text.validation.required(what));
@@ -119,6 +123,10 @@ const contactSchema = (optionalPhone: boolean) =>
       when: () => true,
     });
 
+const photoSchema = z.object({
+  photoToken: z.string().refine((value) => value !== '', 'Envie sua foto para continuar.'),
+});
+
 const journeySchema = z
   .object({
     entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
@@ -170,5 +178,5 @@ const serveSchema = z
 type StepSchema = z.ZodType<Record<string, unknown>, Record<string, unknown>>;
 
 export function stepSchemas(optionalPhone: boolean): StepSchema[] {
-  return [personalSchema, contactSchema(optionalPhone), journeySchema, statuteSchema, serveSchema];
+  return [personalSchema, photoSchema, contactSchema(optionalPhone), journeySchema, statuteSchema, serveSchema];
 }

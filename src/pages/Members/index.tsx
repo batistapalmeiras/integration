@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Empty, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
 import { SlidersHorizontal } from 'lucide-react';
 // Components
-import { MemberPhoto } from '../../components/MemberPhoto';
+import { MemberPhoto, PhotoName } from '../../components/MemberPhoto';
 import { ListView, ViewToggle } from '../../components/ViewToggle';
 import { PageHeader } from '../../components/PageHeader';
 // Local
@@ -14,21 +14,24 @@ import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { TonePill } from '../../components/StatusPill';
 import { MEMBERSHIP_STATUS_LABELS, MEMBERSHIP_STATUS_TONES } from '../../domain/memberRecords';
 import { useMemberPhotoUrls } from '../../queries/memberPhotos';
+import { photoOwnersOf } from '../../repositories/memberPhotos';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
+import { fullRowsPageSize, useGridColumns } from '../../lib/useGridColumns';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
 import { useMembers } from './hooks/useMembers';
 import { membersView } from './persistence';
-import { MemberCard, MemberCardName, MemberGrid, MemberName, ViewRow } from './styles';
+import { MemberCard, MemberCardName, MemberGrid, ViewRow } from './styles';
 
-const GRID_PAGE_SIZE = 15;
+const GRID_PAGE_TARGET = 15;
 
 export function MembersPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const { open, close, modal } = useModal('drawer');
   const [view, setView] = useState<ListView>(() => membersView.load() ?? 'list');
+  const [gridColumns, gridRef] = useGridColumns();
   const {
     members,
     totalCount,
@@ -43,10 +46,10 @@ export function MembersPage() {
     hasFilter,
     loading,
     error,
-  } = useMembers(view === 'grid' ? GRID_PAGE_SIZE : undefined);
+  } = useMembers(view === 'grid' ? fullRowsPageSize(gridColumns, GRID_PAGE_TARGET) : undefined);
   const canOpenRecord = user?.role === UserRole.Pastor;
   const photoSet = useMemberPhotoUrls(
-    members.filter((member) => member.hasPhoto).map((member) => member.id),
+    photoOwnersOf(members),
     ['thumb', 'photo'],
   ).data;
   const photoUrls = (view === 'grid' ? photoSet?.photo : photoSet?.thumb) ?? {};
@@ -103,7 +106,7 @@ export function MembersPage() {
       {!loading && !error && totalCount > 0 && (
         <>
           {view === 'grid' ? (
-            <MemberGrid>
+            <MemberGrid ref={gridRef}>
               {members.map((member) => (
                 <MemberCard
                   key={member.id}
@@ -137,10 +140,7 @@ export function MembersPage() {
                       onClick={canOpenRecord ? () => openMember(member.id) : undefined}
                     >
                       <Td $truncate title={member.name}>
-                        <MemberName>
-                          <MemberPhoto url={photoUrls[member.id] ?? null} size={48} />
-                          <span>{member.name}</span>
-                        </MemberName>
+                        <PhotoName url={photoUrls[member.id] ?? null}>{member.name}</PhotoName>
                       </Td>
                       <Td $shrink>
                         <TonePill $tone={MEMBERSHIP_STATUS_TONES[member.membership_status]}>

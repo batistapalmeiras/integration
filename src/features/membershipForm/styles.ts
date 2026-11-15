@@ -222,3 +222,22 @@ export const ReviewItem = styled.div<{ $wide?: boolean }>`
     overflow-wrap: anywhere;
   }
 `;
+
+export const PhotoPreview = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+export const PhotoActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+
+  & > button {
+    width: 100%;
+  }
+`;
+
+export const PhotoInput = styled.input`
+  display: none;
+`;

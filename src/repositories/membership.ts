@@ -8,6 +8,7 @@ import {
 } from '../domain/membership';
 import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
+import { photoFolderOf } from './memberPhotos';
 
 export async function listMembershipAlerts(personIds: string[]): Promise<MembershipAlert[]> {
   if (personIds.length === 0) return [];
@@ -56,12 +57,13 @@ export interface MembershipQueueRow {
   name: string;
   entryType: EntryType | null;
   reviewReasons: string[];
+  photoFolder: string | null;
 }
 
 export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
   const { data: people, error: peopleError } = await supabase
     .from('people')
-    .select('id, name, entry_type, origin')
+    .select('id, name, entry_type, origin, member_profiles(photo_updated_at, photo_folder)')
     .eq('status', 'membership_pending');
   if (peopleError) throw peopleError;
 
@@ -76,6 +78,7 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
       id: person.id,
       name: person.name,
       entryType: person.entry_type,
+      photoFolder: photoFolderOf(person.id, person.member_profiles),
       reviewReasons: alerts
         .filter((alert) => alert.person_id === person.id && !alert.resolved)
         .map((alert) => MEMBERSHIP_ALERT_LABELS[alert.code]),

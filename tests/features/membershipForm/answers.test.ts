@@ -156,8 +156,8 @@ describe('contact step', () => {
     city: 'Belo Horizonte',
     state: 'MG',
   };
-  const signupContact = stepSchemas(true)[1];
-  const classContact = stepSchemas(false)[1];
+  const signupContact = stepSchemas(true)[2];
+  const classContact = stepSchemas(false)[2];
 
   it('lets only the CPF signup leave the phone empty', () => {
     expect(signupContact.safeParse({ ...valid, phone: '' }).success).toBe(true);

@@ -9,6 +9,7 @@ import { Callout, CalloutContent } from '../../../components/Callout';
 import { NotFound } from '../../../components/NotFound';
 import { DirectSignupFlag } from '../../../components/DirectSignupFlag';
 import { PageHeader } from '../../../components/PageHeader';
+import { PersonPhoto } from '../../../components/PersonPhoto';
 // Local
 import { AppRoute, confirmMemberPath } from '../../../routes/paths';
 import { isDirectSignup } from '../../../domain/origin';
@@ -63,6 +64,8 @@ export function VisitorInfoPage() {
           )
         }
       />
+
+      <PersonPhoto personId={person.id} size={96} />
 
       {isDirectSignup(person.origin) && (
         <FlagRow>

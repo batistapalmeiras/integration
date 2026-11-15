@@ -53,4 +53,11 @@ export const LAST_CHURCH_PROMPTS: Record<EntryType, LastChurchPrompt> = {
 
 export const SERVE_STEP_TITLE = 'Servir e comunidade';
 
-export const STEP_TITLES = ['Seus dados', 'Contato e endereço', 'Sua caminhada', 'Estatuto', SERVE_STEP_TITLE];
+export const STEP_TITLES = [
+  'Seus dados',
+  'Sua foto',
+  'Contato e endereço',
+  'Sua caminhada',
+  'Estatuto',
+  SERVE_STEP_TITLE,
+];

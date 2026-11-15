@@ -17,6 +17,7 @@ import { CouncilDate } from '../domain/councils';
 import { PersonSensitive } from '../domain/personSensitive';
 import { nameFilter, phoneDigits } from '../domain/search';
 import { supabase } from '../lib/supabase';
+import { photoFolderOf } from './memberPhotos';
 
 interface MemberPendency {
   person_id: string;
@@ -149,7 +150,7 @@ interface MemberRecordInfo {
   membershipInterestSentAt: string | null;
   communityJoins: CommunityJoin[];
   council: CouncilDate | null;
-  photoUpdatedAt: string | null;
+  photoFolder: string | null;
 }
 
 interface CommunityJoin {
@@ -219,7 +220,7 @@ export async function getMemberPage(personId: string): Promise<MemberPage> {
         ),
       ],
       council: member.council ? { id: member.council.id, meetingDate: member.council.meeting_date } : null,
-      photoUpdatedAt: member.member_profiles?.photo_updated_at ?? null,
+      photoFolder: photoFolderOf(personId, member.member_profiles),
     },
     community: {
       smallGroupIds: smallGroups.ids,
@@ -275,13 +276,13 @@ export interface MemberRow {
   phone: string | null;
   entry_type: EntryType | null;
   membership_status: MembershipStatus;
-  hasPhoto: boolean;
+  photoFolder: string | null;
 }
 
 export async function listMemberRows(): Promise<MemberRow[]> {
   const { data, error } = await supabase
     .from('people')
-    .select('id, name, phone, entry_type, membership_status, member_profiles(photo_updated_at)')
+    .select('id, name, phone, entry_type, membership_status, member_profiles(photo_updated_at, photo_folder)')
     .eq('status', 'member')
     .order('name', { ascending: true });
   if (error) throw error;
@@ -289,6 +290,6 @@ export async function listMemberRows(): Promise<MemberRow[]> {
     ...row,
     entry_type: toEntryType(row.entry_type),
     membership_status: toMembershipStatus(row.membership_status ?? ''),
-    hasPhoto: !!profile?.photo_updated_at,
+    photoFolder: photoFolderOf(row.id, profile),
   }));
 }

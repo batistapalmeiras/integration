@@ -84,6 +84,7 @@ export interface MembershipFormAnswers {
   smallGroupId: string | null;
   secretSociety: string;
   membershipNote: string;
+  photoToken: string;
 }
 
 export interface SmallGroupOption {
@@ -218,6 +219,7 @@ const membershipAnswerParams = (answers: MembershipFormAnswers) => ({
   p_small_group_id: answers.smallGroupId,
   p_secret_society: answers.secretSociety,
   p_membership_note: answers.membershipNote,
+  p_photo_token: answers.photoToken,
 });
 
 export async function submitMembershipForm(answers: MembershipFormAnswers): Promise<MembershipEligibility> {

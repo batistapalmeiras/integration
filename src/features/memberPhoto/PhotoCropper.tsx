@@ -3,8 +3,8 @@ import { ChangeEvent, PointerEvent, useRef } from 'react';
 // Libs
 import { ZoomIn, ZoomOut } from 'lucide-react';
 // Local
-import { MAX_ZOOM, MIN_ZOOM, moveFrame, PhotoFrame, frameScale, zoomFrame } from '../../../lib/photoFrame';
-import { CropImage, CropMask, CropViewport, ZoomRange, ZoomRow } from '../styles';
+import { MAX_ZOOM, MIN_ZOOM, moveFrame, PhotoFrame, frameScale, zoomFrame } from '../../lib/photoFrame';
+import { CropImage, CropMask, CropViewport, ZoomRange, ZoomRow } from './styles';
 
 interface Props {
   url: string;

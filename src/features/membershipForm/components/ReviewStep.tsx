@@ -9,7 +9,11 @@ import { SmallGroupOption } from '../../../repositories/publicForms';
 import { smallGroupLabel } from '../hooks/usePublicGroups';
 import { LAST_CHURCH_PROMPTS, STEP_TITLES, WANTS_TO_SERVE_LABELS } from '../options';
 import { MembershipFormValues } from '../schema';
-import { ReviewHeader, ReviewItem, ReviewList, ReviewSection, ReviewTitle } from '../styles';
+import { PhotoPreview, ReviewHeader, ReviewItem, ReviewList, ReviewSection, ReviewTitle } from '../styles';
+import { MemberPhoto } from '../../../components/MemberPhoto';
+
+const PHOTO_STEP = 1;
+const REVIEW_PHOTO_SIZE = 96;
 import { formatDate } from '../../../domain/dates';
 
 interface Props {
@@ -49,6 +53,7 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
       ['Data de nascimento', values.birthDate && formatDate(values.birthDate)],
       ['Estado civil', label(MARITAL_STATUS_LABELS, values.maritalStatus)],
     ],
+    [],
     [
       ['E-mail', values.email],
       ['Telefone', values.phone],
@@ -101,6 +106,11 @@ export function ReviewStep({ values, smallGroups, onEdit }: Props) {
               Corrigir
             </LinkButton>
           </ReviewHeader>
+          {step === PHOTO_STEP && (
+            <PhotoPreview>
+              <MemberPhoto url={values.photoPreview || null} size={REVIEW_PHOTO_SIZE} />
+            </PhotoPreview>
+          )}
           <ReviewList>
             {rows.map(([rowLabel, value, wide]) => (
               <ReviewItem key={rowLabel} $wide={wide}>

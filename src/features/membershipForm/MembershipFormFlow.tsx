@@ -13,6 +13,7 @@ import { StoredValue } from '../../lib/storage';
 import { AddressStep } from './components/AddressStep';
 import { JourneyStep } from './components/JourneyStep';
 import { PersonalStep } from './components/PersonalStep';
+import { PhotoStep } from './components/PhotoStep';
 import { ReviewStep } from './components/ReviewStep';
 import { ServeStep } from './components/ServeStep';
 import { StatuteStep } from './components/StatuteStep';
@@ -117,16 +118,17 @@ export function MembershipFormFlow({
       {typeof step === 'number' && (
         <Form onSubmit={(event: FormEvent<HTMLFormElement>) => submitStep(step)(event)} noValidate>
           {step === 0 && <PersonalStep control={control} />}
-          {step === 1 && <AddressStep control={control} setValue={setValue} optionalPhone={optionalPhone} />}
-          {step === 2 && <JourneyStep control={control} />}
-          {step === 3 && (
+          {step === 1 && <PhotoStep control={control} setValue={setValue} />}
+          {step === 2 && <AddressStep control={control} setValue={setValue} optionalPhone={optionalPhone} />}
+          {step === 3 && <JourneyStep control={control} />}
+          {step === 4 && (
             <StatuteStep
               control={control}
               readChapters={readChapters}
               onChapterRead={(id) => setReadChapters((current) => (current.includes(id) ? current : [...current, id]))}
             />
           )}
-          {step === 4 && (
+          {step === 5 && (
             <ServeStep control={control} ministries={ministries} smallGroups={smallGroups} loadError={loadError} />
           )}
 

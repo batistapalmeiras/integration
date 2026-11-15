@@ -19,3 +19,17 @@ export const PhotoImage = styled.img`
   height: 100%;
   object-fit: cover;
 `;
+
+export const PhotoNameRow = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  min-width: 0;
+`;
+
+export const NameText = styled.span`
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;

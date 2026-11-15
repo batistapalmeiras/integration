@@ -84,5 +84,6 @@ export function toMembershipFormAnswers(values: MembershipFormValues): Membershi
     smallGroupId: values.wantsSmallGroup === 'already' ? values.smallGroupId : null,
     secretSociety: values.secretSociety === 'yes' ? values.secretSocietyName.trim() : YES_NO_LABELS.no,
     membershipNote: values.membershipNote,
+    photoToken: values.photoToken,
   };
 }

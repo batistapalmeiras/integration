@@ -10,6 +10,7 @@ import { EndActions, FieldGrid, Section, SectionDivider, Sections } from '../../
 import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { Columns, WideContent } from '../../components/PageColumns';
 import { PageHeader } from '../../components/PageHeader';
+import { PersonPhoto } from '../../components/PersonPhoto';
 import { PanelTitle } from '../../components/Panel';
 // Local
 import { Council } from '../../domain/councils';
@@ -101,6 +102,8 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
   return (
     <WideContent>
       <PageHeader title="Confirmar membro" subtitle={person.name} back />
+
+      <PersonPhoto personId={person.id} size={96} />
 
       <Columns>
         <Answers>
