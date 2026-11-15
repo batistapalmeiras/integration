@@ -1,5 +1,6 @@
 // Libs
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 // Local
 import { GroupNames } from '../../../src/pages/MemberProfile/components/GroupNames';
 import { renderScreen } from '../../support/render';
@@ -20,5 +21,18 @@ describe('group names', () => {
     expect(screen.getByText('Phil e Pedro')).toBeInTheDocument();
     expect(screen.getAllByText('Líder')).toHaveLength(2);
     expect(screen.getByText('Anfitrião')).toBeInTheDocument();
+  });
+
+  it('shows three groups and opens the rest from "mais"', async () => {
+    const groups = ['A', 'B', 'C', 'D', 'E'].map((name) => ({ id: name, name, roles: [] }));
+    renderScreen(<GroupNames groups={groups} />);
+
+    expect(screen.getByText('C')).toBeInTheDocument();
+    expect(screen.queryByText('D')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: '… mais 2' }));
+
+    expect(screen.getByText('E')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /mais/ })).not.toBeInTheDocument();
   });
 });

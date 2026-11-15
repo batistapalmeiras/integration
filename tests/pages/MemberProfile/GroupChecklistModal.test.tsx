@@ -7,8 +7,8 @@ import { UserRole } from '../../../src/types/enums';
 import { renderScreen } from '../../support/render';
 
 const groups = [
-  { id: 'pg-1', name: 'Phil e Pedro' },
-  { id: 'pg-2', name: 'Marcos' },
+  { id: 'pg-1', name: 'Phil e Pedro', roles: [] },
+  { id: 'pg-2', name: 'Marcos', roles: [] },
 ];
 
 const renderModal = (selected: string[], onSave = vi.fn().mockResolvedValue(undefined), close = vi.fn()) => {
@@ -16,6 +16,7 @@ const renderModal = (selected: string[], onSave = vi.fn().mockResolvedValue(unde
     <GroupChecklistModal
       title="Pequenos Grupos"
       emptyText="Nenhum Pequeno Grupo cadastrado."
+      searchPlaceholder="Buscar pelo Pequeno Grupo…"
       groups={groups}
       selected={selected}
       onSave={onSave}
@@ -47,7 +48,7 @@ describe('group checklist modal', () => {
 
   it('starts on the search and filters by name, ignoring accents', async () => {
     renderModal([]);
-    const search = screen.getByPlaceholderText('Buscar pelo nome…');
+    const search = screen.getByPlaceholderText('Buscar pelo Pequeno Grupo…');
     expect(search).toHaveFocus();
 
     await userEvent.type(search, 'marcos');
@@ -59,10 +60,28 @@ describe('group checklist modal', () => {
   it('keeps hidden choices when the search changes', async () => {
     const { onSave } = renderModal(['pg-1']);
 
-    await userEvent.type(screen.getByPlaceholderText('Buscar pelo nome…'), 'marcos');
+    await userEvent.type(screen.getByPlaceholderText('Buscar pelo Pequeno Grupo…'), 'marcos');
     await userEvent.click(screen.getByRole('checkbox', { name: 'Marcos' }));
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 
     expect(onSave).toHaveBeenCalledWith(['pg-1', 'pg-2']);
+  });
+
+  it('shows the member roles next to the group names', () => {
+    renderScreen(
+      <GroupChecklistModal
+        title="Pequenos Grupos"
+        emptyText="Nenhum Pequeno Grupo cadastrado."
+        searchPlaceholder="Buscar pelo Pequeno Grupo…"
+        groups={[{ id: 'pg-1', name: 'Phil e Pedro', roles: ['Líder', 'Anfitrião'] }]}
+        selected={['pg-1']}
+        onSave={vi.fn()}
+        close={vi.fn()}
+      />,
+      { role: UserRole.Pastor },
+    );
+
+    expect(screen.getByText('Líder')).toBeInTheDocument();
+    expect(screen.getByText('Anfitrião')).toBeInTheDocument();
   });
 });

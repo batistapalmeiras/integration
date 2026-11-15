@@ -7,23 +7,26 @@ import { Save } from 'lucide-react';
 import { errorMessage } from '../../../lib/queryCache';
 import { sameItems } from '../../../lib/sameItems';
 import { foldText } from '../../../domain/text';
-import { ChecklistItem, ChecklistItems } from '../styles';
+import { ChecklistItem, ChecklistItems, GroupName } from '../styles';
+import { TonePill } from '../../../components/StatusPill';
 
 interface ChecklistGroup {
   id: string;
   name: string;
+  roles: string[];
 }
 
 interface Props {
   title: string;
   emptyText: string;
+  searchPlaceholder: string;
   groups: ChecklistGroup[];
   selected: string[];
   onSave: (ids: string[]) => Promise<void>;
   close: () => void;
 }
 
-export function GroupChecklistModal({ title, emptyText, groups, selected, onSave, close }: Props) {
+export function GroupChecklistModal({ title, emptyText, searchPlaceholder, groups, selected, onSave, close }: Props) {
   const { show: showToast, toast } = useToast();
   const [checked, setChecked] = useState(selected);
   const [saving, setSaving] = useState(false);
@@ -52,14 +55,27 @@ export function GroupChecklistModal({ title, emptyText, groups, selected, onSave
         <Typography type="p">{emptyText}</Typography>
       ) : (
         <>
-          <SearchInput value={search} onChange={setSearch} placeholder="Buscar pelo nome…" autoFocus />
+          <SearchInput value={search} onChange={setSearch} placeholder={searchPlaceholder} autoFocus />
           {visible.length === 0 ? (
             <Typography type="p">Nada encontrado para essa busca.</Typography>
           ) : (
             <ChecklistItems>
               {visible.map((group) => (
                 <ChecklistItem key={group.id}>
-                  <Checkbox checked={checked.includes(group.id)} onChange={() => toggle(group.id)} label={group.name} />
+                  <Checkbox
+                    checked={checked.includes(group.id)}
+                    onChange={() => toggle(group.id)}
+                    label={
+                      <GroupName>
+                        {group.name}
+                        {group.roles.map((role) => (
+                          <TonePill key={role} $tone="success">
+                            {role}
+                          </TonePill>
+                        ))}
+                      </GroupName>
+                    }
+                  />
                 </ChecklistItem>
               ))}
             </ChecklistItems>

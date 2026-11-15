@@ -46,7 +46,7 @@ export function AddMembersModal({ title, currentIds, close, onAdd }: Props) {
           options={options}
           value={selected}
           onChange={setSelected}
-          placeholder="Buscar membro…"
+          placeholder="Buscar pelo membro…"
         />
         <ModalActions>
           <Button type="submit" variant="primary" disabled={saving || selected.length === 0}>

@@ -43,7 +43,7 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
           options={STATUS_OPTIONS}
           value={status}
           onChange={(value) => setStatus(value as PersonStatus[])}
-          placeholder="Buscar status…"
+          placeholder="Buscar pelo status…"
         />
 
         <RawSelect label="Turma" value={cohort} onChange={(e) => setCohort(e.target.value)}>

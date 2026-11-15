@@ -146,7 +146,7 @@ function FamilyList({
             ))}
           </Select>
           <Select label="Membro" control={picker.control} name="relativeId" searchable>
-            <option value="">Digite o nome…</option>
+            <option value="">Buscar pelo membro…</option>
             {available.map((candidate) => (
               <option key={candidate.id} value={candidate.id}>
                 {candidate.name}

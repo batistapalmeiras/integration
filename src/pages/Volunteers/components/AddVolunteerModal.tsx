@@ -54,7 +54,7 @@ export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
             — repasse ao voluntário.
           </InfoBox>
           <Select label="Membro" control={control} name="personId" searchable>
-            <option value="">Selecione…</option>
+            <option value="">Buscar pelo membro…</option>
             {candidates.data.map((person) => (
               <option key={person.id} value={person.id}>
                 {person.name}
@@ -67,7 +67,7 @@ export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
             </InfoBox>
           )}
           <Select label="Cargo" control={control} name="role">
-            <option value="">Selecione…</option>
+            <option value="">Buscar pelo membro…</option>
             <RoleOptions roles={allowedRoles} />
           </Select>
 

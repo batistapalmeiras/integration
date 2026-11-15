@@ -41,7 +41,7 @@ export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFi
           options={STATUS_OPTIONS}
           value={status}
           onChange={(value) => setStatus(value as MembershipStatus[])}
-          placeholder="Buscar situação…"
+          placeholder="Buscar pela situação…"
         />
 
         <MultiSelect
@@ -49,7 +49,7 @@ export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFi
           options={ENTRY_TYPE_OPTIONS}
           value={entryType}
           onChange={(value) => setEntryType(value as EntryType[])}
-          placeholder="Buscar forma de entrada…"
+          placeholder="Buscar pela forma de entrada…"
         />
 
         <ModalActions>

@@ -31,6 +31,16 @@ export const GroupName = styled.span`
   gap: ${({ theme }) => theme.spacing.xs};
 `;
 
+export const MoreGroups = styled.button`
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.primaryActive};
+  cursor: pointer;
+`;
+
 export const ChildLinks = styled.ul`
   margin: 0;
   padding: 0;

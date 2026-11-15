@@ -73,18 +73,20 @@ export function MemberProfilePage() {
   const smallGroups = community.smallGroupNames;
   const ministries = community.ministryNames;
   const notes = notesQuery.data ?? [];
+  const smallGroupRoles = (groupId: string) => [
+    ...(community.leaderOfSmallGroupIds.includes(groupId) ? ['Líder'] : []),
+    ...(community.hostOfSmallGroupIds.includes(groupId) ? ['Anfitrião'] : []),
+  ];
+  const ministryRoles = (ministryId: string) => (community.leaderOfMinistryIds.includes(ministryId) ? ['Líder'] : []);
   const smallGroupsWithRoles = community.smallGroupIds.map((groupId, index) => ({
     id: groupId,
     name: community.smallGroupNames[index],
-    roles: [
-      ...(community.leaderOfSmallGroupIds.includes(groupId) ? ['Líder'] : []),
-      ...(community.hostOfSmallGroupIds.includes(groupId) ? ['Anfitrião'] : []),
-    ],
+    roles: smallGroupRoles(groupId),
   }));
   const ministriesWithRoles = community.ministryIds.map((ministryId, index) => ({
     id: ministryId,
     name: community.ministryNames[index],
-    roles: community.leaderOfMinistryIds.includes(ministryId) ? ['Líder'] : [],
+    roles: ministryRoles(ministryId),
   }));
 
   const saveCommunity = async (smallGroupIds: string[], ministryIds: string[]) => {
@@ -98,7 +100,8 @@ export function MemberProfilePage() {
       <GroupChecklistModal
         title="Pequenos Grupos"
         emptyText="Nenhum Pequeno Grupo cadastrado."
-        groups={allSmallGroups}
+        searchPlaceholder="Buscar pelo Pequeno Grupo…"
+        groups={allSmallGroups.map((group) => ({ ...group, roles: smallGroupRoles(group.id) }))}
         selected={community.smallGroupIds}
         onSave={(ids) => saveCommunity(ids, community.ministryIds)}
         close={close}
@@ -110,7 +113,8 @@ export function MemberProfilePage() {
       <GroupChecklistModal
         title="Ministérios"
         emptyText="Nenhum ministério cadastrado."
-        groups={allMinistries}
+        searchPlaceholder="Buscar pelo Ministério…"
+        groups={allMinistries.map((ministry) => ({ ...ministry, roles: ministryRoles(ministry.id) }))}
         selected={community.ministryIds}
         onSave={(ids) => saveCommunity(community.smallGroupIds, ids)}
         close={close}

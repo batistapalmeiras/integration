@@ -90,7 +90,7 @@ export function GroupModal({
             options={options}
             value={leaderIds}
             onChange={setLeaderIds}
-            placeholder="Buscar pessoa da lista…"
+            placeholder="Buscar pelo líder…"
           />
         )}
 
@@ -100,7 +100,7 @@ export function GroupModal({
             options={options}
             value={hostIds}
             onChange={setHostIds}
-            placeholder="Buscar pessoa da lista…"
+            placeholder="Buscar pelo anfitrião…"
           />
         )}
 

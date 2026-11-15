@@ -66,7 +66,13 @@ export function StoreItemForm({ item, onSubmit }: Props) {
 
       <TextInput label="Nome do item" control={control} name="name" placeholder="Nome do item" />
 
-      <MultiSelect label="Tamanhos (opcional)" options={SIZE_SELECT_OPTIONS} value={sizes} onChange={setSizes} />
+      <MultiSelect
+        label="Tamanhos (opcional)"
+        options={SIZE_SELECT_OPTIONS}
+        value={sizes}
+        onChange={setSizes}
+        placeholder="Buscar pelo tamanho…"
+      />
 
       <DatePicker label="Data limite (opcional)" control={control} name="deadline" />
 

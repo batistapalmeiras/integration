@@ -43,7 +43,7 @@ export function ServeStep({ control, ministries, smallGroups, loadError }: Props
               value={field.value}
               onChange={field.onChange}
               max={3}
-              placeholder="Buscar ministério…"
+              placeholder="Buscar pelo Ministério…"
               error={fieldState.error?.message}
             />
           )}
