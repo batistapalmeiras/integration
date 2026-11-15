@@ -130,3 +130,16 @@ export const PhotoActions = styled.div`
     padding-right: ${({ theme }) => theme.spacing.sm};
   }
 `;
+
+export const ChecklistItems = styled.ul`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xs};
+  margin: ${({ theme }) => theme.spacing.base} 0 0;
+  padding: 0;
+  list-style: none;
+`;
+
+export const ChecklistItem = styled.li`
+  padding: ${({ theme }) => theme.spacing.xs} 0;
+`;

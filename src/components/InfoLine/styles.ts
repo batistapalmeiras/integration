@@ -67,3 +67,14 @@ export const Panel = styled.div`
     }
   }
 `;
+
+export const Action = styled.div`
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: flex-start;
+
+  & > button {
+    width: auto;
+    padding: 0;
+  }
+`;

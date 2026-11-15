@@ -24,17 +24,20 @@ import {
   MEMBERSHIP_STATUS_TONES,
 } from '../../domain/memberRecords';
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
-import { errorMessage } from '../../lib/queryCache';
+import { errorMessage, invalidateQueries, markPipelineStale } from '../../lib/queryCache';
+import { queryKeys } from '../../lib/queryKeys';
 import { useMemberPhotoUrls } from '../../queries/memberPhotos';
 import { useFamily, useMemberPage, usePersonNotes } from '../../queries/person';
-import { CommunityModal } from './components/CommunityModal';
+import { useMinistries, useSmallGroups } from '../../queries/reference';
+import { savePersonCommunity } from '../../repositories/communityGroups';
+import { GroupChecklistModal } from './components/GroupChecklistModal';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
 import { GroupNames } from './components/GroupNames';
 import { MemberHistory } from './components/MemberHistory';
 import { PhotoModal } from './components/PhotoModal';
-import { HeroCards, HeroGrid, HeroStatus, PhotoBadge, PhotoButton, StatusRow } from './styles';
+import { HeroCards, HeroGrid, HeroStatus, PhotoBadge, PhotoButton } from './styles';
 
 const MEMBERSHIP_SECTION = 'membership';
 const SIDE_SECTIONS = ['contact'];
@@ -52,6 +55,8 @@ export function MemberProfilePage() {
   const { open, close, modal } = useModal('drawer', { fullScreenOnMobile: true });
   const familyModal = useModal('drawer', { fullScreenOnMobile: true });
   const pageQuery = useMemberPage(id);
+  const allSmallGroups = useSmallGroups().data ?? [];
+  const allMinistries = useMinistries().data ?? [];
   const notesQuery = usePersonNotes(id);
   const family = useFamily(id).data;
   const page = pageQuery.data ?? null;
@@ -81,6 +86,36 @@ export function MemberProfilePage() {
     name: community.ministryNames[index],
     roles: community.leaderOfMinistryIds.includes(ministryId) ? ['Líder'] : [],
   }));
+
+  const saveCommunity = async (smallGroupIds: string[], ministryIds: string[]) => {
+    await savePersonCommunity(id, smallGroupIds, ministryIds);
+    await markPipelineStale();
+    await invalidateQueries(queryKeys.memberPage(id));
+  };
+
+  const editSmallGroups = () =>
+    open(
+      <GroupChecklistModal
+        title="Pequenos Grupos"
+        emptyText="Nenhum Pequeno Grupo cadastrado."
+        groups={allSmallGroups}
+        selected={community.smallGroupIds}
+        onSave={(ids) => saveCommunity(ids, community.ministryIds)}
+        close={close}
+      />,
+    );
+
+  const editMinistries = () =>
+    open(
+      <GroupChecklistModal
+        title="Ministérios"
+        emptyText="Nenhum ministério cadastrado."
+        groups={allMinistries}
+        selected={community.ministryIds}
+        onSave={(ids) => saveCommunity(community.smallGroupIds, ids)}
+        close={close}
+      />,
+    );
 
   const edit = (section: RecordSection) =>
     open(
@@ -158,6 +193,11 @@ export function MemberProfilePage() {
               icon={UsersRound}
               label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}
               empty={smallGroups.length === 0}
+              action={
+                <LinkButton icon={<Pencil size={14} />} onClick={editSmallGroups}>
+                  Editar
+                </LinkButton>
+              }
             >
               {smallGroups.length > 0 ? <GroupNames groups={smallGroupsWithRoles} /> : 'Não participa de um PG'}
             </InfoLine>
@@ -165,18 +205,15 @@ export function MemberProfilePage() {
               icon={HeartHandshake}
               label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}
               empty={ministries.length === 0}
+              action={
+                <LinkButton icon={<Pencil size={14} />} onClick={editMinistries}>
+                  Editar
+                </LinkButton>
+              }
             >
               {ministries.length > 0 ? <GroupNames groups={ministriesWithRoles} /> : 'Não serve em um ministério'}
             </InfoLine>
           </InfoPanel>
-          <StatusRow>
-            <LinkButton
-              icon={<Pencil size={14} />}
-              onClick={() => open(<CommunityModal personId={id} community={community} close={close} />)}
-            >
-              Alterar PG e ministérios
-            </LinkButton>
-          </StatusRow>
         </HeroCards>
       </HeroGrid>
 

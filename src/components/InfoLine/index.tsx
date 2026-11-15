@@ -3,16 +3,17 @@ import { ReactNode } from 'react';
 // Libs
 import { LucideIcon } from 'lucide-react';
 // Local
-import { Badge, Body, Item, Label, Panel } from './styles';
+import { Action, Badge, Body, Item, Label, Panel } from './styles';
 
 interface Props {
   icon: LucideIcon;
   label?: string;
   empty?: boolean;
+  action?: ReactNode;
   children: ReactNode;
 }
 
-export function InfoLine({ icon: Icon, label, empty = false, children }: Props) {
+export function InfoLine({ icon: Icon, label, empty = false, action, children }: Props) {
   return (
     <Item $empty={empty}>
       <Badge $empty={empty}>
@@ -22,6 +23,7 @@ export function InfoLine({ icon: Icon, label, empty = false, children }: Props) 
         {label && <Label>{label}</Label>}
         {children}
       </Body>
+      {action && <Action>{action}</Action>}
     </Item>
   );
 }
