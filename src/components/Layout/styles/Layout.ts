@@ -41,18 +41,9 @@ export const SideBrandLink = styled(Link)`
 `;
 
 export const SideBrandLogo = styled.img`
-  width: 32px;
-  height: 32px;
+  height: 44px;
+  width: auto;
   object-fit: contain;
-`;
-
-export const SideBrandName = styled.span`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.ink};
 `;
 
 export const SideNav = styled.nav`

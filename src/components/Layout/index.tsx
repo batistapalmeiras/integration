@@ -4,7 +4,7 @@ import React, { Fragment, useState } from 'react';
 import { useMediaQuery } from 'bp-kit';
 import { ChevronDown, ChevronLeft, LogOut, User } from 'lucide-react';
 // Components
-import icon from '../../assets/icon.png';
+import logo from '../../assets/palmeiras-horizontal-verde.png';
 import {
   activeNavPath,
   areaItems,
@@ -35,7 +35,6 @@ import {
   SideBrand,
   SideBrandLink,
   SideBrandLogo,
-  SideBrandName,
   SideFooter,
   SideMenu,
   SIDEMENU_MEDIA,
@@ -111,8 +110,7 @@ export function Layout({ children }: ILayoutProps) {
       <SideMenu>
         <SideBrand>
           <SideBrandLink to={homeRoute}>
-            <SideBrandLogo src={icon} alt="" />
-            <SideBrandName>Batista Palmeiras</SideBrandName>
+            <SideBrandLogo src={logo} alt="Palmeiras Igreja Batista" />
           </SideBrandLink>
         </SideBrand>
 
