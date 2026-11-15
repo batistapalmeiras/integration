@@ -89,7 +89,7 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
     try {
       if (familyForm.formState.isDirty) await saveFamily(person.id, familyForm.getValues());
       await confirmMember({
-        councilId,
+        councilId: councilId || null,
         smallGroupIds: values.smallGroupIds,
         ministryIds: values.ministryIds,
       });
@@ -120,7 +120,7 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
               <PanelTitle>Conselho Administrativo</PanelTitle>
               {hasCouncil ? (
                 <Select label="Aprovado no Conselho Administrativo de" control={councilForm.control} name="councilId">
-                  <option value="">Selecione</option>
+                  <option value="">Nenhum por enquanto</option>
                   {councils.map((council) => (
                     <option key={council.id} value={council.id}>
                       {formatDate(council.meetingDate)}
@@ -129,7 +129,7 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
                 </Select>
               ) : (
                 <>
-                  <InfoBox variant="warning">Nenhum Conselho Administrativo criado. Crie um para confirmar.</InfoBox>
+                  <InfoBox>Nenhum Conselho Administrativo criado ainda.</InfoBox>
                   <EndActions>
                     <Button type="button" variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
                       <Plus size={16} />
@@ -168,7 +168,7 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
                 type="submit"
                 variant="primary"
                 fullWidth
-                disabled={!councilId || community.formState.isSubmitting}
+                disabled={community.formState.isSubmitting}
               >
                 {community.formState.isSubmitting ? (
                   'Confirmando...'

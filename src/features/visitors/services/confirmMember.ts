@@ -4,7 +4,7 @@ import { Person } from '../domain/types';
 import { insertStatusHistory, updatePersonStatus } from '../../../repositories/people';
 
 export interface MemberConfirmation {
-  councilId: string;
+  councilId: string | null;
   smallGroupIds: string[];
   ministryIds: string[];
 }

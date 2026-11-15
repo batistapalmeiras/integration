@@ -83,7 +83,7 @@ const renderPage = () =>
 describe('confirm member page', () => {
   afterEach(() => clearQueries());
 
-  it('makes the pastor pick the council, newest first, before confirming', async () => {
+  it('lets the pastor confirm with or without a council, newest council first', async () => {
     vi.mocked(listCouncils).mockResolvedValue([
       { id: 'c2', meetingDate: '2026-11-10', memberCount: 3 },
       { id: 'c1', meetingDate: '2026-10-27', memberCount: 5 },
@@ -91,16 +91,18 @@ describe('confirm member page', () => {
     renderPage();
 
     const confirm = await screen.findByRole('button', { name: /Confirmar como membro/ });
-    const council = screen.getAllByRole('combobox').find((select) => select.textContent?.includes('Selecione'));
+    const council = screen
+      .getAllByRole('combobox')
+      .find((select) => select.textContent?.includes('Nenhum por enquanto'));
 
     expect(council).toBeDefined();
     expect([...(council as HTMLSelectElement).options].map((option) => option.textContent)).toEqual([
-      'Selecione',
+      'Nenhum por enquanto',
       '10/11/2026',
       '27/10/2026',
     ]);
     expect(council).toHaveValue('');
-    expect(confirm).toBeDisabled();
+    expect(confirm).toBeEnabled();
 
     await userEvent.selectOptions(council as HTMLSelectElement, 'c2');
 
