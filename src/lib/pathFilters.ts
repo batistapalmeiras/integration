@@ -1,3 +1,6 @@
+// Local
+import { foldText } from '../domain/text';
+
 export type ListFilters<K extends string> = Partial<Record<K, string[]>>;
 
 interface TableFilter<K extends string> {
@@ -21,10 +24,7 @@ export interface DecodedPathFilters<K extends string> {
 const SEPARATOR = '-';
 
 export const slugify = (text: string) =>
-  text
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
+  foldText(text)
     .replace(/[^a-z0-9]+/g, SEPARATOR)
     .replace(/^-+|-+$/g, '');
 

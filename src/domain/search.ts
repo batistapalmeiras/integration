@@ -1,3 +1,6 @@
+// Local
+import { foldText } from './text';
+
 const MIN_PHONE_DIGITS = 3;
 const FILTER_SYNTAX = /[,()*%\\]/g;
 
@@ -12,14 +15,14 @@ export function phoneDigits(search: string): string {
 }
 
 export function matchesNameOrPhone(person: Searchable, search: string): boolean {
-  const term = search.trim().toLowerCase();
+  const term = foldText(search.trim());
   if (!term) return true;
   const digits = phoneDigits(term);
-  return person.name.toLowerCase().includes(term) || (!!digits && !!person.phone?.includes(digits));
+  return foldText(person.name).includes(term) || (!!digits && !!person.phone?.includes(digits));
 }
 
 export function nameFilter(search: string): string {
-  return `name.ilike.%${search.trim().replace(FILTER_SYNTAX, ' ')}%`;
+  return `search_name.ilike.%${foldText(search.trim()).replace(FILTER_SYNTAX, ' ')}%`;
 }
 
 export function nameOrPhoneFilter(search: string): string {

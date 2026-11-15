@@ -830,6 +830,7 @@ export type Database = {
           name: string
           origin: string
           phone: string | null
+          search_name: string | null
           signup_window_from: string | null
           status: string
           updated_at: string
@@ -1399,6 +1400,7 @@ export type Database = {
           missing_fields: string[] | null
           name: string | null
           person_id: string | null
+          search_name: string | null
         }
         Relationships: []
       }

@@ -20,18 +20,27 @@ describe('matchesNameOrPhone', () => {
     expect(matchesNameOrPhone({ name: 'Ana Lima', phone: null }, '98888')).toBe(false);
   });
 
+  it('ignores accents on either side', () => {
+    expect(matchesNameOrPhone({ name: 'João Antônio', phone: null }, 'joao antonio')).toBe(true);
+    expect(matchesNameOrPhone({ name: 'Joao Antonio', phone: null }, 'João')).toBe(true);
+  });
+
   it('matches everyone when the search is empty', () => {
     expect(matchesNameOrPhone(ana, '  ')).toBe(true);
   });
 });
 
 describe('nameOrPhoneFilter', () => {
+  it('searches the name without accents', () => {
+    expect(nameOrPhoneFilter('Inácio')).toBe('search_name.ilike.%inacio%');
+  });
+
   it('searches only the name when there are not enough digits', () => {
-    expect(nameOrPhoneFilter('Ana')).toBe('name.ilike.%Ana%');
+    expect(nameOrPhoneFilter('Ana')).toBe('search_name.ilike.%ana%');
   });
 
   it('adds the phone digits and strips the characters that break the filter', () => {
-    expect(nameOrPhoneFilter('(31) 98888')).toBe('name.ilike.% 31  98888%,phone.ilike.%3198888%');
+    expect(nameOrPhoneFilter('(31) 98888')).toBe('search_name.ilike.% 31  98888%,phone.ilike.%3198888%');
   });
 
   it('keeps only the digits when reading a phone search', () => {

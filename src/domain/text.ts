@@ -15,3 +15,9 @@ export const LOAD_RETRY_MESSAGE = 'Não foi possível carregar agora. Atualize a
 export const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, 'pt-BR');
 
 export const firstNameOf = (name: string) => name.trim().split(/\s+/)[0] ?? '';
+
+export const foldText = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
