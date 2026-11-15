@@ -1,11 +1,13 @@
 // React
 import { FormEvent, useState } from 'react';
 // Libs
-import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect } from 'bp-kit';
+import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect, Switch } from 'bp-kit';
 import { FilterX } from 'lucide-react';
 // Local
+import { MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
 import { MEMBERSHIP_STATUS_LABELS, MembershipStatus } from '../../../domain/memberRecords';
 import { ENTRY_TYPE_LABELS, EntryType } from '../../../types/church';
+import { FlagSwitch } from '../styles';
 
 const STATUS_OPTIONS = Object.entries(MEMBERSHIP_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 const ENTRY_TYPE_OPTIONS = Object.entries(ENTRY_TYPE_LABELS).map(([value, label]) => ({ value, label }));
@@ -14,20 +16,25 @@ interface Props {
   close: () => void;
   membershipStatusFilter: MembershipStatus[];
   entryTypeFilter: EntryType[];
-  onApply: (membershipStatusFilter: MembershipStatus[], entryTypeFilter: EntryType[]) => void;
+  flagFilter: MemberFlag[];
+  onApply: (membershipStatusFilter: MembershipStatus[], entryTypeFilter: EntryType[], flagFilter: MemberFlag[]) => void;
 }
 
-export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFilter, onApply }: Props) {
+export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFilter, flagFilter, onApply }: Props) {
   const [status, setStatus] = useState(membershipStatusFilter);
   const [entryType, setEntryType] = useState(entryTypeFilter);
+  const [flag, setFlag] = useState(flagFilter);
+
+  const toggleFlag = (item: MemberFlag) =>
+    setFlag((current) => (current.includes(item) ? current.filter((value) => value !== item) : [...current, item]));
 
   const apply = () => {
-    onApply(status, entryType);
+    onApply(status, entryType, flag);
     close();
   };
 
   const clear = () => {
-    onApply([], []);
+    onApply([], [], []);
     close();
   };
 
@@ -52,6 +59,12 @@ export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFi
           placeholder="Buscar pela forma de entrada…"
         />
 
+        {MEMBER_FLAGS.map((item) => (
+          <FlagSwitch key={item}>
+            <Switch label={MEMBER_FLAG_LABELS[item]} checked={flag.includes(item)} onChange={() => toggleFlag(item)} />
+          </FlagSwitch>
+        ))}
+
         <ModalActions>
           <Button type="button" variant="primary" onClick={apply}>
             Aplicar
@@ -59,7 +72,7 @@ export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFi
           <LinkButton
             icon={<FilterX size={16} />}
             onClick={clear}
-            disabled={status.length === 0 && entryType.length === 0}
+            disabled={status.length === 0 && entryType.length === 0 && flag.length === 0}
           >
             Limpar
           </LinkButton>

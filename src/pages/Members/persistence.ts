@@ -1,15 +1,17 @@
 // Local
+import { MEMBER_FLAG_LABELS } from '../../domain/memberFlags';
 import { MEMBERSHIP_STATUS_LABELS } from '../../domain/memberRecords';
 import { ListFilters, PathFilter, slugTable } from '../../lib/pathFilters';
 import { storedValue } from '../../lib/storage';
 import { ListView } from '../../components/ViewToggle';
 import { ENTRY_TYPE_LABELS } from '../../types/church';
 
-export type MembersFilterKey = 'status' | 'entryType';
+export type MembersFilterKey = 'status' | 'entryType' | 'flag';
 
 export const MEMBERS_FILTERS: PathFilter<MembersFilterKey>[] = [
   { key: 'status', slugs: slugTable(MEMBERSHIP_STATUS_LABELS) },
   { key: 'entryType', slugs: slugTable(ENTRY_TYPE_LABELS) },
+  { key: 'flag', slugs: slugTable(MEMBER_FLAG_LABELS) },
 ];
 
 export const membersFilters = storedValue<ListFilters<MembersFilterKey>>('members-list-filters');

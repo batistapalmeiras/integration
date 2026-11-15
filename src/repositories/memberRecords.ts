@@ -280,19 +280,21 @@ export interface MemberRow {
   entry_type: EntryType | null;
   membership_status: MembershipStatus;
   photoFolder: string | null;
+  flags: MemberFlag[];
 }
 
 export async function listMemberRows(): Promise<MemberRow[]> {
   const { data, error } = await supabase
     .from('people')
-    .select('id, name, phone, entry_type, membership_status, member_profiles(photo_updated_at, photo_folder)')
+    .select('id, name, phone, entry_type, membership_status, member_profiles(photo_updated_at, photo_folder), member_flags(flag)')
     .eq('status', 'member')
     .order('name', { ascending: true });
   if (error) throw error;
-  return (data ?? []).map(({ member_profiles: profile, ...row }) => ({
+  return (data ?? []).map(({ member_profiles: profile, member_flags: flags, ...row }) => ({
     ...row,
     entry_type: toEntryType(row.entry_type),
     membership_status: toMembershipStatus(row.membership_status ?? ''),
     photoFolder: photoFolderOf(row.id, profile),
+    flags: flags.map((item) => item.flag).filter(isMemberFlag),
   }));
 }

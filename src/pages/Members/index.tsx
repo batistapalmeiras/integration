@@ -42,6 +42,7 @@ export function MembersPage() {
     setSearch,
     membershipStatusFilter,
     entryTypeFilter,
+    flagFilter,
     setFilters,
     hasFilter,
     loading,
@@ -60,7 +61,9 @@ export function MembersPage() {
     membersView.save(next);
   };
 
-  const activeFilterCount = (membershipStatusFilter.length > 0 ? 1 : 0) + (entryTypeFilter.length > 0 ? 1 : 0);
+  const activeFilterCount = [membershipStatusFilter, entryTypeFilter, flagFilter].filter(
+    (filter) => filter.length > 0,
+  ).length;
 
   const openFilters = () =>
     open(
@@ -68,6 +71,7 @@ export function MembersPage() {
         close={close}
         membershipStatusFilter={membershipStatusFilter}
         entryTypeFilter={entryTypeFilter}
+        flagFilter={flagFilter}
         onApply={setFilters}
       />,
     );
