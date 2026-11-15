@@ -2,8 +2,9 @@
 import { useParams } from 'react-router-dom';
 // Libs
 import { Empty, LinkButton, Skeleton, useModal } from 'bp-kit';
-import { HeartHandshake, Pencil, UsersRound } from 'lucide-react';
+import { Camera, ImagePlus, HeartHandshake, Pencil, UsersRound } from 'lucide-react';
 // Components
+import { MemberPhoto } from '../../components/MemberPhoto';
 import { NotesPanel } from '../../components/NotesPanel';
 import { PageHeader } from '../../components/PageHeader';
 import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
@@ -24,6 +25,7 @@ import {
 } from '../../domain/memberRecords';
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
 import { errorMessage } from '../../lib/queryCache';
+import { useMemberPhotoUrls } from '../../queries/memberPhotos';
 import { useFamily, useMemberPage, usePersonNotes } from '../../queries/person';
 import { CommunityModal } from './components/CommunityModal';
 import { EditSectionModal } from './components/EditSectionModal';
@@ -31,7 +33,8 @@ import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
 import { GroupNames } from './components/GroupNames';
 import { MemberHistory } from './components/MemberHistory';
-import { HeroText, StatusRow } from './styles';
+import { PhotoModal } from './components/PhotoModal';
+import { HeroCards, HeroGrid, HeroStatus, PhotoBadge, PhotoButton, StatusRow } from './styles';
 
 const MEMBERSHIP_SECTION = 'membership';
 const SIDE_SECTIONS = ['contact'];
@@ -52,6 +55,7 @@ export function MemberProfilePage() {
   const notesQuery = usePersonNotes(id);
   const family = useFamily(id).data;
   const page = pageQuery.data ?? null;
+  const photoUrl = useMemberPhotoUrls(page?.info.photoUpdatedAt ? [id] : [], 'photo').data?.[id] ?? null;
   const loadError = errorMessage(pageQuery.error);
 
   if (loadError) return <Empty title="Membro não encontrado" description={loadError} />;
@@ -87,9 +91,7 @@ export function MemberProfilePage() {
       />,
     );
 
-  const churchInfo: InfoField[] = [
-    { label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) },
-  ];
+  const churchInfo: InfoField[] = [{ label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) }];
 
   const renderPanel = (section: RecordSection) => (
     <SectionPanel
@@ -106,8 +108,28 @@ export function MemberProfilePage() {
     <WideContent>
       <PageHeader title={record.name} back sticky />
 
-      <HeroText>
-        <StatusRow>
+      <HeroGrid>
+        <PhotoButton
+          type="button"
+          $empty={!page.info.photoUpdatedAt}
+          aria-label={page.info.photoUpdatedAt ? 'Trocar foto' : 'Adicionar foto'}
+          onClick={() => open(<PhotoModal personId={id} photoUrl={photoUrl} close={close} />)}
+        >
+          {page.info.photoUpdatedAt ? (
+            <>
+              <MemberPhoto url={photoUrl} size={104} />
+              <PhotoBadge>
+                <Camera size={14} aria-hidden="true" />
+              </PhotoBadge>
+            </>
+          ) : (
+            <>
+              <ImagePlus size={24} aria-hidden="true" />
+              Adicionar
+            </>
+          )}
+        </PhotoButton>
+        <HeroStatus>
           <TonePill $tone={MEMBERSHIP_STATUS_TONES[record.membershipStatus]}>
             {MEMBERSHIP_STATUS_LABELS[record.membershipStatus]}
           </TonePill>
@@ -117,32 +139,34 @@ export function MemberProfilePage() {
               Alterar
             </LinkButton>
           )}
-        </StatusRow>
-        <InfoPanel>
-          <InfoLine
-            icon={UsersRound}
-            label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}
-            empty={smallGroups.length === 0}
-          >
-            {smallGroups.length > 0 ? <GroupNames groups={smallGroupsWithRoles} /> : 'Não participa de um PG'}
-          </InfoLine>
-          <InfoLine
-            icon={HeartHandshake}
-            label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}
-            empty={ministries.length === 0}
-          >
-            {ministries.length > 0 ? <GroupNames groups={ministriesWithRoles} /> : 'Não serve em um ministério'}
-          </InfoLine>
-        </InfoPanel>
-        <StatusRow>
-          <LinkButton
-            icon={<Pencil size={14} />}
-            onClick={() => open(<CommunityModal personId={id} community={community} close={close} />)}
-          >
-            Alterar PG e ministérios
-          </LinkButton>
-        </StatusRow>
-      </HeroText>
+        </HeroStatus>
+        <HeroCards>
+          <InfoPanel>
+            <InfoLine
+              icon={UsersRound}
+              label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}
+              empty={smallGroups.length === 0}
+            >
+              {smallGroups.length > 0 ? <GroupNames groups={smallGroupsWithRoles} /> : 'Não participa de um PG'}
+            </InfoLine>
+            <InfoLine
+              icon={HeartHandshake}
+              label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}
+              empty={ministries.length === 0}
+            >
+              {ministries.length > 0 ? <GroupNames groups={ministriesWithRoles} /> : 'Não serve em um ministério'}
+            </InfoLine>
+          </InfoPanel>
+          <StatusRow>
+            <LinkButton
+              icon={<Pencil size={14} />}
+              onClick={() => open(<CommunityModal personId={id} community={community} close={close} />)}
+            >
+              Alterar PG e ministérios
+            </LinkButton>
+          </StatusRow>
+        </HeroCards>
+      </HeroGrid>
 
       <MembershipAlerts personId={id} onlyPending />
 
@@ -157,13 +181,7 @@ export function MemberProfilePage() {
                     key="family"
                     family={family}
                     onEdit={() =>
-                      familyModal.open(
-                        <FamilyModal
-                          personId={id}
-                          family={family}
-                          close={familyModal.close}
-                        />,
-                      )
+                      familyModal.open(<FamilyModal personId={id} family={family} close={familyModal.close} />)
                     }
                   />,
                 ]
@@ -228,7 +246,12 @@ function SectionPanel({ section, record, councils, info, onEdit }: SectionPanelP
 }
 
 function SummaryLines({ lines }: { lines: string[] }) {
-  if (lines.length === 0) return <FieldValue as="p" $empty>—</FieldValue>;
+  if (lines.length === 0)
+    return (
+      <FieldValue as="p" $empty>
+        —
+      </FieldValue>
+    );
   return (
     <FieldValue as="p" $empty={false}>
       {lines.join(' · ')}

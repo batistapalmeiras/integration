@@ -534,6 +534,7 @@ export type Database = {
           marital_status: string | null
           other_phone: string | null
           person_id: string
+          photo_updated_at: string | null
         }
         Insert: {
           address_city?: string | null
@@ -551,6 +552,7 @@ export type Database = {
           marital_status?: string | null
           other_phone?: string | null
           person_id: string
+          photo_updated_at?: string | null
         }
         Update: {
           address_city?: string | null
@@ -568,6 +570,7 @@ export type Database = {
           marital_status?: string | null
           other_phone?: string | null
           person_id?: string
+          photo_updated_at?: string | null
         }
         Relationships: [
           {

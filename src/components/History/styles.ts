@@ -139,12 +139,6 @@ export const GapDots = styled.span`
   }
 `;
 
-export const ModalHeading = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
-`;
-
 export const EmptyText = styled.p`
   margin: 0;
   font-family: ${({ theme }) => theme.typography.fontFamily};

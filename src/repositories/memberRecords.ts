@@ -149,6 +149,7 @@ interface MemberRecordInfo {
   membershipInterestSentAt: string | null;
   communityJoins: CommunityJoin[];
   council: CouncilDate | null;
+  photoUpdatedAt: string | null;
 }
 
 interface CommunityJoin {
@@ -218,6 +219,7 @@ export async function getMemberPage(personId: string): Promise<MemberPage> {
         ),
       ],
       council: member.council ? { id: member.council.id, meetingDate: member.council.meeting_date } : null,
+      photoUpdatedAt: member.member_profiles?.photo_updated_at ?? null,
     },
     community: {
       smallGroupIds: smallGroups.ids,
@@ -273,18 +275,20 @@ export interface MemberRow {
   phone: string | null;
   entry_type: EntryType | null;
   membership_status: MembershipStatus;
+  hasPhoto: boolean;
 }
 
 export async function listMemberRows(): Promise<MemberRow[]> {
   const { data, error } = await supabase
     .from('people')
-    .select('id, name, phone, entry_type, membership_status')
+    .select('id, name, phone, entry_type, membership_status, member_profiles(photo_updated_at)')
     .eq('status', 'member')
     .order('name', { ascending: true });
   if (error) throw error;
-  return (data ?? []).map((row) => ({
+  return (data ?? []).map(({ member_profiles: profile, ...row }) => ({
     ...row,
     entry_type: toEntryType(row.entry_type),
     membership_status: toMembershipStatus(row.membership_status ?? ''),
+    hasPhoto: !!profile?.photo_updated_at,
   }));
 }

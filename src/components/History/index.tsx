@@ -10,7 +10,6 @@ import { previewTimeline, SYSTEM_ACTOR, TimelineEntry } from '../../domain/timel
 import {
   EmptyText,
   GapDots,
-  ModalHeading,
   SectionBlock,
   SectionHeading,
   TimelineActor,
@@ -81,12 +80,7 @@ export function HistoryCard({ title, modalTitle, entries, sections, emptyText }:
   const openFullHistory = () =>
     open(
       <>
-        <ModalTitle onClose={close}>
-          <ModalHeading>
-            <Clock size={20} aria-hidden="true" />
-            {modalTitle}
-          </ModalHeading>
-        </ModalTitle>
+        <ModalTitle onClose={close}>{modalTitle}</ModalTitle>
         {sections ? (
           sections
             .filter((section) => section.entries.length > 0)
