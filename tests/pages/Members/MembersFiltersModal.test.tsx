@@ -20,7 +20,7 @@ describe('members filters modal', () => {
       { role: UserRole.Pastor },
     );
 
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Membro ausente' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /Membro ausente/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 
     expect(onApply).toHaveBeenCalledWith([], [], ['absent']);

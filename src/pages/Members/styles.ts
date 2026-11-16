@@ -46,15 +46,3 @@ export const ViewRow = styled.div`
   justify-content: flex-end;
   margin: -${({ theme }) => theme.spacing.sm} 0 ${({ theme }) => theme.spacing.md};
 `;
-
-export const FlagSwitch = styled.div`
-  & > label {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: space-between;
-  }
-
-  & > label > input {
-    right: 0;
-  }
-`;

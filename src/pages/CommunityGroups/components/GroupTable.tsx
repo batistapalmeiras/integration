@@ -6,9 +6,9 @@ import { Button, Empty, Skeleton, text, useModal } from 'bp-kit';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
-import { GroupInput, WEEK_DAY_LABELS } from '../../../domain/communityGroups';
+import { GroupInput, WEEK_DAY_LABELS, WeekDay } from '../../../domain/communityGroups';
 import { GroupRow } from '../hooks/useCommunityGroupsList';
-import { CountPill } from '../styles';
+import { CountPill, DaySuffix } from '../styles';
 import { GroupModal } from './GroupModal';
 
 interface Props {
@@ -63,7 +63,7 @@ export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup
               {rows.map((row) => (
                 <Tr key={row.id} $clickable onClick={() => onRowClick(row.id)}>
                   <Td data-label="Nome">{row.name}</Td>
-                  {smallGroup && <Td data-label="Dia">{row.meetingDay ? WEEK_DAY_LABELS[row.meetingDay] : '—'}</Td>}
+                  {smallGroup && <Td data-label="Dia">{row.meetingDay ? <DayName day={row.meetingDay} /> : '—'}</Td>}
                   <Td data-label="Pessoas">
                     <CountPill>{row.peopleCount}</CountPill>
                   </Td>
@@ -76,5 +76,18 @@ export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup
 
       {modal}
     </div>
+  );
+}
+
+const WEEKDAY_SUFFIX = '-feira';
+
+function DayName({ day }: { day: WeekDay }) {
+  const label = WEEK_DAY_LABELS[day];
+  if (!label.endsWith(WEEKDAY_SUFFIX)) return label;
+  return (
+    <>
+      {label.slice(0, -WEEKDAY_SUFFIX.length)}
+      <DaySuffix>{WEEKDAY_SUFFIX}</DaySuffix>
+    </>
   );
 }

@@ -1,12 +1,12 @@
 // React
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // Libs
-import { Empty, LinkButton, maskPhone, Skeleton, text, useToast } from 'bp-kit';
+import { Button, Empty, maskPhone, Skeleton, text, useToast } from 'bp-kit';
 import { Copy } from 'lucide-react';
 // Components
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';
 import { DateBadge } from '../../components/DateBadge';
-import { List, ListChevron, ListGrow, ListItem } from '../../components/List';
+import { ListChevron, ListGrow } from '../../components/List';
 import { PageHeader } from '../../components/PageHeader';
 import { PeopleCount } from '../../components/PeopleCount';
 import { TonePill } from '../../components/StatusPill';
@@ -23,7 +23,7 @@ import { errorMessage } from '../../lib/queryCache';
 import { useMemberBirthdays } from '../../queries/person';
 import { AppRoute } from '../../routes/paths';
 // Local
-import { Detail, Name, RowButton } from './styles';
+import { BirthdayCard, BirthdayGrid, CountRow, Detail, Name, RowButton } from './styles';
 
 const MONTH_PARAM = 'month';
 
@@ -59,18 +59,7 @@ export function BirthdaysPage() {
 
   return (
     <div>
-      <PageHeader
-        title={`Aniversariantes ${currentYear}`}
-        back
-        actionAlign="end"
-        action={
-          count > 0 && (
-            <LinkButton icon={<Copy size={16} />} onClick={copyList}>
-              Copiar lista
-            </LinkButton>
-          )
-        }
-      />
+      <PageHeader title={`Aniversariantes ${currentYear}`} back />
 
       <ArrowSwitcher
         title={label}
@@ -80,7 +69,17 @@ export function BirthdaysPage() {
         onNext={() => selectMonth(shiftMonth(month, 1))}
       />
 
-      {!loading && !error && <PeopleCount count={count} />}
+      {!loading && !error && (
+        <CountRow>
+          <PeopleCount count={count} />
+          {count > 0 && (
+            <Button type="button" variant="secondary" size="sm" onClick={copyList}>
+              <Copy size={16} />
+              Copiar lista
+            </Button>
+          )}
+        </CountRow>
+      )}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -91,12 +90,12 @@ export function BirthdaysPage() {
       )}
 
       {!loading && !error && count > 0 && (
-        <List>
+        <BirthdayGrid>
           {birthdays.map((birthday) => {
             const isToday = isBirthdayToday(birthday.birthDate, today);
             const age = birthdayAgeLabel(birthday.birthDate, currentYear, today);
             return (
-              <ListItem key={birthday.personId} $selected={isToday}>
+              <BirthdayCard key={birthday.personId} $today={isToday}>
                 <RowButton type="button" onClick={() => navigate(`${AppRoute.Members}/${birthday.personId}`)}>
                   <DateBadge date={birthday.birthDate} strong={isToday} />
                   <ListGrow>
@@ -106,10 +105,10 @@ export function BirthdaysPage() {
                   {isToday && <TonePill $tone="success">Hoje</TonePill>}
                   <ListChevron />
                 </RowButton>
-              </ListItem>
+              </BirthdayCard>
             );
           })}
-        </List>
+        </BirthdayGrid>
       )}
 
       {toast}

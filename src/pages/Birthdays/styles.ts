@@ -30,3 +30,31 @@ export const Detail = styled.span`
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
   color: ${({ theme }) => theme.colors.muted};
 `;
+
+export const BirthdayGrid = styled.ul`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${({ theme }) => theme.spacing.md};
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
+
+export const BirthdayCard = styled.li<{ $today: boolean }>`
+  display: flex;
+  padding: ${({ theme }) => theme.spacing.md};
+  border: 1px solid ${({ theme }) => theme.colors.hairline};
+  border-radius: ${({ theme }) => theme.rounded.md};
+  background: ${({ theme, $today }) => ($today ? theme.colors.primarySoft : theme.colors.canvas)};
+`;
+
+export const CountRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.md};
+`;

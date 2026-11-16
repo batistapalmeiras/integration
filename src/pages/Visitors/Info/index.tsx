@@ -57,7 +57,8 @@ export function VisitorInfoPage() {
         back
         actionAlign="end"
         action={
-          fromMembershipQueue && (
+          fromMembershipQueue &&
+          !isDirectSignup(person.origin) && (
             <LinkButton icon={<UserRound size={16} />} onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
               Ver perfil
             </LinkButton>

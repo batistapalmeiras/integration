@@ -1,13 +1,14 @@
 // React
 import { FormEvent, useState } from 'react';
 // Libs
-import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect, Switch } from 'bp-kit';
+import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect } from 'bp-kit';
 import { FilterX } from 'lucide-react';
+// Components
+import { SwitchRow } from '../../../components/SwitchRow';
 // Local
-import { MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
+import { MEMBER_FLAG_HINTS, MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
 import { MEMBERSHIP_STATUS_LABELS, MembershipStatus } from '../../../domain/memberRecords';
 import { ENTRY_TYPE_LABELS, EntryType } from '../../../types/church';
-import { FlagSwitch } from '../styles';
 
 const STATUS_OPTIONS = Object.entries(MEMBERSHIP_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 const ENTRY_TYPE_OPTIONS = Object.entries(ENTRY_TYPE_LABELS).map(([value, label]) => ({ value, label }));
@@ -60,9 +61,13 @@ export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFi
         />
 
         {MEMBER_FLAGS.map((item) => (
-          <FlagSwitch key={item}>
-            <Switch label={MEMBER_FLAG_LABELS[item]} checked={flag.includes(item)} onChange={() => toggleFlag(item)} />
-          </FlagSwitch>
+          <SwitchRow
+            key={item}
+            title={MEMBER_FLAG_LABELS[item]}
+            hint={MEMBER_FLAG_HINTS[item]}
+            checked={flag.includes(item)}
+            onChange={() => toggleFlag(item)}
+          />
         ))}
 
         <ModalActions>

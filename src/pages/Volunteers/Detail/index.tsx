@@ -12,7 +12,6 @@ import {
   ModalTitle,
   Select,
   Skeleton,
-  Switch,
   text,
   TextInput,
   Typography,
@@ -27,6 +26,7 @@ import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Components
 import { PageHeader } from '../../../components/PageHeader';
+import { SwitchRow } from '../../../components/SwitchRow';
 // Local
 import { AppRoute } from '../../../routes/paths';
 import { canLeavePhoneEmpty } from '../../../domain/memberRecords';
@@ -169,7 +169,13 @@ export function VolunteerDetailPage() {
         <Select label="Cargo" control={control} name="role">
           <RoleOptions roles={visibleRoleOptions} />
         </Select>
-        <Switch label="Conta ativa" checked={volunteer.active} onChange={toggleActive} disabled={!canManage} />
+        <SwitchRow
+          title="Conta ativa"
+          hint="Desativada, a pessoa perde o acesso ao sistema."
+          checked={volunteer.active}
+          onChange={toggleActive}
+          disabled={!canManage}
+        />
 
         {canEdit && (
           <>

@@ -51,3 +51,11 @@ export const CountPill = styled.span`
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
   font-weight: 600;
 `;
+
+export const DaySuffix = styled.span`
+  display: none;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: inline;
+  }
+`;
