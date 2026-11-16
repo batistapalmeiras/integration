@@ -72,7 +72,8 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           options={STATUS_OPTIONS}
           value={draft.status}
           onChange={(value) => change('status', pickKeys(value, MEMBERSHIP_STATUS_LABELS))}
-          placeholder="Buscar pela situação…"
+          placeholder="Todas"
+          searchable={false}
         />
 
         {MEMBER_FLAGS.map((item) => (
@@ -92,7 +93,8 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           options={ENTRY_TYPE_OPTIONS}
           value={draft.entryType}
           onChange={(value) => change('entryType', pickKeys(value, ENTRY_TYPE_LABELS))}
-          placeholder="Buscar pela forma de entrada…"
+          placeholder="Todas"
+          searchable={false}
         />
       </FilterGroup>
 
@@ -109,7 +111,8 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           options={MARITAL_STATUS_OPTIONS}
           value={draft.maritalStatus}
           onChange={(value) => change('maritalStatus', pickKeys(value, MARITAL_STATUS_LABELS))}
-          placeholder="Buscar pelo estado civil…"
+          placeholder="Todos"
+          searchable={false}
         />
 
         <MultiSelect
@@ -117,7 +120,8 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           options={AGE_GROUP_OPTIONS}
           value={draft.ageGroup}
           onChange={(value) => change('ageGroup', pickKeys(value, AGE_GROUP_NAMES))}
-          placeholder="Buscar pela faixa etária…"
+          placeholder="Todas"
+          searchable={false}
         />
       </FilterGroup>
     </FiltersSheet>

@@ -35,7 +35,7 @@ describe('members filters modal', () => {
       { role: UserRole.Pastor },
     );
 
-    await userEvent.click(screen.getByPlaceholderText('Buscar pela faixa etária…'));
+    await userEvent.click(screen.getByRole('button', { name: 'Faixa etária' }));
     await userEvent.click(screen.getByRole('checkbox', { name: 'Jovens (18 a 29)' }));
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 
