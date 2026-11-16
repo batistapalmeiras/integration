@@ -110,7 +110,10 @@ export function useListParams<K extends string>({ basePath, filters, stored }: O
       write({ ...current, search, page: 1 });
     },
     page: current.page,
-    setPage: (page: number) => write({ ...current, page }),
+    setPage: (page: number) => {
+      write({ ...current, page });
+      window.scrollTo(0, 0);
+    },
     paginate,
   };
 }

@@ -82,6 +82,14 @@ describe('useListParams', () => {
     expect(result.current.list.paginate(items, 15)).toEqual({ items: items.slice(15), page: 2, totalPages: 2 });
   });
 
+  it('goes back to the top of the page when the page changes', () => {
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+    const { result } = renderList();
+    act(() => result.current.list.setPage(2));
+    expect(scrollTo).toHaveBeenCalledWith(0, 0);
+    scrollTo.mockRestore();
+  });
+
   it('flags path segments that no filter recognises', () => {
     const { result } = renderList('/lista/turma-1');
     expect(result.current.list.unresolved).toBe(true);

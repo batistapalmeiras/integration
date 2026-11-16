@@ -8,7 +8,7 @@ import { Save, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 // Local
 import { formatDate } from '../../../domain/dates';
-import { DateHint, FormButtons } from '../styles';
+import { FormButtons } from '../styles';
 
 const schema = z.object({ eventDate: z.string().min(1, text.validation.required('a data')) });
 type FormValues = z.infer<typeof schema>;
@@ -25,12 +25,9 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
   const [deleting, setDeleting] = useState(false);
   const {
     control,
-    watch,
     handleSubmit,
     formState: { isSubmitting, isDirty },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { eventDate: initialDate ?? '' } });
-
-  const eventDate = watch('eventDate');
 
   const submit = handleSubmit(async (values) => {
     await onCreate(values.eventDate);
@@ -75,8 +72,13 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
     <>
       <ModalTitle onClose={close}>{initialDate ? 'Editar café de boas-vindas' : 'Novo café de boas-vindas'}</ModalTitle>
       <Form onSubmit={submit}>
-        <DatePicker label="Data" control={control} name="eventDate" isDateDisabled={(date) => date.getDay() !== 0} />
-        {eventDate && <DateHint>Agendado para {formatDate(eventDate)}, 17h30.</DateHint>}
+        <DatePicker
+          label="Data"
+          control={control}
+          name="eventDate"
+          isDateDisabled={(date) => date.getDay() !== 0}
+          calendar
+        />
 
         <FormButtons>
           <Button type="submit" variant="primary" disabled={isSubmitting || (!!initialDate && !isDirty)}>

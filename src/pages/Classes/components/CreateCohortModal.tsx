@@ -53,6 +53,7 @@ export function CreateCohortModal({ close, onCreate, minDate }: Props) {
           label="Data da 1ª aula"
           control={control}
           name="firstDate"
+          calendar
           isDateDisabled={minDate ? (date) => toDateKey(date) < minDate : undefined}
         />
 

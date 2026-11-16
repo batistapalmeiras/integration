@@ -1,9 +1,11 @@
 // React
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 // Libs
-import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect, RawSelect, text } from 'bp-kit';
-import { FilterX } from 'lucide-react';
+import { MultiSelect, RawSelect, text } from 'bp-kit';
+// Components
+import { FilterGroup, FiltersSheet } from '../../../components/FiltersSheet';
 // Local
+import { pickFrom } from '../../../lib/useListParams';
 import { INTEGRATION_STATUSES, PersonStatus, STATUS_META } from '../../../types/person';
 import { ALL_COHORTS } from '../persistence';
 
@@ -34,15 +36,13 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
   };
 
   return (
-    <>
-      <ModalTitle onClose={close}>Filtros</ModalTitle>
-
-      <Form onSubmit={(e: FormEvent) => e.preventDefault()}>
+    <FiltersSheet close={close} onApply={apply} onClear={clear} canClear={!noFilters}>
+      <FilterGroup>
         <MultiSelect
           label={text.fields.status}
           options={STATUS_OPTIONS}
           value={status}
-          onChange={(value) => setStatus(value as PersonStatus[])}
+          onChange={(value) => setStatus(pickFrom(value, INTEGRATION_STATUSES))}
           placeholder="Buscar pelo status…"
         />
 
@@ -54,16 +54,7 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
             </option>
           ))}
         </RawSelect>
-
-        <ModalActions>
-          <Button type="button" variant="primary" onClick={apply}>
-            Aplicar
-          </Button>
-          <LinkButton icon={<FilterX size={16} />} onClick={clear} disabled={noFilters}>
-            Limpar
-          </LinkButton>
-        </ModalActions>
-      </Form>
-    </>
+      </FilterGroup>
+    </FiltersSheet>
   );
 }

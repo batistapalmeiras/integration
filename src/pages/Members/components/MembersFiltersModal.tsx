@@ -1,63 +1,78 @@
 // React
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 // Libs
-import { Button, Form, LinkButton, ModalActions, ModalTitle, MultiSelect } from 'bp-kit';
-import { FilterX } from 'lucide-react';
+import { MultiSelect, SegmentedControl } from 'bp-kit';
 // Components
+import { FilterGroup, FiltersSheet } from '../../../components/FiltersSheet';
 import { SwitchRow } from '../../../components/SwitchRow';
 // Local
+import { AGE_GROUPS, AGE_GROUP_NAMES, ageGroupLabel } from '../../../domain/ageGroups';
 import { MEMBER_FLAG_HINTS, MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
-import { MEMBERSHIP_STATUS_LABELS, MembershipStatus } from '../../../domain/memberRecords';
-import { ENTRY_TYPE_LABELS, EntryType } from '../../../types/church';
+import { pickKeys } from '../../../lib/useListParams';
+import { MemberFilters } from '../hooks/useMembers';
+import {
+  GENDER_LABELS,
+  GENDER_OPTIONS,
+  MARITAL_STATUS_LABELS,
+  MARITAL_STATUS_OPTIONS,
+  MEMBERSHIP_STATUS_LABELS,
+} from '../../../domain/memberRecords';
+import { toOptions } from '../../../domain/text';
+import { ENTRY_TYPE_LABELS } from '../../../types/church';
 
-const STATUS_OPTIONS = Object.entries(MEMBERSHIP_STATUS_LABELS).map(([value, label]) => ({ value, label }));
-const ENTRY_TYPE_OPTIONS = Object.entries(ENTRY_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+const STATUS_OPTIONS = toOptions(MEMBERSHIP_STATUS_LABELS);
+const ENTRY_TYPE_OPTIONS = toOptions(ENTRY_TYPE_LABELS);
+const ALL_GENDERS = 'all';
+const GENDER_CHOICES = [{ value: ALL_GENDERS, label: 'Todos' }, ...GENDER_OPTIONS];
+const AGE_GROUP_OPTIONS = AGE_GROUPS.map((group) => ({ value: group, label: ageGroupLabel(group) }));
+const NO_FILTERS: MemberFilters = {
+  status: [],
+  entryType: [],
+  gender: [],
+  maritalStatus: [],
+  ageGroup: [],
+  flag: [],
+};
 
 interface Props {
   close: () => void;
-  membershipStatusFilter: MembershipStatus[];
-  entryTypeFilter: EntryType[];
-  flagFilter: MemberFlag[];
-  onApply: (membershipStatusFilter: MembershipStatus[], entryTypeFilter: EntryType[], flagFilter: MemberFlag[]) => void;
+  filters: MemberFilters;
+  onApply: (filters: MemberFilters) => void;
 }
 
-export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFilter, flagFilter, onApply }: Props) {
-  const [status, setStatus] = useState(membershipStatusFilter);
-  const [entryType, setEntryType] = useState(entryTypeFilter);
-  const [flag, setFlag] = useState(flagFilter);
+export function MembersFiltersModal({ close, filters, onApply }: Props) {
+  const [draft, setDraft] = useState(filters);
+
+  const change = <K extends keyof MemberFilters>(key: K, values: MemberFilters[K]) =>
+    setDraft((current) => ({ ...current, [key]: values }));
 
   const toggleFlag = (item: MemberFlag) =>
-    setFlag((current) => (current.includes(item) ? current.filter((value) => value !== item) : [...current, item]));
+    change('flag', draft.flag.includes(item) ? draft.flag.filter((value) => value !== item) : [...draft.flag, item]);
 
   const apply = () => {
-    onApply(status, entryType, flag);
+    onApply(draft);
     close();
   };
 
   const clear = () => {
-    onApply([], [], []);
+    onApply(NO_FILTERS);
     close();
   };
 
   return (
-    <>
-      <ModalTitle onClose={close}>Filtros</ModalTitle>
-
-      <Form onSubmit={(e: FormEvent) => e.preventDefault()}>
+    <FiltersSheet
+      close={close}
+      onApply={apply}
+      onClear={clear}
+      canClear={Object.values(draft).some((values) => values.length > 0)}
+    >
+      <FilterGroup title="Membresia">
         <MultiSelect
           label="Situação"
           options={STATUS_OPTIONS}
-          value={status}
-          onChange={(value) => setStatus(value as MembershipStatus[])}
+          value={draft.status}
+          onChange={(value) => change('status', pickKeys(value, MEMBERSHIP_STATUS_LABELS))}
           placeholder="Buscar pela situação…"
-        />
-
-        <MultiSelect
-          label="Forma de entrada"
-          options={ENTRY_TYPE_OPTIONS}
-          value={entryType}
-          onChange={(value) => setEntryType(value as EntryType[])}
-          placeholder="Buscar pela forma de entrada…"
         />
 
         {MEMBER_FLAGS.map((item) => (
@@ -65,24 +80,46 @@ export function MembersFiltersModal({ close, membershipStatusFilter, entryTypeFi
             key={item}
             title={MEMBER_FLAG_LABELS[item]}
             hint={MEMBER_FLAG_HINTS[item]}
-            checked={flag.includes(item)}
+            checked={draft.flag.includes(item)}
             onChange={() => toggleFlag(item)}
           />
         ))}
+      </FilterGroup>
 
-        <ModalActions>
-          <Button type="button" variant="primary" onClick={apply}>
-            Aplicar
-          </Button>
-          <LinkButton
-            icon={<FilterX size={16} />}
-            onClick={clear}
-            disabled={status.length === 0 && entryType.length === 0 && flag.length === 0}
-          >
-            Limpar
-          </LinkButton>
-        </ModalActions>
-      </Form>
-    </>
+      <FilterGroup title="Chegada à igreja">
+        <MultiSelect
+          label="Forma de entrada"
+          options={ENTRY_TYPE_OPTIONS}
+          value={draft.entryType}
+          onChange={(value) => change('entryType', pickKeys(value, ENTRY_TYPE_LABELS))}
+          placeholder="Buscar pela forma de entrada…"
+        />
+      </FilterGroup>
+
+      <FilterGroup title="Dados pessoais">
+        <SegmentedControl
+          label="Sexo"
+          options={GENDER_CHOICES}
+          value={draft.gender[0] ?? ALL_GENDERS}
+          onChange={(value) => change('gender', pickKeys([value], GENDER_LABELS))}
+        />
+
+        <MultiSelect
+          label="Estado civil"
+          options={MARITAL_STATUS_OPTIONS}
+          value={draft.maritalStatus}
+          onChange={(value) => change('maritalStatus', pickKeys(value, MARITAL_STATUS_LABELS))}
+          placeholder="Buscar pelo estado civil…"
+        />
+
+        <MultiSelect
+          label="Faixa etária"
+          options={AGE_GROUP_OPTIONS}
+          value={draft.ageGroup}
+          onChange={(value) => change('ageGroup', pickKeys(value, AGE_GROUP_NAMES))}
+          placeholder="Buscar pela faixa etária…"
+        />
+      </FilterGroup>
+    </FiltersSheet>
   );
 }

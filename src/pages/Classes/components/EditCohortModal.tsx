@@ -49,10 +49,10 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
     <>
       <ModalTitle onClose={close}>Editar datas das aulas</ModalTitle>
       <Form onSubmit={submit}>
-        <DatePicker label="Aula 1" control={control} name="date1" />
-        <DatePicker label="Aula 2" control={control} name="date2" />
-        <DatePicker label="Aula 3" control={control} name="date3" />
-        <DatePicker label="Aula 4" control={control} name="date4" />
+        <DatePicker label="Aula 1" control={control} name="date1" calendar />
+        <DatePicker label="Aula 2" control={control} name="date2" calendar />
+        <DatePicker label="Aula 3" control={control} name="date3" calendar />
+        <DatePicker label="Aula 4" control={control} name="date4" calendar />
 
         <ModalActions>
           <Button type="submit" variant="primary" disabled={isSubmitting || !isDirty}>

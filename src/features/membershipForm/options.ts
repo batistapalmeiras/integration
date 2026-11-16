@@ -1,9 +1,7 @@
 // Local
-import { GENDER_LABELS } from '../../domain/memberRecords';
 import { toOptions } from '../../domain/text';
 import { ENTRY_TYPE_DESCRIPTIONS, ENTRY_TYPE_LABELS, EntryType, WANTS_SMALL_GROUP_LABELS } from '../../types/church';
 
-export const GENDER_OPTIONS = toOptions(GENDER_LABELS);
 export const WANTS_SMALL_GROUP_OPTIONS = toOptions(WANTS_SMALL_GROUP_LABELS);
 
 export const WANTS_TO_SERVE_LABELS = {

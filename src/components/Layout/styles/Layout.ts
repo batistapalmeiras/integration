@@ -204,7 +204,7 @@ export const DropdownItem = styled.button`
   }
 `;
 
-export const BottomBar = styled.nav`
+export const BottomBar = styled.nav<{ $hidden: boolean }>`
   display: none;
 
   @media (max-width: 744px) {
@@ -220,6 +220,8 @@ export const BottomBar = styled.nav`
     -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid rgba(0, 0, 0, 0.06);
     padding-bottom: env(safe-area-inset-bottom);
+    transform: translateY(${({ $hidden }) => ($hidden ? '100%' : '0')});
+    transition: transform 0.25s ease;
   }
 `;
 
@@ -309,7 +311,7 @@ export const Main = styled.main<{ $hasBottomBar: boolean; $hasModuleBar: boolean
   }
 `;
 
-export const ModuleBar = styled(Link)`
+export const ModuleBar = styled(Link)<{ $scrolled: boolean }>`
   display: none;
 
   @media (max-width: 744px) {
@@ -325,7 +327,7 @@ export const ModuleBar = styled(Link)`
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid ${({ theme }) => theme.colors.hairline};
+    border-bottom: 1px solid ${({ theme, $scrolled }) => ($scrolled ? theme.colors.hairline : 'transparent')};
     font-family: ${({ theme }) => theme.typography.fontFamily};
     font-size: ${({ theme }) => theme.typography.titleMd.fontSize};
     font-weight: ${({ theme }) => theme.typography.titleMd.fontWeight};

@@ -20,8 +20,11 @@ import {
 import { homeRouteFor } from '../../routes/HomeRedirect';
 import { AppRoute } from '../../routes/paths';
 import { ROLE_LABELS } from '../../types/enums';
+import { useHideOnScroll } from '../../lib/useHideOnScroll';
+import { useWindowScrolled } from '../../lib/useScrolled';
 // Local
 import { useLayout } from './hooks';
+import { ModuleBarContext } from './moduleBar';
 import { NavDestinationContext } from './navDestination';
 import { closedSideNavKeys } from './persistence';
 import {
@@ -62,6 +65,7 @@ export function Layout({ children }: ILayoutProps) {
   const navAreas = navAreasFor(user?.role);
   const navPaths = [NAV_ITEMS.dashboard.path, ...navAreas.flatMap((area) => areaItems(area).map((item) => item.path))];
   const activePath = activeNavPath(pathname, navPaths);
+  const [moduleBarHidden, setModuleBarHidden] = useState(false);
   const [closedKeys, setClosedKeys] = useState<string[]>(() => closedSideNavKeys.load() ?? []);
   const isOpen = (key: string) => !closedKeys.includes(key);
 
@@ -103,6 +107,8 @@ export function Layout({ children }: ILayoutProps) {
   const isOnTab = !!currentArea || (hasOuterTabs && (isExactTab(AppRoute.Dashboard) || isExactTab(AppRoute.Profile)));
 
   const shouldShowBottomBar = isOnTab;
+  const bottomBarHidden = useHideOnScroll(shouldShowBottomBar, pathname);
+  const scrolled = useWindowScrolled();
   const isNavDestination = hasSidebar ? isSidebarDestination : shouldShowBottomBar;
 
   return (
@@ -170,20 +176,22 @@ export function Layout({ children }: ILayoutProps) {
         </SideFooter>
       </SideMenu>
 
-      <Main $hasBottomBar={shouldShowBottomBar} $hasModuleBar={!!currentArea}>
-        {currentArea && (
-          <ModuleBar to={AppRoute.Dashboard}>
+      <Main $hasBottomBar={shouldShowBottomBar} $hasModuleBar={!!currentArea && !moduleBarHidden}>
+        {currentArea && !moduleBarHidden && (
+          <ModuleBar to={AppRoute.Dashboard} $scrolled={scrolled}>
             <ChevronLeft size={20} />
             {currentArea.title}
           </ModuleBar>
         )}
         <MainInner>
-          <NavDestinationContext.Provider value={isNavDestination}>{children}</NavDestinationContext.Provider>
+          <ModuleBarContext.Provider value={setModuleBarHidden}>
+            <NavDestinationContext.Provider value={isNavDestination}>{children}</NavDestinationContext.Provider>
+          </ModuleBarContext.Provider>
         </MainInner>
       </Main>
 
       {shouldShowBottomBar && (
-        <BottomBar>
+        <BottomBar $hidden={bottomBarHidden}>
           {bottomTabs.map((item) => {
             const active = isTabPath(pathname, item.path);
             return (

@@ -2,12 +2,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, Pagination, SearchInput, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, Pagination, SearchInput, Skeleton, text, useAuthCtx, useMediaQuery, useModal } from 'bp-kit';
 import { SlidersHorizontal } from 'lucide-react';
 // Components
 import { MemberPhoto, PhotoName } from '../../components/MemberPhoto';
 import { ListView, ViewToggle } from '../../components/ViewToggle';
 import { PageHeader } from '../../components/PageHeader';
+import { useHideModuleBar } from '../../components/Layout/moduleBar';
+import { useInView } from '../../lib/useInView';
 // Local
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
@@ -20,16 +22,22 @@ import { UserRole } from '../../types/enums';
 import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 import { fullRowsPageSize, useGridColumns } from '../../lib/useGridColumns';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
+import { MembersTopBar } from './components/MembersTopBar';
 import { useMembers } from './hooks/useMembers';
 import { membersView } from './persistence';
 import { MemberCard, MemberCardName, MemberGrid, ViewRow } from './styles';
 
 const GRID_PAGE_TARGET = 15;
+const TOP_BAR_HEIGHT = 64;
 
 export function MembersPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const { open, close, modal } = useModal('drawer');
+  const mobile = useMediaQuery('(max-width: 744px)');
+  const withTopBar = useMediaQuery('(max-width: 1024px)');
+  const [searchRowRef, searchRowVisible] = useInView<HTMLDivElement>(TOP_BAR_HEIGHT);
+  useHideModuleBar(mobile);
   const [view, setView] = useState<ListView>(() => membersView.load() ?? 'list');
   const [gridColumns, gridRef] = useGridColumns();
   const {
@@ -40,9 +48,8 @@ export function MembersPage() {
     setPage,
     search,
     setSearch,
-    membershipStatusFilter,
-    entryTypeFilter,
-    flagFilter,
+    filters,
+    activeFilterCount,
     setFilters,
     hasFilter,
     loading,
@@ -61,28 +68,34 @@ export function MembersPage() {
     membersView.save(next);
   };
 
-  const activeFilterCount = [membershipStatusFilter, entryTypeFilter, flagFilter].filter(
-    (filter) => filter.length > 0,
-  ).length;
-
   const openFilters = () =>
     open(
       <MembersFiltersModal
         close={close}
-        membershipStatusFilter={membershipStatusFilter}
-        entryTypeFilter={entryTypeFilter}
-        flagFilter={flagFilter}
+        filters={filters}
         onApply={setFilters}
       />,
     );
 
   return (
     <div>
-      <PageHeader title="Membros" back sticky />
+      {withTopBar ? (
+        <MembersTopBar
+          back={mobile}
+          title={mobile ? 'Igreja' : 'Membros'}
+          showFilters={!searchRowVisible}
+          filterCount={activeFilterCount}
+          onFilters={openFilters}
+        />
+      ) : (
+        <PageHeader title="Membros" back sticky />
+      )}
+
+      {mobile && <PageHeader title="Membros" />}
 
       {!loading && !error && <PeopleCount count={totalCount} />}
 
-      <SearchFiltersRow>
+      <SearchFiltersRow ref={searchRowRef}>
         <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
         <Button variant="secondary" size="sm" onClick={openFilters}>
           <SlidersHorizontal size={16} />

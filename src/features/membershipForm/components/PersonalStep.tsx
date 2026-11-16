@@ -4,8 +4,7 @@ import { Control } from 'react-hook-form';
 import { DatePicker, TextInput } from 'bp-kit';
 // Local
 import { FieldPair } from '../../../components/PublicPage/styles';
-import { MARITAL_STATUS_OPTIONS } from '../../../domain/memberRecords';
-import { GENDER_OPTIONS } from '../options';
+import { GENDER_OPTIONS, MARITAL_STATUS_OPTIONS } from '../../../domain/memberRecords';
 import { MembershipFormValues } from '../schema';
 import { SelectField } from '../../../components/SelectField';
 import { isFutureDate } from '../../../domain/dates';

@@ -1,5 +1,5 @@
 // Local
-import { keyParser } from '../lib/parse';
+import { keyParser, optional } from '../lib/parse';
 import { EntryType } from '../types/church';
 import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membership';
 import { toOptions } from './text';
@@ -38,6 +38,8 @@ export const MARITAL_STATUS_LABELS: Record<MaritalStatus, string> = {
   widowed: 'Viúvo(a)',
   stable_union: 'União estável',
 };
+
+export const GENDER_OPTIONS = toOptions(GENDER_LABELS);
 
 export const MARITAL_STATUS_OPTIONS = toOptions(MARITAL_STATUS_LABELS);
 
@@ -112,5 +114,9 @@ export type MemberProfile = Pick<
 export const toMembershipStatus = keyParser(MEMBERSHIP_STATUS_LABELS, 'Situação de membresia');
 
 export const toPendencyField = keyParser(PENDENCY_LABELS, 'Pendência');
+
+export const toGender = optional(keyParser(GENDER_LABELS, 'Sexo'));
+
+export const toMaritalStatus = optional(keyParser(MARITAL_STATUS_LABELS, 'Estado civil'));
 
 export const canLeavePhoneEmpty = (origin: string | undefined) => origin === 'membership_signup';

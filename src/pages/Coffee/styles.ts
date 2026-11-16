@@ -45,13 +45,6 @@ export const IconAction = styled.button<{ $tone?: 'positive' | 'negative' }>`
   }
 `;
 
-export const DateHint = styled.p`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
-  color: ${({ theme }) => theme.colors.muted};
-  margin: 0;
-`;
-
 export const PresenceTag = styled(TonePill).attrs({ as: 'button', type: 'button' })`
   margin: 0;
   line-height: inherit;
