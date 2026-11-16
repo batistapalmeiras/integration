@@ -43,7 +43,7 @@ export function PeopleFiltersModal({ close, statusFilter, cohortFilter, cohortNa
           options={STATUS_OPTIONS}
           value={status}
           onChange={(value) => setStatus(pickFrom(value, INTEGRATION_STATUSES))}
-          placeholder="Todos"
+          emptyText="Todos"
           searchable={false}
         />
 

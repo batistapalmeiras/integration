@@ -78,7 +78,7 @@ describe('edit section modal', () => {
 
     expect(screen.getByRole('region', { name: 'Sinalizações' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Salvar' })).toBeDisabled();
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Membro ausente' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /Membro ausente/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 
     expect(saveMemberFlags).toHaveBeenCalledWith('p1', [], ['absent']);
@@ -89,10 +89,10 @@ describe('edit section modal', () => {
   it('drops the flag when the member is no longer active', async () => {
     renderModal(['absent']);
 
-    expect(screen.getByRole('checkbox', { name: 'Membro ausente' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /Membro ausente/ })).toBeChecked();
     await userEvent.selectOptions(screen.getByRole('combobox'), 'removed');
 
-    expect(screen.queryByRole('checkbox', { name: 'Membro ausente' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /Membro ausente/ })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 
     expect(saveRecord).toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe('edit section modal', () => {
   it('offers to flag the spouse too, and flags only when the pastor says yes', async () => {
     const close = renderModal([], { id: 'p2', name: 'Bruno Lima' });
 
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Membro ausente' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /Membro ausente/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 
     expect(screen.getByText('Deseja marcar Bruno Lima também como membro ausente?')).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('edit section modal', () => {
   it('does not ask about the spouse on removal when the spouse is not flagged', async () => {
     const close = renderModal(['absent'], { id: 'p2', name: 'Bruno Lima' });
 
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Membro ausente' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /Membro ausente/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 
     expect(saveMemberFlags).toHaveBeenCalledWith('p1', ['absent'], []);
@@ -129,7 +129,7 @@ describe('edit section modal', () => {
     vi.mocked(listMemberFlags).mockResolvedValueOnce(['absent']);
     const close = renderModal(['absent'], { id: 'p2', name: 'Bruno Lima' });
 
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Membro ausente' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /Membro ausente/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 
     expect(screen.getByText('Bruno Lima também está como membro ausente. Deseja desmarcar?')).toBeInTheDocument();

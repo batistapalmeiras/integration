@@ -2,13 +2,14 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, Checkbox, Form, ModalActions, ModalTitle, Typography, useToast } from 'bp-kit';
+import { Button, Form, ModalActions, ModalTitle, Typography, useToast } from 'bp-kit';
 import { Check, Save } from 'lucide-react';
 // Components
-import { Section, SectionDivider } from '../../../components/FormLayout';
-import { PanelTitle } from '../../../components/Panel';
+import { FilterGroup } from '../../../components/FiltersSheet';
+import { SectionDivider } from '../../../components/FormLayout';
+import { SwitchRow } from '../../../components/SwitchRow';
 // Local
-import { MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
+import { MEMBER_FLAG_DESCRIPTIONS, MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
 import { MemberRecord } from '../../../domain/memberRecords';
 import { firstNameOf } from '../../../domain/text';
 import { RecordSection, RecordSectionFields, saveRecord, sectionResolver } from '../../../features/memberRecord';
@@ -49,7 +50,9 @@ export function EditSectionModal({ personId, record, section, optionalPhone, fla
   const [sharing, setSharing] = useState(false);
 
   const toggleFlag = (flag: MemberFlag) =>
-    setCheckedFlags((current) => (current.includes(flag) ? current.filter((item) => item !== flag) : [...current, flag]));
+    setCheckedFlags((current) =>
+      current.includes(flag) ? current.filter((item) => item !== flag) : [...current, flag],
+    );
 
   const submit = handleSubmit(async (values) => {
     try {
@@ -129,18 +132,18 @@ export function EditSectionModal({ personId, record, section, optionalPhone, fla
       <Form onSubmit={submit}>
         <RecordSectionFields section={section} control={control} />
         {flaggable && (
-          <SectionDivider>
-            <Section aria-label="Sinalizações">
-              <PanelTitle>Sinalizações</PanelTitle>
+          <SectionDivider aria-label="Sinalizações" role="region">
+            <FilterGroup>
               {MEMBER_FLAGS.map((flag) => (
-                <Checkbox
+                <SwitchRow
                   key={flag}
+                  title={MEMBER_FLAG_LABELS[flag]}
+                  hint={MEMBER_FLAG_DESCRIPTIONS[flag]}
                   checked={checkedFlags.includes(flag)}
                   onChange={() => toggleFlag(flag)}
-                  label={MEMBER_FLAG_LABELS[flag]}
                 />
               ))}
-            </Section>
+            </FilterGroup>
           </SectionDivider>
         )}
         <ModalActions>

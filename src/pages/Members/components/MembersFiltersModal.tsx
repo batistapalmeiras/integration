@@ -7,7 +7,7 @@ import { FilterGroup, FiltersSheet } from '../../../components/FiltersSheet';
 import { SwitchRow } from '../../../components/SwitchRow';
 // Local
 import { AGE_GROUPS, AGE_GROUP_NAMES, ageGroupLabel } from '../../../domain/ageGroups';
-import { MEMBER_FLAG_HINTS, MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
+import { MEMBER_FLAG_FILTER_HINTS, MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
 import { pickKeys } from '../../../lib/useListParams';
 import { MemberFilters } from '../hooks/useMembers';
 import {
@@ -72,7 +72,7 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           options={STATUS_OPTIONS}
           value={draft.status}
           onChange={(value) => change('status', pickKeys(value, MEMBERSHIP_STATUS_LABELS))}
-          placeholder="Todas"
+          emptyText="Todas"
           searchable={false}
         />
 
@@ -80,7 +80,7 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           <SwitchRow
             key={item}
             title={MEMBER_FLAG_LABELS[item]}
-            hint={MEMBER_FLAG_HINTS[item]}
+            hint={MEMBER_FLAG_FILTER_HINTS[item]}
             checked={draft.flag.includes(item)}
             onChange={() => toggleFlag(item)}
           />
@@ -93,7 +93,7 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           options={ENTRY_TYPE_OPTIONS}
           value={draft.entryType}
           onChange={(value) => change('entryType', pickKeys(value, ENTRY_TYPE_LABELS))}
-          placeholder="Todas"
+          emptyText="Todas"
           searchable={false}
         />
       </FilterGroup>
@@ -111,7 +111,7 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           options={MARITAL_STATUS_OPTIONS}
           value={draft.maritalStatus}
           onChange={(value) => change('maritalStatus', pickKeys(value, MARITAL_STATUS_LABELS))}
-          placeholder="Todos"
+          emptyText="Todos"
           searchable={false}
         />
 
@@ -120,7 +120,7 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           options={AGE_GROUP_OPTIONS}
           value={draft.ageGroup}
           onChange={(value) => change('ageGroup', pickKeys(value, AGE_GROUP_NAMES))}
-          placeholder="Todas"
+          emptyText="Todas"
           searchable={false}
         />
       </FilterGroup>

@@ -30,8 +30,8 @@ export function CommunityFields({ control, declines, smallGroups, ministries }: 
               options={toOptions(smallGroups)}
               value={field.value}
               onChange={field.onChange}
-              placeholder="Nenhum por enquanto"
-              searchable={false}
+              emptyText="Nenhum por enquanto"
+              placeholder="Buscar pelo Pequeno Grupo…"
               error={fieldState.error?.message}
             />
           )}
@@ -48,13 +48,12 @@ export function CommunityFields({ control, declines, smallGroups, ministries }: 
               options={toOptions(ministries)}
               value={field.value}
               onChange={field.onChange}
-              placeholder="Nenhum por enquanto"
-              searchable={false}
+              emptyText="Nenhum por enquanto"
+              placeholder="Buscar pelo Ministério…"
               error={fieldState.error?.message}
             />
           )}
         />
-        {declines.ministry && <Hint>Na ficha, a pessoa disse que não pode servir em um ministério agora.</Hint>}
       </FieldStack>
     </>
   );
