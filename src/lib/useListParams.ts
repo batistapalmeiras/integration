@@ -46,6 +46,7 @@ export function useListParams<K extends string>({ basePath, filters, stored }: O
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const [saved, setSaved] = useState<ListFilters<K>>(() => stored?.load() ?? {});
+  const [typedSearch, setTypedSearch] = useState(() => params.get(SEARCH_PARAM) ?? '');
   const segments = pathSegments(location.pathname, basePath);
   const decoded = decodePathFilters(filters, segments);
   const fromPath = segments.length > 0;
@@ -57,7 +58,7 @@ export function useListParams<K extends string>({ basePath, filters, stored }: O
   });
   const current: ListState<K> = {
     filters: values,
-    search: params.get(SEARCH_PARAM) ?? '',
+    search: typedSearch,
     page: parsePage(params.get(PAGE_PARAM)),
   };
   const debouncedSearch = useDebouncedValue(current.search.trim());
@@ -104,7 +105,10 @@ export function useListParams<K extends string>({ basePath, filters, stored }: O
     unresolved: decoded.unresolved.length > 0,
     search: current.search,
     debouncedSearch,
-    setSearch: (search: string) => write({ ...current, search, page: 1 }),
+    setSearch: (search: string) => {
+      setTypedSearch(search);
+      write({ ...current, search, page: 1 });
+    },
     page: current.page,
     setPage: (page: number) => write({ ...current, page }),
     paginate,

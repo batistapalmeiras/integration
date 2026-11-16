@@ -74,6 +74,7 @@ export function MemberProfilePage() {
   const smallGroups = community.smallGroupNames;
   const ministries = community.ministryNames;
   const notes = notesQuery.data ?? [];
+  const spouse = family?.find((relative) => relative.relation === 'spouse') ?? null;
   const smallGroupRoles = (groupId: string) => [
     ...(community.leaderOfSmallGroupIds.includes(groupId) ? ['Líder'] : []),
     ...(community.hostOfSmallGroupIds.includes(groupId) ? ['Anfitrião'] : []),
@@ -130,6 +131,7 @@ export function MemberProfilePage() {
         section={section}
         optionalPhone={canLeavePhoneEmpty(info.origin)}
         flags={section.id === MEMBERSHIP_SECTION ? flags : undefined}
+        spouse={spouse}
         close={close}
       />,
     );
@@ -162,7 +164,7 @@ export function MemberProfilePage() {
                 personId={id}
                 photoUrl={photoUrl}
                 photoFolder={photoFolder}
-                spouse={family?.find((relative) => relative.relation === 'spouse') ?? null}
+                spouse={spouse}
                 close={close}
               />,
             )
