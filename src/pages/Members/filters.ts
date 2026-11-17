@@ -1,6 +1,6 @@
 // Local
 import { AgeGroup, ageGroupOf, ageOn } from '../../domain/ageGroups';
-import { ChildrenStatus, Couple, coupleChildrenStatus, MemberGrouping } from '../../domain/couples';
+import { Couple, MemberGrouping } from '../../domain/couples';
 import { MemberFlag } from '../../domain/memberFlags';
 import { Gender, MaritalStatus, MembershipStatus } from '../../domain/memberRecords';
 import { matchesNameOrPhone } from '../../domain/search';
@@ -14,7 +14,6 @@ export interface MemberFilters {
   maritalStatus: MaritalStatus[];
   ageGroup: AgeGroup[];
   flag: MemberFlag[];
-  children: ChildrenStatus[];
 }
 
 export const NO_MEMBER_FILTERS: MemberFilters = {
@@ -24,12 +23,11 @@ export const NO_MEMBER_FILTERS: MemberFilters = {
   maritalStatus: [],
   ageGroup: [],
   flag: [],
-  children: [],
 };
 
 const FILTERS_BY_GROUPING: Record<MemberGrouping, (keyof MemberFilters)[]> = {
   individual: ['status', 'flag', 'entryType', 'gender', 'maritalStatus', 'ageGroup'],
-  couple: ['status', 'flag', 'children'],
+  couple: ['status', 'flag'],
 };
 
 export const filtersFor = (grouping: MemberGrouping, filters: MemberFilters): MemberFilters =>
@@ -55,16 +53,10 @@ export function matchesMember(member: MemberRow, filters: MemberFilters, search:
   );
 }
 
-export function matchesCouple(
-  couple: Couple<MemberRow>,
-  filters: MemberFilters,
-  search: string,
-  parents: Set<string>,
-): boolean {
+export function matchesCouple(couple: Couple<MemberRow>, filters: MemberFilters, search: string): boolean {
   return (
     couple.some((member) => matchesNameOrPhone(member, search)) &&
     couple.every((member) => allows(filters.status, member.membership_status)) &&
-    (filters.flag.length === 0 || couple.some((member) => member.flags.some((flag) => filters.flag.includes(flag)))) &&
-    allows(filters.children, coupleChildrenStatus(couple, parents))
+    (filters.flag.length === 0 || couple.some((member) => member.flags.some((flag) => filters.flag.includes(flag))))
   );
 }

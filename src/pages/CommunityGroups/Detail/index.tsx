@@ -102,6 +102,7 @@ export function CommunityGroupDetailPage() {
         fieldLabel={label}
         group={group}
         smallGroup={isPg}
+        withLeaders={!group.automatic}
         groupMembers={people}
         onDelete={people.length === 0 ? openDelete : undefined}
         close={close}
@@ -199,33 +200,42 @@ export function CommunityGroupDetailPage() {
         }
       />
 
-      <InfoPanel>
-        {isPg && (
-          <InfoLine icon={CalendarDays} label="Dia" empty={!group.meetingDay}>
-            {group.meetingDay ? WEEK_DAY_LABELS[group.meetingDay] : 'Nenhum dia cadastrado'}
-          </InfoLine>
-        )}
-        <RolePeople
-          icon={Crown}
-          singular="Líder"
-          plural="Líderes"
-          people={namesOf(group.leaderIds)}
-          emptyText="Nenhum líder cadastrado"
-        />
-        {isPg && (
+      {!group.automatic && (
+        <InfoPanel>
+          {isPg && (
+            <InfoLine icon={CalendarDays} label="Dia" empty={!group.meetingDay}>
+              {group.meetingDay ? WEEK_DAY_LABELS[group.meetingDay] : 'Nenhum dia cadastrado'}
+            </InfoLine>
+          )}
           <RolePeople
-            icon={House}
-            singular="Anfitrião"
-            plural="Anfitriões"
-            people={namesOf(group.hostIds)}
-            emptyText="Nenhum anfitrião cadastrado"
+            icon={Crown}
+            singular="Líder"
+            plural="Líderes"
+            people={namesOf(group.leaderIds)}
+            emptyText="Nenhum líder cadastrado"
           />
-        )}
-      </InfoPanel>
+          {isPg && (
+            <RolePeople
+              icon={House}
+              singular="Anfitrião"
+              plural="Anfitriões"
+              people={namesOf(group.hostIds)}
+              emptyText="Nenhum anfitrião cadastrado"
+            />
+          )}
+        </InfoPanel>
+      )}
 
 
       {people.length === 0 && (
-        <Empty title="Ninguém vinculado ainda" description="Use o botão acima para adicionar pessoas." />
+        <Empty
+          title="Ninguém vinculado ainda"
+          description={
+            group.automatic
+              ? 'Os líderes dos Pequenos Grupos aparecem aqui.'
+              : 'Use o botão acima para adicionar pessoas.'
+          }
+        />
       )}
 
       {people.length > 0 && (
@@ -236,7 +246,7 @@ export function CommunityGroupDetailPage() {
               <thead>
                 <tr>
                   <Th>{text.fields.name}</Th>
-                  <Th $shrink />
+                  {!group.automatic && <Th $shrink />}
                 </tr>
               </thead>
               <tbody>
@@ -252,20 +262,22 @@ export function CommunityGroupDetailPage() {
                         ))}
                       </NameCell>
                     </Td>
-                    <Td $shrink>
-                      <IconButton
-                        icon={<UserMinus size={14} />}
-                        iconPosition="center"
-                        variant="secondary"
-                        size="sm"
-                        aria-label={`Remover ${person.name}`}
-                        title="Remover"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openRemovePerson(person);
-                        }}
-                      />
-                    </Td>
+                    {!group.automatic && (
+                      <Td $shrink>
+                        <IconButton
+                          icon={<UserMinus size={14} />}
+                          iconPosition="center"
+                          variant="secondary"
+                          size="sm"
+                          aria-label={`Remover ${person.name}`}
+                          title="Remover"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openRemovePerson(person);
+                          }}
+                        />
+                      </Td>
+                    )}
                   </Tr>
                 ))}
               </tbody>
@@ -274,10 +286,12 @@ export function CommunityGroupDetailPage() {
         </div>
       )}
 
-      <AddButton type="button" onClick={openAddMembers}>
-        <Plus size={18} />
-        Adicionar membros
-      </AddButton>
+      {!group.automatic && (
+        <AddButton type="button" onClick={openAddMembers}>
+          <Plus size={18} />
+          Adicionar membros
+        </AddButton>
+      )}
 
       {modal}
       {toast}

@@ -31,6 +31,7 @@ interface Props {
   fieldLabel: string;
   group?: CommunityGroup;
   smallGroup?: boolean;
+  withLeaders?: boolean;
   groupMembers?: PersonInGroup[];
   onDelete?: () => void;
   close: () => void;
@@ -42,6 +43,7 @@ export function GroupModal({
   fieldLabel,
   group,
   smallGroup = false,
+  withLeaders = true,
   groupMembers,
   onDelete,
   close,
@@ -84,7 +86,7 @@ export function GroupModal({
 
         {smallGroup && <SelectField control={control} name="meetingDay" label="Dia do PG" options={WEEK_DAY_OPTIONS} />}
 
-        {canPickPeople && (
+        {withLeaders && canPickPeople && (
           <MultiSelect
             label="Líder(es)"
             options={options}

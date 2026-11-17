@@ -15,9 +15,10 @@ import {
 import { errorMessage, invalidateQueries } from '../../../lib/queryCache';
 import { firstNameOf } from '../../../domain/text';
 import {
-  memberPhotoFolder,
   MemberPhotoFiles,
+  memberPhotoOwner,
   memberPhotoUrls,
+  PhotoOwner,
   removeMemberPhoto,
   saveMemberPhoto,
 } from '../../../repositories/memberPhotos';
@@ -29,7 +30,7 @@ const PREVIEW_SIZE = 240;
 interface Props {
   personId: string;
   photoUrl: string | null;
-  photoFolder: string | null;
+  photo: PhotoOwner | null;
   spouse: Pick<Relative, 'id' | 'name'> | null;
   close: () => void;
 }
@@ -45,7 +46,7 @@ const refreshPhotos = (personId: string) =>
       (key[0] === 'person' && key[1] === personId),
   );
 
-export function PhotoModal({ personId, photoUrl, photoFolder, spouse, close }: Props) {
+export function PhotoModal({ personId, photoUrl, photo: currentPhoto, spouse, close }: Props) {
   const { show: showToast, toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
@@ -119,7 +120,7 @@ export function PhotoModal({ personId, photoUrl, photoFolder, spouse, close }: P
   const editCurrent = async () => {
     setSaving(true);
     try {
-      const urls = photoFolder ? await memberPhotoUrls([{ personId, folder: photoFolder }], ['original']) : null;
+      const urls = currentPhoto ? await memberPhotoUrls([currentPhoto], ['original']) : null;
       const url = urls?.original[personId] ?? photoUrl;
       if (!url) return;
       setPicked({ ...(await openPhoto(url)), isNew: false });
@@ -134,14 +135,14 @@ export function PhotoModal({ personId, photoUrl, photoFolder, spouse, close }: P
     setSaving(true);
     try {
       const { photo: full, thumb, original } = await preparePhotoFiles(photo);
-      const keepsOriginal = !photo.isNew && photoFolder === personId;
+      const keepsOriginal = !photo.isNew && currentPhoto?.folder === personId;
       await saveMemberPhoto(personId, { photo: full, thumb, original: keepsOriginal ? undefined : original });
       await refreshPhotos(personId);
       if (!spouse) {
         close();
         return;
       }
-      const replacing = (await memberPhotoFolder(spouse.id)) !== null;
+      const replacing = (await memberPhotoOwner(spouse.id)) !== null;
       setPicked(null);
       setSpouseOffer({ files: { photo: full, thumb, original }, previewUrl: URL.createObjectURL(full), replacing });
       setSaving(false);
@@ -231,7 +232,7 @@ export function PhotoModal({ personId, photoUrl, photoFolder, spouse, close }: P
             disabled={saving}
             onClick={() =>
               run(
-                () => removeMemberPhoto({ personId, folder: photoFolder ?? personId }),
+                () => removeMemberPhoto({ personId, folder: currentPhoto?.folder ?? personId }),
                 'Não foi possível remover a foto.',
               )
             }

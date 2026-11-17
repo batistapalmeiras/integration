@@ -7,6 +7,7 @@ import {
   CommunityOverview,
   GroupInput,
   GroupOption,
+  MANUAL_MINISTRY_KIND,
   PersonInGroup,
   WeekDay,
 } from '../domain/communityGroups';
@@ -25,7 +26,7 @@ const toWeekDay = (value: string | null): WeekDay | null => WEEK_DAYS.find((day)
 
 const SMALL_GROUP_COLUMNS = 'id, name, meeting_day, small_group_roles(person_id, role)';
 
-const MINISTRY_COLUMNS = 'id, name, ministry_leaders(person_id)';
+const MINISTRY_COLUMNS = 'id, name, kind, ministry_leaders(person_id)';
 
 type SmallGroupRole = Pick<TableRow<'small_group_roles'>, 'person_id' | 'role'>;
 
@@ -33,7 +34,7 @@ interface SmallGroupRow extends Pick<TableRow<'small_groups'>, 'id' | 'name' | '
   small_group_roles: SmallGroupRole[];
 }
 
-interface MinistryRow extends Pick<TableRow<'ministries'>, 'id' | 'name'> {
+interface MinistryRow extends Pick<TableRow<'ministries'>, 'id' | 'name' | 'kind'> {
   ministry_leaders: Pick<TableRow<'ministry_leaders'>, 'person_id'>[];
 }
 
@@ -52,6 +53,7 @@ const fromMinistry = (row: MinistryRow): CommunityGroup => ({
   leaderIds: row.ministry_leaders.map((leader) => leader.person_id),
   hostIds: [],
   meetingDay: null,
+  automatic: row.kind !== MANUAL_MINISTRY_KIND,
 });
 
 const fromSmallGroup = (row: SmallGroupRow): CommunityGroup => ({
@@ -60,6 +62,7 @@ const fromSmallGroup = (row: SmallGroupRow): CommunityGroup => ({
   leaderIds: peopleWithRole(row.small_group_roles, 'leader'),
   hostIds: peopleWithRole(row.small_group_roles, 'host'),
   meetingDay: toWeekDay(row.meeting_day),
+  automatic: false,
 });
 
 const ministryPayload = (input: GroupInput): TableInsert<'ministries'> => ({ name: input.name });
@@ -69,17 +72,39 @@ const smallGroupPayload = (input: GroupInput): TableInsert<'small_groups'> => ({
   meeting_day: input.meetingDay,
 });
 
+const roleKey = (role: SmallGroupRole) => `${role.role}:${role.person_id}`;
+
+async function replaceSmallGroupRoles(id: string, input: GroupInput): Promise<void> {
+  const { data, error } = await supabase.from('small_group_roles').select('person_id, role').eq('small_group_id', id);
+  if (error) throw error;
+  const wanted: SmallGroupRole[] = [
+    ...input.leaderIds.map((personId) => ({ person_id: personId, role: 'leader' })),
+    ...input.hostIds.map((personId) => ({ person_id: personId, role: 'host' })),
+  ];
+  const wantedKeys = wanted.map(roleKey);
+  const currentKeys = data.map(roleKey);
+  const removed = data.filter((role) => !wantedKeys.includes(roleKey(role)));
+  const added = wanted.filter((role) => !currentKeys.includes(roleKey(role)));
+  const deletions = await Promise.all(
+    removed.map((role) =>
+      supabase
+        .from('small_group_roles')
+        .delete()
+        .eq('small_group_id', id)
+        .eq('person_id', role.person_id)
+        .eq('role', role.role),
+    ),
+  );
+  const deleteError = deletions.find((result) => result.error)?.error;
+  if (deleteError) throw deleteError;
+  if (added.length === 0) return;
+  const result = await supabase.from('small_group_roles').insert(added.map((role) => ({ ...role, small_group_id: id })));
+  if (result.error) throw result.error;
+}
+
 async function replaceGroupRoles(table: Table, id: string, input: GroupInput): Promise<void> {
   if (isSmallGroups(table)) {
-    const { error: deleteError } = await supabase.from('small_group_roles').delete().eq('small_group_id', id);
-    if (deleteError) throw deleteError;
-    const rows = [
-      ...input.leaderIds.map((personId) => ({ small_group_id: id, person_id: personId, role: 'leader' })),
-      ...input.hostIds.map((personId) => ({ small_group_id: id, person_id: personId, role: 'host' })),
-    ];
-    if (rows.length === 0) return;
-    const { error } = await supabase.from('small_group_roles').insert(rows);
-    if (error) throw error;
+    await replaceSmallGroupRoles(id, input);
     return;
   }
   const { error: deleteError } = await supabase.from('ministry_leaders').delete().eq('ministry_id', id);
@@ -92,7 +117,9 @@ async function replaceGroupRoles(table: Table, id: string, input: GroupInput): P
 }
 
 async function listGroups(table: Table): Promise<GroupOption[]> {
-  const { data, error } = await supabase.from(table).select('id, name').order('name');
+  const { data, error } = isSmallGroups(table)
+    ? await supabase.from('small_groups').select('id, name').order('name')
+    : await supabase.from('ministries').select('id, name').eq('kind', MANUAL_MINISTRY_KIND).order('name');
   if (error) throw error;
   return data;
 }
@@ -215,11 +242,16 @@ async function listMinistryPeople(id: string): Promise<PersonInGroup[]> {
 }
 
 async function syncPersonMinistries(personId: string, ministryIds: string[]): Promise<void> {
-  const { data, error } = await supabase.from('person_ministries').select('ministry_id').eq('person_id', personId);
-  if (error) throw error;
-  const current = data.map((row) => row.ministry_id);
-  const removed = current.filter((id) => !ministryIds.includes(id));
-  const added = ministryIds.filter((id) => !current.includes(id));
+  const [links, manual] = await Promise.all([
+    supabase.from('person_ministries').select('ministry_id').eq('person_id', personId),
+    listGroups('ministries'),
+  ]);
+  if (links.error) throw links.error;
+  const isManual = (id: string) => manual.some((ministry) => ministry.id === id);
+  const current = links.data.map((row) => row.ministry_id).filter(isManual);
+  const wanted = ministryIds.filter(isManual);
+  const removed = current.filter((id) => !wanted.includes(id));
+  const added = wanted.filter((id) => !current.includes(id));
   if (removed.length > 0) {
     const result = await supabase.from('person_ministries').delete().eq('person_id', personId).in('ministry_id', removed);
     if (result.error) throw result.error;

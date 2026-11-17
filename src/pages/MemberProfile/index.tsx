@@ -61,9 +61,8 @@ export function MemberProfilePage() {
   const notesQuery = usePersonNotes(id);
   const family = useFamily(id).data;
   const page = pageQuery.data ?? null;
-  const photoFolder = page?.info.photoFolder ?? null;
-  const photoUrl =
-    useMemberPhotoUrls(photoFolder ? [{ personId: id, folder: photoFolder }] : [], ['photo']).data?.photo[id] ?? null;
+  const photo = page?.info.photo ?? null;
+  const photoUrl = useMemberPhotoUrls(photo ? [photo] : [], ['photo']).data?.photo[id] ?? null;
   const loadError = errorMessage(pageQuery.error);
 
   if (loadError) return <Empty title="Membro não encontrado" description={loadError} />;
@@ -156,21 +155,21 @@ export function MemberProfilePage() {
       <HeroGrid>
         <PhotoButton
           type="button"
-          $empty={!photoFolder}
-          aria-label={photoFolder ? 'Trocar foto' : 'Adicionar foto'}
+          $empty={!photo}
+          aria-label={photo ? 'Trocar foto' : 'Adicionar foto'}
           onClick={() =>
             open(
               <PhotoModal
                 personId={id}
                 photoUrl={photoUrl}
-                photoFolder={photoFolder}
+                photo={photo}
                 spouse={spouse}
                 close={close}
               />,
             )
           }
         >
-          {photoFolder ? (
+          {photo ? (
             <>
               <MemberPhoto url={photoUrl} size={104} />
               <PhotoBadge>

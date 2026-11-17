@@ -7,7 +7,7 @@ import { FilterGroup, FiltersSheet } from '../../../components/FiltersSheet';
 import { SwitchRow } from '../../../components/SwitchRow';
 // Local
 import { AGE_GROUPS, AGE_GROUP_NAMES, ageGroupLabel } from '../../../domain/ageGroups';
-import { CHILDREN_STATUS_LABELS, MEMBER_GROUPING_LABELS, MemberGrouping } from '../../../domain/couples';
+import { MEMBER_GROUPING_LABELS, MemberGrouping } from '../../../domain/couples';
 import {
   COUPLE_FLAG_FILTER_HINTS,
   MEMBER_FLAG_FILTER_HINTS,
@@ -33,8 +33,6 @@ const ALL_GENDERS = 'all';
 const GENDER_CHOICES = [{ value: ALL_GENDERS, label: 'Todos' }, ...GENDER_OPTIONS];
 const AGE_GROUP_OPTIONS = AGE_GROUPS.map((group) => ({ value: group, label: ageGroupLabel(group) }));
 const GROUPING_OPTIONS = toOptions(MEMBER_GROUPING_LABELS);
-const ALL_CHILDREN = 'all';
-const CHILDREN_CHOICES = [{ value: ALL_CHILDREN, label: 'Todos' }, ...toOptions(CHILDREN_STATUS_LABELS)];
 
 interface Props {
   close: () => void;
@@ -105,16 +103,7 @@ export function MembersFiltersModal({ close, grouping, couplesAllowed, filters, 
         ))}
       </FilterGroup>
 
-      {coupled ? (
-        <FilterGroup title="Família">
-          <SegmentedControl
-            label="Filhos"
-            options={CHILDREN_CHOICES}
-            value={draft.children[0] ?? ALL_CHILDREN}
-            onChange={(value) => change('children', pickKeys([value], CHILDREN_STATUS_LABELS))}
-          />
-        </FilterGroup>
-      ) : (
+      {!coupled && (
         <>
           <FilterGroup title="Chegada à igreja">
             <MultiSelect

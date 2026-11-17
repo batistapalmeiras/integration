@@ -68,7 +68,7 @@ describe('members filters modal', () => {
     expect(onApply).toHaveBeenCalledWith('individual', { ...NO_MEMBER_FILTERS, gender: ['female'] });
   });
 
-  it('switches to couples, swapping the personal filters for the family ones', async () => {
+  it('switches to couples, leaving out the personal filters', async () => {
     const onApply = vi.fn();
     renderScreen(
       <MembersFiltersModal
@@ -86,10 +86,9 @@ describe('members filters modal', () => {
     expect(screen.queryByRole('radio', { name: 'Feminino' })).not.toBeInTheDocument();
     expect(screen.getByText('Casais em que pelo menos um dos dois foi sinalizado no perfil.')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('radio', { name: 'Com filhos' }));
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 
-    expect(onApply).toHaveBeenCalledWith('couple', { ...NO_MEMBER_FILTERS, status: ['active'], children: ['with'] });
+    expect(onApply).toHaveBeenCalledWith('couple', { ...NO_MEMBER_FILTERS, status: ['active'] });
   });
 
   it('hides the couple toggle from who cannot see families', () => {

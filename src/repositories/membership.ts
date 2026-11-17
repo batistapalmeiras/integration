@@ -8,7 +8,7 @@ import {
 } from '../domain/membership';
 import { byName } from '../domain/text';
 import { supabase } from '../lib/supabase';
-import { photoFolderOf } from './memberPhotos';
+import { PhotoOwner, photoOwnerOf } from './memberPhotos';
 
 export async function listMembershipAlerts(personIds: string[]): Promise<MembershipAlert[]> {
   if (personIds.length === 0) return [];
@@ -57,7 +57,7 @@ export interface MembershipQueueRow {
   name: string;
   entryType: EntryType | null;
   reviewReasons: string[];
-  photoFolder: string | null;
+  photo: PhotoOwner | null;
 }
 
 export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
@@ -78,7 +78,7 @@ export async function listMembershipQueue(): Promise<MembershipQueueRow[]> {
       id: person.id,
       name: person.name,
       entryType: person.entry_type,
-      photoFolder: photoFolderOf(person.id, person.member_profiles),
+      photo: photoOwnerOf(person.id, person.member_profiles),
       reviewReasons: alerts
         .filter((alert) => alert.person_id === person.id && !alert.resolved)
         .map((alert) => MEMBERSHIP_ALERT_LABELS[alert.code]),

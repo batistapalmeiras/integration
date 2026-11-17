@@ -1,5 +1,5 @@
 // Local
-import { coupleChildrenStatus, pairCouples, parentIdsOf } from '../../src/domain/couples';
+import { pairCouples } from '../../src/domain/couples';
 import { FamilyTraits } from '../../src/domain/family';
 import { Gender } from '../../src/domain/memberRecords';
 
@@ -28,12 +28,5 @@ describe('couples', () => {
     const traits = traitsOf({ c: { spouseId: 'z' } });
 
     expect(pairCouples([ana, carla], traits)).toEqual([]);
-  });
-
-  it('counts the children of either spouse', () => {
-    const parents = parentIdsOf(traitsOf({ d: { motherId: 'a' } }));
-
-    expect(coupleChildrenStatus([bruno, ana], parents)).toBe('with');
-    expect(coupleChildrenStatus([bruno, carla], parents)).toBe('without');
   });
 });

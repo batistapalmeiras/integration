@@ -1,17 +1,26 @@
 // Local
-import { PENDENCY_LABELS } from '../../../domain/memberRecords';
+import { PENDENCY_LABELS, PendencyField } from '../../../domain/memberRecords';
 import { listMemberPendencies } from '../../../repositories/memberRecords';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { PathFilter, slugTable } from '../../../lib/pathFilters';
-import { LIST_PAGE_SIZE, pickKeys, useListParams } from '../../../lib/useListParams';
+import { LIST_PAGE_SIZE, pickFrom, useListParams } from '../../../lib/useListParams';
 import { AppRoute } from '../../../routes/paths';
 
-const FILTERS: PathFilter<'field'>[] = [{ key: 'field', slugs: slugTable(PENDENCY_LABELS) }];
+export const FILTERABLE_PENDENCIES: PendencyField[] = [
+  'phone',
+  'email',
+  'birth_date',
+  'marital_status',
+  'address',
+  'cpf',
+];
+
+const FILTERS: PathFilter<'field'>[] = [{ key: 'field', slugs: slugTable(PENDENCY_LABELS, FILTERABLE_PENDENCIES) }];
 
 export function useMemberPendencies() {
   const list = useListParams({ basePath: AppRoute.MemberPendencies, filters: FILTERS });
-  const field = pickKeys(list.filter('field'), PENDENCY_LABELS)[0] ?? null;
+  const field = pickFrom(list.filter('field'), FILTERABLE_PENDENCIES)[0] ?? null;
 
   const params = { field, search: list.debouncedSearch, page: list.page, pageSize: LIST_PAGE_SIZE };
   const query = useQuery(queryKeys.memberPendencies(params), () => listMemberPendencies(params));

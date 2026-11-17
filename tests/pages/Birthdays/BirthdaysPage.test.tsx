@@ -40,7 +40,7 @@ describe('birthdays page', () => {
         '\n\n',
       ),
     );
-    expect(await screen.findByText('Lista copiada.')).toBeInTheDocument();
+    expect(await screen.findByText('Lista copiada')).toBeInTheDocument();
   });
 
   it('goes from December to January', async () => {

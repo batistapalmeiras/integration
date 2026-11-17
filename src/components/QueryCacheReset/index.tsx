@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useAuthCtx } from 'bp-kit';
 // Local
 import { clearQueries } from '../../lib/queryCache';
+import { clearSignedPhotoUrls } from '../../repositories/memberPhotos';
 
 export function QueryCacheReset() {
   const { user } = useAuthCtx();
@@ -11,7 +12,10 @@ export function QueryCacheReset() {
   const previousUserId = useRef(userId);
 
   useEffect(() => {
-    if (previousUserId.current && previousUserId.current !== userId) clearQueries();
+    if (previousUserId.current && previousUserId.current !== userId) {
+      clearQueries();
+      clearSignedPhotoUrls();
+    }
     previousUserId.current = userId;
   }, [userId]);
 

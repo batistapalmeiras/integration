@@ -11,9 +11,7 @@ import { isReviewPendency, PENDENCY_LABELS } from '../../domain/memberRecords';
 import { AppRoute } from '../../routes/paths';
 import { PageFlexBody, PageFlexWrap, PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 // Local
-import { useMemberPendencies } from './hooks/useMemberPendencies';
-
-const FIELD_OPTIONS = Object.entries(PENDENCY_LABELS);
+import { FILTERABLE_PENDENCIES, useMemberPendencies } from './hooks/useMemberPendencies';
 
 export function MemberPendenciesPage() {
   const navigate = useNavigate();
@@ -36,9 +34,9 @@ export function MemberPendenciesPage() {
             onChange={(e) => setField(e.target.value)}
           >
             <option value="">Todas as pendências</option>
-            {FIELD_OPTIONS.map(([value, label]) => (
+            {FILTERABLE_PENDENCIES.map((value) => (
               <option key={value} value={value}>
-                {label}
+                {PENDENCY_LABELS[value]}
               </option>
             ))}
           </RawSelect>

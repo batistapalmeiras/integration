@@ -18,7 +18,10 @@ export interface CommunityGroup {
   leaderIds: string[];
   hostIds: string[];
   meetingDay: WeekDay | null;
+  automatic: boolean;
 }
+
+export const MANUAL_MINISTRY_KIND = 'manual';
 
 export type GroupInput = Pick<CommunityGroup, 'name' | 'leaderIds' | 'hostIds' | 'meetingDay'>;
 

@@ -51,9 +51,9 @@ export function BirthdaysPage() {
     const list = birthdaysListText(birthdays, currentYear, label.toLowerCase(), maskPhone);
     try {
       await navigator.clipboard.writeText(list);
-      showToast('Lista copiada.');
+      showToast('Lista copiada');
     } catch {
-      showToast('Não foi possível copiar a lista.');
+      showToast('Não foi possível copiar a lista');
     }
   };
 

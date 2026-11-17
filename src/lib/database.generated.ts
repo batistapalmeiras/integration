@@ -548,6 +548,20 @@ export type Database = {
             foreignKeyName: "member_flags_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
+            referencedRelation: "member_pendencies"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "member_flags_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "membership_alerts"
+            referencedColumns: ["person_id"]
+          },
+          {
+            foreignKeyName: "member_flags_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
@@ -689,16 +703,19 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          kind: string
           name: string
         }
         Insert: {
           created_at?: string
           id?: string
+          kind?: string
           name: string
         }
         Update: {
           created_at?: string
           id?: string
+          kind?: string
           name?: string
         }
         Relationships: []
@@ -891,6 +908,7 @@ export type Database = {
           name: string
           origin?: string
           phone?: string | null
+          search_name?: string | null
           signup_window_from?: string | null
           status?: string
           updated_at?: string
@@ -912,6 +930,7 @@ export type Database = {
           name?: string
           origin?: string
           phone?: string | null
+          search_name?: string | null
           signup_window_from?: string | null
           status?: string
           updated_at?: string
@@ -1464,6 +1483,10 @@ export type Database = {
           welcome_coffee: number
         }[]
       }
+      attach_membership_photo: {
+        Args: { p_person_id: string; p_photo_token: string }
+        Returns: undefined
+      }
       can_edit_person_note: { Args: { p_created_by: string }; Returns: boolean }
       can_manage_person_notes: {
         Args: { p_person_id: string }
@@ -1559,6 +1582,7 @@ export type Database = {
         Args: { p_relation: string; p_relative_gender: string }
         Returns: string
       }
+      family_parent_gender: { Args: { p_person_id: string }; Returns: string }
       family_relation_gender: { Args: { p_relation: string }; Returns: string }
       find_membership_interest_person: {
         Args: { p_phone: string }
@@ -1723,6 +1747,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      search_text: { Args: { p_text: string }; Returns: string }
       service_sunday: { Args: { p_at: string }; Returns: string }
       set_family: {
         Args: {
@@ -1832,6 +1857,10 @@ export type Database = {
         Returns: undefined
       }
       sync_family_couples: { Args: never; Returns: undefined }
+      sync_small_group_leader_ministry: {
+        Args: { p_person_id: string }
+        Returns: undefined
+      }
       team_contacts: {
         Args: { p_stage: string }
         Returns: {

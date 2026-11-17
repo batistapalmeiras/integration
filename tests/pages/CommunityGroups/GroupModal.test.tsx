@@ -13,6 +13,7 @@ const group: CommunityGroup = {
   leaderIds: ['p1', 'gone'],
   hostIds: ['p2'],
   meetingDay: 'thursday',
+  automatic: false,
 };
 
 const members = [
@@ -47,5 +48,22 @@ describe('group modal', () => {
       hostIds: ['p2'],
       meetingDay: 'thursday',
     });
+  });
+
+  it('has no leaders to pick in the ministry filled by the small group leaders', () => {
+    renderScreen(
+      <GroupModal
+        title="Editar Líder de PG"
+        fieldLabel="Ministério"
+        group={{ ...group, name: 'Líder de PG', hostIds: [], meetingDay: null, automatic: true }}
+        withLeaders={false}
+        groupMembers={members}
+        close={vi.fn()}
+        onSave={vi.fn()}
+      />,
+      { role: UserRole.Pastor },
+    );
+
+    expect(screen.queryByRole('button', { name: 'Líder(es)' })).not.toBeInTheDocument();
   });
 });

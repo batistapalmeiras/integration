@@ -3,7 +3,7 @@ import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { pickKeys, useListParams } from '../../../lib/useListParams';
 import { AGE_GROUP_NAMES } from '../../../domain/ageGroups';
-import { CHILDREN_STATUS_LABELS, MemberGrouping, pairCouples, parentIdsOf } from '../../../domain/couples';
+import { MemberGrouping, pairCouples } from '../../../domain/couples';
 import { todayKey } from '../../../domain/dates';
 import { MEMBER_FLAG_LABELS } from '../../../domain/memberFlags';
 import { GENDER_LABELS, MARITAL_STATUS_LABELS, MEMBERSHIP_STATUS_LABELS } from '../../../domain/memberRecords';
@@ -28,17 +28,15 @@ export function useMembers(pageSizeOf: (grouping: MemberGrouping) => number | un
     maritalStatus: pickKeys(list.filter('maritalStatus'), MARITAL_STATUS_LABELS),
     ageGroup: pickKeys(list.filter('ageGroup'), AGE_GROUP_NAMES),
     flag: pickKeys(list.filter('flag'), MEMBER_FLAG_LABELS),
-    children: pickKeys(list.filter('children'), CHILDREN_STATUS_LABELS),
   });
   const activeFilterCount = activeFilterCountOf(filters);
   const rows = query.data ?? [];
   const today = todayKey();
   const traits = traitsQuery.data ?? {};
-  const parents = parentIdsOf(traits);
 
   const members = coupled ? [] : rows.filter((member) => matchesMember(member, filters, list.debouncedSearch, today));
   const couples = coupled
-    ? pairCouples(rows, traits).filter((couple) => matchesCouple(couple, filters, list.debouncedSearch, parents))
+    ? pairCouples(rows, traits).filter((couple) => matchesCouple(couple, filters, list.debouncedSearch))
     : [];
   const pageSize = pageSizeOf(grouping);
   const memberPage = list.paginate(members, pageSize);

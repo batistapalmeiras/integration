@@ -20,7 +20,7 @@ import { isMemberFlag, MemberFlag } from '../domain/memberFlags';
 import { PersonSensitive } from '../domain/personSensitive';
 import { nameFilter, phoneDigits } from '../domain/search';
 import { supabase } from '../lib/supabase';
-import { photoFolderOf } from './memberPhotos';
+import { PhotoOwner, photoOwnerOf } from './memberPhotos';
 
 interface MemberPendency {
   person_id: string;
@@ -153,7 +153,7 @@ interface MemberRecordInfo {
   membershipInterestSentAt: string | null;
   communityJoins: CommunityJoin[];
   council: CouncilDate | null;
-  photoFolder: string | null;
+  photo: PhotoOwner | null;
 }
 
 interface CommunityJoin {
@@ -224,7 +224,7 @@ export async function getMemberPage(personId: string): Promise<MemberPage> {
         ),
       ],
       council: member.council ? { id: member.council.id, meetingDate: member.council.meeting_date } : null,
-      photoFolder: photoFolderOf(personId, member.member_profiles),
+      photo: photoOwnerOf(personId, member.member_profiles),
     },
     community: {
       smallGroupIds: smallGroups.ids,
@@ -281,7 +281,7 @@ export interface MemberRow {
   phone: string | null;
   entry_type: EntryType | null;
   membership_status: MembershipStatus;
-  photoFolder: string | null;
+  photo: PhotoOwner | null;
   flags: MemberFlag[];
   birthDate: string | null;
   gender: Gender | null;
@@ -300,7 +300,7 @@ export async function listMemberRows(): Promise<MemberRow[]> {
       ...row,
       entry_type: toEntryType(row.entry_type),
       membership_status: toMembershipStatus(row.membership_status ?? ''),
-      photoFolder: photoFolderOf(row.id, profile),
+      photo: photoOwnerOf(row.id, profile),
       flags: flags.map((item) => item.flag).filter(isMemberFlag),
       birthDate: sensitive?.birth_date ?? null,
       gender: toGender(profile?.gender ?? null),
