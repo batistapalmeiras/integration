@@ -7,9 +7,16 @@ import { FilterGroup, FiltersSheet } from '../../../components/FiltersSheet';
 import { SwitchRow } from '../../../components/SwitchRow';
 // Local
 import { AGE_GROUPS, AGE_GROUP_NAMES, ageGroupLabel } from '../../../domain/ageGroups';
-import { MEMBER_FLAG_FILTER_HINTS, MEMBER_FLAG_LABELS, MEMBER_FLAGS, MemberFlag } from '../../../domain/memberFlags';
+import { CHILDREN_STATUS_LABELS, MEMBER_GROUPING_LABELS, MemberGrouping } from '../../../domain/couples';
+import {
+  COUPLE_FLAG_FILTER_HINTS,
+  MEMBER_FLAG_FILTER_HINTS,
+  MEMBER_FLAG_LABELS,
+  MEMBER_FLAGS,
+  MemberFlag,
+} from '../../../domain/memberFlags';
 import { pickKeys } from '../../../lib/useListParams';
-import { MemberFilters } from '../hooks/useMembers';
+import { activeFilterCountOf, filtersFor, MemberFilters, NO_MEMBER_FILTERS } from '../filters';
 import {
   GENDER_LABELS,
   GENDER_OPTIONS,
@@ -25,23 +32,23 @@ const ENTRY_TYPE_OPTIONS = toOptions(ENTRY_TYPE_LABELS);
 const ALL_GENDERS = 'all';
 const GENDER_CHOICES = [{ value: ALL_GENDERS, label: 'Todos' }, ...GENDER_OPTIONS];
 const AGE_GROUP_OPTIONS = AGE_GROUPS.map((group) => ({ value: group, label: ageGroupLabel(group) }));
-const NO_FILTERS: MemberFilters = {
-  status: [],
-  entryType: [],
-  gender: [],
-  maritalStatus: [],
-  ageGroup: [],
-  flag: [],
-};
+const GROUPING_OPTIONS = toOptions(MEMBER_GROUPING_LABELS);
+const ALL_CHILDREN = 'all';
+const CHILDREN_CHOICES = [{ value: ALL_CHILDREN, label: 'Todos' }, ...toOptions(CHILDREN_STATUS_LABELS)];
 
 interface Props {
   close: () => void;
+  grouping: MemberGrouping;
+  couplesAllowed: boolean;
   filters: MemberFilters;
-  onApply: (filters: MemberFilters) => void;
+  onApply: (grouping: MemberGrouping, filters: MemberFilters) => void;
 }
 
-export function MembersFiltersModal({ close, filters, onApply }: Props) {
+export function MembersFiltersModal({ close, grouping, couplesAllowed, filters, onApply }: Props) {
+  const [draftGrouping, setDraftGrouping] = useState(grouping);
   const [draft, setDraft] = useState(filters);
+  const coupled = draftGrouping === 'couple';
+  const flagHints = coupled ? COUPLE_FLAG_FILTER_HINTS : MEMBER_FLAG_FILTER_HINTS;
 
   const change = <K extends keyof MemberFilters>(key: K, values: MemberFilters[K]) =>
     setDraft((current) => ({ ...current, [key]: values }));
@@ -50,12 +57,12 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
     change('flag', draft.flag.includes(item) ? draft.flag.filter((value) => value !== item) : [...draft.flag, item]);
 
   const apply = () => {
-    onApply(draft);
+    onApply(draftGrouping, filtersFor(draftGrouping, draft));
     close();
   };
 
   const clear = () => {
-    onApply(NO_FILTERS);
+    onApply(draftGrouping, NO_MEMBER_FILTERS);
     close();
   };
 
@@ -64,8 +71,19 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
       close={close}
       onApply={apply}
       onClear={clear}
-      canClear={Object.values(draft).some((values) => values.length > 0)}
+      canClear={activeFilterCountOf(filtersFor(draftGrouping, draft)) > 0}
     >
+      {couplesAllowed && (
+        <FilterGroup>
+          <SegmentedControl
+            label="Exibir"
+            options={GROUPING_OPTIONS}
+            value={draftGrouping}
+            onChange={(value) => setDraftGrouping(pickKeys([value], MEMBER_GROUPING_LABELS)[0] ?? 'individual')}
+          />
+        </FilterGroup>
+      )}
+
       <FilterGroup title="Membresia">
         <MultiSelect
           label="Situação"
@@ -80,50 +98,63 @@ export function MembersFiltersModal({ close, filters, onApply }: Props) {
           <SwitchRow
             key={item}
             title={MEMBER_FLAG_LABELS[item]}
-            hint={MEMBER_FLAG_FILTER_HINTS[item]}
+            hint={flagHints[item]}
             checked={draft.flag.includes(item)}
             onChange={() => toggleFlag(item)}
           />
         ))}
       </FilterGroup>
 
-      <FilterGroup title="Chegada à igreja">
-        <MultiSelect
-          label="Forma de entrada"
-          options={ENTRY_TYPE_OPTIONS}
-          value={draft.entryType}
-          onChange={(value) => change('entryType', pickKeys(value, ENTRY_TYPE_LABELS))}
-          emptyText="Todas"
-          searchable={false}
-        />
-      </FilterGroup>
+      {coupled ? (
+        <FilterGroup title="Família">
+          <SegmentedControl
+            label="Filhos"
+            options={CHILDREN_CHOICES}
+            value={draft.children[0] ?? ALL_CHILDREN}
+            onChange={(value) => change('children', pickKeys([value], CHILDREN_STATUS_LABELS))}
+          />
+        </FilterGroup>
+      ) : (
+        <>
+          <FilterGroup title="Chegada à igreja">
+            <MultiSelect
+              label="Forma de entrada"
+              options={ENTRY_TYPE_OPTIONS}
+              value={draft.entryType}
+              onChange={(value) => change('entryType', pickKeys(value, ENTRY_TYPE_LABELS))}
+              emptyText="Todas"
+              searchable={false}
+            />
+          </FilterGroup>
 
-      <FilterGroup title="Dados pessoais">
-        <SegmentedControl
-          label="Sexo"
-          options={GENDER_CHOICES}
-          value={draft.gender[0] ?? ALL_GENDERS}
-          onChange={(value) => change('gender', pickKeys([value], GENDER_LABELS))}
-        />
+          <FilterGroup title="Dados pessoais">
+            <SegmentedControl
+              label="Sexo"
+              options={GENDER_CHOICES}
+              value={draft.gender[0] ?? ALL_GENDERS}
+              onChange={(value) => change('gender', pickKeys([value], GENDER_LABELS))}
+            />
 
-        <MultiSelect
-          label="Estado civil"
-          options={MARITAL_STATUS_OPTIONS}
-          value={draft.maritalStatus}
-          onChange={(value) => change('maritalStatus', pickKeys(value, MARITAL_STATUS_LABELS))}
-          emptyText="Todos"
-          searchable={false}
-        />
+            <MultiSelect
+              label="Estado civil"
+              options={MARITAL_STATUS_OPTIONS}
+              value={draft.maritalStatus}
+              onChange={(value) => change('maritalStatus', pickKeys(value, MARITAL_STATUS_LABELS))}
+              emptyText="Todos"
+              searchable={false}
+            />
 
-        <MultiSelect
-          label="Faixa etária"
-          options={AGE_GROUP_OPTIONS}
-          value={draft.ageGroup}
-          onChange={(value) => change('ageGroup', pickKeys(value, AGE_GROUP_NAMES))}
-          emptyText="Todas"
-          searchable={false}
-        />
-      </FilterGroup>
+            <MultiSelect
+              label="Faixa etária"
+              options={AGE_GROUP_OPTIONS}
+              value={draft.ageGroup}
+              onChange={(value) => change('ageGroup', pickKeys(value, AGE_GROUP_NAMES))}
+              emptyText="Todas"
+              searchable={false}
+            />
+          </FilterGroup>
+        </>
+      )}
     </FiltersSheet>
   );
 }

@@ -41,6 +41,44 @@ export const MemberCardName = styled.span`
   color: ${({ theme }) => theme.colors.ink};
 `;
 
+export const CoupleGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${({ theme }) => theme.spacing.md};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
+
+export const CoupleCard = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: ${({ theme }) => theme.spacing.xs};
+  border: 1px solid ${({ theme }) => theme.colors.hairline};
+  border-radius: 14px;
+  background: ${({ theme }) => theme.colors.canvas};
+`;
+
+export const CouplePerson = styled.div<{ $clickable: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  min-width: 0;
+  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.sm};
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font: inherit;
+  text-align: center;
+  cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
+
+  &:hover {
+    background: ${({ theme, $clickable }) => ($clickable ? theme.colors.surfaceSoft : 'transparent')};
+  }
+`;
+
 export const ViewRow = styled.div`
   display: flex;
   justify-content: flex-end;

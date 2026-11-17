@@ -46,4 +46,4 @@ export const useMembershipAlerts = (personId: string) =>
 export const useFamily = (personId: string) =>
   useQuery(queryKeys.personFamily(personId), () => getFamily(personId), { enabled: !!personId });
 
-export const useFamilyTraits = () => useQuery(queryKeys.familyTraits, listFamilyTraits);
+export const useFamilyTraits = (enabled = true) => useQuery(queryKeys.familyTraits, listFamilyTraits, { enabled });

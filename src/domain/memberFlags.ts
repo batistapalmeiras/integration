@@ -10,6 +10,10 @@ export const MEMBER_FLAG_FILTER_HINTS: Record<MemberFlag, string> = {
   absent: 'Quem está faltando com frequência e foi sinalizado no perfil.',
 };
 
+export const COUPLE_FLAG_FILTER_HINTS: Record<MemberFlag, string> = {
+  absent: 'Casais em que pelo menos um dos dois foi sinalizado no perfil.',
+};
+
 export const MEMBER_FLAG_DESCRIPTIONS: Record<MemberFlag, string> = {
   absent: 'Está faltando com frequência e precisa de acompanhamento.',
 };

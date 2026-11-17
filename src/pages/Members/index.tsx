@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, Pagination, SearchInput, Skeleton, text, useAuthCtx, useMediaQuery, useModal } from 'bp-kit';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Users } from 'lucide-react';
 // Components
-import { MemberPhoto, PhotoName } from '../../components/MemberPhoto';
+import { CountBadge } from '../../components/CountBadge';
+import { PhotoName } from '../../components/MemberPhoto';
 import { ListView, ViewToggle } from '../../components/ViewToggle';
 import { PageHeader } from '../../components/PageHeader';
 import { useHideModuleBar } from '../../components/Layout/moduleBar';
@@ -21,14 +22,20 @@ import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 import { fullRowsPageSize, useGridColumns } from '../../lib/useGridColumns';
+import { CoupleCards, MemberTileContent } from './components/MemberEntries';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
 import { MembersTopBar } from './components/MembersTopBar';
 import { useMembers } from './hooks/useMembers';
 import { membersView } from './persistence';
-import { MemberCard, MemberCardName, MemberGrid, ViewRow } from './styles';
+import { MemberCard, MemberGrid, ViewRow } from './styles';
 
 const GRID_PAGE_TARGET = 15;
 const TOP_BAR_HEIGHT = 64;
+
+function emptyDescription(coupled: boolean, hasFilter: boolean): string {
+  if (hasFilter) return `Nenhum ${coupled ? 'casal' : 'membro'} encontrado para os filtros aplicados.`;
+  return coupled ? 'Casais entre membros aparecerão aqui.' : 'Membros confirmados aparecerão aqui.';
+}
 
 export function MembersPage() {
   const navigate = useNavigate();
@@ -40,8 +47,11 @@ export function MembersPage() {
   useHideModuleBar(mobile);
   const [view, setView] = useState<ListView>(() => membersView.load() ?? 'list');
   const [gridColumns, gridRef] = useGridColumns();
+  const canOpenRecord = user?.role === UserRole.Pastor;
   const {
+    grouping,
     members,
+    couples,
     totalCount,
     page,
     totalPages,
@@ -54,14 +64,17 @@ export function MembersPage() {
     hasFilter,
     loading,
     error,
-  } = useMembers(view === 'grid' ? fullRowsPageSize(gridColumns, GRID_PAGE_TARGET) : undefined);
-  const canOpenRecord = user?.role === UserRole.Pastor;
-  const photoSet = useMemberPhotoUrls(
-    photoOwnersOf(members),
-    ['thumb', 'photo'],
-  ).data;
-  const photoUrls = (view === 'grid' ? photoSet?.photo : photoSet?.thumb) ?? {};
+  } = useMembers(
+    (current) =>
+      current === 'couple' || view === 'grid' ? fullRowsPageSize(gridColumns, GRID_PAGE_TARGET) : undefined,
+    canOpenRecord,
+  );
+  const coupled = grouping === 'couple';
+  const shownView: ListView = coupled ? 'grid' : view;
+  const photoSet = useMemberPhotoUrls(photoOwnersOf(coupled ? couples.flat() : members), ['thumb', 'photo']).data;
+  const photoUrls = (shownView === 'grid' ? photoSet?.photo : photoSet?.thumb) ?? {};
   const openMember = (memberId: string) => navigate(`${AppRoute.Members}/${memberId}`);
+  const onOpen = canOpenRecord ? openMember : undefined;
 
   const changeView = (next: ListView) => {
     setView(next);
@@ -72,6 +85,8 @@ export function MembersPage() {
     open(
       <MembersFiltersModal
         close={close}
+        grouping={grouping}
+        couplesAllowed={canOpenRecord}
         filters={filters}
         onApply={setFilters}
       />,
@@ -93,7 +108,13 @@ export function MembersPage() {
 
       {mobile && <PageHeader title="Membros" />}
 
-      {!loading && !error && <PeopleCount count={totalCount} />}
+      {!loading &&
+        !error &&
+        (coupled ? (
+          <CountBadge icon={Users} count={totalCount} singular="casal" plural="casais" />
+        ) : (
+          <PeopleCount count={totalCount} />
+        ))}
 
       <SearchFiltersRow ref={searchRowRef}>
         <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
@@ -103,9 +124,11 @@ export function MembersPage() {
         </Button>
       </SearchFiltersRow>
 
-      <ViewRow>
-        <ViewToggle value={view} onChange={changeView} />
-      </ViewRow>
+      {!coupled && (
+        <ViewRow>
+          <ViewToggle value={view} onChange={changeView} />
+        </ViewRow>
+      )}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -113,16 +136,15 @@ export function MembersPage() {
 
       {!loading && !error && totalCount === 0 && (
         <Empty
-          title="Nenhum membro encontrado"
-          description={
-            hasFilter ? 'Nenhum membro encontrado para os filtros aplicados.' : 'Membros confirmados aparecerão aqui.'
-          }
+          title={coupled ? 'Nenhum casal encontrado' : 'Nenhum membro encontrado'}
+          description={emptyDescription(coupled, hasFilter)}
         />
       )}
 
       {!loading && !error && totalCount > 0 && (
         <>
-          {view === 'grid' ? (
+          {coupled && <CoupleCards couples={couples} photoUrls={photoUrls} onOpen={onOpen} gridRef={gridRef} />}
+          {!coupled && view === 'grid' && (
             <MemberGrid ref={gridRef}>
               {members.map((member) => (
                 <MemberCard
@@ -132,15 +154,12 @@ export function MembersPage() {
                   $clickable={canOpenRecord}
                   onClick={canOpenRecord ? () => openMember(member.id) : undefined}
                 >
-                  <MemberPhoto url={photoUrls[member.id] ?? null} size={88} />
-                  <MemberCardName>{member.name}</MemberCardName>
-                  <TonePill $tone={MEMBERSHIP_STATUS_TONES[member.membership_status]}>
-                    {MEMBERSHIP_STATUS_LABELS[member.membership_status]}
-                  </TonePill>
+                  <MemberTileContent member={member} photoUrl={photoUrls[member.id] ?? null} />
                 </MemberCard>
               ))}
             </MemberGrid>
-          ) : (
+          )}
+          {shownView === 'list' && (
             <TableWrapper>
               <Table>
                 <thead>

@@ -3,6 +3,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // Local
 import { MembersFiltersModal } from '../../../src/pages/Members/components/MembersFiltersModal';
+import { NO_MEMBER_FILTERS } from '../../../src/pages/Members/filters';
 import { UserRole } from '../../../src/types/enums';
 import { renderScreen } from '../../support/render';
 
@@ -12,7 +13,9 @@ describe('members filters modal', () => {
     renderScreen(
       <MembersFiltersModal
         close={vi.fn()}
-        filters={{ status: [], entryType: [], gender: [], maritalStatus: [], ageGroup: [], flag: [] }}
+        grouping="individual"
+        couplesAllowed
+        filters={NO_MEMBER_FILTERS}
         onApply={onApply}
       />,
       { role: UserRole.Pastor },
@@ -21,7 +24,7 @@ describe('members filters modal', () => {
     await userEvent.click(screen.getByRole('checkbox', { name: /Membro ausente/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 
-    expect(onApply).toHaveBeenCalledWith({ status: [], entryType: [], gender: [], maritalStatus: [], ageGroup: [], flag: ['absent'] });
+    expect(onApply).toHaveBeenCalledWith('individual', { ...NO_MEMBER_FILTERS, flag: ['absent'] });
   });
 
   it('filters by age group', async () => {
@@ -29,7 +32,9 @@ describe('members filters modal', () => {
     renderScreen(
       <MembersFiltersModal
         close={vi.fn()}
-        filters={{ status: [], entryType: [], gender: [], maritalStatus: [], ageGroup: [], flag: [] }}
+        grouping="individual"
+        couplesAllowed
+        filters={NO_MEMBER_FILTERS}
         onApply={onApply}
       />,
       { role: UserRole.Pastor },
@@ -39,7 +44,7 @@ describe('members filters modal', () => {
     await userEvent.click(screen.getByRole('checkbox', { name: 'Jovens (18 a 29)' }));
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 
-    expect(onApply).toHaveBeenCalledWith({ status: [], entryType: [], gender: [], maritalStatus: [], ageGroup: ['youth'], flag: [] });
+    expect(onApply).toHaveBeenCalledWith('individual', { ...NO_MEMBER_FILTERS, ageGroup: ['youth'] });
   });
 
   it('picks one gender at a time, with everyone as the default', async () => {
@@ -47,7 +52,9 @@ describe('members filters modal', () => {
     renderScreen(
       <MembersFiltersModal
         close={vi.fn()}
-        filters={{ status: [], entryType: [], gender: [], maritalStatus: [], ageGroup: [], flag: [] }}
+        grouping="individual"
+        couplesAllowed
+        filters={NO_MEMBER_FILTERS}
         onApply={onApply}
       />,
       { role: UserRole.Pastor },
@@ -58,13 +65,45 @@ describe('members filters modal', () => {
     await userEvent.click(screen.getByRole('radio', { name: 'Feminino' }));
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 
-    expect(onApply).toHaveBeenCalledWith({
-      status: [],
-      entryType: [],
-      gender: ['female'],
-      maritalStatus: [],
-      ageGroup: [],
-      flag: [],
-    });
+    expect(onApply).toHaveBeenCalledWith('individual', { ...NO_MEMBER_FILTERS, gender: ['female'] });
+  });
+
+  it('switches to couples, swapping the personal filters for the family ones', async () => {
+    const onApply = vi.fn();
+    renderScreen(
+      <MembersFiltersModal
+        close={vi.fn()}
+        grouping="individual"
+        couplesAllowed
+        filters={{ ...NO_MEMBER_FILTERS, gender: ['female'], status: ['active'] }}
+        onApply={onApply}
+      />,
+      { role: UserRole.Pastor },
+    );
+
+    await userEvent.click(screen.getByRole('radio', { name: 'Casal' }));
+
+    expect(screen.queryByRole('radio', { name: 'Feminino' })).not.toBeInTheDocument();
+    expect(screen.getByText('Casais em que pelo menos um dos dois foi sinalizado no perfil.')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('radio', { name: 'Com filhos' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
+
+    expect(onApply).toHaveBeenCalledWith('couple', { ...NO_MEMBER_FILTERS, status: ['active'], children: ['with'] });
+  });
+
+  it('hides the couple toggle from who cannot see families', () => {
+    renderScreen(
+      <MembersFiltersModal
+        close={vi.fn()}
+        grouping="individual"
+        couplesAllowed={false}
+        filters={NO_MEMBER_FILTERS}
+        onApply={vi.fn()}
+      />,
+      { role: UserRole.Pastor },
+    );
+
+    expect(screen.queryByRole('radio', { name: 'Casal' })).not.toBeInTheDocument();
   });
 });
