@@ -31,7 +31,7 @@ describe('multi select', () => {
     expect(screen.getByRole('button', { name: 'Ministérios' })).toHaveTextContent('60+, Café Integração e mais 1');
   });
 
-  it('searches inside the open list and keeps the search while checking', async () => {
+  it('closes the list after picking a searched item', async () => {
     renderScreen(<Field initial={[]} />, { role: UserRole.Pastor });
 
     expect(screen.getByRole('button', { name: 'Ministérios' })).toHaveTextContent('Nenhum por enquanto');
@@ -42,7 +42,18 @@ describe('multi select', () => {
     expect(screen.queryByRole('checkbox', { name: '60+' })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('checkbox', { name: 'Louvor' }));
 
-    expect(screen.getByRole('searchbox', { name: 'Buscar pelo Ministério…' })).toHaveValue('lou');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ministérios' })).toHaveTextContent('Louvor');
+  });
+
+  it('keeps the list open to pick several items while the search is empty', async () => {
+    renderScreen(<Field initial={[]} />, { role: UserRole.Pastor });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Ministérios' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: '60+' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Louvor' }));
+
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ministérios' })).toHaveTextContent('60+, Louvor');
   });
 });
