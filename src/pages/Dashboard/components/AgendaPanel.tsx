@@ -44,15 +44,18 @@ export function cohortEntry(cohort: UpcomingCohort): AgendaEntry {
   };
 }
 
+export const AGENDA_TITLE = 'Próximos dias';
+
 interface Props {
   entries: AgendaEntry[];
   emptyText: string;
+  titled?: boolean;
 }
 
-export function AgendaPanel({ entries, emptyText }: Props) {
+export function AgendaPanel({ entries, emptyText, titled = true }: Props) {
   return (
     <Panel aria-labelledby="agenda">
-      <PanelTitle id="agenda">Próximos dias</PanelTitle>
+      {titled && <PanelTitle id="agenda">{AGENDA_TITLE}</PanelTitle>}
       {entries.length === 0 && <PanelText>{emptyText}</PanelText>}
       <AgendaList>
         {entries.map((entry) => (

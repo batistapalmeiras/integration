@@ -45,13 +45,6 @@ export type Database = {
             foreignKeyName: "coffee_attendance_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "coffee_attendance_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -143,13 +136,6 @@ export type Database = {
             foreignKeyName: "contact_attempts_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "contact_attempts_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -222,13 +208,6 @@ export type Database = {
             foreignKeyName: "enrollments_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "enrollments_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -262,13 +241,6 @@ export type Database = {
             foreignKeyName: "family_hidden_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "family_hidden_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -278,13 +250,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "family_hidden_relative_id_fkey"
-            columns: ["relative_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
           },
           {
             foreignKeyName: "family_hidden_relative_id_fkey"
@@ -326,13 +291,6 @@ export type Database = {
             foreignKeyName: "family_links_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "family_links_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -342,13 +300,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "family_links_relative_id_fkey"
-            columns: ["relative_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
           },
           {
             foreignKeyName: "family_links_relative_id_fkey"
@@ -498,13 +449,6 @@ export type Database = {
             foreignKeyName: "member_events_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "member_events_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -543,13 +487,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "member_flags_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
           },
           {
             foreignKeyName: "member_flags_person_id_fkey"
@@ -630,13 +567,6 @@ export type Database = {
             foreignKeyName: "member_profiles_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: true
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "member_profiles_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: true
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -669,13 +599,6 @@ export type Database = {
           resolved_by?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "membership_alert_resolutions_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
           {
             foreignKeyName: "membership_alert_resolutions_person_id_fkey"
             columns: ["person_id"]
@@ -774,13 +697,6 @@ export type Database = {
             foreignKeyName: "parent_links_child_id_fkey"
             columns: ["child_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "parent_links_child_id_fkey"
-            columns: ["child_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -790,13 +706,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "parent_links_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
           },
           {
             foreignKeyName: "parent_links_parent_id_fkey"
@@ -851,13 +760,6 @@ export type Database = {
             foreignKeyName: "pastoral_notes_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "pastoral_notes_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -886,7 +788,6 @@ export type Database = {
           name: string
           origin: string
           phone: string | null
-          search_name: string | null
           signup_window_from: string | null
           status: string
           updated_at: string
@@ -908,7 +809,6 @@ export type Database = {
           name: string
           origin?: string
           phone?: string | null
-          search_name?: string | null
           signup_window_from?: string | null
           status?: string
           updated_at?: string
@@ -930,7 +830,6 @@ export type Database = {
           name?: string
           origin?: string
           phone?: string | null
-          search_name?: string | null
           signup_window_from?: string | null
           status?: string
           updated_at?: string
@@ -970,13 +869,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ministries"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_ministries_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
           },
           {
             foreignKeyName: "person_ministries_person_id_fkey"
@@ -1045,13 +937,6 @@ export type Database = {
             foreignKeyName: "person_sensitive_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: true
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "person_sensitive_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: true
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -1081,13 +966,6 @@ export type Database = {
           small_group_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "person_small_groups_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
           {
             foreignKeyName: "person_small_groups_person_id_fkey"
             columns: ["person_id"]
@@ -1141,13 +1019,6 @@ export type Database = {
             foreignKeyName: "profiles_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: true
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "profiles_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: true
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -1183,13 +1054,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "person_small_groups"
             referencedColumns: ["person_id", "small_group_id"]
-          },
-          {
-            foreignKeyName: "small_group_roles_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
           },
           {
             foreignKeyName: "small_group_roles_person_id_fkey"
@@ -1256,13 +1120,6 @@ export type Database = {
             foreignKeyName: "spouse_links_person_a_id_fkey"
             columns: ["person_a_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "spouse_links_person_a_id_fkey"
-            columns: ["person_a_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -1272,13 +1129,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "spouse_links_person_b_id_fkey"
-            columns: ["person_b_id"]
-            isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
           },
           {
             foreignKeyName: "spouse_links_person_b_id_fkey"
@@ -1336,13 +1186,6 @@ export type Database = {
             foreignKeyName: "status_history_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "status_history_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -1392,13 +1235,6 @@ export type Database = {
             foreignKeyName: "visitor_events_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "visitor_events_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -1433,13 +1269,6 @@ export type Database = {
             foreignKeyName: "enrollments_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
-            referencedRelation: "member_pendencies"
-            referencedColumns: ["person_id"]
-          },
-          {
-            foreignKeyName: "enrollments_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
             referencedRelation: "membership_alerts"
             referencedColumns: ["person_id"]
           },
@@ -1451,16 +1280,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      member_pendencies: {
-        Row: {
-          membership_status: string | null
-          missing_fields: string[] | null
-          name: string | null
-          person_id: string | null
-          search_name: string | null
-        }
-        Relationships: []
       }
       membership_alerts: {
         Row: {
@@ -1747,7 +1566,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      search_text: { Args: { p_text: string }; Returns: string }
       service_sunday: { Args: { p_at: string }; Returns: string }
       set_family: {
         Args: {

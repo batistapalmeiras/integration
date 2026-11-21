@@ -113,14 +113,14 @@ export const Detail = styled.span`
 export const PastorGrid = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: 'members' 'birthdays' 'agenda' 'title' 'funnel';
+  grid-template-areas: 'members' 'birthdays' 'agenda-title' 'agenda' 'title' 'funnel';
   gap: ${({ theme }) => theme.spacing.md};
 
   @container dashboard (min-width: 720px) {
     grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr);
     grid-template-areas:
       'members birthdays'
-      '. title'
+      'agenda-title title'
       'agenda funnel';
   }
 `;
@@ -137,8 +137,8 @@ export const GridArea = styled.div<{ $area: string }>`
   }
 `;
 
-export const FunnelTitle = styled(PanelTitle)`
-  grid-area: title;
+export const AreaTitle = styled(PanelTitle)<{ $area: string }>`
+  grid-area: ${({ $area }) => $area};
   margin-top: ${({ theme }) => theme.spacing.sm};
 `;
 
