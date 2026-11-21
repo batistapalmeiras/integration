@@ -24,6 +24,4 @@ yarn-error.log*
 # Supabase CLI local cache
 supabase/.temp
 
-supabase/schema.sql
 docs/
-supabase/migrations/
