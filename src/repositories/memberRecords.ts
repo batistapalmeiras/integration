@@ -7,75 +7,18 @@ import {
   MemberProfile,
   MemberRecord,
   MembershipStatus,
-  PendencyField,
   toGender,
   toMaritalStatus,
   toMembershipStatus,
-  toPendencyField,
 } from '../domain/memberRecords';
 import { EntryType, toEntryType } from '../types/church';
 import { groupNames } from '../domain/communityGroups';
 import { CouncilDate } from '../domain/councils';
-import { isMemberFlag, MemberFlag } from '../domain/memberFlags';
+import { isMemberFlag, MemberFlag, MemberFlagMark } from '../domain/memberFlags';
+import { isDirectSignup } from '../domain/origin';
 import { PersonSensitive } from '../domain/personSensitive';
-import { nameFilter, phoneDigits } from '../domain/search';
 import { supabase } from '../lib/supabase';
 import { PhotoOwner, photoOwnerOf } from './memberPhotos';
-
-interface MemberPendency {
-  person_id: string;
-  name: string;
-  membership_status: MembershipStatus;
-  missing_fields: PendencyField[];
-}
-
-interface MemberPendencyPage {
-  rows: MemberPendency[];
-  total: number;
-}
-
-async function personIdsByPhone(search: string): Promise<string[]> {
-  const digits = phoneDigits(search);
-  if (!digits) return [];
-  const { data, error } = await supabase
-    .from('people')
-    .select('id')
-    .eq('status', 'member')
-    .ilike('phone', `%${digits}%`);
-  if (error) throw error;
-  return (data ?? []).map((row) => row.id);
-}
-
-export async function listMemberPendencies(filters: {
-  field: PendencyField | null;
-  search: string;
-  page: number;
-  pageSize: number;
-}): Promise<MemberPendencyPage> {
-  let query = supabase.from('member_pendencies').select('*', { count: 'exact' }).order('name');
-  if (filters.field) query = query.contains('missing_fields', [filters.field]);
-  if (filters.search) {
-    const ids = await personIdsByPhone(filters.search);
-    const byName = nameFilter(filters.search);
-    query = query.or(ids.length > 0 ? `${byName},person_id.in.(${ids.join(',')})` : byName);
-  }
-  const from = (filters.page - 1) * filters.pageSize;
-  const { data, count, error } = await query.range(from, from + filters.pageSize - 1);
-  if (error) throw error;
-  const rows = (data ?? []).flatMap((row) =>
-    row.person_id && row.name && row.membership_status
-      ? [
-          {
-            person_id: row.person_id,
-            name: row.name,
-            membership_status: toMembershipStatus(row.membership_status),
-            missing_fields: (row.missing_fields ?? []).map(toPendencyField),
-          },
-        ]
-      : [],
-  );
-  return { rows, total: count ?? 0 };
-}
 
 export async function countMembers(): Promise<number> {
   const { count, error } = await supabase
@@ -176,11 +119,11 @@ export interface MemberPage {
   record: MemberRecord;
   info: MemberRecordInfo;
   community: MemberCommunity;
-  flags: MemberFlag[];
+  flags: MemberFlagMark[];
 }
 
 const MEMBER_PAGE_COLUMNS =
-  'name, phone, email, membership_status, entry_type, council_id, created_at, origin, visited_on, membership_interest_sent_at, council:councils(id, meeting_date), member_profiles(*), person_sensitive(birth_date, origin_church), person_small_groups!person_small_groups_person_id_fkey(created_at, small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(created_at, ministry:ministries!person_ministries_ministry_id_fkey(id, name)), member_flags(flag)';
+  'name, phone, email, membership_status, entry_type, council_id, created_at, origin, visited_on, membership_interest_sent_at, council:councils(id, meeting_date), member_profiles(*), person_sensitive(birth_date, origin_church), person_small_groups!person_small_groups_person_id_fkey(created_at, small_group:small_groups!person_small_groups_small_group_id_fkey(id, name)), person_ministries(created_at, ministry:ministries!person_ministries_ministry_id_fkey(id, name)), member_flags(flag, created_at)';
 
 export async function getMemberPage(personId: string): Promise<MemberPage> {
   const [memberResult, roles, ministryLeaders] = await Promise.all([
@@ -235,7 +178,9 @@ export async function getMemberPage(personId: string): Promise<MemberPage> {
       hostOfSmallGroupIds: roles.data.filter((row) => row.role === 'host').map((row) => row.small_group_id),
       leaderOfMinistryIds: ministryLeaders.data.map((row) => row.ministry_id),
     },
-    flags: member.member_flags.map((row) => row.flag).filter(isMemberFlag),
+    flags: member.member_flags.flatMap(({ flag, created_at }) =>
+      isMemberFlag(flag) ? [{ flag, flaggedAt: created_at }] : [],
+    ),
   };
 }
 
@@ -286,17 +231,18 @@ export interface MemberRow {
   birthDate: string | null;
   gender: Gender | null;
   maritalStatus: MaritalStatus | null;
+  acceptedOn: string | null;
 }
 
 export async function listMemberRows(): Promise<MemberRow[]> {
   const { data, error } = await supabase
     .from('people')
-    .select('id, name, phone, entry_type, membership_status, member_profiles(photo_updated_at, photo_folder, gender, marital_status), member_flags(flag), person_sensitive(birth_date)')
+    .select('id, name, phone, entry_type, membership_status, origin, council:councils!people_council_id_fkey(meeting_date), member_profiles(photo_updated_at, photo_folder, gender, marital_status), member_flags(flag), person_sensitive(birth_date)')
     .eq('status', 'member')
     .order('name', { ascending: true });
   if (error) throw error;
   return (data ?? []).map(
-    ({ member_profiles: profile, member_flags: flags, person_sensitive: sensitive, ...row }) => ({
+    ({ member_profiles: profile, member_flags: flags, person_sensitive: sensitive, origin, council, ...row }) => ({
       ...row,
       entry_type: toEntryType(row.entry_type),
       membership_status: toMembershipStatus(row.membership_status ?? ''),
@@ -305,6 +251,7 @@ export async function listMemberRows(): Promise<MemberRow[]> {
       birthDate: sensitive?.birth_date ?? null,
       gender: toGender(profile?.gender ?? null),
       maritalStatus: toMaritalStatus(profile?.marital_status ?? null),
+      acceptedOn: isDirectSignup(origin) ? null : (council?.meeting_date ?? null),
     }),
   );
 }

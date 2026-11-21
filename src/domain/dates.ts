@@ -25,6 +25,14 @@ export function todayKey(): string {
   return timestampDateKey(new Date().toISOString());
 }
 
+export function monthsBefore(dateKey: string, months: number): string {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const target = new Date(Date.UTC(year, month - 1 - months, 1));
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  target.setUTCDate(Math.min(day, lastDay));
+  return target.toISOString().slice(0, 10);
+}
+
 export function weekdayLabel(dateKey: string): string {
   const weekday = new Date(`${dateKey}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long' });
   return weekday.charAt(0).toUpperCase() + weekday.slice(1).replace('-feira', '');

@@ -2,7 +2,6 @@
 import { TableRow, TableUpdate } from '../lib/database.types';
 import {
   comparePeopleByPipeline,
-  INTEGRATION_STATUSES,
   Person,
   PersonStatus,
   toPersonStatus,
@@ -10,7 +9,6 @@ import {
 } from '../types/person';
 import { groupNames } from '../domain/communityGroups';
 import { timestampDateKey } from '../domain/dates';
-import { nameOrPhoneFilter } from '../domain/search';
 import { supabase } from '../lib/supabase';
 
 const toPerson = (row: TableRow<'people'>): Person => ({ ...row, status: toPersonStatus(row.status) });
@@ -21,48 +19,6 @@ export async function listVisitors(): Promise<Person[]> {
   const { data, error } = await supabase.from('people').select('*').in('status', VISIBLE_STATUSES);
   if (error) throw error;
   return data.map(toPerson).sort(comparePeopleByPipeline);
-}
-
-export interface ReportFilters {
-  statusFilter: PersonStatus[];
-  cohortFilter: string;
-  search: string;
-}
-
-export async function listPeople({ statusFilter, cohortFilter, search }: ReportFilters): Promise<PersonRow[]> {
-  let cohortPersonIds: string[] | null = null;
-  if (cohortFilter !== 'all') {
-    const { data, error } = await supabase
-      .from('enrollments')
-      .select('person_id, cohort:cohorts!inner(name)')
-      .eq('cohort.name', cohortFilter);
-    if (error) throw error;
-    cohortPersonIds = (data ?? []).map((row) => row.person_id);
-    if (cohortPersonIds.length === 0) return [];
-  }
-
-  let query = supabase
-    .from('people')
-    .select('id,name,status,whatsapp_opened_at,class_invite_sent_at,membership_interest_sent_at')
-    .in('status', statusFilter.length > 0 ? statusFilter : INTEGRATION_STATUSES);
-  if (search) query = query.or(nameOrPhoneFilter(search));
-  if (cohortPersonIds) query = query.in('id', cohortPersonIds);
-
-  const { data, error } = await query;
-  if (error) throw error;
-
-  return (data ?? [])
-    .map((person) => ({ ...person, status: toPersonStatus(person.status) }))
-    .sort(comparePeopleByPipeline);
-}
-
-export interface PersonRow {
-  id: string;
-  name: string;
-  status: PersonStatus;
-  whatsapp_opened_at: string | null;
-  class_invite_sent_at: string | null;
-  membership_interest_sent_at: string | null;
 }
 
 export interface NewVisitor {

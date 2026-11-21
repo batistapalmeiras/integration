@@ -13,12 +13,12 @@ export const Hero = styled.div`
 export const Layout = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: 'action' 'side' 'notes';
+  grid-template-areas: 'action' 'side' 'notes' 'history';
   gap: ${({ theme }) => theme.spacing.base};
 
   @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
     grid-template-columns: minmax(0, 1fr) 300px;
-    grid-template-areas: 'action side' 'notes side';
+    grid-template-areas: 'action side' 'notes side' 'history side';
     align-items: start;
   }
 `;
@@ -46,6 +46,11 @@ export const SideArea = styled.div`
 
 export const NotesArea = styled.div`
   grid-area: notes;
+  min-width: 0;
+`;
+
+export const HistoryArea = styled.div`
+  grid-area: history;
   min-width: 0;
 `;
 

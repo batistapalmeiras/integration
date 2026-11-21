@@ -5,6 +5,7 @@ import { pickKeys, useListParams } from '../../../lib/useListParams';
 import { AGE_GROUP_NAMES } from '../../../domain/ageGroups';
 import { MemberGrouping, pairCouples } from '../../../domain/couples';
 import { todayKey } from '../../../domain/dates';
+import { RECENT_ACCEPTANCE_LABELS } from '../../../domain/memberAcceptance';
 import { MEMBER_FLAG_LABELS } from '../../../domain/memberFlags';
 import { GENDER_LABELS, MARITAL_STATUS_LABELS, MEMBERSHIP_STATUS_LABELS } from '../../../domain/memberRecords';
 import { ENTRY_TYPE_LABELS } from '../../../types/church';
@@ -28,6 +29,7 @@ export function useMembers(pageSizeOf: (grouping: MemberGrouping) => number | un
     maritalStatus: pickKeys(list.filter('maritalStatus'), MARITAL_STATUS_LABELS),
     ageGroup: pickKeys(list.filter('ageGroup'), AGE_GROUP_NAMES),
     flag: pickKeys(list.filter('flag'), MEMBER_FLAG_LABELS),
+    recent: pickKeys(list.filter('recent'), RECENT_ACCEPTANCE_LABELS),
   });
   const activeFilterCount = activeFilterCountOf(filters);
   const rows = query.data ?? [];

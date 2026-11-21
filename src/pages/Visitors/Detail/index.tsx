@@ -22,7 +22,7 @@ import { PersonDetailsCard } from './components/PersonDetailsCard';
 import { ProgressStepper } from './components/ProgressStepper';
 import { VisitHistory } from './components/VisitHistory';
 import { useVisitorMenu } from './components/useVisitorMenu';
-import { ActionArea, Hero, Layout, NotesArea, SideArea, StatusLine } from './styles';
+import { ActionArea, Hero, HistoryArea, Layout, NotesArea, SideArea, StatusLine } from './styles';
 
 export function VisitorDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,7 +31,15 @@ export function VisitorDetailPage() {
   const { person, loading, error } = detail;
 
   if (loading) return <Skeleton $h="320px" />;
-  if (error || !person) return <NotFound title="Cadastro não encontrado" description={error ?? ''} backTo={AppRoute.Visitors} backLabel="Voltar para visitantes" />;
+  if (error || !person)
+    return (
+      <NotFound
+        title="Cadastro não encontrado"
+        description={error ?? ''}
+        backTo={AppRoute.Visitors}
+        backLabel="Voltar para visitantes"
+      />
+    );
   if (person.status === 'member') {
     if (user?.role === UserRole.Pastor) return <Navigate to={`${AppRoute.Members}/${person.id}`} replace />;
     return <Empty title={`${person.name} já é membro`} description="O perfil de membro fica com o pastor." />;
@@ -80,7 +88,6 @@ function VisitorDetailContent({ detail, person }: ContentProps) {
       <Layout>
         <ActionArea>
           <NextStep detail={detail} onContactRegistered={() => navigate(AppRoute.Visitors)} />
-          <VisitHistory person={person} profile={detail.profile} />
         </ActionArea>
         <SideArea>
           <ContactPanel person={person} onEdit={menu.openEdit} />
@@ -89,6 +96,9 @@ function VisitorDetailContent({ detail, person }: ContentProps) {
         <NotesArea>
           <NotesPanel personId={person.id} notes={notes} />
         </NotesArea>
+        <HistoryArea>
+          <VisitHistory person={person} profile={detail.profile} />
+        </HistoryArea>
       </Layout>
       {menu.overlays}
     </WideContent>

@@ -25,7 +25,7 @@ export function AdminDashboard() {
             <HighlightCards
               label="Números da Integração"
               items={[
-                { label: 'Na Integração', value: countInIntegration(funnel), icon: NAV_ITEMS.people.icon },
+                { label: 'Na Integração', value: countInIntegration(funnel), icon: NAV_ITEMS.visitors.icon },
                 {
                   label: 'Em processo de membresia',
                   value: funnel.membership_pending ?? 0,

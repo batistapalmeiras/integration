@@ -8,10 +8,9 @@ import {
   slugTable,
 } from '../../src/lib/pathFilters';
 import { MEMBERS_FILTERS } from '../../src/pages/Members/persistence';
-import { peopleFiltersFor } from '../../src/pages/People/persistence';
 import { VISITOR_FILTERS } from '../../src/pages/Visitors/persistence';
 
-const RESERVED = ['pendencias', 'aniversariantes', 'novo'];
+const RESERVED = ['aniversariantes', 'novo'];
 
 const allSlugs = <K extends string>(filters: PathFilter<K>[]) =>
   filters.flatMap((filter) => ('slugs' in filter ? Object.values(filter.slugs) : []));
@@ -43,15 +42,6 @@ describe('path filters', () => {
     });
   });
 
-  it('reads cohorts by their names', () => {
-    const filters = peopleFiltersFor(['Turma 15/11/2026']);
-    expect(encodePathFilters(filters, { cohort: ['Turma 15/11/2026'] })).toEqual(['turma-15-11-2026']);
-    expect(decodePathFilters(filters, ['integracao', 'turma-15-11-2026']).values).toEqual({
-      status: ['integration'],
-      cohort: ['Turma 15/11/2026'],
-    });
-  });
-
   it('reads dates as day, month and year', () => {
     const filters = [datePathFilter('cafe')];
     expect(encodePathFilters(filters, { cafe: ['2026-12-06'] })).toEqual(['06-12-2026']);
@@ -60,7 +50,7 @@ describe('path filters', () => {
   });
 
   it('gives every option its own slug, apart from the screens next to the lists', () => {
-    for (const filters of [MEMBERS_FILTERS, VISITOR_FILTERS, peopleFiltersFor([])]) {
+    for (const filters of [MEMBERS_FILTERS, VISITOR_FILTERS]) {
       const slugs = allSlugs(filters);
       expect(new Set(slugs).size).toBe(slugs.length);
       expect(slugs.filter((slug) => RESERVED.includes(slug))).toEqual([]);

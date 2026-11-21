@@ -42,8 +42,6 @@ describe('route access', () => {
     expect(canAccess(UserRole.Admin, `${AppRoute.Members}/ativo/batismo`)).toBe(true);
     expect(canAccess(UserRole.Teacher, `${AppRoute.Visitors}/arquivado`)).toBe(false);
     expect(canAccess(UserRole.IntegrationTeam, `${AppRoute.Visitors}/arquivado`)).toBe(true);
-    expect(canAccess(UserRole.Pastor, `${AppRoute.MemberPendencies}/telefone`)).toBe(true);
-    expect(canAccess(UserRole.Admin, `${AppRoute.MemberPendencies}/telefone`)).toBe(false);
   });
 
   it('denies unknown paths and missing roles', () => {

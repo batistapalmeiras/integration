@@ -2,24 +2,26 @@
 import { StatCard, StatLabel, StatValue } from 'bp-kit';
 // Components
 import { IconBadge } from '../../../components/MenuOptions';
+import { NAV_ITEMS } from '../../../routes/navigation';
 import { PersonStatus, STATUS_META } from '../../../types/person';
+import { visitorsPath } from '../../Visitors/persistence';
 // Local
-import { Detail, PanelTitle, Section, StageGrid, StatRow, StatText } from '../styles';
+import { StageGrid, StageLink, StatRow, StatText } from '../styles';
 
 interface FunnelStage {
   status: PersonStatus;
-  owner: string;
+  path: string;
 }
 
 export type FunnelCounts = Partial<Record<PersonStatus, number>>;
 
 const INTEGRATION_FUNNEL: FunnelStage[] = [
-  { status: 'initial_contact', owner: 'Equipe de Integração' },
-  { status: 'retry_contact', owner: 'Equipe de Integração' },
-  { status: 'welcome_coffee', owner: 'Equipe de Integração' },
-  { status: 'pending_signup', owner: 'A própria pessoa' },
-  { status: 'integration', owner: 'Professor' },
-  { status: 'membership_pending', owner: 'Conselho Administrativo' },
+  { status: 'initial_contact', path: visitorsPath({ status: ['initial_contact'] }) },
+  { status: 'retry_contact', path: visitorsPath({ status: ['retry_contact'] }) },
+  { status: 'welcome_coffee', path: NAV_ITEMS.coffee.path },
+  { status: 'pending_signup', path: NAV_ITEMS.coffee.path },
+  { status: 'integration', path: NAV_ITEMS.classes.path },
+  { status: 'membership_pending', path: NAV_ITEMS.membership.path },
 ];
 
 export function countInIntegration(counts: FunnelCounts): number {
@@ -38,13 +40,12 @@ function StageIcon({ status }: { status: PersonStatus }) {
   return <Icon size={22} />;
 }
 
-export function FunnelSection({ counts }: Props) {
+export function FunnelCards({ counts }: Props) {
   return (
-    <Section aria-labelledby="integration">
-      <PanelTitle id="integration">Integração</PanelTitle>
-      <StageGrid>
-        {INTEGRATION_FUNNEL.map((stage) => (
-          <StatCard key={stage.status}>
+    <StageGrid aria-labelledby="integration">
+      {INTEGRATION_FUNNEL.map((stage) => (
+        <StageLink key={stage.status} to={stage.path}>
+          <StatCard>
             <StatRow>
               <IconBadge>
                 <StageIcon status={stage.status} />
@@ -52,12 +53,11 @@ export function FunnelSection({ counts }: Props) {
               <StatText>
                 <StatLabel>{STATUS_META[stage.status].label}</StatLabel>
                 <StatValue>{counts[stage.status] ?? 0}</StatValue>
-                <Detail>{stage.owner}</Detail>
               </StatText>
             </StatRow>
           </StatCard>
-        ))}
-      </StageGrid>
-    </Section>
+        </StageLink>
+      ))}
+    </StageGrid>
   );
 }

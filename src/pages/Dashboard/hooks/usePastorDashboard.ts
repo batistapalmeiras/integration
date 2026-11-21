@@ -1,26 +1,9 @@
 // Local
-import { CommunityOverview } from '../../../domain/communityGroups';
-import { getCommunityOverview } from '../../../repositories/communityGroups';
-import { countMembers } from '../../../repositories/memberRecords';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
-import { IntegrationOverview, loadIntegrationOverview } from './integrationOverview';
-
-interface Overview extends IntegrationOverview {
-  totalMembers: number;
-  community: CommunityOverview;
-}
-
-async function loadOverview(): Promise<Overview> {
-  const [integration, totalMembers, community] = await Promise.all([
-    loadIntegrationOverview(),
-    countMembers(),
-    getCommunityOverview(),
-  ]);
-  return { ...integration, totalMembers, community };
-}
+import { loadIntegrationOverview } from './integrationOverview';
 
 export function usePastorDashboard() {
-  const query = useQuery(queryKeys.pastorDashboard, loadOverview);
+  const query = useQuery(queryKeys.pastorDashboard, loadIntegrationOverview);
   return { overview: query.data ?? null, loading: query.loading, error: errorMessage(query.error) };
 }

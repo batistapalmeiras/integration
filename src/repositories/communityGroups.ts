@@ -4,7 +4,6 @@ import { byName } from '../domain/text';
 import {
   CommunityGroup,
   CommunityGroupWithCount,
-  CommunityOverview,
   GroupInput,
   GroupOption,
   MANUAL_MINISTRY_KIND,
@@ -177,16 +176,6 @@ export async function listMembers({ activeOnly = false } = {}): Promise<PersonIn
   const { data, error } = await filtered.order('name');
   if (error) throw error;
   return (data ?? []).map(toPersonInGroup);
-}
-
-export async function getCommunityOverview(): Promise<CommunityOverview> {
-  const [smallGroups, ministries] = await Promise.all([
-    supabase.from('small_groups').select('id', { count: 'exact', head: true }),
-    supabase.from('ministries').select('id', { count: 'exact', head: true }),
-  ]);
-  const failure = smallGroups.error ?? ministries.error;
-  if (failure) throw failure;
-  return { smallGroups: smallGroups.count ?? 0, ministries: ministries.count ?? 0 };
 }
 
 export async function addPeopleToSmallGroup(groupId: string, personIds: string[]): Promise<void> {

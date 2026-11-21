@@ -19,9 +19,9 @@ import {
   AgendaList,
   AgendaTitle,
   BirthdayHeading,
-  BirthdaysPanel,
   CardLink,
   Detail,
+  Panel,
   PanelText,
   PanelTitle,
 } from '../styles';
@@ -45,7 +45,7 @@ export function BirthdaysHighlight() {
   const shown = upcoming.slice(0, UPCOMING_BIRTHDAYS_LIMIT);
 
   return (
-    <BirthdaysPanel aria-labelledby="birthdays">
+    <Panel aria-labelledby="birthdays">
       <BirthdayHeading>
         <PanelTitle id="birthdays">Aniversariantes de {month}</PanelTitle>
         {monthTotal > 0 && <CardLink to={NAV_ITEMS.birthdays.path}>Ver todos os {monthTotal}</CardLink>}
@@ -69,6 +69,6 @@ export function BirthdaysHighlight() {
           ))}
         </AgendaList>
       )}
-    </BirthdaysPanel>
+    </Panel>
   );
 }

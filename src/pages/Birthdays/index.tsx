@@ -1,7 +1,7 @@
 // React
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // Libs
-import { Button, Empty, maskPhone, Skeleton, text, useToast } from 'bp-kit';
+import { Button, Empty, maskPhone, Skeleton, text, useMediaQuery, useToast } from 'bp-kit';
 import { Copy } from 'lucide-react';
 // Components
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';
@@ -18,14 +18,18 @@ import {
   isBirthdayToday,
   shiftMonth,
 } from '../../domain/birthdays';
-import { monthName, todayKey } from '../../domain/dates';
+import { monthName, shortMonthName, todayKey } from '../../domain/dates';
 import { errorMessage } from '../../lib/queryCache';
 import { useMemberBirthdays } from '../../queries/person';
 import { AppRoute } from '../../routes/paths';
 // Local
-import { BirthdayCard, BirthdayGrid, CountRow, Detail, Name, RowButton } from './styles';
+import { BirthdayCard, BirthdayGrid, CountRow, Detail, MonthButton, MonthTabs, Name, RowButton } from './styles';
 
 const MONTH_PARAM = 'month';
+
+const MONTHS = Array.from({ length: 12 }, (_, index) => index + 1);
+
+const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
 function parseInteger(value: string | null, min: number, max: number): number | null {
   const number = Number(value);
@@ -37,6 +41,7 @@ export function BirthdaysPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data, loading, error } = useMemberBirthdays();
   const { show: showToast, toast } = useToast();
+  const compact = useMediaQuery('(max-width: 1024px)');
 
   const today = todayKey();
   const currentYear = Number(today.slice(0, 4));
@@ -61,13 +66,30 @@ export function BirthdaysPage() {
     <div>
       <PageHeader title={`Aniversariantes ${currentYear}`} back />
 
-      <ArrowSwitcher
-        title={label}
-        previousLabel="Mês anterior"
-        nextLabel="Próximo mês"
-        onPrevious={() => selectMonth(shiftMonth(month, -1))}
-        onNext={() => selectMonth(shiftMonth(month, 1))}
-      />
+      {compact ? (
+        <ArrowSwitcher
+          title={label}
+          previousLabel="Mês anterior"
+          nextLabel="Próximo mês"
+          onPrevious={() => selectMonth(shiftMonth(month, -1))}
+          onNext={() => selectMonth(shiftMonth(month, 1))}
+        />
+      ) : (
+        <MonthTabs aria-label="Mês">
+          {MONTHS.map((item) => (
+            <MonthButton
+              key={item}
+              type="button"
+              aria-label={monthName(item)}
+              aria-pressed={item === month}
+              $selected={item === month}
+              onClick={() => selectMonth(item)}
+            >
+              {capitalize(shortMonthName(item))}
+            </MonthButton>
+          ))}
+        </MonthTabs>
+      )}
 
       {!loading && !error && (
         <CountRow>

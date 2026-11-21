@@ -65,10 +65,6 @@ export const STATUS_LABELS: Record<string, string> = Object.fromEntries(
 
 export const VISITOR_QUEUE_STATUSES: PersonStatus[] = ['initial_contact', 'retry_contact'];
 
-export const INTEGRATION_STATUSES = (Object.keys(STATUS_META) as PersonStatus[]).filter(
-  (status) => status !== 'member',
-);
-
 const AWAITING_REPLY_META = {
   label: 'Aguardando Retorno',
   compactLabel: 'Aguardando',

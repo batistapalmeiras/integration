@@ -37,11 +37,6 @@ export interface CommunityGroupWithCount extends Pick<CommunityGroup, 'id' | 'na
   peopleCount: number;
 }
 
-export interface CommunityOverview {
-  smallGroups: number;
-  ministries: number;
-}
-
 export const percentOf = (part: number, total: number) => (total === 0 ? 0 : Math.round((part / total) * 100));
 
 export interface GroupNames {

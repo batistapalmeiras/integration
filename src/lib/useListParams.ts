@@ -6,7 +6,7 @@ import { decodePathFilters, encodePathFilters, ListFilters, PathFilter } from '.
 import { StoredValue } from './storage';
 import { useDebouncedValue } from './useDebouncedValue';
 
-export const LIST_PAGE_SIZE = 10;
+const LIST_PAGE_SIZE = 10;
 const PAGE_PARAM = 'page';
 const SEARCH_PARAM = 'q';
 

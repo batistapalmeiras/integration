@@ -1,7 +1,6 @@
 // Local
 import { keyParser, optional } from '../lib/parse';
 import { EntryType } from '../types/church';
-import { MEMBERSHIP_ALERT_LABELS, MembershipAlertCode } from './membership';
 import { toOptions } from './text';
 
 export type MembershipStatus = 'active' | 'transferred' | 'removed' | 'deceased';
@@ -42,31 +41,6 @@ export const MARITAL_STATUS_LABELS: Record<MaritalStatus, string> = {
 export const GENDER_OPTIONS = toOptions(GENDER_LABELS);
 
 export const MARITAL_STATUS_OPTIONS = toOptions(MARITAL_STATUS_LABELS);
-
-export type PendencyField =
-  | MembershipAlertCode
-  | 'phone'
-  | 'email'
-  | 'birth_date'
-  | 'gender'
-  | 'marital_status'
-  | 'address'
-  | 'cpf';
-
-export const PENDENCY_LABELS: Record<PendencyField, string> = {
-  ...MEMBERSHIP_ALERT_LABELS,
-  phone: 'Telefone',
-  email: 'E-mail',
-  birth_date: 'Nascimento',
-  gender: 'Sexo',
-  marital_status: 'Estado civil',
-  address: 'Endereço',
-  cpf: 'CPF',
-};
-
-export function isReviewPendency(field: PendencyField): boolean {
-  return field in MEMBERSHIP_ALERT_LABELS;
-}
 
 export interface MemberRecord {
   name: string;
@@ -112,8 +86,6 @@ export type MemberProfile = Pick<
 >;
 
 export const toMembershipStatus = keyParser(MEMBERSHIP_STATUS_LABELS, 'Situação de membresia');
-
-export const toPendencyField = keyParser(PENDENCY_LABELS, 'Pendência');
 
 export const toGender = optional(keyParser(GENDER_LABELS, 'Sexo'));
 

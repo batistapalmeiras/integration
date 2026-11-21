@@ -43,10 +43,24 @@ describe('birthdays page', () => {
     expect(await screen.findByText('Lista copiada')).toBeInTheDocument();
   });
 
-  it('goes from December to January', async () => {
+  it('picks any month from the row of months on the desktop', async () => {
     const user = userEvent.setup();
     renderScreen(<BirthdaysPage />, { role: UserRole.Pastor, route: `${AppRoute.Birthdays}?month=12` });
-    await user.click(await screen.findByRole('button', { name: 'Próximo mês' }));
-    expect(await screen.findByText('Janeiro')).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Dezembro' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: 'Março' }));
+    expect(screen.getByRole('button', { name: 'Março' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('goes from December to January with the arrows on phone and tablet', async () => {
+    const desktopMatchMedia = window.matchMedia;
+    window.matchMedia = (query: string) => ({ ...desktopMatchMedia(query), matches: query.includes('max-width') });
+    try {
+      const user = userEvent.setup();
+      renderScreen(<BirthdaysPage />, { role: UserRole.Pastor, route: `${AppRoute.Birthdays}?month=12` });
+      await user.click(await screen.findByRole('button', { name: 'Próximo mês' }));
+      expect(await screen.findByText('Janeiro')).toBeInTheDocument();
+    } finally {
+      window.matchMedia = desktopMatchMedia;
+    }
   });
 });

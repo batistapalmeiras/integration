@@ -82,6 +82,13 @@ export const HeroCards = styled.div`
   gap: ${({ theme }) => theme.spacing.sm};
 `;
 
+export const FlagDate = styled.span`
+  display: block;
+  margin-top: ${({ theme }) => theme.spacing.xs};
+  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
+  color: ${({ theme }) => theme.colors.muted};
+`;
+
 export const PhotoButton = styled.button<{ $empty: boolean }>`
   grid-area: photo;
   position: relative;

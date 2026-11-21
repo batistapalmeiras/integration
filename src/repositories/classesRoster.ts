@@ -149,12 +149,6 @@ export async function fetchCohortBoard(): Promise<CohortBoard> {
   };
 }
 
-export async function listCohortNames(): Promise<string[]> {
-  const { data, error } = await supabase.from('cohorts').select('name, enrollments!inner(id)').order('name');
-  if (error) throw error;
-  return (data ?? []).map((cohort) => cohort.name);
-}
-
 export async function createCohort(name: string, lessonDates: string[]): Promise<string> {
   const { data, error } = await supabase.rpc('create_cohort', { p_name: name, p_lesson_dates: lessonDates });
   if (error) throw error;

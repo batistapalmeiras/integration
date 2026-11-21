@@ -10,8 +10,6 @@ export const queryKeys = {
   councils: ['people', 'councils'] as const,
   councilRoster: (id: string) => ['people', 'councils', id] as const,
   membershipPendingCount: ['people', 'membership-pending-count'] as const,
-  memberPendencies: (params: object) => ['people', 'member-pendencies', params] as const,
-  peopleList: (params: object) => ['people', 'list', params] as const,
   statusCounts: ['people', 'status-counts'] as const,
   annualYears: ['people', 'annual-years'] as const,
   annualReport: (year: number) => ['people', 'annual-report', year] as const,
@@ -44,7 +42,6 @@ export const queryKeys = {
 
   cohortBoard: ['cohorts', 'board'] as const,
   hasUpcomingCohort: ['cohorts', 'has-upcoming'] as const,
-  cohortNames: ['cohorts', 'names'] as const,
   familyTraits: ['family', 'traits'] as const,
   cohortsReport: ['cohorts', 'report'] as const,
   cohortRoster: (id: string) => ['cohorts', 'roster', id] as const,

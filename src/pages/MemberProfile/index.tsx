@@ -16,7 +16,6 @@ import { CouncilDate } from '../../domain/councils';
 import { DirectSignupFlag } from '../../components/DirectSignupFlag';
 import { TonePill } from '../../components/StatusPill';
 import { formatTimestampDate } from '../../domain/dates';
-import { MEMBER_FLAG_LABELS } from '../../domain/memberFlags';
 import { isDirectSignup } from '../../domain/origin';
 import {
   canLeavePhoneEmpty,
@@ -32,6 +31,7 @@ import { useFamily, useMemberPage, usePersonNotes } from '../../queries/person';
 import { useMinistries, useSmallGroups } from '../../queries/reference';
 import { savePersonCommunity } from '../../repositories/communityGroups';
 import { GroupChecklistModal } from './components/GroupChecklistModal';
+import { MemberFlagsCard } from './components/MemberFlagsCard';
 import { EditSectionModal } from './components/EditSectionModal';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
@@ -129,7 +129,7 @@ export function MemberProfilePage() {
         record={record}
         section={section}
         optionalPhone={canLeavePhoneEmpty(info.origin)}
-        flags={section.id === MEMBERSHIP_SECTION ? flags : undefined}
+        flags={section.id === MEMBERSHIP_SECTION ? flags.map((mark) => mark.flag) : undefined}
         spouse={spouse}
         close={close}
       />,
@@ -188,11 +188,6 @@ export function MemberProfilePage() {
             {MEMBERSHIP_STATUS_LABELS[record.membershipStatus]}
           </TonePill>
           {isDirectSignup(info.origin) && <DirectSignupFlag />}
-          {flags.map((flag) => (
-            <TonePill key={flag} $tone="warning">
-              {MEMBER_FLAG_LABELS[flag]}
-            </TonePill>
-          ))}
           {MEMBERSHIP && (
             <LinkButton icon={<Pencil size={14} />} onClick={() => edit(MEMBERSHIP)}>
               Alterar
@@ -200,6 +195,7 @@ export function MemberProfilePage() {
           )}
         </HeroStatus>
         <HeroCards>
+          <MemberFlagsCard flags={flags} />
           <InfoPanel>
             <InfoLine
               icon={UsersRound}

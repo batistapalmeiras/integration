@@ -1,7 +1,7 @@
 // Libs
 import { parseDateKey, toDateKey } from 'bp-kit';
 // Local
-import { isFutureDate, todayKey } from '../../src/domain/dates';
+import { isFutureDate, monthsBefore, todayKey } from '../../src/domain/dates';
 
 describe('date keys', () => {
   it('round-trips a local date through its yyyy-mm-dd key', () => {
@@ -17,5 +17,16 @@ describe('isFutureDate', () => {
     expect(isFutureDate(today)).toBe(false);
     expect(isFutureDate(new Date(1990, 2, 15))).toBe(false);
     expect(isFutureDate(tomorrow)).toBe(true);
+  });
+});
+
+describe('monthsBefore', () => {
+  it('goes back whole months, across the year', () => {
+    expect(monthsBefore('2026-11-20', 3)).toBe('2026-08-20');
+    expect(monthsBefore('2026-02-10', 3)).toBe('2025-11-10');
+  });
+
+  it('stops at the last day of a shorter month', () => {
+    expect(monthsBefore('2026-05-31', 3)).toBe('2026-02-28');
   });
 });

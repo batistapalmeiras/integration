@@ -83,27 +83,6 @@ export const Td = styled.td<{ $hideOnMobile?: boolean; $truncate?: boolean; $shr
     `}
 `;
 
-export const NameCell = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-`;
-
-export const NameText = styled.span`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-export const Subline = styled.span`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
 export const ReviewFlag = styled.span`
   display: inline-flex;
   align-items: center;

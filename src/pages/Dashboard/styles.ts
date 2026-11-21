@@ -28,10 +28,27 @@ export const StatRow = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
 
-  @container dashboard (max-width: 600px) {
+  @container (max-width: 600px) {
     flex-direction: column;
     align-items: flex-start;
     gap: ${({ theme }) => theme.spacing.sm};
+  }
+`;
+
+export const StageLink = styled(Link)`
+  display: flex;
+  color: inherit;
+  text-decoration: none;
+
+  & > div {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    transition: border-color 0.15s;
+  }
+
+  &:hover > div {
+    border-color: ${({ theme }) => theme.colors.borderStrong};
   }
 `;
 
@@ -61,15 +78,9 @@ export const StageGrid = styled.div`
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: ${({ theme }) => theme.spacing.md};
 
-  @container dashboard (max-width: 720px) {
+  @container (max-width: 720px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-`;
-
-export const Section = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
 `;
 
 export const Panel = styled(Card)`
@@ -99,25 +110,106 @@ export const Detail = styled.span`
   color: ${({ theme }) => theme.colors.muted};
 `;
 
-export const Columns = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
+export const PastorGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'members' 'birthdays' 'agenda' 'title' 'funnel';
   gap: ${({ theme }) => theme.spacing.md};
-  margin-top: ${({ theme }) => theme.spacing.lg};
+
+  @container dashboard (min-width: 720px) {
+    grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr);
+    grid-template-areas:
+      'members birthdays'
+      '. title'
+      'agenda funnel';
+  }
 `;
 
-export const MainColumn = styled.div`
-  flex: 999 1 460px;
-  min-width: 0;
-`;
-
-export const SideColumn = styled.div`
-  flex: 1 1 300px;
-  min-width: 0;
+export const GridArea = styled.div<{ $area: string }>`
+  grid-area: ${({ $area }) => $area};
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.md};
+  min-width: 0;
+
+  & > :first-child {
+    flex: 1;
+  }
+`;
+
+export const FunnelTitle = styled(PanelTitle)`
+  grid-area: title;
+  margin-top: ${({ theme }) => theme.spacing.sm};
+`;
+
+export const FunnelArea = styled.div`
+  grid-area: funnel;
+  container-type: inline-size;
+  min-width: 0;
+  display: flex;
+
+  & > * {
+    flex: 1;
+    grid-auto-rows: 1fr;
+  }
+`;
+
+export const ChurchCard = styled.section`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: ${({ theme }) => theme.spacing.lg};
+  border-radius: ${({ theme }) => theme.rounded.lg};
+  background: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.onPrimary};
+`;
+
+export const ChurchCardIcon = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+  border-radius: ${({ theme }) => theme.rounded.md};
+  background: rgba(255, 255, 255, 0.2);
+`;
+
+export const ChurchCardLabel = styled.h2`
+  margin: 0;
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+`;
+
+export const ChurchCardValue = styled.span`
+  font-size: ${({ theme }) => theme.typography.displayXl.fontSize};
+  font-weight: 700;
+  line-height: 1.1;
+`;
+
+export const ChurchRecent = styled.span`
+  margin: ${({ theme }) => theme.spacing.xs} 0 ${({ theme }) => theme.spacing.base};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 500;
+`;
+
+export const ChurchButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xxs};
+  margin-top: auto;
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base};
+  border-radius: ${({ theme }) => theme.rounded.full};
+  background: ${({ theme }) => theme.colors.canvas};
+  color: ${({ theme }) => theme.colors.luxe};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primarySoft};
+  }
 `;
 
 export const AgendaItem = styled.div`
@@ -144,10 +236,6 @@ export const CardLink = styled(Link)`
   &:hover {
     color: ${({ theme }) => theme.colors.luxe};
   }
-`;
-
-export const BirthdaysPanel = styled(Panel)`
-  margin-top: ${({ theme }) => theme.spacing.md};
 `;
 
 export const BirthdayHeading = styled.div`

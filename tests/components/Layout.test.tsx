@@ -19,15 +19,14 @@ const linksTo = (path: string) =>
 describe('side menu by role', () => {
   it('shows the church area to the pastor', () => {
     renderScreen(<Layout>conteúdo</Layout>, { role: UserRole.Pastor, route: AppRoute.Members });
-    for (const item of ['Membros', 'Pendências', 'Pequenos Grupos', 'Ministérios', 'Aniversariantes']) {
+    for (const item of ['Membros', 'Pequenos Grupos', 'Ministérios', 'Aniversariantes']) {
       expect([item, hasLink(item)]).toEqual([item, true]);
     }
   });
 
-  it('keeps the teacher to classes and people', () => {
+  it('keeps the teacher to classes', () => {
     renderScreen(<Layout>conteúdo</Layout>, { role: UserRole.Teacher, route: AppRoute.Classes });
     expect(hasLink('Turmas')).toBe(true);
-    expect(hasLink('Pessoas')).toBe(true);
     for (const item of ['Visitantes', 'Membros', 'Café', 'Membresia', 'Aniversariantes']) {
       expect([item, hasLink(item)]).toEqual([item, false]);
     }
@@ -37,7 +36,7 @@ describe('side menu by role', () => {
     renderScreen(<Layout>conteúdo</Layout>, { role: UserRole.IntegrationTeam, route: AppRoute.Visitors });
     expect(hasLink('Visitantes')).toBe(true);
     expect(hasLink('Café')).toBe(true);
-    for (const item of ['Membros', 'Membresia', 'Pendências']) {
+    for (const item of ['Membros', 'Membresia']) {
       expect([item, hasLink(item)]).toEqual([item, false]);
     }
     expect(linksTo(AppRoute.Classes)).toBe(false);

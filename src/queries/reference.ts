@@ -1,6 +1,6 @@
 // Local
 import { getUpcomingCoffeeEventDate, hasUpcomingCoffeeEvent } from '../repositories/cafeSchedule';
-import { hasUpcomingCohort, listCohortNames } from '../repositories/classesRoster';
+import { hasUpcomingCohort } from '../repositories/classesRoster';
 import { listMembers, listMinistries, listSmallGroups } from '../repositories/communityGroups';
 import { useQuery } from '../lib/queryCache';
 import { queryKeys, REFERENCE_STALE_TIME } from '../lib/queryKeys';
@@ -13,8 +13,6 @@ export const useMinistries = (enabled = true) =>
 
 export const useMemberNames = (activeOnly = false) =>
   useQuery(queryKeys.memberNames(activeOnly), () => listMembers({ activeOnly }));
-
-export const useCohortNames = () => useQuery(queryKeys.cohortNames, listCohortNames);
 
 export const useHasUpcomingCoffeeEvent = (enabled = true) =>
   useQuery(queryKeys.hasUpcomingCoffeeEvent, hasUpcomingCoffeeEvent, { enabled });
