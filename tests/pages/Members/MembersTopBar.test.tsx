@@ -10,7 +10,7 @@ describe('members top bar', () => {
   it('goes back to the area and shows the filters once the search row is gone', async () => {
     const onFilters = vi.fn();
     renderScreen(<MembersTopBar back title="Igreja" showFilters filterCount={2} onFilters={onFilters} />, {
-      role: UserRole.Pastor,
+      role: UserRole.GeneralAdmin,
     });
 
     expect(screen.getByRole('button', { name: 'Igreja' })).toBeInTheDocument();
@@ -22,7 +22,7 @@ describe('members top bar', () => {
 
   it('keeps only the title while the search row is on screen', () => {
     renderScreen(<MembersTopBar back={false} title="Membros" showFilters={false} filterCount={0} onFilters={vi.fn()} />, {
-      role: UserRole.Pastor,
+      role: UserRole.GeneralAdmin,
     });
 
     expect(screen.getByText('Membros')).toBeInTheDocument();

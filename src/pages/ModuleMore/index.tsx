@@ -1,11 +1,10 @@
 // React
 import { Navigate, useNavigate } from 'react-router-dom';
-// Libs
-import { useAuthCtx } from 'bp-kit';
 // Components
 import { MenuOptionCard, OptionsGrid } from '../../components/MenuOptions';
 import { PageHeader } from '../../components/PageHeader';
-import { findNavAreaById, isNavGroup, MORE_TAB_LABEL, NavItem, navAreasFor } from '../../routes/navigation';
+import { useNavAreas } from '../../features/access/useRole';
+import { findNavAreaById, isNavGroup, MORE_TAB_LABEL, NavItem } from '../../routes/navigation';
 import { AppRoute } from '../../routes/paths';
 // Local
 import { GroupSection, GroupTitle } from './styles';
@@ -16,8 +15,8 @@ interface Props {
 
 export function ModuleMorePage({ areaId }: Props) {
   const navigate = useNavigate();
-  const { user } = useAuthCtx();
-  const area = findNavAreaById(navAreasFor(user?.role), areaId);
+  const navAreas = useNavAreas();
+  const area = findNavAreaById(navAreas, areaId);
 
   if (!area) return <Navigate to={AppRoute.Dashboard} replace />;
 

@@ -16,8 +16,8 @@ function renderAt(route: string, role: UserRole) {
         path="/membros/:id"
         element={
           <IdOrListRoute
-            detail={{ element: <p>Perfil</p>, roles: [UserRole.Pastor] }}
-            list={{ element: <p>Lista</p>, roles: [UserRole.Pastor, UserRole.Admin] }}
+            detail={{ element: <p>Perfil</p>, roles: [UserRole.GeneralAdmin] }}
+            list={{ element: <p>Lista</p>, roles: [UserRole.GeneralAdmin, UserRole.Admin] }}
           />
         }
       />
@@ -29,7 +29,7 @@ function renderAt(route: string, role: UserRole) {
 
 describe('IdOrListRoute', () => {
   it('opens the record when the segment is an id', () => {
-    renderAt(`/membros/${ID}`, UserRole.Pastor);
+    renderAt(`/membros/${ID}`, UserRole.GeneralAdmin);
     expect(screen.getByText('Perfil')).toBeInTheDocument();
   });
 

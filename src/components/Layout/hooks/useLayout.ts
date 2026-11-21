@@ -3,10 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
+import { useCanAccess } from '../../../features/access/useRole';
 import { useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { AppRoute } from '../../../routes/paths';
-import { canAccess } from '../../../routes/table';
 import { countMembershipPending } from '../../../repositories/membership';
 
 export function useLayout() {
@@ -14,7 +14,8 @@ export function useLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const showMembership = canAccess(user?.role, AppRoute.Membership);
+  const canAccess = useCanAccess();
+  const showMembership = canAccess(AppRoute.Membership);
 
   const membershipCount =
     useQuery(queryKeys.membershipPendingCount, countMembershipPending, { enabled: showMembership }).data ?? 0;

@@ -1,7 +1,7 @@
 // React
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Empty, Skeleton, useAuthCtx } from 'bp-kit';
+import { Empty, Skeleton } from 'bp-kit';
 // Components
 import { NotFound } from '../../../components/NotFound';
 import { NotesPanel } from '../../../components/NotesPanel';
@@ -11,6 +11,7 @@ import { DirectSignupFlag } from '../../../components/DirectSignupFlag';
 import { PageHeader } from '../../../components/PageHeader';
 import { StatusPill } from '../../../components/StatusPill';
 // Local
+import { useRole } from '../../../features/access/useRole';
 import { AppRoute } from '../../../routes/paths';
 import { hasRole, INTEGRATION_TEAM_ROLES, UserRole } from '../../../types/enums';
 import { isDirectSignup } from '../../../domain/origin';
@@ -26,7 +27,7 @@ import { ActionArea, Hero, HistoryArea, Layout, NotesArea, SideArea, StatusLine 
 
 export function VisitorDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuthCtx();
+  const role = useRole();
   const detail = useVisitorDetail(id ?? '');
   const { person, loading, error } = detail;
 
@@ -41,8 +42,8 @@ export function VisitorDetailPage() {
       />
     );
   if (person.status === 'member') {
-    if (user?.role === UserRole.Pastor) return <Navigate to={`${AppRoute.Members}/${person.id}`} replace />;
-    return <Empty title={`${person.name} já é membro`} description="O perfil de membro fica com o pastor." />;
+    if (role === UserRole.GeneralAdmin) return <Navigate to={`${AppRoute.Members}/${person.id}`} replace />;
+    return <Empty title={`${person.name} já é membro`} description="O perfil de membro fica com o Administrador Geral." />;
   }
 
   return <VisitorDetailContent detail={detail} person={person} />;
@@ -55,9 +56,9 @@ interface ContentProps {
 
 function VisitorDetailContent({ detail, person }: ContentProps) {
   const navigate = useNavigate();
-  const { user } = useAuthCtx();
+  const role = useRole();
   const notes = usePersonNotes(person.id).data ?? [];
-  const canManage = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
+  const canManage = hasRole(role, INTEGRATION_TEAM_ROLES);
   const menu = useVisitorMenu({
     person,
     canManage,

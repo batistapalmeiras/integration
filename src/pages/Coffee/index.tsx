@@ -10,7 +10,6 @@ import {
   Skeleton,
   text,
   Typography,
-  useAuthCtx,
   useModal,
   useToast,
 } from 'bp-kit';
@@ -18,6 +17,7 @@ import { Archive, Check, Eraser, Pencil, Plus, X, XCircle } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
+import { useRole } from '../../features/access/useRole';
 import { AddButton } from '../../components/AddButton';
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';
 import { EnrollPersonModal } from '../../components/EnrollPersonModal';
@@ -50,7 +50,7 @@ const PRESENCE_LABELS: Record<'came' | 'missed', string> = { came: 'Veio', misse
 
 export function CoffeePage() {
   const navigate = useNavigate();
-  const { user } = useAuthCtx();
+  const role = useRole();
   const {
     events,
     canCreateEvent,
@@ -76,8 +76,8 @@ export function CoffeePage() {
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
 
-  const canPlan = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
-  const canAddPeople = hasRole(user?.role, LEADERSHIP_ROLES);
+  const canPlan = hasRole(role, INTEGRATION_TEAM_ROLES);
+  const canAddPeople = hasRole(role, LEADERSHIP_ROLES);
 
   const openCreateModal = () => open(<CreateEventModal close={close} onCreate={createEvent} />);
   const openEditModal = () =>

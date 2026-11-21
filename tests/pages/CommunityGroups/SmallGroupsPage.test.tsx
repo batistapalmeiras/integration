@@ -26,7 +26,7 @@ describe('small groups page', () => {
     vi.mocked(countSmallGroupPeople).mockResolvedValue(12);
     vi.mocked(countMembers).mockResolvedValue(48);
 
-    renderScreen(<SmallGroupsPage />, { role: UserRole.Pastor });
+    renderScreen(<SmallGroupsPage />, { role: UserRole.GeneralAdmin });
 
     expect(await screen.findByText('2 PGs')).toBeInTheDocument();
     expect(await screen.findByText('12 pessoas')).toBeInTheDocument();

@@ -110,7 +110,7 @@ export const Detail = styled.span`
   color: ${({ theme }) => theme.colors.muted};
 `;
 
-export const PastorGrid = styled.div`
+export const GeneralAdminGrid = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: 'members' 'birthdays' 'agenda-title' 'agenda' 'title' 'funnel';

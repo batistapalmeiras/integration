@@ -65,7 +65,7 @@ const renderModal = (flags: MemberFlag[] = [], spouse: { id: string; name: strin
       spouse={spouse}
       close={close}
     />,
-    { role: UserRole.Pastor },
+    { role: UserRole.GeneralAdmin },
   );
   return close;
 };
@@ -99,7 +99,7 @@ describe('edit section modal', () => {
     expect(saveMemberFlags).toHaveBeenCalledWith('p1', ['absent'], []);
   });
 
-  it('offers to flag the spouse too, and flags only when the pastor says yes', async () => {
+  it('offers to flag the spouse too, and flags only when the general admin says yes', async () => {
     const close = renderModal([], { id: 'p2', name: 'Bruno Lima' });
 
     await userEvent.click(screen.getByRole('checkbox', { name: /Membro ausente/ }));

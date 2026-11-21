@@ -10,7 +10,7 @@ export enum AppRoute {
   ArchivedVisitors = '/visitantes/arquivado',
   Coffee = '/cafe-de-boas-vindas',
   Classes = '/turma',
-  Volunteers = '/voluntarios',
+  Volunteers = '/controle-de-acesso',
   Reports = '/relatorios',
   Profile = '/perfil',
   ChangePassword = '/perfil/senha',

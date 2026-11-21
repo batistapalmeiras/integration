@@ -29,7 +29,7 @@ const person = {
 describe('edit visitor form', () => {
   it('only lets the user save after something changed, so no empty edit is logged', async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
-    renderScreen(<EditVisitorForm person={person} onSave={onSave} onBack={vi.fn()} />, { role: UserRole.Pastor });
+    renderScreen(<EditVisitorForm person={person} onSave={onSave} onBack={vi.fn()} />, { role: UserRole.GeneralAdmin });
 
     const save = screen.getByRole('button', { name: /Salvar alterações/ });
     expect(save).toBeDisabled();

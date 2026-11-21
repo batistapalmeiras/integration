@@ -58,7 +58,7 @@ describe('visitors screens', () => {
       <Routes>
         <Route path="/visitantes/*" element={<VisitorsPage />} />
       </Routes>,
-      { role: UserRole.Pastor, route: '/visitantes?q=ana' },
+      { role: UserRole.GeneralAdmin, route: '/visitantes?q=ana' },
     );
 
     expect(await screen.findByText('Na fila (1)')).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('visitors screens', () => {
           <Route path="/visitantes/*" element={<VisitorsPage />} />
         </Routes>
       </>,
-      { role: UserRole.Pastor, route: '/visitantes' },
+      { role: UserRole.GeneralAdmin, route: '/visitantes' },
     );
 
     await userEvent.click(await screen.findByText('Arquivados (1)'));

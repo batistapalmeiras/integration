@@ -8,7 +8,7 @@ import { UserRole } from '../../../src/types/enums';
 import { renderScreen } from '../../support/render';
 
 describe('members filters modal', () => {
-  it('filters the members the pastor flagged as absent', async () => {
+  it('filters the members the general admin flagged as absent', async () => {
     const onApply = vi.fn();
     renderScreen(
       <MembersFiltersModal
@@ -18,7 +18,7 @@ describe('members filters modal', () => {
         filters={NO_MEMBER_FILTERS}
         onApply={onApply}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     await userEvent.click(screen.getByRole('checkbox', { name: /Membro ausente/ }));
@@ -37,7 +37,7 @@ describe('members filters modal', () => {
         filters={NO_MEMBER_FILTERS}
         onApply={onApply}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     await userEvent.click(screen.getByRole('button', { name: 'Faixa etária' }));
@@ -57,7 +57,7 @@ describe('members filters modal', () => {
         filters={NO_MEMBER_FILTERS}
         onApply={onApply}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     expect(screen.getByRole('radio', { name: 'Todos' })).toBeChecked();
@@ -78,7 +78,7 @@ describe('members filters modal', () => {
         filters={{ ...NO_MEMBER_FILTERS, gender: ['female'], status: ['active'] }}
         onApply={onApply}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     await userEvent.click(screen.getByRole('radio', { name: 'Casal' }));
@@ -100,7 +100,7 @@ describe('members filters modal', () => {
         filters={NO_MEMBER_FILTERS}
         onApply={vi.fn()}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     expect(screen.queryByRole('radio', { name: 'Casal' })).not.toBeInTheDocument();

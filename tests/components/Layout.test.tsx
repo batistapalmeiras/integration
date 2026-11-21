@@ -17,8 +17,8 @@ const linksTo = (path: string) =>
   screen.queryAllByRole('link', { hidden: true }).some((link) => link.getAttribute('href') === path);
 
 describe('side menu by role', () => {
-  it('shows the church area to the pastor', () => {
-    renderScreen(<Layout>conteúdo</Layout>, { role: UserRole.Pastor, route: AppRoute.Members });
+  it('shows the church area to the general admin', () => {
+    renderScreen(<Layout>conteúdo</Layout>, { role: UserRole.GeneralAdmin, route: AppRoute.Members });
     for (const item of ['Membros', 'Pequenos Grupos', 'Ministérios', 'Aniversariantes']) {
       expect([item, hasLink(item)]).toEqual([item, true]);
     }

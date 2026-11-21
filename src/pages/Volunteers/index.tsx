@@ -16,6 +16,7 @@ import {
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
+import { useRole } from '../../features/access/useRole';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { AppRoute } from '../../routes/paths';
 import { assignableRoles, canChangeRole } from '../../domain/volunteers';
@@ -27,23 +28,31 @@ import { useVolunteers } from './hooks/useVolunteers';
 import { EmptySectionHint, ModuleSection, ModuleTitle, Sections } from './styles';
 
 const ROLE_SECTION_LABELS: Record<UserRole, string> = {
-  [UserRole.Pastor]: 'Pastores',
+  [UserRole.Developer]: 'Desenvolvedores',
+  [UserRole.GeneralAdmin]: 'Administradores Gerais',
   [UserRole.Admin]: 'Administradores',
   [UserRole.Teacher]: 'Professores',
   [UserRole.IntegrationTeam]: 'Equipe de Integração',
 };
 
-const MODULE_GROUPS = groupRolesByModule([UserRole.Pastor, UserRole.Admin, UserRole.Teacher, UserRole.IntegrationTeam]);
+const MODULE_GROUPS = groupRolesByModule([
+  UserRole.GeneralAdmin,
+  UserRole.Developer,
+  UserRole.Admin,
+  UserRole.Teacher,
+  UserRole.IntegrationTeam,
+]);
 
 export function VolunteersPage() {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
+  const role = useRole();
   const { volunteers, loading, error, addVolunteer, changeRole } = useVolunteers();
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
 
-  const allowedRoles = assignableRoles(user?.role);
-  const actor = { id: user?.id ?? '', role: user?.role ?? '' };
+  const allowedRoles = assignableRoles(role);
+  const actor = { id: user?.id ?? '', role: role ?? '' };
   const canMove = (volunteer: VolunteerRow, target: UserRole) => canChangeRole(actor, volunteer, target);
   const canDrag = (volunteer: VolunteerRow) => allowedRoles.some((role) => canMove(volunteer, role));
 
@@ -122,13 +131,13 @@ export function VolunteersPage() {
 
   return (
     <div>
-      <PageHeader title="Voluntários" back action={<Button onClick={openAddModal}>Adicionar</Button>} />
+      <PageHeader title="Controle de acesso" back action={<Button onClick={openAddModal}>Adicionar</Button>} />
 
       {loading && <Skeleton $h="240px" />}
       {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
 
       {!loading && !error && volunteers.length === 0 && (
-        <Empty title="Nenhum voluntário cadastrado" description="Adicione o primeiro pelo botão acima." />
+        <Empty title="Nenhum usuário cadastrado" description="Adicione o primeiro pelo botão acima." />
       )}
 
       {!loading && !error && volunteers.length > 0 && (
@@ -143,7 +152,7 @@ export function VolunteersPage() {
                     {section.volunteers.length > 0 ? (
                       renderTable(section.volunteers)
                     ) : (
-                      <EmptySectionHint>Nenhum voluntário cadastrado.</EmptySectionHint>
+                      <EmptySectionHint>Nenhum usuário cadastrado.</EmptySectionHint>
                     )}
                   </RoleDropZone>
                 ))}

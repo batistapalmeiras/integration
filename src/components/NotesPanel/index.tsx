@@ -15,6 +15,7 @@ import {
 } from 'bp-kit';
 import { Lock, Pencil, Plus, Save, Trash2 } from 'lucide-react';
 // Local
+import { useRole } from '../../features/access/useRole';
 import { formatTimestampDate } from '../../domain/dates';
 import { PersonNote } from '../../domain/personNotes';
 import { invalidateQueries } from '../../lib/queryCache';
@@ -35,6 +36,7 @@ const noteOrigin = (note: PersonNote) =>
 
 export function NotesPanel({ personId, notes }: Props) {
   const { user } = useAuthCtx();
+  const role = useRole();
   const { show: showToast, toast } = useToast();
   const { open, close, modal } = useModal('drawer');
   const [writing, setWriting] = useState(false);
@@ -150,7 +152,7 @@ export function NotesPanel({ personId, notes }: Props) {
             autoFocus
             onChange={(event) => setDraft(event.target.value)}
           />
-          {user?.role === UserRole.Pastor && (
+          {role === UserRole.GeneralAdmin && (
             <PrivateHint>
               <Lock size={12} aria-hidden="true" />
               Só você verá esta anotação.

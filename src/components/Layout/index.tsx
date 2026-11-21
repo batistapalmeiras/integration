@@ -14,9 +14,9 @@ import {
   MORE_TAB_ICON,
   MORE_TAB_LABEL,
   NAV_ITEMS,
-  navAreasFor,
   NavItem,
 } from '../../routes/navigation';
+import { useNavAreas } from '../../features/access/useRole';
 import { homeRouteFor } from '../../routes/HomeRedirect';
 import { AppRoute } from '../../routes/paths';
 import { ROLE_LABELS } from '../../types/enums';
@@ -62,7 +62,7 @@ interface ILayoutProps {
 
 export function Layout({ children }: ILayoutProps) {
   const { user, navigate, handleLogout, isExactTab, pathname, membershipCount } = useLayout();
-  const navAreas = navAreasFor(user?.role);
+  const navAreas = useNavAreas();
   const navPaths = [NAV_ITEMS.dashboard.path, ...navAreas.flatMap((area) => areaItems(area).map((item) => item.path))];
   const activePath = activeNavPath(pathname, navPaths);
   const [moduleBarHidden, setModuleBarHidden] = useState(false);

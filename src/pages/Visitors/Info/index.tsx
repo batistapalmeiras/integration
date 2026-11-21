@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 // Libs
-import { Button, LinkButton, Skeleton, Tab, useAuthCtx } from 'bp-kit';
+import { Button, LinkButton, Skeleton, Tab } from 'bp-kit';
 import { Check, UserRound } from 'lucide-react';
 // Components
 import { Callout, CalloutContent } from '../../../components/Callout';
@@ -11,6 +11,7 @@ import { DirectSignupFlag } from '../../../components/DirectSignupFlag';
 import { PageHeader } from '../../../components/PageHeader';
 import { PersonPhoto } from '../../../components/PersonPhoto';
 // Local
+import { useRole } from '../../../features/access/useRole';
 import { AppRoute, confirmMemberPath } from '../../../routes/paths';
 import { isDirectSignup } from '../../../domain/origin';
 import { UserRole } from '../../../types/enums';
@@ -27,7 +28,7 @@ const isDetailTab = (value: string | null): value is DetailTab => !!value && val
 export function VisitorInfoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuthCtx();
+  const role = useRole();
   const { person, loading, error, profile } = useVisitorProfile(id ?? '');
   const { tabs, canSeeAnswers, makeups } = useDetailTabs(person);
 
@@ -46,7 +47,7 @@ export function VisitorInfoPage() {
   const current = tab && tabs.includes(tab) ? tab : tabs[0];
 
   const showConfirmMember =
-    fromMembershipQueue && user?.role === UserRole.Pastor && person.status === 'membership_pending';
+    fromMembershipQueue && role === UserRole.GeneralAdmin && person.status === 'membership_pending';
   const openConfirmMember = () => navigate(confirmMemberPath(person.id));
 
   return (

@@ -93,7 +93,7 @@ export function CoffeeStagePanel({
     return (
       <StageCard title="Convidar para a turma" summary={inviteSummary}>
         <InfoBox variant="warning">
-          A próxima turma de Integração ainda não foi aberta. Peça ao pastor ou ao administrador para abrir antes de convidar.
+          A próxima turma de Integração ainda não foi aberta. Peça ao Administrador Geral ou ao administrador para abrir antes de convidar.
         </InfoBox>
       </StageCard>
     );

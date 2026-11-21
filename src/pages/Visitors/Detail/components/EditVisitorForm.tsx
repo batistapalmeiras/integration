@@ -2,9 +2,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 // Libs
-import { Button, maskPhone, useAuthCtx } from 'bp-kit';
+import { Button, maskPhone } from 'bp-kit';
 import { Save } from 'lucide-react';
 // Local
+import { useRole } from '../../../../features/access/useRole';
 import { Person } from '../../../../features/visitors';
 import { UserRole } from '../../../../types/enums';
 import { VisitorForm, VisitorFormActions } from '../../components/VisitorForm';
@@ -24,7 +25,7 @@ const INTEGRATION_TEAM_STATUSES: Person['status'][] = [
 ];
 
 export function EditVisitorForm({ person, onSave, onBack }: Props) {
-  const { user } = useAuthCtx();
+  const role = useRole();
 
   const {
     control,
@@ -41,10 +42,10 @@ export function EditVisitorForm({ person, onSave, onBack }: Props) {
   });
 
   const canEditFields =
-    (user?.role === UserRole.Admin && person.status !== 'member') ||
-    user?.role === UserRole.Pastor ||
-    (user?.role === UserRole.IntegrationTeam && INTEGRATION_TEAM_STATUSES.includes(person.status)) ||
-    (user?.role === UserRole.Teacher && person.status === 'integration');
+    (role === UserRole.Admin && person.status !== 'member') ||
+    role === UserRole.GeneralAdmin ||
+    (role === UserRole.IntegrationTeam && INTEGRATION_TEAM_STATUSES.includes(person.status)) ||
+    (role === UserRole.Teacher && person.status === 'integration');
 
   return (
     <VisitorForm control={control} onSubmit={handleSubmit(onSave)} disabled={!canEditFields}>

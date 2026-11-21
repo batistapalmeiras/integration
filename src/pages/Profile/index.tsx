@@ -6,6 +6,7 @@ import { useIsNavDestination } from '../../components/Layout/navDestination';
 // Local
 import { AppRoute } from '../../routes/paths';
 import { ROLE_LABELS, UserRole } from '../../types/enums';
+import { ViewRolePanel } from './components/ViewRolePanel';
 
 export function ProfilePage() {
   const { user, logout } = useAuthCtx();
@@ -18,11 +19,14 @@ export function ProfilePage() {
   };
 
   return (
-    <SharedProfilePage
-      roleLabel={user ? ROLE_LABELS[user.role as UserRole] : undefined}
-      changePasswordPath={AppRoute.ChangePassword}
-      onLogout={handleLogout}
-      back={!isNavDestination}
-    />
+    <>
+      <SharedProfilePage
+        roleLabel={user ? ROLE_LABELS[user.role as UserRole] : undefined}
+        changePasswordPath={AppRoute.ChangePassword}
+        onLogout={handleLogout}
+        back={!isNavDestination}
+      />
+      {user?.role === UserRole.Developer && <ViewRolePanel />}
+    </>
   );
 }

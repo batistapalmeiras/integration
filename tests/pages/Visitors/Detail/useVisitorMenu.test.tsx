@@ -46,7 +46,7 @@ function Harness({ canManage, status = 'initial_contact' }: { canManage: boolean
 
 describe('visitor menu', () => {
   it('lists edit, archive and delete for who manages a visitor still in the first contact', async () => {
-    renderScreen(<Harness canManage />, { role: UserRole.Pastor });
+    renderScreen(<Harness canManage />, { role: UserRole.GeneralAdmin });
 
     await userEvent.click(screen.getByText('menu'));
 
@@ -56,7 +56,7 @@ describe('visitor menu', () => {
   });
 
   it('opens the form inside the modal and lets the user go back to the menu', async () => {
-    renderScreen(<Harness canManage />, { role: UserRole.Pastor });
+    renderScreen(<Harness canManage />, { role: UserRole.GeneralAdmin });
 
     await userEvent.click(screen.getByText('menu'));
     await userEvent.click(screen.getByRole('button', { name: /Editar dados/ }));
@@ -78,7 +78,7 @@ describe('visitor menu', () => {
   });
 
   it('offers to reactivate an archived visitor instead of archiving again', async () => {
-    renderScreen(<Harness canManage status="archived" />, { role: UserRole.Pastor });
+    renderScreen(<Harness canManage status="archived" />, { role: UserRole.GeneralAdmin });
 
     await userEvent.click(screen.getByText('menu'));
 

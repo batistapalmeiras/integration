@@ -20,7 +20,8 @@ import {
   UsersRound,
 } from 'lucide-react';
 // Local
-import { UserRole } from '../types/enums';
+import { DEFAULT_VIEW_ROLE } from '../domain/access';
+import { EffectiveRole, SystemModule, UserRole } from '../types/enums';
 import { AppRoute, COUNCILS_PATH, isEntityId } from './paths';
 
 export interface NavItem {
@@ -39,7 +40,7 @@ export const NAV_ITEMS = {
   cohortHistory: { label: 'Histórico de turmas', path: `${AppRoute.Reports}/turmas`, icon: GraduationCap },
   coffeeHistory: { label: 'Histórico de cafés', path: `${AppRoute.Reports}/cafes`, icon: Coffee },
   councilHistory: { label: 'Histórico do Conselho Administrativo', path: COUNCILS_PATH, icon: Gavel },
-  volunteers: { label: 'Voluntários', path: AppRoute.Volunteers, icon: UserPlus },
+  volunteers: { label: 'Controle de acesso', path: AppRoute.Volunteers, icon: UserPlus },
   reports: { label: 'Relatórios', path: AppRoute.Reports, icon: FileBarChart },
   members: { label: 'Membros', path: AppRoute.Members, icon: Users },
   birthdays: { label: 'Aniversariantes', path: AppRoute.Birthdays, icon: Cake },
@@ -82,7 +83,7 @@ const LEADERSHIP_HISTORY_GROUP: NavGroup = {
   ],
 };
 
-export const PASTOR_NAV_AREAS: NavArea[] = [
+export const GENERAL_ADMIN_NAV_AREAS: NavArea[] = [
   {
     id: 'church',
     title: 'Igreja',
@@ -136,15 +137,21 @@ const TEACHER_NAV_AREAS: NavArea[] = [
   },
 ];
 
-const NAV_AREAS_BY_ROLE: Record<UserRole, NavArea[]> = {
-  [UserRole.Pastor]: PASTOR_NAV_AREAS,
+const NAV_AREAS_BY_ROLE: Record<EffectiveRole, NavArea[]> = {
+  [UserRole.GeneralAdmin]: GENERAL_ADMIN_NAV_AREAS,
   [UserRole.Admin]: ADMIN_NAV_AREAS,
   [UserRole.IntegrationTeam]: INTEGRATION_TEAM_NAV_AREAS,
   [UserRole.Teacher]: TEACHER_NAV_AREAS,
 };
 
-export function navAreasFor(role: string | undefined): NavArea[] {
-  return NAV_AREAS_BY_ROLE[role as UserRole] ?? [];
+export function navAreasFor(role: string | undefined, viewRole: EffectiveRole = DEFAULT_VIEW_ROLE): NavArea[] {
+  if (role === UserRole.Developer) {
+    return [
+      ...navAreasFor(UserRole.GeneralAdmin).filter((area) => area.id === SystemModule.Church),
+      ...navAreasFor(viewRole).filter((area) => area.id !== SystemModule.Church),
+    ];
+  }
+  return NAV_AREAS_BY_ROLE[role as EffectiveRole] ?? [];
 }
 
 export const MORE_TAB_LABEL = 'Mais';

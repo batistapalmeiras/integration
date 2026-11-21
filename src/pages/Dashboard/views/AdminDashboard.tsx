@@ -31,7 +31,7 @@ export function AdminDashboard() {
                   value: funnel.membership_pending ?? 0,
                   icon: NAV_ITEMS.membership.icon,
                 },
-                { label: 'Voluntários', value: volunteers, icon: NAV_ITEMS.volunteers.icon },
+                { label: 'Usuários', value: volunteers, icon: NAV_ITEMS.volunteers.icon },
               ]}
             />
             {makeupNotes.length > 0 && (

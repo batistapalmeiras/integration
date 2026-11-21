@@ -1,12 +1,13 @@
 // React
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Empty, LinkButton, Skeleton, useAuthCtx, useModal } from 'bp-kit';
+import { Empty, LinkButton, Skeleton, useModal } from 'bp-kit';
 import { Pencil } from 'lucide-react';
 // Components
 import { EntryTypeTable } from '../../../components/EntryTypeTable';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
+import { useRole } from '../../../features/access/useRole';
 import { PeopleCount } from '../../../components/PeopleCount';
 import { formatDate } from '../../../domain/dates';
 import { CouncilModal } from '../../../features/councils';
@@ -18,12 +19,12 @@ import { UserRole } from '../../../types/enums';
 export function CouncilRosterPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuthCtx();
+  const role = useRole();
   const { open, close, modal } = useModal('drawer');
   const { data, loading, error } = useCouncilRoster(id ?? '');
   const council = data?.council;
   const members = data?.members ?? [];
-  const isPastor = user?.role === UserRole.Pastor;
+  const isGeneralAdmin = role === UserRole.GeneralAdmin;
 
   if (loading) return <Skeleton $h="320px" />;
   if (error || !council)
@@ -36,7 +37,7 @@ export function CouncilRosterPage() {
         subtitle={formatDate(council.meetingDate)}
         back
         action={
-          isPastor && (
+          isGeneralAdmin && (
             <LinkButton
               icon={<Pencil size={16} />}
               onClick={() =>
@@ -65,7 +66,7 @@ export function CouncilRosterPage() {
       ) : (
         <EntryTypeTable
           rows={members.map((member) => ({ id: member.personId, name: member.name, entryType: member.entryType }))}
-          onSelect={isPastor ? (personId) => navigate(`${AppRoute.Members}/${personId}`) : undefined}
+          onSelect={isGeneralAdmin ? (personId) => navigate(`${AppRoute.Members}/${personId}`) : undefined}
         />
       )}
       {modal}

@@ -26,13 +26,13 @@ function Field({ initial }: { initial: string[] }) {
 
 describe('multi select', () => {
   it('sums up the picked items in one line instead of chips', () => {
-    renderScreen(<Field initial={['60+', 'Café Integração', 'Cobertura']} />, { role: UserRole.Pastor });
+    renderScreen(<Field initial={['60+', 'Café Integração', 'Cobertura']} />, { role: UserRole.GeneralAdmin });
 
     expect(screen.getByRole('button', { name: 'Ministérios' })).toHaveTextContent('60+, Café Integração e mais 1');
   });
 
   it('closes the list after picking a searched item', async () => {
-    renderScreen(<Field initial={[]} />, { role: UserRole.Pastor });
+    renderScreen(<Field initial={[]} />, { role: UserRole.GeneralAdmin });
 
     expect(screen.getByRole('button', { name: 'Ministérios' })).toHaveTextContent('Nenhum por enquanto');
 
@@ -47,7 +47,7 @@ describe('multi select', () => {
   });
 
   it('keeps the list open to pick several items while the search is empty', async () => {
-    renderScreen(<Field initial={[]} />, { role: UserRole.Pastor });
+    renderScreen(<Field initial={[]} />, { role: UserRole.GeneralAdmin });
 
     await userEvent.click(screen.getByRole('button', { name: 'Ministérios' }));
     await userEvent.click(screen.getByRole('checkbox', { name: '60+' }));

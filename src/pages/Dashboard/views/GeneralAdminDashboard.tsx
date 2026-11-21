@@ -5,11 +5,11 @@ import { ChurchMembersCard } from '../components/ChurchMembersCard';
 import { DashboardShell } from '../components/DashboardShell';
 import { FunnelCards } from '../components/FunnelSection';
 import { MakeupNotesPanel } from '../components/MakeupNotesPanel';
-import { usePastorDashboard } from '../hooks/usePastorDashboard';
-import { AreaTitle, FunnelArea, GridArea, PastorGrid } from '../styles';
+import { useGeneralAdminDashboard } from '../hooks/useGeneralAdminDashboard';
+import { AreaTitle, FunnelArea, GridArea, GeneralAdminGrid } from '../styles';
 
-export function PastorDashboard() {
-  const { overview, loading, error } = usePastorDashboard();
+export function GeneralAdminDashboard() {
+  const { overview, loading, error } = useGeneralAdminDashboard();
 
   return (
     <DashboardShell loading={loading || !overview} error={error}>
@@ -17,7 +17,7 @@ export function PastorDashboard() {
         const { funnel, coffee, cohort, makeupNotes } = overview!;
 
         return (
-          <PastorGrid>
+          <GeneralAdminGrid>
             <GridArea $area="members">
               <ChurchMembersCard />
             </GridArea>
@@ -41,7 +41,7 @@ export function PastorDashboard() {
             <FunnelArea>
               <FunnelCards counts={funnel} />
             </FunnelArea>
-          </PastorGrid>
+          </GeneralAdminGrid>
         );
       }}
     </DashboardShell>

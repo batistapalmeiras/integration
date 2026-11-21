@@ -319,7 +319,7 @@ CREATE OR REPLACE FUNCTION public.can_edit_person_note(p_created_by uuid)
 AS $function$
   select coalesce(
     p_created_by = auth.uid()
-      or public."current_role"() = 'pastor'
+      or public."current_role"() = 'general_admin'
       or (
         public."current_role"() = 'admin'
         and exists (
@@ -338,7 +338,7 @@ CREATE OR REPLACE FUNCTION public.can_manage_person_notes(p_person_id uuid)
  STABLE SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-  select public."current_role"() = 'pastor'
+  select public."current_role"() = 'general_admin'
       or (
         public."current_role"() in ('integration_team', 'teacher', 'admin')
         and exists (select 1 from public.people p where p.id = p_person_id and p.status <> 'member')
@@ -353,7 +353,7 @@ CREATE OR REPLACE FUNCTION public.can_read_person(p_status text)
  SET search_path TO 'public'
 AS $function$
   select auth.uid() is not null
-     and (p_status is distinct from 'member' or public."current_role"() in ('pastor', 'admin'));
+     and (p_status is distinct from 'member' or public."current_role"() in ('general_admin', 'admin'));
 $function$
 ;
 
@@ -373,7 +373,7 @@ CREATE OR REPLACE FUNCTION public.can_write_person(p_status text)
  STABLE
  SET search_path TO 'public'
 AS $function$
-  select public."current_role"() = 'pastor'
+  select public."current_role"() = 'general_admin'
       or (p_status is distinct from 'member' and public."current_role"() in ('integration_team', 'admin'));
 $function$
 ;
@@ -532,7 +532,9 @@ CREATE OR REPLACE FUNCTION public."current_role"()
  STABLE SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-  select role from public.profiles where id = auth.uid() and active;
+  select case when role = 'developer' then 'general_admin' else role end
+    from public.profiles
+   where id = auth.uid() and active;
 $function$
 ;
 
@@ -923,7 +925,7 @@ begin
     raise exception 'Você não pode mudar a sua própria permissão.';
   end if;
 
-  if v_actor = 'pastor' then
+  if v_actor = 'general_admin' then
     return new;
   end if;
 
@@ -980,7 +982,7 @@ AS $function$
     left join public.profiles pr on pr.id = e.changed_by
     left join public.people pe on pe.id = pr.person_id
    where e.person_id = p_person_id
-     and public."current_role"() = 'pastor'
+     and public."current_role"() = 'general_admin'
    order by e.created_at;
 $function$
 ;
@@ -1369,13 +1371,13 @@ end;
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.mark_pastor_notes_private()
+CREATE OR REPLACE FUNCTION public.mark_general_admin_notes_private()
  RETURNS trigger
  LANGUAGE plpgsql
  SET search_path TO 'public'
 AS $function$
 begin
-  new.private := public."current_role"() = 'pastor';
+  new.private := public."current_role"() = 'general_admin';
   return new;
 end;
 $function$
@@ -1552,7 +1554,7 @@ declare
   v_seated integer := 0;
   v_closed integer := 0;
 begin
-  if auth.uid() is not null and coalesce(public."current_role"(), '') not in ('integration_team', 'admin', 'pastor') then
+  if auth.uid() is not null and coalesce(public."current_role"(), '') not in ('integration_team', 'admin', 'general_admin') then
     raise exception 'Sem permissão para rodar a manutenção do funil.';
   end if;
 
@@ -1767,8 +1769,8 @@ declare
   v_constraint text;
   v_hidden uuid;
 begin
-  if public."current_role"() is distinct from 'pastor' then
-    raise exception 'Só o pastor pode alterar a família.';
+  if public."current_role"() is distinct from 'general_admin' then
+    raise exception 'Só o Administrador Geral pode alterar a família.';
   end if;
 
   if not exists (select 1 from public.people where id = p_person_id and status in ('member', 'membership_pending')) then
@@ -1890,8 +1892,8 @@ declare
   v_role text;
   v_gender text;
 begin
-  if public."current_role"() is distinct from 'pastor' then
-    raise exception 'Só o pastor pode alterar a família.';
+  if public."current_role"() is distinct from 'general_admin' then
+    raise exception 'Só o Administrador Geral pode alterar a família.';
   end if;
 
   delete from public.spouse_links where p_person_id in (person_a_id, person_b_id);
@@ -2341,7 +2343,7 @@ begin
 
   if not (
     p_profile_id = auth.uid()
-    or v_actor = 'pastor'
+    or v_actor = 'general_admin'
     or (v_actor = 'admin' and v_target_role in ('integration_team', 'teacher'))
   ) then
     raise exception 'Você não tem permissão para editar este voluntário.';
@@ -2479,7 +2481,7 @@ alter table public.people add constraint people_status_check CHECK ((status = AN
 
 alter table public.person_sensitive add constraint person_sensitive_wants_small_group_check CHECK ((wants_small_group = ANY (ARRAY['yes'::text, 'not_now'::text, 'already'::text])));
 
-alter table public.profiles add constraint profiles_role_check CHECK ((role = ANY (ARRAY['admin'::text, 'integration_team'::text, 'pastor'::text, 'teacher'::text])));
+alter table public.profiles add constraint profiles_role_check CHECK ((role = ANY (ARRAY['admin'::text, 'integration_team'::text, 'general_admin'::text, 'teacher'::text, 'developer'::text])));
 
 alter table public.small_group_roles add constraint small_group_roles_role_check CHECK ((role = ANY (ARRAY['leader'::text, 'host'::text])));
 
@@ -2631,7 +2633,7 @@ CREATE TRIGGER member_profiles_record_updated AFTER UPDATE ON public.member_prof
 
 CREATE TRIGGER ministry_leaders_events AFTER INSERT OR DELETE ON public.ministry_leaders FOR EACH ROW EXECUTE FUNCTION log_community_link();
 
-CREATE TRIGGER pastoral_notes_private_for_pastors BEFORE INSERT ON public.pastoral_notes FOR EACH ROW EXECUTE FUNCTION mark_pastor_notes_private();
+CREATE TRIGGER pastoral_notes_private_for_general_admin BEFORE INSERT ON public.pastoral_notes FOR EACH ROW EXECUTE FUNCTION mark_general_admin_notes_private();
 
 CREATE TRIGGER format_people_name BEFORE INSERT OR UPDATE OF name ON public.people FOR EACH ROW EXECUTE FUNCTION format_people_name();
 
@@ -2719,29 +2721,29 @@ alter table public.status_history enable row level security;
 
 alter table public.visitor_events enable row level security;
 
-create policy coffee_attendance_manage_team_pastor_admin on public.coffee_attendance as permissive for all to public
-  using (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])))
-  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])));
+create policy coffee_attendance_manage_team_general_admin_admin on public.coffee_attendance as permissive for all to public
+  using (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])))
+  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])));
 
 create policy coffee_attendance_select_all_authenticated on public.coffee_attendance as permissive for select to public
   using ((auth.uid() IS NOT NULL));
 
 create policy coffee_events_manage_team_admin on public.coffee_events as permissive for all to public
-  using (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])))
-  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])));
+  using (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])))
+  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])));
 
 create policy coffee_events_select_all_authenticated on public.coffee_events as permissive for select to public
   using ((auth.uid() IS NOT NULL));
 
-create policy cohorts_manage_admin_pastor on public.cohorts as permissive for all to public
-  using (("current_role"() = ANY (ARRAY['admin'::text, 'pastor'::text])))
-  with check (("current_role"() = ANY (ARRAY['admin'::text, 'pastor'::text])));
+create policy cohorts_manage_admin_general_admin on public.cohorts as permissive for all to public
+  using (("current_role"() = ANY (ARRAY['admin'::text, 'general_admin'::text])))
+  with check (("current_role"() = ANY (ARRAY['admin'::text, 'general_admin'::text])));
 
 create policy cohorts_select_all_authenticated on public.cohorts as permissive for select to public
   using ((auth.uid() IS NOT NULL));
 
 create policy contact_attempts_insert_team_admin on public.contact_attempts as permissive for insert to public
-  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])));
+  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])));
 
 create policy contact_attempts_select_visible_people on public.contact_attempts as permissive for select to public
   using ((EXISTS ( SELECT 1
@@ -2749,95 +2751,95 @@ create policy contact_attempts_select_visible_people on public.contact_attempts 
   WHERE (p.id = contact_attempts.person_id))));
 
 create policy contact_attempts_update_team_admin on public.contact_attempts as permissive for update to public
-  using (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])))
-  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])));
+  using (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])))
+  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])));
 
-create policy councils_delete_pastor on public.councils as permissive for delete to public
-  using (("current_role"() = 'pastor'::text));
+create policy councils_delete_general_admin on public.councils as permissive for delete to public
+  using (("current_role"() = 'general_admin'::text));
 
-create policy councils_insert_pastor on public.councils as permissive for insert to public
-  with check (("current_role"() = 'pastor'::text));
+create policy councils_insert_general_admin on public.councils as permissive for insert to public
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy councils_select_leadership on public.councils as permissive for select to public
-  using (("current_role"() = ANY (ARRAY['pastor'::text, 'admin'::text])));
+  using (("current_role"() = ANY (ARRAY['general_admin'::text, 'admin'::text])));
 
-create policy councils_update_pastor on public.councils as permissive for update to public
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy councils_update_general_admin on public.councils as permissive for update to public
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy enrollments_manage_team_admin on public.enrollments as permissive for all to public
-  using (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])))
-  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])));
+  using (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])))
+  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])));
 
 create policy enrollments_select_all_authenticated on public.enrollments as permissive for select to public
   using ((auth.uid() IS NOT NULL));
 
-create policy family_hidden_read_pastor on public.family_hidden as permissive for select to public
-  using (("current_role"() = 'pastor'::text));
+create policy family_hidden_read_general_admin on public.family_hidden as permissive for select to public
+  using (("current_role"() = 'general_admin'::text));
 
-create policy family_links_read_pastor on public.family_links as permissive for select to public
-  using (("current_role"() = 'pastor'::text));
+create policy family_links_read_general_admin on public.family_links as permissive for select to public
+  using (("current_role"() = 'general_admin'::text));
 
 create policy lesson_attendance_manage_teacher_admin on public.lesson_attendance as permissive for all to public
-  using (("current_role"() = ANY (ARRAY['teacher'::text, 'admin'::text, 'pastor'::text])))
-  with check (("current_role"() = ANY (ARRAY['teacher'::text, 'admin'::text, 'pastor'::text])));
+  using (("current_role"() = ANY (ARRAY['teacher'::text, 'admin'::text, 'general_admin'::text])))
+  with check (("current_role"() = ANY (ARRAY['teacher'::text, 'admin'::text, 'general_admin'::text])));
 
 create policy lesson_attendance_select_all_authenticated on public.lesson_attendance as permissive for select to public
   using ((auth.uid() IS NOT NULL));
 
-create policy lesson_makeups_select_pastor_admin_teacher on public.lesson_makeups as permissive for select to public
-  using ((("current_role"() = ANY (ARRAY['pastor'::text, 'admin'::text, 'teacher'::text])) AND (EXISTS ( SELECT 1
+create policy lesson_makeups_select_general_admin_admin_teacher on public.lesson_makeups as permissive for select to public
+  using ((("current_role"() = ANY (ARRAY['general_admin'::text, 'admin'::text, 'teacher'::text])) AND (EXISTS ( SELECT 1
    FROM ((lesson_attendance la
      JOIN enrollments e ON ((e.id = la.enrollment_id)))
      JOIN people p ON ((p.id = e.person_id)))
   WHERE (la.id = lesson_makeups.lesson_attendance_id)))));
 
-create policy lessons_manage_admin_pastor on public.lessons as permissive for all to public
-  using (("current_role"() = ANY (ARRAY['admin'::text, 'pastor'::text])))
-  with check (("current_role"() = ANY (ARRAY['admin'::text, 'pastor'::text])));
+create policy lessons_manage_admin_general_admin on public.lessons as permissive for all to public
+  using (("current_role"() = ANY (ARRAY['admin'::text, 'general_admin'::text])))
+  with check (("current_role"() = ANY (ARRAY['admin'::text, 'general_admin'::text])));
 
 create policy lessons_select_all_authenticated on public.lessons as permissive for select to public
   using ((auth.uid() IS NOT NULL));
 
-create policy member_events_read_pastor on public.member_events as permissive for select to public
-  using (("current_role"() = 'pastor'::text));
+create policy member_events_read_general_admin on public.member_events as permissive for select to public
+  using (("current_role"() = 'general_admin'::text));
 
-create policy member_flags_manage_pastor on public.member_flags as permissive for all to public
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy member_flags_manage_general_admin on public.member_flags as permissive for all to public
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
-create policy member_profiles_manage_pastor on public.member_profiles as permissive for all to public
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy member_profiles_manage_general_admin on public.member_profiles as permissive for all to public
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
-create policy membership_alert_resolutions_insert_pastor on public.membership_alert_resolutions as permissive for insert to public
-  with check (("current_role"() = 'pastor'::text));
+create policy membership_alert_resolutions_insert_general_admin on public.membership_alert_resolutions as permissive for insert to public
+  with check (("current_role"() = 'general_admin'::text));
 
-create policy membership_alert_resolutions_select_pastor_admin on public.membership_alert_resolutions as permissive for select to public
-  using ((("current_role"() = ANY (ARRAY['pastor'::text, 'admin'::text])) AND (EXISTS ( SELECT 1
+create policy membership_alert_resolutions_select_general_admin_admin on public.membership_alert_resolutions as permissive for select to public
+  using ((("current_role"() = ANY (ARRAY['general_admin'::text, 'admin'::text])) AND (EXISTS ( SELECT 1
    FROM people p
   WHERE (p.id = membership_alert_resolutions.person_id)))));
 
-create policy membership_alert_resolutions_delete_pastor on public.membership_alert_resolutions as permissive for delete to public
-  using (("current_role"() = 'pastor'::text));
+create policy membership_alert_resolutions_delete_general_admin on public.membership_alert_resolutions as permissive for delete to public
+  using (("current_role"() = 'general_admin'::text));
 
-create policy ministries_manage_pastor on public.ministries as permissive for all to public
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy ministries_manage_general_admin on public.ministries as permissive for all to public
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy ministries_select_all_authenticated on public.ministries as permissive for select to public
   using ((auth.uid() IS NOT NULL));
 
-create policy ministry_leaders_manage_pastor on public.ministry_leaders as permissive for all to authenticated
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy ministry_leaders_manage_general_admin on public.ministry_leaders as permissive for all to authenticated
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy ministry_leaders_select_authenticated on public.ministry_leaders as permissive for select to authenticated
   using ((auth.uid() IS NOT NULL));
 
-create policy parent_links_manage_pastor on public.parent_links as permissive for all to public
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy parent_links_manage_general_admin on public.parent_links as permissive for all to public
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy pastoral_notes_delete on public.pastoral_notes as permissive for delete to public
   using ((can_manage_person_notes(person_id) AND can_see_person_note(private, created_by)));
@@ -2852,8 +2854,8 @@ create policy pastoral_notes_update on public.pastoral_notes as permissive for u
   using ((can_manage_person_notes(person_id) AND can_see_person_note(private, created_by) AND can_edit_person_note(created_by)))
   with check ((can_manage_person_notes(person_id) AND can_see_person_note(private, created_by) AND can_edit_person_note(created_by) AND (btrim(body) <> ''::text)));
 
-create policy people_delete_team_pastor_admin_initial_contact on public.people as permissive for delete to public
-  using ((("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])) AND (status = 'initial_contact'::text)));
+create policy people_delete_team_general_admin_admin_initial_contact on public.people as permissive for delete to public
+  using ((("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])) AND (status = 'initial_contact'::text)));
 
 create policy people_insert_can_write on public.people as permissive for insert to public
   with check (can_write_person(status));
@@ -2865,11 +2867,11 @@ create policy people_update_can_write on public.people as permissive for update 
   using (can_write_person(status))
   with check (can_write_person(status));
 
-create policy person_ministries_delete_pastor on public.person_ministries as permissive for delete to public
-  using (("current_role"() = 'pastor'::text));
+create policy person_ministries_delete_general_admin on public.person_ministries as permissive for delete to public
+  using (("current_role"() = 'general_admin'::text));
 
-create policy person_ministries_insert_pastor on public.person_ministries as permissive for insert to public
-  with check (("current_role"() = 'pastor'::text));
+create policy person_ministries_insert_general_admin on public.person_ministries as permissive for insert to public
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy person_ministries_select_visible_people on public.person_ministries as permissive for select to public
   using ((EXISTS ( SELECT 1
@@ -2884,52 +2886,52 @@ create policy person_sensitive_manage_admin_integration on public.person_sensiti
    FROM people p
   WHERE ((p.id = person_sensitive.person_id) AND (p.status <> 'member'::text))))));
 
-create policy person_sensitive_manage_pastor on public.person_sensitive as permissive for all to public
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy person_sensitive_manage_general_admin on public.person_sensitive as permissive for all to public
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
-create policy person_small_groups_delete_pastor on public.person_small_groups as permissive for delete to authenticated
-  using (("current_role"() = 'pastor'::text));
+create policy person_small_groups_delete_general_admin on public.person_small_groups as permissive for delete to authenticated
+  using (("current_role"() = 'general_admin'::text));
 
-create policy person_small_groups_insert_pastor on public.person_small_groups as permissive for insert to authenticated
-  with check (("current_role"() = 'pastor'::text));
+create policy person_small_groups_insert_general_admin on public.person_small_groups as permissive for insert to authenticated
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy person_small_groups_select_visible_people on public.person_small_groups as permissive for select to authenticated
   using ((EXISTS ( SELECT 1
    FROM people p
   WHERE (p.id = person_small_groups.person_id))));
 
-create policy profiles_manage_admin_pastor on public.profiles as permissive for all to public
-  using ((("current_role"() = 'pastor'::text) OR (("current_role"() = 'admin'::text) AND (role = ANY (ARRAY['integration_team'::text, 'teacher'::text])))))
-  with check ((("current_role"() = 'pastor'::text) OR (("current_role"() = 'admin'::text) AND (role = ANY (ARRAY['integration_team'::text, 'teacher'::text])))));
+create policy profiles_manage_admin_general_admin on public.profiles as permissive for all to public
+  using ((("current_role"() = 'general_admin'::text) OR (("current_role"() = 'admin'::text) AND (role = ANY (ARRAY['integration_team'::text, 'teacher'::text])))))
+  with check ((("current_role"() = 'general_admin'::text) OR (("current_role"() = 'admin'::text) AND (role = ANY (ARRAY['integration_team'::text, 'teacher'::text])))));
 
 create policy profiles_select_own_or_admin on public.profiles as permissive for select to public
-  using (((id = auth.uid()) OR ("current_role"() = ANY (ARRAY['admin'::text, 'pastor'::text]))));
+  using (((id = auth.uid()) OR ("current_role"() = ANY (ARRAY['admin'::text, 'general_admin'::text]))));
 
 create policy profiles_update_own_name on public.profiles as permissive for update to public
   using ((id = auth.uid()))
   with check ((id = auth.uid()));
 
-create policy small_group_roles_manage_pastor on public.small_group_roles as permissive for all to authenticated
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy small_group_roles_manage_general_admin on public.small_group_roles as permissive for all to authenticated
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy small_group_roles_select_authenticated on public.small_group_roles as permissive for select to authenticated
   using ((auth.uid() IS NOT NULL));
 
-create policy small_groups_manage_pastor on public.small_groups as permissive for all to public
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy small_groups_manage_general_admin on public.small_groups as permissive for all to public
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
 create policy small_groups_select_all_authenticated on public.small_groups as permissive for select to public
   using ((auth.uid() IS NOT NULL));
 
-create policy spouse_links_manage_pastor on public.spouse_links as permissive for all to public
-  using (("current_role"() = 'pastor'::text))
-  with check (("current_role"() = 'pastor'::text));
+create policy spouse_links_manage_general_admin on public.spouse_links as permissive for all to public
+  using (("current_role"() = 'general_admin'::text))
+  with check (("current_role"() = 'general_admin'::text));
 
-create policy status_history_insert_team_pastor_admin on public.status_history as permissive for insert to public
-  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'pastor'::text, 'admin'::text])));
+create policy status_history_insert_team_general_admin_admin on public.status_history as permissive for insert to public
+  with check (("current_role"() = ANY (ARRAY['integration_team'::text, 'general_admin'::text, 'admin'::text])));
 
 create policy status_history_select_visible_people on public.status_history as permissive for select to public
   using ((EXISTS ( SELECT 1
@@ -2939,21 +2941,21 @@ create policy status_history_select_visible_people on public.status_history as p
 create policy visitor_events_read on public.visitor_events as permissive for select to public
   using (can_manage_person_notes(person_id));
 
-create policy member_photos_delete_pastor on storage.objects as permissive for delete to public
-  using (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'pastor'::text)));
+create policy member_photos_delete_general_admin on storage.objects as permissive for delete to public
+  using (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'general_admin'::text)));
 
-create policy member_photos_insert_pastor on storage.objects as permissive for insert to public
-  with check (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'pastor'::text)));
+create policy member_photos_insert_general_admin on storage.objects as permissive for insert to public
+  with check (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'general_admin'::text)));
 
 create policy member_photos_insert_submission on storage.objects as permissive for insert to anon, authenticated
   with check (((bucket_id = 'member-photos'::text) AND ((storage.foldername(name))[1] = 'submissions'::text)));
 
-create policy member_photos_select_pastor on storage.objects as permissive for select to public
-  using (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'pastor'::text)));
+create policy member_photos_select_general_admin on storage.objects as permissive for select to public
+  using (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'general_admin'::text)));
 
-create policy member_photos_update_pastor on storage.objects as permissive for update to public
-  using (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'pastor'::text)))
-  with check (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'pastor'::text)));
+create policy member_photos_update_general_admin on storage.objects as permissive for update to public
+  using (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'general_admin'::text)))
+  with check (((bucket_id = 'member-photos'::text) AND ("current_role"() = 'general_admin'::text)));
 
 revoke all on function public.annual_pipeline_counts(p_year integer) from public, anon, authenticated;
 grant execute on function public.annual_pipeline_counts(p_year integer) to authenticated;
@@ -3184,10 +3186,10 @@ revoke all on function public.mark_coffee_attended(p_attendance_id uuid, p_perso
 grant execute on function public.mark_coffee_attended(p_attendance_id uuid, p_person_id uuid, p_actor_id uuid) to authenticated;
 grant execute on function public.mark_coffee_attended(p_attendance_id uuid, p_person_id uuid, p_actor_id uuid) to service_role;
 
-revoke all on function public.mark_pastor_notes_private() from public, anon, authenticated;
-grant execute on function public.mark_pastor_notes_private() to anon;
-grant execute on function public.mark_pastor_notes_private() to authenticated;
-grant execute on function public.mark_pastor_notes_private() to service_role;
+revoke all on function public.mark_general_admin_notes_private() from public, anon, authenticated;
+grant execute on function public.mark_general_admin_notes_private() to anon;
+grant execute on function public.mark_general_admin_notes_private() to authenticated;
+grant execute on function public.mark_general_admin_notes_private() to service_role;
 
 revoke all on function public.membership_lesson_progress(p_person_id uuid) from public, anon, authenticated;
 grant execute on function public.membership_lesson_progress(p_person_id uuid) to service_role;

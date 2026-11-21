@@ -77,13 +77,13 @@ const renderPage = () =>
     <Routes>
       <Route path="/membresia/:id/confirmar" element={<ConfirmMemberPage />} />
     </Routes>,
-    { role: UserRole.Pastor, route: '/membresia/p1/confirmar' },
+    { role: UserRole.GeneralAdmin, route: '/membresia/p1/confirmar' },
   );
 
 describe('confirm member page', () => {
   afterEach(() => clearQueries());
 
-  it('lets the pastor confirm with or without a council, newest council first', async () => {
+  it('lets the general admin confirm with or without a council, newest council first', async () => {
     vi.mocked(listCouncils).mockResolvedValue([
       { id: 'c2', meetingDate: '2026-11-10', memberCount: 3 },
       { id: 'c1', meetingDate: '2026-10-27', memberCount: 5 },

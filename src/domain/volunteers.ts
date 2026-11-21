@@ -7,7 +7,7 @@ interface RoleHolder {
 }
 
 export function assignableRoles(actorRole: string | undefined): UserRole[] {
-  if (actorRole === UserRole.Pastor) return Object.values(UserRole);
+  if (actorRole === UserRole.GeneralAdmin) return Object.values(UserRole);
   if (actorRole === UserRole.Admin) return ADMIN_MANAGEABLE_ROLES;
   return [];
 }

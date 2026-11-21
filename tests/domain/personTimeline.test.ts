@@ -221,7 +221,7 @@ describe('membershipTimeline', () => {
       'Confirmado como membro',
       'Entrou no Pequeno Grupo PG Centro',
     ]);
-    expect(entries[3].actor).toBe('Pastor');
+    expect(entries[3].actor).toBe('Administrador Geral');
   });
 
   it('marks an imported member and ignores the groups that came along with the import', () => {
@@ -292,7 +292,7 @@ describe('membershipTimeline', () => {
     ]);
   });
 
-  it('tells when the pastor flags a member and removes the flag', () => {
+  it('tells when the general admin flags a member and removes the flag', () => {
     const entries = membershipTimeline({
       ...source,
       events: [
@@ -374,7 +374,7 @@ describe('membershipTimeline', () => {
     ]);
   });
 
-  it('shows the groups joined on the day of the signup and says the pastor placed the person', () => {
+  it('shows the groups joined on the day of the signup and says the general admin placed the person', () => {
     const entries = membershipTimeline({
       ...source,
       origin: 'membership_signup',
@@ -382,6 +382,6 @@ describe('membershipTimeline', () => {
       communityJoins: [{ kind: 'ministry', name: 'Kids Palmeiras', joinedAt: '2026-11-10T21:00:28Z' }],
     });
 
-    expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([['Passou a servir em Kids Palmeiras', 'Pastor']]);
+    expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([['Passou a servir em Kids Palmeiras', 'Administrador Geral']]);
   });
 });

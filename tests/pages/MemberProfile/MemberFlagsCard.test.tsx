@@ -8,7 +8,7 @@ import { renderScreen } from '../../support/render';
 describe('member flags card', () => {
   it('explains the flag and tells when the member was flagged', () => {
     renderScreen(<MemberFlagsCard flags={[{ flag: 'absent', flaggedAt: '2026-11-16T15:00:00Z' }]} />, {
-      role: UserRole.Pastor,
+      role: UserRole.GeneralAdmin,
     });
 
     expect(screen.getByRole('note')).toHaveTextContent('Membro ausente');
@@ -16,9 +16,9 @@ describe('member flags card', () => {
     expect(screen.getByText('Sinalizado em 16/11/2026')).toBeInTheDocument();
   });
 
-  it('explains the members the pastor is following closely', () => {
+  it('explains the members the general admin is following closely', () => {
     renderScreen(<MemberFlagsCard flags={[{ flag: 'attention', flaggedAt: '2026-11-20T15:00:00Z' }]} />, {
-      role: UserRole.Pastor,
+      role: UserRole.GeneralAdmin,
     });
 
     expect(screen.getByRole('note')).toHaveTextContent('Membro em atenção');

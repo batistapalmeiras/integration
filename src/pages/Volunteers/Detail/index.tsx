@@ -28,11 +28,12 @@ import { z } from 'zod';
 import { PageHeader } from '../../../components/PageHeader';
 import { SwitchRow } from '../../../components/SwitchRow';
 // Local
+import { useRole } from '../../../features/access/useRole';
 import { AppRoute } from '../../../routes/paths';
 import { canLeavePhoneEmpty } from '../../../domain/memberRecords';
 import { assignableRoles } from '../../../domain/volunteers';
 import { useLatest } from '../../../lib/useLatest';
-import { hasRole, LEADERSHIP_ROLES, UserRole } from '../../../types/enums';
+import { hasRole, PRIVILEGED_ACCOUNT_ROLES, UserRole } from '../../../types/enums';
 import { FormContent } from '../../../components/FormLayout';
 import { RoleOptions } from '../components/RoleOptions';
 import { useVolunteerDetail } from '../hooks/useVolunteerDetail';
@@ -56,16 +57,17 @@ export function VolunteerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthCtx();
+  const role = useRole();
   const { show: showToast, toast } = useToast();
   const { open, close, modal } = useModal('drawer');
   const { volunteer, loading, error, saveVolunteer, setActive, removeVolunteer } = useVolunteerDetail(id ?? '');
 
-  const isPastor = user?.role === UserRole.Pastor;
-  const roleOptions = Array.from(new Set([...assignableRoles(user?.role), ...(volunteer ? [volunteer.role] : [])]));
+  const isGeneralAdmin = role === UserRole.GeneralAdmin;
+  const roleOptions = Array.from(new Set([...assignableRoles(role), ...(volunteer ? [volunteer.role] : [])]));
 
   const isSelf = volunteer?.id === user?.id;
-  const isTargetPrivileged = hasRole(volunteer?.role, LEADERSHIP_ROLES);
-  const canEdit = isPastor || isSelf || !isTargetPrivileged;
+  const isTargetPrivileged = hasRole(volunteer?.role, PRIVILEGED_ACCOUNT_ROLES);
+  const canEdit = isGeneralAdmin || isSelf || !isTargetPrivileged;
   const canManage = canEdit && !isSelf;
   const visibleRoleOptions = canManage ? roleOptions : volunteer ? [volunteer.role] : [];
   const optionalPhoneRef = useLatest(canLeavePhoneEmpty(volunteer?.origin));
@@ -88,7 +90,7 @@ export function VolunteerDetailPage() {
   });
 
   if (loading) return <Skeleton $h="320px" />;
-  if (error || !volunteer) return <Empty title="Voluntário não encontrado" description={error ?? ''} />;
+  if (error || !volunteer) return <Empty title="Usuário não encontrado" description={error ?? ''} />;
 
   const submit = handleSubmit(async (values) => {
     try {
@@ -137,9 +139,9 @@ export function VolunteerDetailPage() {
 
   return (
     <FormContent>
-      <PageHeader title={volunteer.name} subtitle="Editar voluntário" back />
+      <PageHeader title={volunteer.name} subtitle="Editar usuário" back />
 
-      {!canEdit && <InfoBox variant="info">Só o Pastor pode editar contas de Administrador ou Pastor.</InfoBox>}
+      {!canEdit && <InfoBox variant="info">Só o Administrador Geral pode editar contas de Administrador ou Administrador Geral.</InfoBox>}
 
       <Form onSubmit={submit}>
         <TextInput
@@ -193,7 +195,7 @@ export function VolunteerDetailPage() {
             {canManage && (
               <Button type="button" variant="danger" fullWidth onClick={confirmRemove}>
                 <Trash2 size={16} />
-                Remover voluntário
+                Remover usuário
               </Button>
             )}
           </>

@@ -1,6 +1,7 @@
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
+import { useRole } from '../../../../features/access/useRole';
 import { useVisitorDetail } from '../../../../features/visitors';
 import { hasRole, INTEGRATION_TEAM_ROLES, TEACHING_ROLES, UserRole } from '../../../../types/enums';
 import { ContactAttemptFormValues } from '../../validators';
@@ -18,12 +19,13 @@ interface Props {
 
 export function NextStep({ detail, onContactRegistered }: Props) {
   const { user } = useAuthCtx();
+  const role = useRole();
   const { person } = detail;
   if (!person) return null;
 
-  const isPastor = user?.role === UserRole.Pastor;
-  const canManage = hasRole(user?.role, INTEGRATION_TEAM_ROLES);
-  const canRecordAttendance = hasRole(user?.role, TEACHING_ROLES);
+  const isGeneralAdmin = role === UserRole.GeneralAdmin;
+  const canManage = hasRole(role, INTEGRATION_TEAM_ROLES);
+  const canRecordAttendance = hasRole(role, TEACHING_ROLES);
 
   const handleRegisterContact = async (values: ContactAttemptFormValues) => {
     await detail.registerContactAttempt(values);
@@ -40,7 +42,7 @@ export function NextStep({ detail, onContactRegistered }: Props) {
       case 'integration':
         return canRecordAttendance ? null : 'os professores';
       case 'membership_pending':
-        return isPastor ? null : 'o pastor';
+        return isGeneralAdmin ? null : 'o Administrador Geral';
       default:
         return null;
     }
@@ -95,7 +97,7 @@ export function NextStep({ detail, onContactRegistered }: Props) {
         />
       )}
 
-      {isPastor && person.status === 'membership_pending' && (
+      {isGeneralAdmin && person.status === 'membership_pending' && (
         <MembershipPendingStagePanel person={person} />
       )}
     </>

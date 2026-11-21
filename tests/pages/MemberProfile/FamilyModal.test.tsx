@@ -17,7 +17,7 @@ vi.mock('../../../src/queries/reference', () => ({
 describe('family modal', () => {
   it('opens straight on the relation and the member when the member has no family yet', () => {
     renderScreen(<FamilyModal personId="p1" family={[]} close={vi.fn()} />, {
-      role: UserRole.Pastor,
+      role: UserRole.GeneralAdmin,
     });
 
     expect(screen.getByText('Selecione o parentesco')).toBeInTheDocument();
@@ -31,7 +31,7 @@ describe('family modal', () => {
         family={[{ id: 'm1', name: 'Pedro Souza', relation: 'child', gender: 'male', derived: false }]}
         close={vi.fn()}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     expect(screen.getByText('Filho: Pedro Souza')).toBeInTheDocument();
@@ -39,14 +39,14 @@ describe('family modal', () => {
     expect(screen.queryByText('Selecione o parentesco')).not.toBeInTheDocument();
   });
 
-  it('lets the pastor remove a relation the system works out, the same way as any other', async () => {
+  it('lets the general admin remove a relation the system works out, the same way as any other', async () => {
     renderScreen(
       <FamilyModal
         personId="p1"
         family={[{ id: 'g1', name: 'Gabrielle Soares', relation: 'grandchild', gender: 'female', derived: true }]}
         close={vi.fn()}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     expect(screen.getByText('Neta: Gabrielle Soares')).toBeInTheDocument();

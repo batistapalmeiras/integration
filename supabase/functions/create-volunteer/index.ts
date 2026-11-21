@@ -31,8 +31,8 @@ Deno.serve(async (req) => {
   if (userError || !user) return json({ error: 'Não autenticado' }, 401);
 
   const { data: callerProfile } = await callerClient.from('profiles').select('role').eq('id', user.id).single();
-  if (!['admin', 'pastor'].includes(callerProfile?.role)) {
-    return json({ error: 'Apenas administradores ou o pastor podem cadastrar voluntários' }, 403);
+  if (!['admin', 'general_admin', 'developer'].includes(callerProfile?.role)) {
+    return json({ error: 'Apenas administradores ou o Administrador Geral podem cadastrar usuários' }, 403);
   }
 
   const { personId, password, role } = await req.json();
@@ -52,14 +52,14 @@ Deno.serve(async (req) => {
     .eq('id', personId)
     .single();
   if (!person || person.status !== 'member') {
-    return json({ error: 'Só membros podem ser voluntários' }, 400);
+    return json({ error: 'Só membros podem ter acesso ao sistema' }, 400);
   }
   if (!person.email) {
     return json({ error: 'Cadastre o e-mail do membro antes, porque ele será o login' }, 400);
   }
 
   const { data: linked } = await adminClient.from('profiles').select('id').eq('person_id', personId).maybeSingle();
-  if (linked) return json({ error: 'Esse membro já é voluntário' }, 400);
+  if (linked) return json({ error: 'Esse membro já tem acesso ao sistema' }, 400);
 
   const { data: created, error: createError } = await adminClient.auth.admin.createUser({
     email: person.email,

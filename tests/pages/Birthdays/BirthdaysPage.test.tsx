@@ -24,7 +24,7 @@ describe('birthdays page', () => {
   });
 
   it('shows the month birthdays in day order, under the current year', async () => {
-    renderScreen(<BirthdaysPage />, { role: UserRole.Pastor, route: MARCH });
+    renderScreen(<BirthdaysPage />, { role: UserRole.GeneralAdmin, route: MARCH });
     expect(await screen.findByText(`Aniversariantes ${YEAR}`)).toBeInTheDocument();
     const names = screen.getAllByText(/^(Ana|Bruno|Carla)$/).map((node) => node.textContent);
     expect(names).toEqual(['Bruno', 'Ana']);
@@ -33,7 +33,7 @@ describe('birthdays page', () => {
 
   it('copies date, name and phone for each person', async () => {
     const user = userEvent.setup();
-    renderScreen(<BirthdaysPage />, { role: UserRole.Pastor, route: MARCH });
+    renderScreen(<BirthdaysPage />, { role: UserRole.GeneralAdmin, route: MARCH });
     await user.click(await screen.findByRole('button', { name: /Copiar lista/ }));
     expect(await navigator.clipboard.readText()).toBe(
       [`Aniversariantes de março de ${YEAR}`, '02/03 · Bruno · sem celular', '20/03 · Ana · (31) 98888-7777'].join(
@@ -45,7 +45,7 @@ describe('birthdays page', () => {
 
   it('picks any month from the row of months on the desktop', async () => {
     const user = userEvent.setup();
-    renderScreen(<BirthdaysPage />, { role: UserRole.Pastor, route: `${AppRoute.Birthdays}?month=12` });
+    renderScreen(<BirthdaysPage />, { role: UserRole.GeneralAdmin, route: `${AppRoute.Birthdays}?month=12` });
     expect(await screen.findByRole('button', { name: 'Dezembro' })).toHaveAttribute('aria-pressed', 'true');
     await user.click(screen.getByRole('button', { name: 'Março' }));
     expect(screen.getByRole('button', { name: 'Março' })).toHaveAttribute('aria-pressed', 'true');
@@ -56,7 +56,7 @@ describe('birthdays page', () => {
     window.matchMedia = (query: string) => ({ ...desktopMatchMedia(query), matches: query.includes('max-width') });
     try {
       const user = userEvent.setup();
-      renderScreen(<BirthdaysPage />, { role: UserRole.Pastor, route: `${AppRoute.Birthdays}?month=12` });
+      renderScreen(<BirthdaysPage />, { role: UserRole.GeneralAdmin, route: `${AppRoute.Birthdays}?month=12` });
       await user.click(await screen.findByRole('button', { name: 'Próximo mês' }));
       expect(await screen.findByText('Janeiro')).toBeInTheDocument();
     } finally {

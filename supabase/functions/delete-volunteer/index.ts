@@ -31,8 +31,8 @@ Deno.serve(async (req) => {
   if (userError || !user) return json({ error: 'Não autenticado' }, 401);
 
   const { data: callerProfile } = await callerClient.from('profiles').select('role').eq('id', user.id).single();
-  if (!['admin', 'pastor'].includes(callerProfile?.role)) {
-    return json({ error: 'Apenas administradores ou o pastor podem remover voluntários' }, 403);
+  if (!['admin', 'general_admin', 'developer'].includes(callerProfile?.role)) {
+    return json({ error: 'Apenas administradores ou o Administrador Geral podem remover usuários' }, 403);
   }
 
   const { id } = await req.json();

@@ -11,10 +11,10 @@ import {
 } from '../../src/types/enums';
 
 describe('role groups', () => {
-  it('lets admin and pastor into every group', () => {
+  it('lets admin and general admin into every group', () => {
     [LEADERSHIP_ROLES, INTEGRATION_TEAM_ROLES, TEACHING_ROLES, STAFF_ROLES].forEach((group) => {
       expect(hasRole(UserRole.Admin, group)).toBe(true);
-      expect(hasRole(UserRole.Pastor, group)).toBe(true);
+      expect(hasRole(UserRole.GeneralAdmin, group)).toBe(true);
     });
   });
 
@@ -32,9 +32,9 @@ describe('role groups', () => {
 });
 
 describe('roles by module', () => {
-  it('puts the pastor under Igreja and the integration roles under Integração, in module order', () => {
-    expect(groupRolesByModule([UserRole.Teacher, UserRole.Pastor, UserRole.Admin])).toEqual([
-      { module: SystemModule.Church, label: 'Igreja', roles: [UserRole.Pastor] },
+  it('puts the general admin under Igreja and the integration roles under Integração, in module order', () => {
+    expect(groupRolesByModule([UserRole.Teacher, UserRole.GeneralAdmin, UserRole.Admin])).toEqual([
+      { module: SystemModule.Church, label: 'Igreja', roles: [UserRole.GeneralAdmin] },
       { module: SystemModule.Integration, label: 'Integração', roles: [UserRole.Teacher, UserRole.Admin] },
     ]);
   });

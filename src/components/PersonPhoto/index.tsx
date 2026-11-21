@@ -1,6 +1,5 @@
-// Libs
-import { useAuthCtx } from 'bp-kit';
 // Local
+import { useRole } from '../../features/access/useRole';
 import { usePersonPhotoUrl } from '../../queries/memberPhotos';
 import { UserRole } from '../../types/enums';
 import { MemberPhoto } from '../MemberPhoto';
@@ -12,8 +11,8 @@ interface Props {
 }
 
 export function PersonPhoto({ personId, size }: Props) {
-  const { user } = useAuthCtx();
-  const url = usePersonPhotoUrl(personId, user?.role === UserRole.Pastor).data ?? null;
+  const role = useRole();
+  const url = usePersonPhotoUrl(personId, role === UserRole.GeneralAdmin).data ?? null;
 
   if (!url) return null;
 

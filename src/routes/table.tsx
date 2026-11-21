@@ -4,7 +4,14 @@ import { matchRoutes } from 'react-router-dom';
 // Libs
 import { ChangePasswordPage } from 'bp-kit';
 // Local
-import { INTEGRATION_TEAM_ROLES, LEADERSHIP_ROLES, STAFF_ROLES, TEACHING_ROLES, UserRole } from '../types/enums';
+import {
+  INTEGRATION_TEAM_ROLES,
+  LEADERSHIP_ROLES,
+  STAFF_ROLES,
+  SystemModule,
+  TEACHING_ROLES,
+  UserRole,
+} from '../types/enums';
 import {
   BirthdaysPage,
   ClassesPage,
@@ -49,12 +56,15 @@ export interface RouteTarget {
 export interface RouteDefinition extends RouteTarget {
   path: string;
   list?: RouteTarget;
+  module?: SystemModule;
 }
 
-const PASTOR = [UserRole.Pastor];
+const GENERAL_ADMIN = [UserRole.GeneralAdmin];
 
 const VISITORS_LIST: RouteTarget = { element: <VisitorsPage />, roles: INTEGRATION_TEAM_ROLES };
-const MEMBERS_LIST: RouteTarget = { element: <MembersPage />, roles: PASTOR };
+const CHURCH = SystemModule.Church;
+
+const MEMBERS_LIST: RouteTarget = { element: <MembersPage />, roles: GENERAL_ADMIN };
 
 export const PUBLIC_ROUTES: RouteDefinition[] = [
   { path: AppRoute.IntegrationSignup, element: <IntegrationSignupPage /> },
@@ -67,7 +77,7 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: AppRoute.Dashboard, element: <DashboardPage /> },
   { path: AppRoute.Profile, element: <ProfilePage /> },
   { path: AppRoute.ChangePassword, element: <ChangePasswordPage /> },
-  { path: AppRoute.ChurchMore, element: <ModuleMorePage areaId="church" />, roles: PASTOR },
+  { path: AppRoute.ChurchMore, module: CHURCH, element: <ModuleMorePage areaId="church" />, roles: GENERAL_ADMIN },
   { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: LEADERSHIP_ROLES },
 
   { path: `${AppRoute.Visitors}/*`, ...VISITORS_LIST },
@@ -78,17 +88,17 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: `${AppRoute.Coffee}/*`, element: <CoffeePage />, roles: INTEGRATION_TEAM_ROLES },
   { path: AppRoute.Classes, element: <ClassesPage />, roles: TEACHING_ROLES },
   { path: AppRoute.Membership, element: <MembershipPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Membership}/:id/confirmar`, element: <ConfirmMemberPage />, roles: PASTOR },
+  { path: `${AppRoute.Membership}/:id/confirmar`, element: <ConfirmMemberPage />, roles: GENERAL_ADMIN },
 
-  { path: `${AppRoute.Members}/*`, ...MEMBERS_LIST },
-  { path: AppRoute.Birthdays, element: <BirthdaysPage />, roles: PASTOR },
-  { path: `${AppRoute.Members}/:id`, element: <MemberProfilePage />, roles: PASTOR, list: MEMBERS_LIST },
-  { path: AppRoute.Ministries, element: <MinistriesPage />, roles: PASTOR },
-  { path: AppRoute.SmallGroups, element: <SmallGroupsPage />, roles: PASTOR },
-  { path: `${AppRoute.CommunityGroups}/:type/:id`, element: <CommunityGroupDetailPage />, roles: PASTOR },
-  { path: AppRoute.Volunteers, element: <VolunteersPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Volunteers}/:id`, element: <VolunteerDetailPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Store}/*`, element: <StoreRoutes />, roles: PASTOR },
+  { path: `${AppRoute.Members}/*`, module: CHURCH, ...MEMBERS_LIST },
+  { path: AppRoute.Birthdays, module: CHURCH, element: <BirthdaysPage />, roles: GENERAL_ADMIN },
+  { path: `${AppRoute.Members}/:id`, module: CHURCH, element: <MemberProfilePage />, roles: GENERAL_ADMIN, list: MEMBERS_LIST },
+  { path: AppRoute.Ministries, module: CHURCH, element: <MinistriesPage />, roles: GENERAL_ADMIN },
+  { path: AppRoute.SmallGroups, module: CHURCH, element: <SmallGroupsPage />, roles: GENERAL_ADMIN },
+  { path: `${AppRoute.CommunityGroups}/:type/:id`, module: CHURCH, element: <CommunityGroupDetailPage />, roles: GENERAL_ADMIN },
+  { path: AppRoute.Volunteers, module: CHURCH, element: <VolunteersPage />, roles: LEADERSHIP_ROLES },
+  { path: `${AppRoute.Volunteers}/:id`, module: CHURCH, element: <VolunteerDetailPage />, roles: LEADERSHIP_ROLES },
+  { path: `${AppRoute.Store}/*`, module: CHURCH, element: <StoreRoutes />, roles: GENERAL_ADMIN },
 
   { path: AppRoute.Reports, element: <ReportsPage />, roles: LEADERSHIP_ROLES },
   { path: `${AppRoute.Reports}/cafes`, element: <CoffeeHistoryPage />, roles: INTEGRATION_TEAM_ROLES },
@@ -98,6 +108,10 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: `${COUNCILS_PATH}/:id`, element: <CouncilRosterPage />, roles: LEADERSHIP_ROLES },
   { path: `${AppRoute.Reports}/turmas/:id`, element: <CohortRosterPage />, roles: LEADERSHIP_ROLES },
 ];
+
+export function moduleOf(pathname: string): SystemModule {
+  return matchRoutes(PRIVATE_ROUTES, pathname)?.[0]?.route.module ?? SystemModule.Integration;
+}
 
 export function canAccess(role: string | undefined, pathname: string): boolean {
   const match = matchRoutes(PRIVATE_ROUTES, pathname)?.[0];

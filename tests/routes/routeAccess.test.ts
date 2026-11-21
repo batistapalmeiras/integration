@@ -4,7 +4,7 @@ import { AppRoute } from '../../src/routes/paths';
 import { canAccess } from '../../src/routes/table';
 import { UserRole } from '../../src/types/enums';
 
-const ROLES = Object.values(UserRole);
+const ROLES = Object.values(UserRole).filter((role) => role !== UserRole.Developer);
 const ID = '5f3c2b1a-9d8e-4f7a-b6c5-1234567890ab';
 
 describe('route access', () => {
@@ -25,7 +25,7 @@ describe('route access', () => {
   });
 
   it('keeps member records and pastoral screens with the pastor', () => {
-    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/${ID}`)).toBe(true);
+    expect(canAccess(UserRole.GeneralAdmin, `${AppRoute.Members}/${ID}`)).toBe(true);
     expect(canAccess(UserRole.Admin, `${AppRoute.Members}/${ID}`)).toBe(false);
     expect(canAccess(UserRole.Admin, AppRoute.Birthdays)).toBe(false);
     expect(canAccess(UserRole.Teacher, AppRoute.Visitors)).toBe(false);
@@ -40,15 +40,15 @@ describe('route access', () => {
   });
 
   it('treats a segment that is not an id as list filters, with the list roles', () => {
-    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/ativo`)).toBe(true);
-    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/ativo/batismo`)).toBe(true);
+    expect(canAccess(UserRole.GeneralAdmin, `${AppRoute.Members}/ativo`)).toBe(true);
+    expect(canAccess(UserRole.GeneralAdmin, `${AppRoute.Members}/ativo/batismo`)).toBe(true);
     expect(canAccess(UserRole.Admin, `${AppRoute.Members}/ativo`)).toBe(false);
     expect(canAccess(UserRole.Teacher, `${AppRoute.Visitors}/arquivado`)).toBe(false);
     expect(canAccess(UserRole.IntegrationTeam, `${AppRoute.Visitors}/arquivado`)).toBe(true);
   });
 
   it('denies unknown paths and missing roles', () => {
-    expect(canAccess(UserRole.Pastor, '/nao-existe')).toBe(false);
+    expect(canAccess(UserRole.GeneralAdmin, '/nao-existe')).toBe(false);
     expect(canAccess(undefined, AppRoute.Dashboard)).toBe(false);
   });
 });

@@ -1,11 +1,12 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, ModalTitle, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, ModalTitle, Skeleton, text, useModal } from 'bp-kit';
 import { Pencil, Plus } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
+import { useRole } from '../../features/access/useRole';
 import { AddButton } from '../../components/AddButton';
 import { ArrowSwitcher } from '../../components/ArrowSwitcher';
 import { EnrollPersonModal } from '../../components/EnrollPersonModal';
@@ -23,7 +24,7 @@ import { useClasses } from './hooks';
 
 export function ClassesPage() {
   const navigate = useNavigate();
-  const { user } = useAuthCtx();
+  const role = useRole();
   const {
     cohorts,
     cohort,
@@ -44,7 +45,7 @@ export function ClassesPage() {
   } = useClasses();
   const { open, close, modal } = useModal('drawer');
 
-  const canManageCohort = hasRole(user?.role, LEADERSHIP_ROLES);
+  const canManageCohort = hasRole(role, LEADERSHIP_ROLES);
   const canEnroll = canManageCohort;
 
   const openCreateModal = () =>

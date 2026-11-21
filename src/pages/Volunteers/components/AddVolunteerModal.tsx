@@ -38,20 +38,20 @@ export function AddVolunteerModal({ close, onAdd, allowedRoles }: Props) {
       await onAdd(values.personId, values.role);
       close();
     } catch (e) {
-      showToast(e instanceof Error ? e.message : 'Não foi possível adicionar o voluntário.');
+      showToast(e instanceof Error ? e.message : 'Não foi possível adicionar o usuário.');
     }
   });
 
   return (
     <>
-      <ModalTitle onClose={close}>Adicionar voluntário</ModalTitle>
+      <ModalTitle onClose={close}>Adicionar usuário</ModalTitle>
       {candidates.loading && <Skeleton $h="160px" />}
       {candidates.error && <InfoBox variant="warning">{errorMessage(candidates.error)}</InfoBox>}
       {candidates.data && (
         <Form onSubmit={submit}>
           <InfoBox variant="info">
-            O voluntário entra com o e-mail do cadastro de membro. A senha inicial será {defaultVolunteerPassword()}{' '}
-            — repasse ao voluntário.
+            O usuário entra com o e-mail do cadastro de membro. A senha inicial será {defaultVolunteerPassword()}{' '}
+            — repasse ao usuário.
           </InfoBox>
           <Select label="Membro" control={control} name="personId" searchable>
             <option value="">Buscar pelo membro…</option>

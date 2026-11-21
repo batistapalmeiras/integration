@@ -14,7 +14,7 @@ export const queryKeys = {
   statusCounts: ['people', 'status-counts'] as const,
   annualYears: ['people', 'annual-years'] as const,
   annualReport: (year: number) => ['people', 'annual-report', year] as const,
-  pastorDashboard: ['people', 'pastor-dashboard'] as const,
+  generalAdminDashboard: ['people', 'general-admin-dashboard'] as const,
   integrationTeamDashboard: ['people', 'integration-team-dashboard'] as const,
   adminDashboard: ['people', 'admin-dashboard'] as const,
   teacherDashboard: ['cohorts', 'teacher-dashboard'] as const,

@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 // Libs
 import { useAuthCtx } from 'bp-kit';
 // Local
+import { useRole } from '../features/access/useRole';
 import { UserRole } from '../types/enums';
 import { AppRoute } from './paths';
 
@@ -13,10 +14,11 @@ interface Props {
 
 export function ProtectedRoute({ children, roles }: Props) {
   const { user, loading } = useAuthCtx();
+  const role = useRole();
 
   if (loading) return null;
   if (!user) return <Navigate to={AppRoute.Login} replace />;
-  if (roles && !(roles as string[]).includes(user.role)) return <Navigate to={AppRoute.Dashboard} replace />;
+  if (roles && !(roles as string[]).includes(role ?? '')) return <Navigate to={AppRoute.Dashboard} replace />;
 
   return <>{children}</>;
 }

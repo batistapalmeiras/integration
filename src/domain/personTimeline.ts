@@ -182,7 +182,7 @@ export interface MembershipSource {
 }
 
 const BULK_JOIN_WINDOW_MS = 24 * 60 * 60 * 1000;
-const PASTOR_ACTOR = 'Pastor';
+const GENERAL_ADMIN_ACTOR = 'Administrador Geral';
 
 const ROLE_LABELS: Record<string, string> = { leader: 'Líder', host: 'Anfitrião' };
 
@@ -313,7 +313,7 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
           timestampDateKey(join.joinedAt),
           join.joinedAt,
           join.kind === 'small_group' ? `Entrou no Pequeno Grupo ${join.name}` : `Passou a servir em ${join.name}`,
-          PASTOR_ACTOR,
+          GENERAL_ADMIN_ACTOR,
         ),
       );
     });

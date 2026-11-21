@@ -22,7 +22,7 @@ const renderModal = (selected: string[], onSave = vi.fn().mockResolvedValue(unde
       onSave={onSave}
       close={close}
     />,
-    { role: UserRole.Pastor },
+    { role: UserRole.GeneralAdmin },
   );
   return { onSave, close };
 };
@@ -78,7 +78,7 @@ describe('group checklist modal', () => {
         onSave={vi.fn()}
         close={vi.fn()}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     expect(screen.getByText('Líder')).toBeInTheDocument();

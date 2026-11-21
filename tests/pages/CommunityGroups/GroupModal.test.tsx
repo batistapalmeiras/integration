@@ -34,7 +34,7 @@ describe('group modal', () => {
         close={vi.fn()}
         onSave={onSave}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     expect(screen.getByText('Pedro Henrique Oliveira Menezes')).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe('group modal', () => {
         close={vi.fn()}
         onSave={vi.fn()}
       />,
-      { role: UserRole.Pastor },
+      { role: UserRole.GeneralAdmin },
     );
 
     expect(screen.queryByRole('button', { name: 'Líder(es)' })).not.toBeInTheDocument();

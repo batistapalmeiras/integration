@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, Pagination, SearchInput, Skeleton, text, useAuthCtx, useMediaQuery, useModal } from 'bp-kit';
+import { Button, Empty, Pagination, SearchInput, Skeleton, text, useMediaQuery, useModal } from 'bp-kit';
 import { SlidersHorizontal, Users } from 'lucide-react';
 // Components
 import { CountBadge } from '../../components/CountBadge';
@@ -12,6 +12,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { useHideModuleBar } from '../../components/Layout/moduleBar';
 import { useInView } from '../../lib/useInView';
 // Local
+import { useRole } from '../../features/access/useRole';
 import { PeopleCount } from '../../components/PeopleCount';
 import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
 import { TonePill } from '../../components/StatusPill';
@@ -39,7 +40,7 @@ function emptyDescription(coupled: boolean, hasFilter: boolean): string {
 
 export function MembersPage() {
   const navigate = useNavigate();
-  const { user } = useAuthCtx();
+  const role = useRole();
   const { open, close, modal } = useModal('drawer');
   const mobile = useMediaQuery('(max-width: 744px)');
   const withTopBar = useMediaQuery('(max-width: 1024px)');
@@ -47,7 +48,7 @@ export function MembersPage() {
   useHideModuleBar(mobile);
   const [view, setView] = useState<ListView>(() => membersView.load() ?? 'list');
   const [gridColumns, gridRef] = useGridColumns();
-  const canOpenRecord = user?.role === UserRole.Pastor;
+  const canOpenRecord = role === UserRole.GeneralAdmin;
   const {
     grouping,
     members,

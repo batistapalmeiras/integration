@@ -1,7 +1,7 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, LinkButton, Skeleton, text, useAuthCtx, useModal } from 'bp-kit';
+import { Button, Empty, LinkButton, Skeleton, text, useModal } from 'bp-kit';
 import { CalendarDays, ChevronRight, Plus } from 'lucide-react';
 // Components
 import { EntryTypeTable } from '../../components/EntryTypeTable';
@@ -16,12 +16,13 @@ import { photoOwnersOf } from '../../repositories/memberPhotos';
 import { AppRoute, COUNCILS_PATH } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 // Local
+import { useRole } from '../../features/access/useRole';
 import { useMembershipQueue } from './hooks/useMembershipQueue';
 import { CouncilBar, CouncilLabel } from './styles';
 
 export function MembershipPage() {
   const navigate = useNavigate();
-  const { user } = useAuthCtx();
+  const role = useRole();
   const { open, close, modal } = useModal('drawer');
   const { rows, loading, error } = useMembershipQueue();
   const photoUrls =
@@ -30,14 +31,14 @@ export function MembershipPage() {
       ['thumb'],
     ).data?.thumb ?? {};
   const council = currentCouncil(useCouncils().data ?? []);
-  const isPastor = user?.role === UserRole.Pastor;
+  const isGeneralAdmin = role === UserRole.GeneralAdmin;
 
   return (
     <div>
       <PageHeader
         title="Membresia"
         action={
-          isPastor && (
+          isGeneralAdmin && (
             <Button variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
               <Plus size={16} />
               Novo Conselho
