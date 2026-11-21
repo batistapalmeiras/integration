@@ -14,6 +14,7 @@ import { renderScreen } from '../../support/render';
 vi.mock('../../../src/repositories/people', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../src/repositories/people')>()),
   listVisitors: vi.fn(),
+  listArchivedDates: vi.fn().mockResolvedValue({ '2': '2026-11-18T15:00:00Z' }),
 }));
 
 const visitor = (id: string, name: string, status: 'initial_contact' | 'archived') => ({
@@ -84,6 +85,11 @@ describe('visitors screens', () => {
 
     expect(await screen.findByText('Ana Lima')).toBeInTheDocument();
     expect(screen.queryByText('Ana Souza')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Ordenar' }));
+    expect(screen.getByRole('radio', { name: 'Nome (A–Z)' })).toHaveAttribute('aria-checked', 'true');
+    await userEvent.click(screen.getByRole('radio', { name: 'Arquivados mais recentemente' }));
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('/visitantes/arquivado');
   });
 });

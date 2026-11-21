@@ -33,13 +33,16 @@ describe('route access', () => {
 
   it('matches the most specific route, so the new-visitor form is not taken for a visitor id', () => {
     expect(canAccess(UserRole.IntegrationTeam, AppRoute.NewVisitor)).toBe(true);
+    expect(canAccess(UserRole.IntegrationTeam, `${AppRoute.Reports}/cafes`)).toBe(true);
+    expect(canAccess(UserRole.IntegrationTeam, `${AppRoute.Reports}/turmas`)).toBe(false);
     expect(canAccess(UserRole.Teacher, AppRoute.NewVisitor)).toBe(false);
     expect(canAccess(UserRole.Teacher, `${AppRoute.Visitors}/${ID}`)).toBe(true);
   });
 
   it('treats a segment that is not an id as list filters, with the list roles', () => {
-    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/ativo`)).toBe(true);
-    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/ativo/batismo`)).toBe(true);
+    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/ativo`)).toBe(true);
+    expect(canAccess(UserRole.Pastor, `${AppRoute.Members}/ativo/batismo`)).toBe(true);
+    expect(canAccess(UserRole.Admin, `${AppRoute.Members}/ativo`)).toBe(false);
     expect(canAccess(UserRole.Teacher, `${AppRoute.Visitors}/arquivado`)).toBe(false);
     expect(canAccess(UserRole.IntegrationTeam, `${AppRoute.Visitors}/arquivado`)).toBe(true);
   });

@@ -54,7 +54,7 @@ export interface RouteDefinition extends RouteTarget {
 const PASTOR = [UserRole.Pastor];
 
 const VISITORS_LIST: RouteTarget = { element: <VisitorsPage />, roles: INTEGRATION_TEAM_ROLES };
-const MEMBERS_LIST: RouteTarget = { element: <MembersPage />, roles: LEADERSHIP_ROLES };
+const MEMBERS_LIST: RouteTarget = { element: <MembersPage />, roles: PASTOR };
 
 export const PUBLIC_ROUTES: RouteDefinition[] = [
   { path: AppRoute.IntegrationSignup, element: <IntegrationSignupPage /> },
@@ -68,7 +68,7 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: AppRoute.Profile, element: <ProfilePage /> },
   { path: AppRoute.ChangePassword, element: <ChangePasswordPage /> },
   { path: AppRoute.ChurchMore, element: <ModuleMorePage areaId="church" />, roles: PASTOR },
-  { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: INTEGRATION_TEAM_ROLES },
+  { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: LEADERSHIP_ROLES },
 
   { path: `${AppRoute.Visitors}/*`, ...VISITORS_LIST },
   { path: AppRoute.ArchivedVisitors, element: <ArchivedVisitorsPage />, roles: INTEGRATION_TEAM_ROLES },
@@ -93,10 +93,10 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: AppRoute.Reports, element: <ReportsPage />, roles: LEADERSHIP_ROLES },
   { path: `${AppRoute.Reports}/cafes`, element: <CoffeeHistoryPage />, roles: INTEGRATION_TEAM_ROLES },
   { path: `${AppRoute.Reports}/cafes/:id`, element: <CoffeeRosterPage />, roles: INTEGRATION_TEAM_ROLES },
-  { path: `${AppRoute.Reports}/turmas`, element: <CohortsListPage />, roles: INTEGRATION_TEAM_ROLES },
+  { path: `${AppRoute.Reports}/turmas`, element: <CohortsListPage />, roles: LEADERSHIP_ROLES },
   { path: COUNCILS_PATH, element: <CouncilsPage />, roles: LEADERSHIP_ROLES },
   { path: `${COUNCILS_PATH}/:id`, element: <CouncilRosterPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Reports}/turmas/:id`, element: <CohortRosterPage />, roles: INTEGRATION_TEAM_ROLES },
+  { path: `${AppRoute.Reports}/turmas/:id`, element: <CohortRosterPage />, roles: LEADERSHIP_ROLES },
 ];
 
 export function canAccess(role: string | undefined, pathname: string): boolean {

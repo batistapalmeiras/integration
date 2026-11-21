@@ -71,19 +71,15 @@ interface NavArea {
   morePath?: AppRoute;
 }
 
-const HISTORY_GROUP: NavGroup = {
+const LEADERSHIP_HISTORY_GROUP: NavGroup = {
   id: 'history',
   label: 'Histórico',
   icon: History,
   items: [
     { ...NAV_ITEMS.coffeeHistory, label: 'Cafés' },
     { ...NAV_ITEMS.cohortHistory, label: 'Turmas' },
+    { ...NAV_ITEMS.councilHistory, label: 'Conselho Administrativo' },
   ],
-};
-
-const LEADERSHIP_HISTORY_GROUP: NavGroup = {
-  ...HISTORY_GROUP,
-  items: [...HISTORY_GROUP.items, { ...NAV_ITEMS.councilHistory, label: 'Conselho Administrativo' }],
 };
 
 export const PASTOR_NAV_AREAS: NavArea[] = [
@@ -110,9 +106,8 @@ export const INTEGRATION_TEAM_NAV_AREAS: NavArea[] = [
     id: 'integration',
     title: 'Integração',
     icon: Sprout,
-    tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee],
-    more: [HISTORY_GROUP],
-    morePath: AppRoute.IntegrationMore,
+    tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, { ...NAV_ITEMS.coffeeHistory, label: 'Histórico', icon: History }],
+    more: [],
   },
 ];
 
@@ -123,7 +118,6 @@ const ADMIN_NAV_AREAS: NavArea[] = [
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
     more: [
-      NAV_ITEMS.members,
       NAV_ITEMS.volunteers,
       LEADERSHIP_HISTORY_GROUP,
       NAV_ITEMS.reports,

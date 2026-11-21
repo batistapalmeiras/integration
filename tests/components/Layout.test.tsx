@@ -41,7 +41,9 @@ describe('side menu by role', () => {
     }
     expect(linksTo(AppRoute.Classes)).toBe(false);
     expect(linksTo(`${AppRoute.Reports}/cafes`)).toBe(true);
-    expect(linksTo(`${AppRoute.Reports}/turmas`)).toBe(true);
+    expect(linksTo(`${AppRoute.Reports}/turmas`)).toBe(false);
+    expect(hasLink('Histórico')).toBe(true);
+    expect(hasLink('Mais')).toBe(false);
   });
 
   it('shows the user name and role and renders the page content', () => {

@@ -106,10 +106,10 @@ export function Layout({ children }: ILayoutProps) {
   const hasOuterTabs = navAreas.length > 1;
   const isOnTab = !!currentArea || (hasOuterTabs && (isExactTab(AppRoute.Dashboard) || isExactTab(AppRoute.Profile)));
 
-  const shouldShowBottomBar = isOnTab;
+  const shouldShowBottomBar = isOnTab && bottomTabs.length > 1;
   const bottomBarHidden = useHideOnScroll(shouldShowBottomBar, pathname);
   const scrolled = useWindowScrolled();
-  const isNavDestination = hasSidebar ? isSidebarDestination : shouldShowBottomBar;
+  const isNavDestination = hasSidebar ? isSidebarDestination : isOnTab;
 
   return (
     <>

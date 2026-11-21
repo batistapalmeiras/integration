@@ -21,6 +21,16 @@ export async function listVisitors(): Promise<Person[]> {
   return data.map(toPerson).sort(comparePeopleByPipeline);
 }
 
+export async function listArchivedDates(): Promise<Record<string, string>> {
+  const { data, error } = await supabase
+    .from('status_history')
+    .select('person_id, created_at')
+    .eq('to_status', 'archived')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return Object.fromEntries((data ?? []).map((row) => [row.person_id, row.created_at]));
+}
+
 export interface NewVisitor {
   name: string;
   phone: string;
