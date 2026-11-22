@@ -19,11 +19,16 @@ export interface FamilyLink {
 
 const toGender = (value: string | null): Gender | null => (value === 'male' || value === 'female' ? value : null);
 
-export async function getFamily(personId: string): Promise<Relative[]> {
-  const { data, error } = await supabase.rpc('get_family_links', { p_person_id: personId });
-  if (error) throw error;
+interface FamilyRow {
+  relation: string;
+  person_id: string;
+  name: string;
+  gender: string | null;
+  derived: boolean;
+}
 
-  return data
+function toRelatives(rows: FamilyRow[]): Relative[] {
+  return rows
     .flatMap((row) =>
       isFamilyRelation(row.relation)
         ? [
@@ -38,6 +43,21 @@ export async function getFamily(personId: string): Promise<Relative[]> {
         : [],
     )
     .sort((a, b) => relationRank(a.relation) - relationRank(b.relation) || byName(a, b));
+}
+
+export async function getFamily(personId: string): Promise<Relative[]> {
+  const { data, error } = await supabase.rpc('get_family_links', { p_person_id: personId });
+  if (error) throw error;
+  return toRelatives(data);
+}
+
+export async function suggestFamily(personId: string, links: FamilyLink[]): Promise<Relative[]> {
+  const { data, error } = await supabase.rpc('suggest_family_links', {
+    p_person_id: personId,
+    p_links: links.map((link) => ({ relative_id: link.relativeId, relation: link.relation })),
+  });
+  if (error) throw error;
+  return toRelatives(data);
 }
 
 export async function setFamily(personId: string, links: FamilyLink[], hidden: string[]): Promise<void> {

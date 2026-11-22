@@ -4,6 +4,7 @@ export const queryKeys = {
   visitors: ['people', 'visitors'] as const,
   archivedDates: ['people', 'archived-dates'] as const,
   members: ['people', 'members'] as const,
+  memberPhotoOwners: (personIds: string[]) => ['people', 'member-photo-owners', personIds] as const,
   memberPhotos: (variant: string, owners: string[]) => ['people', 'member-photos', variant, owners] as const,
   memberNames: (activeOnly: boolean) => ['people', 'member-names', { activeOnly }] as const,
   memberTotal: ['people', 'member-total'] as const,

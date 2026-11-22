@@ -1,7 +1,7 @@
 // Local
 import { useQuery } from '../lib/queryCache';
 import { queryKeys } from '../lib/queryKeys';
-import { memberPhotoOwner, memberPhotoUrls, PhotoOwner, PhotoVariant } from '../repositories/memberPhotos';
+import { memberPhotoOwner, memberPhotoOwners, memberPhotoUrls, PhotoOwner, PhotoVariant } from '../repositories/memberPhotos';
 
 const PHOTO_URL_STALE_TIME = 30 * 60_000;
 
@@ -14,6 +14,15 @@ export const useMemberPhotoUrls = (owners: PhotoOwner[], variants: PhotoVariant[
     () => memberPhotoUrls(owners, variants),
     { enabled: owners.length > 0, staleTime: PHOTO_URL_STALE_TIME },
   );
+
+export function useRelativePhotoUrls(personIds: string[]): Record<string, string> {
+  const ids = [...personIds].sort();
+  const owners = useQuery(queryKeys.memberPhotoOwners(ids), () => memberPhotoOwners(ids), {
+    enabled: ids.length > 0,
+    staleTime: PHOTO_URL_STALE_TIME,
+  }).data;
+  return useMemberPhotoUrls(owners ?? [], ['thumb']).data?.thumb ?? {};
+}
 
 async function personPhotoUrl(personId: string): Promise<string | null> {
   const owner = await memberPhotoOwner(personId);

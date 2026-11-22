@@ -1,11 +1,12 @@
 // React
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Control, Controller, useController, useForm } from 'react-hook-form';
 // Libs
 import { IconButton, LinkButton, Select } from 'bp-kit';
 import { Plus, Trash2 } from 'lucide-react';
 // Components
 import { WideField } from '../../components/FormLayout';
+import { MemberPhoto } from '../../components/MemberPhoto';
 import { ItemRow, ItemRows, ItemStack } from '../../components/Panel';
 // Local
 import {
@@ -18,11 +19,12 @@ import {
   relationRank,
 } from '../../domain/family';
 import { byName } from '../../domain/text';
+import { useRelativePhotoUrls } from '../../queries/memberPhotos';
 import { useFamilyTraits } from '../../queries/person';
 import { useMemberNames } from '../../queries/reference';
-import { Relative } from '../../repositories/family';
+import { Relative, suggestFamily } from '../../repositories/family';
 import { FamilyFormValues, FamilyLinkValue } from './form';
-import { AddLink } from './styles';
+import { AddLink, RowPerson, SuggestingHint } from './styles';
 
 interface ListProps {
   personId: string;
@@ -35,6 +37,7 @@ interface ListProps {
   derived: Relative[];
   hidden: string[];
   onHiddenChange: (hidden: string[]) => void;
+  suggest: (links: FamilyLinkValue[]) => Promise<Relative[]>;
 }
 
 interface PickerValues {
@@ -55,8 +58,14 @@ function FamilyList({
   derived,
   hidden,
   onHiddenChange,
+  suggest,
 }: ListProps) {
   const [picking, setPicking] = useState(startOpen && value.length === 0);
+  const [preview, setPreview] = useState<Relative[] | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+  const [known, setKnown] = useState<Map<string, string>>(new Map());
+  const dismissed = useRef(new Set<string>());
+  const derivedRows = preview ?? derived;
 
   useEffect(() => {
     onPickingChange?.(picking);
@@ -68,7 +77,7 @@ function FamilyList({
   const available = candidates.filter(
     (candidate) =>
       !value.some((link) => link.relativeId === candidate.id) &&
-      !derived.some((relative) => relative.id === candidate.id) &&
+      !derivedRows.some((relative) => relative.id === candidate.id) &&
       (!isFamilyRelation(picked.relation) ||
         fitsRelation(picked.relation, personId, traits[personId], traits[candidate.id])),
   );
@@ -77,11 +86,11 @@ function FamilyList({
     ...value.map((link) => ({
       relativeId: link.relativeId,
       relation: link.relation,
-      name: names.get(link.relativeId) ?? '',
+      name: names.get(link.relativeId) ?? known.get(link.relativeId) ?? '',
       gender: traits[link.relativeId]?.gender ?? null,
       derived: false,
     })),
-    ...derived
+    ...derivedRows
       .filter((relative) => !hidden.includes(relative.id))
       .map((relative) => ({
         relativeId: relative.id,
@@ -96,15 +105,41 @@ function FamilyList({
     return rankOf(a.relation) - rankOf(b.relation) || byName(a, b);
   });
 
+  const include = async (base: FamilyLinkValue[]) => {
+    setSuggesting(true);
+    try {
+      const family = await suggest(base);
+      onChange(
+        family
+          .filter((relative) => !relative.derived && !dismissed.current.has(relative.id))
+          .map((relative) => ({ relativeId: relative.id, relation: relative.relation })),
+      );
+      setPreview(family.filter((relative) => relative.derived));
+      setKnown(new Map(family.map((relative) => [relative.id, relative.name])));
+    } catch {
+      onChange(base);
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
   useEffect(() => {
     const subscription = picker.watch((values) => {
       if (!values.relation || !values.relativeId) return;
-      onChange([...value, { relativeId: values.relativeId, relation: values.relation }]);
+      dismissed.current.delete(values.relativeId);
+      void include([...value, { relativeId: values.relativeId, relation: values.relation }]);
       picker.reset(EMPTY_PICK);
       setPicking(false);
     });
     return () => subscription.unsubscribe();
-  }, [picker, value, onChange]);
+  });
+
+  const removeStored = (relativeId: string) => {
+    dismissed.current.add(relativeId);
+    onChange(value.filter((link) => link.relativeId !== relativeId));
+  };
+
+  const photos = useRelativePhotoUrls(rows.map((row) => row.relativeId));
 
   return (
     <ItemStack>
@@ -112,9 +147,12 @@ function FamilyList({
         <ItemRows>
           {rows.map((row) => (
             <ItemRow key={row.relativeId}>
-              <span>
-                {isFamilyRelation(row.relation) ? relationLabel(row.relation, row.gender) : row.relation}: {row.name}
-              </span>
+              <RowPerson>
+                <MemberPhoto url={photos[row.relativeId] ?? null} size={56} />
+                <span>
+                  {isFamilyRelation(row.relation) ? relationLabel(row.relation, row.gender) : row.relation}: {row.name}
+                </span>
+              </RowPerson>
               <IconButton
                 type="button"
                 icon={<Trash2 size={14} />}
@@ -124,15 +162,15 @@ function FamilyList({
                 aria-label={`Remover ${row.name}`}
                 title="Remover"
                 onClick={() =>
-                  row.derived
-                    ? onHiddenChange([...hidden, row.relativeId])
-                    : onChange(value.filter((link) => link.relativeId !== row.relativeId))
+                  row.derived ? onHiddenChange([...hidden, row.relativeId]) : removeStored(row.relativeId)
                 }
               />
             </ItemRow>
           ))}
         </ItemRows>
       )}
+
+      {suggesting && <SuggestingHint>Buscando os familiares…</SuggestingHint>}
 
       {picking ? (
         <ItemStack>
@@ -176,6 +214,13 @@ export function FamilyFields({ personId, startOpen = false, onPickingChange, fam
   const traits = useFamilyTraits().data ?? {};
   const { field: hiddenField } = useController({ control, name: 'hidden' });
   const members = (useMemberNames().data ?? []).filter((member) => member.id !== personId);
+  const suggest = (links: FamilyLinkValue[]) =>
+    suggestFamily(
+      personId,
+      links.flatMap((link) =>
+        isFamilyRelation(link.relation) ? [{ relativeId: link.relativeId, relation: link.relation }] : [],
+      ),
+    );
   const candidates = [...members, ...family.filter((relative) => !members.some((member) => member.id === relative.id))];
 
   return (
@@ -195,6 +240,7 @@ export function FamilyFields({ personId, startOpen = false, onPickingChange, fam
             derived={family.filter((relative) => relative.derived)}
             hidden={hiddenField.value}
             onHiddenChange={hiddenField.onChange}
+            suggest={suggest}
           />
         )}
       />

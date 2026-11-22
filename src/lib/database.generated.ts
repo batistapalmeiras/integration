@@ -1416,6 +1416,18 @@ export type Database = {
           relation: string
         }[]
       }
+      expand_family_links: {
+        Args: { p_person_id: string }
+        Returns: undefined
+      }
+      expand_family_person: {
+        Args: { p_person_id: string }
+        Returns: number
+      }
+      family_compose: {
+        Args: { p_link: string; p_next: string }
+        Returns: string
+      }
       get_family_links: {
         Args: { p_person_id: string }
         Returns: {
@@ -1574,6 +1586,16 @@ export type Database = {
       set_lesson_dates: {
         Args: { p_cohort_id: string; p_lesson_dates: string[] }
         Returns: undefined
+      }
+      suggest_family_links: {
+        Args: { p_links: Json; p_person_id: string }
+        Returns: {
+          derived: boolean
+          gender: string
+          name: string
+          person_id: string
+          relation: string
+        }[]
       }
       share_family_link: {
         Args: {

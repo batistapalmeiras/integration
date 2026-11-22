@@ -99,6 +99,18 @@ export async function memberPhotoOwner(personId: string): Promise<PhotoOwner | n
   return photoOwnerOf(personId, data);
 }
 
+export async function memberPhotoOwners(personIds: string[]): Promise<PhotoOwner[]> {
+  const { data, error } = await supabase
+    .from('member_profiles')
+    .select('person_id, photo_updated_at, photo_folder')
+    .in('person_id', personIds);
+  if (error) throw error;
+  return (data ?? []).flatMap((row) => {
+    const owner = photoOwnerOf(row.person_id, row);
+    return owner ? [owner] : [];
+  });
+}
+
 export async function removeMemberPhoto(owner: Pick<PhotoOwner, 'personId' | 'folder'>): Promise<void> {
   const { error: removeError } = await supabase.storage
     .from(BUCKET)
