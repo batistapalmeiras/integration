@@ -22,6 +22,19 @@ export const Trigger = styled.button`
   }
 `;
 
+export const TriggerName = styled.span`
+  display: none;
+  padding: 0 ${({ theme }) => theme.spacing.sm} 0 ${({ theme }) => theme.spacing.sm};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.ink};
+
+  @media (min-width: 745px) {
+    display: inline;
+  }
+`;
+
 export const ModalBody = styled.div`
   --menu-inset: 0px;
   --menu-identity-top: 0px;

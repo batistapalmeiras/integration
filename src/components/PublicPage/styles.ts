@@ -93,7 +93,7 @@ export const Progress = styled.div<{ $steps: number }>`
 export const ProgressSegment = styled.span<{ $done: boolean }>`
   height: 4px;
   border-radius: ${({ theme }) => theme.rounded.full};
-  background: ${({ $done, theme }) => ($done ? theme.colors.primary : theme.colors.hairline)};
+  background: ${({ $done, theme }) => ($done ? theme.gradients.primary : theme.colors.hairline)};
   transition: background 0.2s ease;
 `;
 

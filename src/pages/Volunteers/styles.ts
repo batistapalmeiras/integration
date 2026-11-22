@@ -23,7 +23,7 @@ export const FilterItem = styled.button<{ $active: boolean }>`
   padding: 0 14px;
   border: 0;
   border-radius: ${({ theme }) => theme.rounded.full};
-  background: ${({ theme, $active }) => ($active ? theme.colors.primary : 'transparent')};
+  background: ${({ theme, $active }) => ($active ? theme.gradients.primary : 'transparent')};
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
   font-weight: 600;
@@ -34,7 +34,7 @@ export const FilterItem = styled.button<{ $active: boolean }>`
   transition: background 0.15s;
 
   &:hover {
-    background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.surfaceSoft)};
+    background: ${({ theme, $active }) => ($active ? theme.gradients.primary : theme.colors.surfaceSoft)};
   }
 `;
 

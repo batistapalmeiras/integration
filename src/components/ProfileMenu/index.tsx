@@ -10,6 +10,7 @@ import { SIDEMENU_MEDIA } from '../Layout/styles';
 // Local
 import { profileSections } from '../../features/access/profileSections';
 import { useUserPhotoUrl } from '../../features/access/useUserPhotoUrl';
+import { firstNameOf } from '../../domain/text';
 import { usePresence } from '../../lib/usePresence';
 import { ROLE_LABELS, UserRole } from '../../types/enums';
 import {
@@ -23,6 +24,7 @@ import {
   Popover,
   Role,
   Trigger,
+  TriggerName,
   Wrap,
 } from './styles';
 
@@ -40,7 +42,7 @@ function ProfileSummary({ name, photoUrl, roleLabel, sections, onOpen }: Summary
       <Identity>
         <Avatar name={name} size={44} photoUrl={photoUrl} />
         <IdentityText>
-          <Name>{name}</Name>
+          <Name>{firstNameOf(name)}</Name>
           <Role>{roleLabel}</Role>
         </IdentityText>
       </Identity>
@@ -124,6 +126,7 @@ export function ProfileMenu() {
         onClick={toggle}
       >
         <Avatar name={user.name} size={36} photoUrl={photoUrl} />
+        <TriggerName>{firstNameOf(user.name)}</TriggerName>
       </Trigger>
       {desktop && menuPresent.mounted && (
         <Popover role="menu" $closing={menuPresent.closing}>

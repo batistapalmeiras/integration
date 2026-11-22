@@ -38,7 +38,7 @@ describe('profile menu on desktop', () => {
     await userEvent.click(trigger());
 
     const menu = screen.getByRole('menu');
-    expect(menu).toHaveTextContent('Ana Souza');
+    expect(menu).toHaveTextContent('Ana');
     expect(menu).toHaveTextContent('Administrador Geral');
     expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual(['Meus dados', 'Segurança']);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -96,7 +96,7 @@ describe('profile menu on phones', () => {
     await userEvent.click(trigger());
 
     const dialog = screen.getByRole('dialog');
-    expect(dialog).toHaveTextContent('Ana Souza');
+    expect(dialog).toHaveTextContent('Ana');
     expect(dialog).toHaveTextContent('Equipe de Integração');
     expect(screen.getByRole('menuitem', { name: 'Meus dados' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Sair' })).not.toBeInTheDocument();

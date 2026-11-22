@@ -19,7 +19,7 @@ export const Bars = styled.div<{ $stages: number }>`
 export const Bar = styled.span<{ $filled: boolean }>`
   height: 6px;
   border-radius: ${({ theme }) => theme.rounded.full};
-  background: ${({ theme, $filled }) => ($filled ? theme.colors.primary : theme.colors.hairline)};
+  background: ${({ theme, $filled }) => ($filled ? theme.gradients.primary : theme.colors.hairline)};
 `;
 
 export const Labels = styled.div<{ $stages: number }>`

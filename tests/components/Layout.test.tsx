@@ -77,7 +77,7 @@ describe('side menu by role', () => {
     expect(screen.queryByRole('link', { name: /^Meu perfil,/, hidden: true })).not.toBeInTheDocument();
   });
 
-  it('keeps only the avatar on phones, beside the page title', () => {
+  it('keeps a single profile button on phones, beside the page title', () => {
     const original = window.matchMedia;
     window.matchMedia = ((query: string) => ({
       ...original(query),
@@ -88,7 +88,7 @@ describe('side menu by role', () => {
     window.matchMedia = original;
 
     const trigger = screen.getByRole('button', { name: 'Menu do usuário', hidden: true });
-    expect(trigger).not.toHaveTextContent('Ana');
+    expect(trigger).toHaveTextContent('Ana');
     expect(screen.getAllByRole('button', { name: 'Menu do usuário', hidden: true })).toHaveLength(1);
     expect(screen.queryByRole('link', { name: /^Meu perfil,/, hidden: true })).not.toBeInTheDocument();
   });
