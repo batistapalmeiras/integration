@@ -118,7 +118,7 @@ export const GeneralAdminGrid = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
 
   @container dashboard (min-width: 720px) {
-    grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr);
+    grid-template-columns: minmax(max-content, 1fr) minmax(0, 2fr);
     grid-template-areas:
       'members birthdays'
       'agenda-title title'
@@ -205,6 +205,10 @@ export const ChurchActions = styled.div`
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing.sm};
   margin-top: auto;
+
+  @container dashboard (min-width: 720px) {
+    flex-wrap: nowrap;
+  }
 `;
 
 export const ChurchButton = styled(Link)`

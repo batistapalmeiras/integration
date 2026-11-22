@@ -14,6 +14,7 @@ interface Options<K extends string> {
   basePath: string;
   filters: PathFilter<K>[];
   stored?: StoredValue<ListFilters<K>>;
+  defaults?: ListFilters<K>;
 }
 
 interface ListState<K extends string> {
@@ -41,11 +42,11 @@ export const pickKeys = <K extends string>(values: string[], labels: Record<K, s
 export const pickFrom = <T extends string>(values: string[], allowed: readonly T[]): T[] =>
   values.flatMap((value) => allowed.filter((item) => item === value));
 
-export function useListParams<K extends string>({ basePath, filters, stored }: Options<K>) {
+export function useListParams<K extends string>({ basePath, filters, stored, defaults }: Options<K>) {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const [saved, setSaved] = useState<ListFilters<K>>(() => stored?.load() ?? {});
+  const [saved, setSaved] = useState<ListFilters<K>>(() => ({ ...defaults, ...stored?.load() }));
   const [typedSearch, setTypedSearch] = useState(() => params.get(SEARCH_PARAM) ?? '');
   const segments = pathSegments(location.pathname, basePath);
   const decoded = decodePathFilters(filters, segments);

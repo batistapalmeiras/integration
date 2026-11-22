@@ -11,13 +11,18 @@ import { GENDER_LABELS, MARITAL_STATUS_LABELS, MEMBERSHIP_STATUS_LABELS } from '
 import { ENTRY_TYPE_LABELS } from '../../../types/church';
 import { useFamilyTraits } from '../../../queries/person';
 import { activeFilterCountOf, filtersFor, matchesCouple, matchesMember, MemberFilters } from '../filters';
-import { MEMBERS_FILTERS, membersFilters } from '../persistence';
+import { DEFAULT_MEMBER_FILTERS, MEMBERS_FILTERS, membersFilters } from '../persistence';
 import { listMemberRows } from '../../../repositories/memberRecords';
 import { AppRoute } from '../../../routes/paths';
 
 export function useMembers(pageSizeOf: (grouping: MemberGrouping) => number | undefined, couplesAllowed: boolean) {
   const query = useQuery(queryKeys.members, listMemberRows);
-  const list = useListParams({ basePath: AppRoute.Members, filters: MEMBERS_FILTERS, stored: membersFilters });
+  const list = useListParams({
+    basePath: AppRoute.Members,
+    filters: MEMBERS_FILTERS,
+    stored: membersFilters,
+    defaults: DEFAULT_MEMBER_FILTERS,
+  });
   const grouping: MemberGrouping =
     couplesAllowed && list.filter('grouping').includes('couple') ? 'couple' : 'individual';
   const coupled = grouping === 'couple';

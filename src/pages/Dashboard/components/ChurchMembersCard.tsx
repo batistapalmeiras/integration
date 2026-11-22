@@ -8,7 +8,7 @@ import { useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { listMemberRows } from '../../../repositories/memberRecords';
 import { NAV_ITEMS } from '../../../routes/navigation';
-import { membersFilters, membersPath } from '../../Members/persistence';
+import { membersPath } from '../../Members/persistence';
 import { ChurchActions, ChurchButton, ChurchCard, ChurchCardIcon, ChurchCardLabel, ChurchCardValue, ChurchRecent } from '../styles';
 
 const MembersIcon = NAV_ITEMS.members.icon;
@@ -33,16 +33,16 @@ export function ChurchMembersCard() {
         </ChurchRecent>
       )}
       <ChurchActions>
+        <ChurchButton to={membersPath({})}>
+          Ver todos
+          <ChevronRight size={16} aria-hidden="true" />
+        </ChurchButton>
         {recent > 0 && (
           <ChurchButton to={membersPath({ recent: ['recent'] })}>
             Ver {recent === 1 ? 'o aceito' : `os ${recent} aceitos`}
             <ChevronRight size={16} aria-hidden="true" />
           </ChurchButton>
         )}
-        <ChurchButton to={membersPath({})} onClick={() => membersFilters.save({})}>
-          Ver todos
-          <ChevronRight size={16} aria-hidden="true" />
-        </ChurchButton>
       </ChurchActions>
     </ChurchCard>
   );

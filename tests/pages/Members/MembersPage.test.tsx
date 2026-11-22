@@ -86,3 +86,20 @@ describe('members page filters', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 });
+
+describe('members page default', () => {
+  beforeEach(() => window.localStorage.clear());
+
+  it('starts with the active status selected when nothing was saved', async () => {
+    renderMembers(AppRoute.Members);
+
+    expect(await screen.findByRole('button', { name: /Filtros \(1\)/ })).toBeInTheDocument();
+  });
+
+  it('keeps what was saved, even when it is no filter at all', async () => {
+    window.localStorage.setItem('members-list-filters-v2', JSON.stringify({ status: [] }));
+    renderMembers(AppRoute.Members);
+
+    expect(await screen.findByRole('button', { name: 'Filtros' })).toBeInTheDocument();
+  });
+});
