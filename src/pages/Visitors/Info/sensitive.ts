@@ -60,7 +60,7 @@ export interface InfoSection {
 }
 
 const NOT_ASKED_ON_FORM: (keyof MemberRecord)[] = ['addressReference', 'councilId'];
-const BAPTISM_FIELDS: (keyof MemberRecord)[] = ['baptismChurch', 'baptismDate'];
+const BAPTISM_FIELDS: (keyof MemberRecord)[] = ['baptismChurch'];
 
 function smallGroupAnswer(data: PersonSensitive | null, smallGroupNames: string[]): string | null {
   const answer = membershipCommunityEntries(data)[0];

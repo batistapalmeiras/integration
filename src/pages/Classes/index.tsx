@@ -82,7 +82,7 @@ export function ClassesPage() {
             }}
           >
             <Plus size={16} />
-            Nova turma
+            Turma
           </Button>
           {cohort && (
             <Button
@@ -114,7 +114,7 @@ export function ClassesPage() {
           ) : (
             <Button variant="secondary" onClick={openCreateModal}>
               <Plus size={16} />
-              Nova turma
+              Turma
             </Button>
           ))
         }
@@ -141,7 +141,7 @@ export function ClassesPage() {
           title="Nenhuma turma ativa"
           description={
             canManageCohort
-              ? 'Abra a próxima turma pelo botão Nova turma.'
+              ? 'Abra a próxima turma pelo botão Turma.'
               : 'Aguarde o administrador abrir a próxima turma.'
           }
         />

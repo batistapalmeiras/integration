@@ -19,9 +19,7 @@ export function ArchivedVisitorsPage() {
 
   return (
     <div>
-      <PageHeader title="Visitantes arquivados" back />
-
-      {!loading && !error && <PeopleCount count={totalCount} />}
+      <PageHeader title="Arquivados" back />
 
       {loading && <Skeleton $h="240px" />}
 
@@ -36,6 +34,8 @@ export function ArchivedVisitorsPage() {
           </Button>
         </SortRow>
       )}
+
+      {!loading && !error && <PeopleCount count={totalCount} />}
 
       {!loading && !error && rows.length === 0 && (
         <Empty

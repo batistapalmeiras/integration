@@ -1,36 +1,31 @@
 // React
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, Pagination, SearchInput, Skeleton, text, useMediaQuery, useModal } from 'bp-kit';
-import { SlidersHorizontal, Users } from 'lucide-react';
+import { SlidersHorizontal, Users, X } from 'lucide-react';
 // Components
 import { CountBadge } from '../../components/CountBadge';
-import { PhotoName } from '../../components/MemberPhoto';
-import { ListView, ViewToggle } from '../../components/ViewToggle';
 import { PageHeader } from '../../components/PageHeader';
 import { useHideModuleBar } from '../../components/Layout/moduleBar';
 import { useInView } from '../../lib/useInView';
 // Local
 import { useRole } from '../../features/access/useRole';
 import { PeopleCount } from '../../components/PeopleCount';
-import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
-import { TonePill } from '../../components/StatusPill';
-import { MEMBERSHIP_STATUS_LABELS, MEMBERSHIP_STATUS_TONES } from '../../domain/memberRecords';
 import { useMemberPhotoUrls } from '../../queries/memberPhotos';
 import { photoOwnersOf } from '../../repositories/memberPhotos';
 import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 import { fullRowsPageSize, useGridColumns } from '../../lib/useGridColumns';
+import { RECENT_ACCEPTANCE_LABELS } from '../../domain/memberAcceptance';
 import { CoupleCards, MemberTileContent } from './components/MemberEntries';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
 import { MembersTopBar } from './components/MembersTopBar';
 import { useMembers } from './hooks/useMembers';
-import { membersView } from './persistence';
-import { MemberCard, MemberGrid, ViewRow } from './styles';
+import { ActiveFilters, MemberCard, MemberGrid, RecentChip } from './styles';
 
 const GRID_PAGE_TARGET = 15;
+const GRID_MIN_ROWS = 3;
 const TOP_BAR_HEIGHT = 64;
 
 function emptyDescription(coupled: boolean, hasFilter: boolean): string {
@@ -46,7 +41,6 @@ export function MembersPage() {
   const withTopBar = useMediaQuery('(max-width: 1024px)');
   const [searchRowRef, searchRowVisible] = useInView<HTMLDivElement>(TOP_BAR_HEIGHT);
   useHideModuleBar(mobile);
-  const [view, setView] = useState<ListView>(() => membersView.load() ?? 'list');
   const [gridColumns, gridRef] = useGridColumns();
   const canOpenRecord = role === UserRole.GeneralAdmin;
   const {
@@ -66,21 +60,16 @@ export function MembersPage() {
     loading,
     error,
   } = useMembers(
-    (current) =>
-      current === 'couple' || view === 'grid' ? fullRowsPageSize(gridColumns, GRID_PAGE_TARGET) : undefined,
+    () => fullRowsPageSize(gridColumns, GRID_PAGE_TARGET, GRID_MIN_ROWS),
     canOpenRecord,
   );
   const coupled = grouping === 'couple';
-  const shownView: ListView = coupled ? 'grid' : view;
-  const photoSet = useMemberPhotoUrls(photoOwnersOf(coupled ? couples.flat() : members), ['thumb', 'photo']).data;
-  const photoUrls = (shownView === 'grid' ? photoSet?.photo : photoSet?.thumb) ?? {};
+  const photoSet = useMemberPhotoUrls(photoOwnersOf(coupled ? couples.flat() : members), ['photo']).data;
+  const photoUrls = photoSet?.photo ?? {};
   const openMember = (memberId: string) => navigate(`${AppRoute.Members}/${memberId}`);
   const onOpen = canOpenRecord ? openMember : undefined;
 
-  const changeView = (next: ListView) => {
-    setView(next);
-    membersView.save(next);
-  };
+  const clearRecent = () => setFilters(grouping, { ...filters, recent: [] });
 
   const openFilters = () =>
     open(
@@ -109,14 +98,6 @@ export function MembersPage() {
 
       {mobile && <PageHeader title="Membros" />}
 
-      {!loading &&
-        !error &&
-        (coupled ? (
-          <CountBadge icon={Users} count={totalCount} singular="casal" plural="casais" />
-        ) : (
-          <PeopleCount count={totalCount} />
-        ))}
-
       <SearchFiltersRow ref={searchRowRef}>
         <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
         <Button variant="secondary" size="sm" onClick={openFilters}>
@@ -125,11 +106,22 @@ export function MembersPage() {
         </Button>
       </SearchFiltersRow>
 
-      {!coupled && (
-        <ViewRow>
-          <ViewToggle value={view} onChange={changeView} />
-        </ViewRow>
+      {!coupled && filters.recent.length > 0 && (
+        <ActiveFilters>
+          <RecentChip type="button" aria-label={`Remover filtro ${RECENT_ACCEPTANCE_LABELS.recent}`} onClick={clearRecent}>
+            {RECENT_ACCEPTANCE_LABELS.recent}
+            <X size={14} aria-hidden="true" />
+          </RecentChip>
+        </ActiveFilters>
       )}
+
+      {!loading &&
+        !error &&
+        (coupled ? (
+          <CountBadge icon={Users} count={totalCount} singular="casal" plural="casais" />
+        ) : (
+          <PeopleCount count={totalCount} />
+        ))}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -145,7 +137,7 @@ export function MembersPage() {
       {!loading && !error && totalCount > 0 && (
         <>
           {coupled && <CoupleCards couples={couples} photoUrls={photoUrls} onOpen={onOpen} gridRef={gridRef} />}
-          {!coupled && view === 'grid' && (
+          {!coupled && (
             <MemberGrid ref={gridRef}>
               {members.map((member) => (
                 <MemberCard
@@ -155,42 +147,15 @@ export function MembersPage() {
                   $clickable={canOpenRecord}
                   onClick={canOpenRecord ? () => openMember(member.id) : undefined}
                 >
-                  <MemberTileContent member={member} photoUrl={photoUrls[member.id] ?? null} />
+                  <MemberTileContent
+                    member={member}
+                    photoUrl={photoUrls[member.id] ?? null}
+                    interactive={canOpenRecord}
+                  />
                 </MemberCard>
               ))}
             </MemberGrid>
           )}
-          {shownView === 'list' && (
-            <TableWrapper>
-              <Table>
-                <thead>
-                  <tr>
-                    <Th>{text.fields.name}</Th>
-                    <Th $shrink>Situação</Th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.map((member) => (
-                    <Tr
-                      key={member.id}
-                      $clickable={canOpenRecord}
-                      onClick={canOpenRecord ? () => openMember(member.id) : undefined}
-                    >
-                      <Td $truncate title={member.name}>
-                        <PhotoName url={photoUrls[member.id] ?? null}>{member.name}</PhotoName>
-                      </Td>
-                      <Td $shrink>
-                        <TonePill $tone={MEMBERSHIP_STATUS_TONES[member.membership_status]}>
-                          {MEMBERSHIP_STATUS_LABELS[member.membership_status]}
-                        </TonePill>
-                      </Td>
-                    </Tr>
-                  ))}
-                </tbody>
-              </Table>
-            </TableWrapper>
-          )}
-
           {totalPages > 1 && (
             <PaginationWrap>
               <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

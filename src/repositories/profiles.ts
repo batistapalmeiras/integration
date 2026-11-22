@@ -2,11 +2,24 @@
 import { ProfileSource } from 'bp-kit';
 // Local
 import { supabase } from '../lib/supabase';
+import { toUserRole, UserRole } from '../types/enums';
 
 export async function getMustChangePassword(userId: string): Promise<boolean> {
   const { data, error } = await supabase.from('profiles').select('must_change_password').eq('id', userId).single();
   if (error) throw error;
   return data?.must_change_password ?? false;
+}
+
+export async function getOwnPersonId(userId: string): Promise<string | null> {
+  const { data, error } = await supabase.from('profiles').select('person_id').eq('id', userId).maybeSingle();
+  if (error) throw error;
+  return data?.person_id ?? null;
+}
+
+export async function getPersonAccessRole(personId: string): Promise<UserRole | null> {
+  const { data, error } = await supabase.from('profiles').select('role').eq('person_id', personId).maybeSingle();
+  if (error) throw error;
+  return data ? toUserRole(data.role) : null;
 }
 
 export async function clearMustChangePassword(userId: string): Promise<void> {

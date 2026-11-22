@@ -7,7 +7,6 @@ import { GENDER_LABELS, MARITAL_STATUS_LABELS, MEMBERSHIP_STATUS_LABELS } from '
 import { encodePathFilters, ListFilters, PathFilter, slugTable } from '../../lib/pathFilters';
 import { AppRoute } from '../../routes/paths';
 import { storedValue } from '../../lib/storage';
-import { ListView } from '../../components/ViewToggle';
 import { ENTRY_TYPE_LABELS } from '../../types/church';
 
 export type MembersFilterKey =
@@ -36,4 +35,3 @@ export const membersPath = (filters: ListFilters<MembersFilterKey>): string =>
 
 export const membersFilters = storedValue<ListFilters<MembersFilterKey>>('members-list-filters');
 
-export const membersView = storedValue<ListView>('members-list-view');

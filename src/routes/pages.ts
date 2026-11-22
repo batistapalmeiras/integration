@@ -29,10 +29,10 @@ export const MembershipSignupPage = lazyPage(() => import('../pages/MembershipSi
 export const DashboardPage = lazyPage(() => import('../pages/Dashboard'), 'DashboardPage');
 export const ModuleMorePage = lazyPage(() => import('../pages/ModuleMore'), 'ModuleMorePage');
 export const ProfilePage = lazyPage(() => import('../pages/Profile'), 'ProfilePage');
+export const ViewRolePage = lazyPage(() => import('../pages/Profile/ViewRole'), 'ViewRolePage');
 
 export const VisitorsPage = lazyPage(() => import('../pages/Visitors'), 'VisitorsPage');
 export const ArchivedVisitorsPage = lazyPage(() => import('../pages/Visitors/Archived'), 'ArchivedVisitorsPage');
-export const NewVisitorPage = lazyPage(() => import('../pages/Visitors/New'), 'NewVisitorPage');
 export const VisitorDetailPage = lazyPage(() => import('../pages/Visitors/Detail'), 'VisitorDetailPage');
 export const VisitorInfoPage = lazyPage(() => import('../pages/Visitors/Info'), 'VisitorInfoPage');
 export const CoffeePage = lazyPage(() => import('../pages/Coffee'), 'CoffeePage');
@@ -50,7 +50,6 @@ export const CommunityGroupDetailPage = lazyPage(
   'CommunityGroupDetailPage',
 );
 export const VolunteersPage = lazyPage(() => import('../pages/Volunteers'), 'VolunteersPage');
-export const VolunteerDetailPage = lazyPage(() => import('../pages/Volunteers/Detail'), 'VolunteerDetailPage');
 
 export const ReportsPage = lazyPage(() => import('../pages/Reports'), 'ReportsPage');
 export const CoffeeHistoryPage = lazyPage(

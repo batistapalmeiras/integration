@@ -11,7 +11,6 @@ const nothingSaved: SavedMembershipAnswers = {
   gender: '',
   cpf: '',
   maritalStatus: '',
-  otherPhone: '',
   zip: '',
   street: '',
   number: '',
@@ -21,7 +20,6 @@ const nothingSaved: SavedMembershipAnswers = {
   state: '',
   entryType: '',
   baptismChurch: '',
-  baptismDate: '',
   originChurch: '',
   previousChurch: '',
   baptismInfo: '',
@@ -77,7 +75,6 @@ describe('prefilledForm', () => {
         originChurch: 'Igreja de origem',
         previousChurch: 'Igreja anterior',
         cpf: '52998224725',
-        otherPhone: '31988887777',
         zip: '30140071',
       }),
     );
@@ -86,7 +83,6 @@ describe('prefilledForm', () => {
       baptismChurch: 'Igreja Batista Bela Vista',
       lastChurch: 'Igreja de origem',
       cpf: '529.982.247-25',
-      otherPhone: '(31) 98888-7777',
       zip: '30140-071',
     });
   });
@@ -115,7 +111,6 @@ describe('toMembershipFormAnswers', () => {
       {
         ...filled,
         entryType: 'baptism',
-        baptismDate: '2001-05-06',
         ministryInterests: ['Louvor'],
         wantsToServe: 'no',
         wantsSmallGroup: 'yes',
@@ -127,7 +122,6 @@ describe('toMembershipFormAnswers', () => {
     );
     expect(answers).toMatchObject({
       baptismChurch: '',
-      baptismDate: null,
       ministryInterests: [],
       smallGroupId: null,
       secretSociety: 'Não',
@@ -158,7 +152,6 @@ describe('contact step', () => {
   const valid = {
     phone: '(31) 99999-8888',
     email: 'ana@exemplo.com',
-    otherPhone: '',
     zip: '30140-071',
     street: 'Rua A',
     number: '10',
@@ -178,11 +171,5 @@ describe('contact step', () => {
   it('wants a complete phone when one is given', () => {
     expect(signupContact.safeParse(valid).success).toBe(true);
     expect(signupContact.safeParse({ ...valid, phone: '(31) 9999' }).success).toBe(false);
-  });
-
-  it('wants the other phone to differ from the phone', () => {
-    const result = signupContact.safeParse({ ...valid, otherPhone: '31999998888' });
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.path).toEqual(['otherPhone']);
   });
 });

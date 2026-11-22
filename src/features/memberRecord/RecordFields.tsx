@@ -1,7 +1,9 @@
 // React
-import { Control } from 'react-hook-form';
+import { Control, UseFormSetValue } from 'react-hook-form';
 // Libs
 import { DatePicker, Select, Textarea, TextInput, text } from 'bp-kit';
+// Components
+import { ZipAddress, ZipField } from '../../components/ZipField';
 // Local
 import { formatDate, isFutureDate } from '../../domain/dates';
 import { MemberRecord } from '../../domain/memberRecords';
@@ -12,9 +14,10 @@ import { RecordField, RecordSection } from './sections';
 interface FieldProps {
   field: RecordField;
   control: Control<MemberRecord>;
+  setValue: UseFormSetValue<MemberRecord>;
 }
 
-function RecordFieldInput({ field, control }: FieldProps) {
+function RecordFieldInput({ field, control, setValue }: FieldProps) {
   const common = { label: field.label, control, name: field.name };
   switch (field.kind) {
     case 'phone':
@@ -38,19 +41,30 @@ function RecordFieldInput({ field, control }: FieldProps) {
       );
     case 'council':
       return <CouncilSelect field={field} control={control} />;
+    case 'zip':
+      return <ZipField control={control} name={field.name} onAddress={(address) => fillAddress(setValue, address)} />;
     default:
       return (
         <TextInput
           {...common}
           placeholder={field.placeholder}
           maxLength={field.maxLength}
+          mask={field.mask}
           inputMode={field.numeric ? 'numeric' : undefined}
         />
       );
   }
 }
 
-function CouncilSelect({ field, control }: FieldProps) {
+function fillAddress(setValue: UseFormSetValue<MemberRecord>, address: ZipAddress) {
+  const options = { shouldValidate: true, shouldDirty: true };
+  if (address.street) setValue('addressStreet', address.street, options);
+  if (address.neighborhood) setValue('addressNeighborhood', address.neighborhood, options);
+  if (address.city) setValue('addressCity', address.city, options);
+  if (address.state) setValue('addressState', address.state, options);
+}
+
+function CouncilSelect({ field, control }: Pick<FieldProps, 'field' | 'control'>) {
   const councils = useCouncils().data ?? [];
   return (
     <Select label={field.label} control={control} name={field.name}>
@@ -67,13 +81,14 @@ function CouncilSelect({ field, control }: FieldProps) {
 interface SectionProps {
   section: RecordSection;
   control: Control<MemberRecord>;
+  setValue: UseFormSetValue<MemberRecord>;
 }
 
-export function RecordSectionFields({ section, control }: SectionProps) {
+export function RecordSectionFields({ section, control, setValue }: SectionProps) {
   return (
     <>
       {section.fields.map((field) => (
-        <RecordFieldInput key={field.name} field={field} control={control} />
+        <RecordFieldInput key={field.name} field={field} control={control} setValue={setValue} />
       ))}
     </>
   );

@@ -76,6 +76,7 @@ export const HighlightValue = styled(StatValue)`
 export const StageGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
   gap: ${({ theme }) => theme.spacing.md};
 
   @container (max-width: 720px) {
@@ -150,8 +151,14 @@ export const FunnelArea = styled.div`
 
   & > * {
     flex: 1;
-    grid-auto-rows: 1fr;
   }
+`;
+
+export const StageStat = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.spacing.sm};
 `;
 
 export const ChurchCard = styled.section`
@@ -160,7 +167,7 @@ export const ChurchCard = styled.section`
   align-items: flex-start;
   padding: ${({ theme }) => theme.spacing.lg};
   border-radius: ${({ theme }) => theme.rounded.lg};
-  background: ${({ theme }) => theme.colors.primary};
+  background: ${({ theme }) => theme.gradients.primary};
   color: ${({ theme }) => theme.colors.onPrimary};
 `;
 
@@ -193,11 +200,17 @@ export const ChurchRecent = styled.span`
   font-weight: 500;
 `;
 
+export const ChurchActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-top: auto;
+`;
+
 export const ChurchButton = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.xxs};
-  margin-top: auto;
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base};
   border-radius: ${({ theme }) => theme.rounded.full};
   background: ${({ theme }) => theme.colors.canvas};

@@ -31,11 +31,9 @@ describe('route access', () => {
     expect(canAccess(UserRole.Teacher, AppRoute.Visitors)).toBe(false);
   });
 
-  it('matches the most specific route, so the new-visitor form is not taken for a visitor id', () => {
-    expect(canAccess(UserRole.IntegrationTeam, AppRoute.NewVisitor)).toBe(true);
+  it('matches the most specific route, so a report is not taken for a visitor id', () => {
     expect(canAccess(UserRole.IntegrationTeam, `${AppRoute.Reports}/cafes`)).toBe(true);
     expect(canAccess(UserRole.IntegrationTeam, `${AppRoute.Reports}/turmas`)).toBe(false);
-    expect(canAccess(UserRole.Teacher, AppRoute.NewVisitor)).toBe(false);
     expect(canAccess(UserRole.Teacher, `${AppRoute.Visitors}/${ID}`)).toBe(true);
   });
 

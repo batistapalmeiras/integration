@@ -1,5 +1,5 @@
 // Local
-import { formatCPF, maskPhone, onlyDigits } from 'bp-kit';
+import { formatCPF, maskCEP, maskPhone, onlyDigits } from 'bp-kit';
 import {
   COUNTED_MEMBERSHIP_STATUSES,
   Gender,
@@ -33,7 +33,6 @@ export async function countMembers(): Promise<number> {
 const PROFILE_COLUMNS = {
   gender: 'gender',
   maritalStatus: 'marital_status',
-  otherPhone: 'other_phone',
   addressZip: 'address_zip',
   addressStreet: 'address_street',
   addressNumber: 'address_number',
@@ -43,7 +42,6 @@ const PROFILE_COLUMNS = {
   addressState: 'address_state',
   addressReference: 'address_reference',
   cpf: 'cpf',
-  baptismDate: 'baptism_date',
   baptismChurch: 'baptism_church',
 } as const satisfies Record<keyof MemberProfile, string>;
 
@@ -65,7 +63,7 @@ function toMemberProfile(row: Record<string, string | number | boolean | null> |
   return {
     ...profileValues,
     cpf: profileValues.cpf && formatCPF(profileValues.cpf),
-    otherPhone: profileValues.otherPhone && maskPhone(profileValues.otherPhone),
+    addressZip: profileValues.addressZip && maskCEP(profileValues.addressZip),
     gender: profileValues.gender as Gender | '',
     maritalStatus: profileValues.maritalStatus as MaritalStatus | '',
   };
@@ -192,7 +190,6 @@ export async function saveMemberRecord(personId: string, record: MemberRecord): 
     ]),
   );
   profile.cpf = digitsOrNull(record.cpf);
-  profile.other_phone = digitsOrNull(record.otherPhone);
   profile.address_zip = digitsOrNull(record.addressZip);
 
   const results = await Promise.all([

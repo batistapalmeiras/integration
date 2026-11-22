@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 // Libs
 import { fadeUp } from 'bp-kit';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const SIDEMENU_WIDTH = 248;
 export const SIDEMENU_MEDIA = '(min-width: 745px)';
@@ -63,21 +63,29 @@ export const SideNavArea = styled.div`
   margin-top: ${({ theme }) => theme.spacing.md};
 `;
 
-export const SideNavAreaToggle = styled.button<{ $open: boolean }>`
+const sideNavAreaLabel = css`
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 32px;
   padding: 0 ${({ theme }) => theme.spacing.md};
-  border: 0;
-  border-radius: ${({ theme }) => theme.rounded.sm};
-  background: transparent;
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.microLabel.fontSize};
   font-weight: 700;
   letter-spacing: 0.6px;
   text-transform: uppercase;
   color: ${({ theme }) => theme.colors.muted};
+`;
+
+export const SideNavAreaLabel = styled.div`
+  ${sideNavAreaLabel}
+`;
+
+export const SideNavAreaToggle = styled.button<{ $open: boolean }>`
+  ${sideNavAreaLabel}
+  border: 0;
+  border-radius: ${({ theme }) => theme.rounded.sm};
+  background: transparent;
   cursor: pointer;
 
   svg {
@@ -90,7 +98,12 @@ export const SideNavAreaToggle = styled.button<{ $open: boolean }>`
   }
 `;
 
-export const SideNavLink = styled(Link)<{ $active: boolean; $nested?: boolean }>`
+export const SIDEMENU_OFFSET = `${SIDEMENU_WIDTH}px`;
+
+export const SideNavLink = styled(Link)<{
+  $active: boolean;
+  $nested?: boolean;
+}>`
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -104,7 +117,6 @@ export const SideNavLink = styled(Link)<{ $active: boolean; $nested?: boolean }>
   font-weight: ${({ $active }) => ($active ? 700 : 500)};
   color: ${({ theme, $active }) => ($active ? theme.colors.ink : theme.colors.muted)};
   background: ${({ theme, $active }) => ($active ? theme.colors.surfaceSoft : 'transparent')};
-  border-left: 2px solid ${({ theme, $active }) => ($active ? theme.colors.primary : 'transparent')};
   text-decoration: none;
   transition:
     background 0.15s,
@@ -129,7 +141,6 @@ export const SideNavGroupToggle = styled.button<{ $open: boolean }>`
   height: 42px;
   padding: 0 ${({ theme }) => theme.spacing.md};
   border: 0;
-  border-left: 2px solid transparent;
   border-radius: ${({ theme }) => theme.rounded.sm};
   background: transparent;
   font-family: ${({ theme }) => theme.typography.fontFamily};
@@ -156,51 +167,6 @@ export const SideNavGroupToggle = styled.button<{ $open: boolean }>`
   &:hover {
     background: ${({ theme }) => theme.colors.surfaceSoft};
     color: ${({ theme }) => theme.colors.ink};
-  }
-`;
-
-export const SideFooter = styled.div`
-  flex-shrink: 0;
-  padding: ${({ theme }) => theme.spacing.md};
-  border-top: 1px solid ${({ theme }) => theme.colors.hairline};
-`;
-
-export const SideUserInfo = styled.div`
-  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
-`;
-
-export const SideUserName = styled.p`
-  font-size: ${({ theme }) => theme.typography.caption.fontSize};
-  font-weight: ${({ theme }) => theme.typography.caption.fontWeight};
-  color: ${({ theme }) => theme.colors.ink};
-`;
-
-export const SideUserRole = styled.p`
-  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
-  color: ${({ theme }) => theme.colors.muted};
-  margin-top: 2px;
-`;
-
-export const DropdownItem = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
-  width: 100%;
-  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.base}`};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  color: ${({ theme }) => theme.colors.ink};
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.surfaceSoft};
-  }
-  &.danger {
-    color: ${({ theme }) => theme.colors.primaryErrorText};
   }
 `;
 
@@ -295,7 +261,10 @@ export const SideNavCount = styled.span`
 
 const MODULE_BAR_HEIGHT = 'calc(48px + env(safe-area-inset-top))';
 
-export const Main = styled.main<{ $hasBottomBar: boolean; $hasModuleBar: boolean }>`
+export const Main = styled.main<{
+  $hasBottomBar: boolean;
+  $hasModuleBar: boolean;
+}>`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -307,11 +276,11 @@ export const Main = styled.main<{ $hasBottomBar: boolean; $hasModuleBar: boolean
   }
 
   @media ${SIDEMENU_MEDIA} {
-    margin-left: ${SIDEMENU_WIDTH}px;
+    margin-left: ${SIDEMENU_OFFSET};
   }
 `;
 
-export const ModuleBar = styled(Link)<{ $scrolled: boolean }>`
+export const ModuleBar = styled.div<{ $scrolled: boolean }>`
   display: none;
 
   @media (max-width: 744px) {
@@ -320,6 +289,7 @@ export const ModuleBar = styled(Link)<{ $scrolled: boolean }>`
     z-index: 50;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: ${({ theme }) => theme.spacing.xs};
     box-sizing: border-box;
     height: ${MODULE_BAR_HEIGHT};
@@ -328,16 +298,40 @@ export const ModuleBar = styled(Link)<{ $scrolled: boolean }>`
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid ${({ theme, $scrolled }) => ($scrolled ? theme.colors.hairline : 'transparent')};
-    font-family: ${({ theme }) => theme.typography.fontFamily};
-    font-size: ${({ theme }) => theme.typography.titleMd.fontSize};
-    font-weight: ${({ theme }) => theme.typography.titleMd.fontWeight};
-    color: ${({ theme }) => theme.colors.ink};
-    text-decoration: none;
   }
 `;
 
-export const MainInner = styled.div`
+export const ModuleBarLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.titleMd.fontSize};
+  font-weight: ${({ theme }) => theme.typography.titleMd.fontWeight};
+  color: ${({ theme }) => theme.colors.ink};
+  text-decoration: none;
+`;
+
+export const ProfileSlot = styled.div`
+  position: relative;
+  z-index: 60;
+  height: 0;
+`;
+
+export const ProfileAnchor = styled.div`
+  position: absolute;
+  top: var(--profile-top, 0px);
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+`;
+
+const PROFILE_RESERVE = '52px';
+
+export const MainInner = styled.div<{ $profileSlot: boolean }>`
   --page-gutter: ${({ theme }) => theme.spacing.xl};
+  --profile-reserve: ${({ $profileSlot }) => ($profileSlot ? PROFILE_RESERVE : '0px')};
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
@@ -348,6 +342,10 @@ export const MainInner = styled.div`
   animation: ${fadeUp} 0.25s ease;
 
   @media (max-width: 744px) {
+    &:has([data-top-bar]) {
+      --profile-top: calc(8px - ${({ theme }) => theme.spacing.lg} - env(safe-area-inset-top) / 2);
+    }
+
     --page-gutter: ${({ theme }) => theme.spacing.base};
     padding: calc(${({ theme }) => theme.spacing.lg} + env(safe-area-inset-top)) ${({ theme }) => theme.spacing.base}
       ${({ theme }) => theme.spacing.lg};

@@ -522,7 +522,7 @@ AS $function$
   select pr.id, p.name, pr.role
     from public.profiles pr
     join public.people p on p.id = pr.person_id
-   where pr.id = auth.uid();
+   where pr.id = auth.uid() and p.membership_status = 'active';
 $function$
 ;
 
@@ -532,9 +532,10 @@ CREATE OR REPLACE FUNCTION public."current_role"()
  STABLE SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-  select case when role = 'developer' then 'general_admin' else role end
-    from public.profiles
-   where id = auth.uid() and active;
+  select case when pr.role = 'developer' then 'general_admin' else pr.role end
+    from public.profiles pr
+    join public.people p on p.id = pr.person_id
+   where pr.id = auth.uid() and p.membership_status = 'active';
 $function$
 ;
 
@@ -917,7 +918,7 @@ begin
     raise exception 'Não é permitido alterar este campo.';
   end if;
 
-  if new.role is not distinct from old.role and new.active is not distinct from old.active then
+  if new.role is not distinct from old.role then
     return new;
   end if;
 
@@ -2271,7 +2272,7 @@ AS $function$
              else array['integration_team']
            end
          )
-     and pr.active
+     and pe.membership_status = 'active'
      and pe.phone is not null
      and pe.phone <> ''
    order by pe.name;

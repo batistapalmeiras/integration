@@ -6,7 +6,6 @@ export enum AppRoute {
   ChurchMore = '/igreja/mais',
   IntegrationMore = '/integracao/mais',
   Visitors = '/visitantes',
-  NewVisitor = '/visitantes/novo',
   ArchivedVisitors = '/visitantes/arquivado',
   Coffee = '/cafe-de-boas-vindas',
   Classes = '/turma',
@@ -14,19 +13,28 @@ export enum AppRoute {
   Reports = '/relatorios',
   Profile = '/perfil',
   ChangePassword = '/perfil/senha',
+  ProfileView = '/perfil/visao',
   IntegrationSignup = '/integracao/inscricao',
   MakeupAttendance = '/turma/reposicao',
   MembershipInterest = '/integracao/ficha-de-interesse',
   MembershipSignup = '/cadastro-de-membresia',
   Members = '/membros',
   Birthdays = '/membros/aniversariantes',
-  Membership = '/membresia',
+  Membership = '/conselho',
   CommunityGroups = '/comunidade',
   Ministries = '/comunidade/ministerios',
   SmallGroups = '/comunidade/pgs',
   Store = '/loja',
   NewStoreItem = '/loja/novo',
 }
+
+export const profilePath = (profileId: string) => `${AppRoute.Profile}/${profileId}`;
+
+const sectionPath = (base: string, section?: string) => (section ? `${base}/${section}` : base);
+
+export const profileAccessPath = (profileId: string) => sectionPath(profilePath(profileId), 'acesso');
+
+export const memberPath = (personId: string, section?: string) => sectionPath(`${AppRoute.Members}/${personId}`, section);
 
 export const confirmMemberPath = (personId: string) => `${AppRoute.Membership}/${personId}/confirmar`;
 

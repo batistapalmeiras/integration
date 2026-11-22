@@ -1,5 +1,6 @@
 // Components
 import { DateBadge } from '../../../components/DateBadge';
+import { UpcomingLesson } from '../../../domain/cohortSchedule';
 import { todayKey, weekdayLabel } from '../../../domain/dates';
 // Local
 import { AgendaItem, AgendaList, AgendaTitle, Detail, Panel, PanelText, PanelTitle } from '../styles';
@@ -36,12 +37,36 @@ export function coffeeEntry(coffee: UpcomingCoffee): AgendaEntry {
   };
 }
 
-export function cohortEntry(cohort: UpcomingCohort): AgendaEntry {
+function cohortEntry(cohort: UpcomingCohort): AgendaEntry {
   return {
     date: cohort.firstLesson,
     title: `1ª aula da ${cohort.name}`,
     detail: 'As inscrições fecham às 17:30',
   };
+}
+
+function lessonEntry(lesson: UpcomingLesson): AgendaEntry {
+  return {
+    date: lesson.date,
+    title: `Aula ${lesson.number}`,
+    detail: dayLabel(lesson.date),
+  };
+}
+
+export function agendaEntries({
+  coffee,
+  cohort,
+  lessons,
+}: {
+  coffee: UpcomingCoffee | null;
+  cohort: UpcomingCohort | null;
+  lessons: UpcomingLesson[];
+}): AgendaEntry[] {
+  return [
+    ...(coffee ? [coffeeEntry(coffee)] : []),
+    ...(cohort ? [cohortEntry(cohort)] : []),
+    ...lessons.map(lessonEntry),
+  ].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export const AGENDA_TITLE = 'Próximos dias';

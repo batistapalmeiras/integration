@@ -1,15 +1,15 @@
 // React
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, onlyDigits, useAuthCtx, useModal } from 'bp-kit';
+import { Button, onlyDigits, useAuthCtx, useToast, ModalTitle } from 'bp-kit';
 import { Save } from 'lucide-react';
-// Components
-import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { reactivatePerson } from '../../../features/visitors';
+import { invalidateQueries, markPipelineStale } from '../../../lib/queryCache';
+import { queryKeys } from '../../../lib/queryKeys';
 import { findPersonByPhone } from '../../../repositories/people';
 import { AppRoute } from '../../../routes/paths';
 import { useCreatePerson } from '../hooks/useCreatePerson';
@@ -21,11 +21,18 @@ import { Intro } from './styles';
 const MIN_PHONE_DIGITS = 10;
 const PHONE_LOOKUP_DEBOUNCE_MS = 400;
 
-export function NewVisitorPage() {
+type ExistingPerson = NonNullable<Awaited<ReturnType<typeof findPersonByPhone>>>;
+
+interface Props {
+  close: () => void;
+}
+
+export function NewVisitorModal({ close }: Props) {
   const navigate = useNavigate();
   const { user } = useAuthCtx();
   const { createPerson } = useCreatePerson();
-  const { open, close, modal } = useModal('drawer');
+  const { show: showToast, toast } = useToast();
+  const [existing, setExisting] = useState<ExistingPerson | null>(null);
   const checkedPhone = useRef('');
 
   const {
@@ -45,36 +52,45 @@ export function NewVisitorPage() {
 
     const timeout = setTimeout(() => {
       checkedPhone.current = digits;
-      findPersonByPhone(digits).then(showExisting);
+      findPersonByPhone(digits).then((person) => person && setExisting(person));
     }, PHONE_LOOKUP_DEBOUNCE_MS);
 
-    function showExisting(person: Awaited<ReturnType<typeof findPersonByPhone>>) {
-      if (!person) return;
-      const profile = `${AppRoute.Visitors}/${person.id}`;
-      open(
-        <ExistingPersonModal
-          person={person}
-          close={close}
-          onOpen={() => navigate(profile)}
-          onReactivate={async () => {
-            await reactivatePerson(person, user?.id);
-            navigate(profile);
-          }}
-        />,
-      );
-    }
-
     return () => clearTimeout(timeout);
-  }, [phone, open, close, navigate, user?.id]);
+  }, [phone]);
+
+  const openProfile = (personId: string) => {
+    close();
+    navigate(`${AppRoute.Visitors}/${personId}`);
+  };
 
   const submit = handleSubmit(async (values) => {
-    await createPerson(values);
-    navigate(AppRoute.Visitors);
+    try {
+      await createPerson(values);
+      await markPipelineStale();
+      await invalidateQueries(queryKeys.visitors);
+      close();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Não foi possível salvar.');
+    }
   });
 
+  if (existing) {
+    return (
+      <ExistingPersonModal
+        person={existing}
+        close={() => setExisting(null)}
+        onOpen={() => openProfile(existing.id)}
+        onReactivate={async () => {
+          await reactivatePerson(existing, user?.id);
+          openProfile(existing.id);
+        }}
+      />
+    );
+  }
+
   return (
-    <div>
-      <PageHeader title="Novo visitante" back />
+    <>
+      <ModalTitle onClose={close}>Novo visitante</ModalTitle>
       <Intro type="p">Informe os dados de contato de quem visitou a igreja.</Intro>
 
       <VisitorForm control={control} onSubmit={submit}>
@@ -91,8 +107,7 @@ export function NewVisitorPage() {
           </Button>
         </VisitorFormActions>
       </VisitorForm>
-
-      {modal}
-    </div>
+      {toast}
+    </>
   );
 }

@@ -3,6 +3,7 @@ import {
   currentLesson,
   hasFirstLessonStarted,
   selectUpcomingCohort,
+  upcomingLessons,
 } from '../../src/domain/cohortSchedule';
 
 const lessons = (first: string, id = first) => ({
@@ -56,5 +57,32 @@ describe('currentLesson', () => {
 
   it('stays on the last class after the turma ends', () => {
     expect(currentLesson(dates, '2026-10-31')?.number).toBe(4);
+  });
+});
+
+describe('upcomingLessons', () => {
+  const underway = {
+    cohort: { name: 'Turma 15/11' },
+    lessons: [
+      { number: 1, date: '2026-11-15' },
+      { number: 2, date: '2026-11-22' },
+      { number: 3, date: '2026-11-29' },
+      { number: 4, date: '2026-12-06' },
+    ],
+  };
+  const notStarted = { cohort: { name: 'Turma 13/12' }, lessons: [{ number: 1, date: '2026-12-13' }] };
+
+  it('lists the classes of the turma under way from today on', () => {
+    const lessonsLeft = upcomingLessons([underway], '2026-11-22', new Date('2026-11-22T10:00:00'));
+
+    expect(lessonsLeft.map((lesson) => [lesson.number, lesson.date])).toEqual([
+      [2, '2026-11-22'],
+      [3, '2026-11-29'],
+      [4, '2026-12-06'],
+    ]);
+  });
+
+  it('leaves a turma that has not started to its first-class entry', () => {
+    expect(upcomingLessons([notStarted], '2026-11-22', new Date('2026-11-22T10:00:00'))).toEqual([]);
   });
 });

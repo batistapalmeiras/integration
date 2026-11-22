@@ -25,7 +25,7 @@ export function StoreTable({ items }: Props) {
         back
         action={
           <HeaderActions>
-            <Button onClick={() => navigate(AppRoute.NewStoreItem)}>Adicionar</Button>
+            <Button variant="secondary" onClick={() => navigate(AppRoute.NewStoreItem)}>Adicionar</Button>
           </HeaderActions>
         }
       />

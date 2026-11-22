@@ -29,13 +29,13 @@ function toCohortWithLessons({ lessons, status, ...cohort }: CohortRow): CohortW
   };
 }
 
-async function listOpenCohorts(): Promise<CohortWithLessons[]> {
+export async function listOpenCohorts(): Promise<CohortWithLessons[]> {
   const { data, error } = await supabase.from('cohorts').select(COHORT_WITH_LESSONS).eq('status', 'active');
   if (error) throw error;
   return (data ?? []).map(toCohortWithLessons);
 }
 
-export async function getUpcomingCohortWithLessons(): Promise<CohortWithLessons | null> {
+async function getUpcomingCohortWithLessons(): Promise<CohortWithLessons | null> {
   return selectUpcomingCohort(await listOpenCohorts());
 }
 

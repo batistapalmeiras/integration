@@ -12,6 +12,9 @@ import {
   TEACHING_ROLES,
   UserRole,
 } from '../types/enums';
+import { OwnProfileRedirect } from '../pages/Profile/OwnProfileRedirect';
+import { ProfileShell } from '../pages/Profile/components/ProfileShell';
+import { LogoutSection } from '../pages/Profile/components/LogoutSection';
 import {
   BirthdaysPage,
   ClassesPage,
@@ -34,7 +37,6 @@ import {
   MembershipPage,
   MinistriesPage,
   ModuleMorePage,
-  NewVisitorPage,
   ProfilePage,
   ReportsPage,
   SmallGroupsPage,
@@ -43,7 +45,7 @@ import {
   VisitorInfoPage,
   ArchivedVisitorsPage,
   VisitorsPage,
-  VolunteerDetailPage,
+  ViewRolePage,
   VolunteersPage,
 } from './pages';
 import { AppRoute, COUNCILS_PATH, isEntityId } from './paths';
@@ -51,6 +53,7 @@ import { AppRoute, COUNCILS_PATH, isEntityId } from './paths';
 export interface RouteTarget {
   element: ReactNode;
   roles?: UserRole[];
+  standalone?: boolean;
 }
 
 export interface RouteDefinition extends RouteTarget {
@@ -75,14 +78,35 @@ export const PUBLIC_ROUTES: RouteDefinition[] = [
 
 export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: AppRoute.Dashboard, element: <DashboardPage /> },
-  { path: AppRoute.Profile, element: <ProfilePage /> },
-  { path: AppRoute.ChangePassword, element: <ChangePasswordPage /> },
+  { path: AppRoute.Profile, module: CHURCH, standalone: true, element: <OwnProfileRedirect /> },
+  { path: `${AppRoute.Profile}/:id`, module: CHURCH, standalone: true, element: <ProfilePage /> },
+  { path: `${AppRoute.Profile}/:id/:section`, module: CHURCH, standalone: true, element: <ProfilePage /> },
+  {
+    path: AppRoute.ChangePassword,
+    module: CHURCH,
+    standalone: true,
+    element: (
+      <ProfileShell>
+        <ChangePasswordPage back={false} />
+        <LogoutSection />
+      </ProfileShell>
+    ),
+  },
+  {
+    path: AppRoute.ProfileView,
+    module: CHURCH,
+    standalone: true,
+    element: (
+      <ProfileShell>
+        <ViewRolePage />
+      </ProfileShell>
+    ),
+  },
   { path: AppRoute.ChurchMore, module: CHURCH, element: <ModuleMorePage areaId="church" />, roles: GENERAL_ADMIN },
   { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: LEADERSHIP_ROLES },
 
   { path: `${AppRoute.Visitors}/*`, ...VISITORS_LIST },
   { path: AppRoute.ArchivedVisitors, element: <ArchivedVisitorsPage />, roles: INTEGRATION_TEAM_ROLES },
-  { path: AppRoute.NewVisitor, element: <NewVisitorPage />, roles: INTEGRATION_TEAM_ROLES },
   { path: `${AppRoute.Visitors}/:id`, element: <VisitorDetailPage />, roles: STAFF_ROLES, list: VISITORS_LIST },
   { path: `${AppRoute.Visitors}/:id/detalhes`, element: <VisitorInfoPage />, roles: STAFF_ROLES },
   { path: `${AppRoute.Coffee}/*`, element: <CoffeePage />, roles: INTEGRATION_TEAM_ROLES },
@@ -92,12 +116,31 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
 
   { path: `${AppRoute.Members}/*`, module: CHURCH, ...MEMBERS_LIST },
   { path: AppRoute.Birthdays, module: CHURCH, element: <BirthdaysPage />, roles: GENERAL_ADMIN },
-  { path: `${AppRoute.Members}/:id`, module: CHURCH, element: <MemberProfilePage />, roles: GENERAL_ADMIN, list: MEMBERS_LIST },
+  {
+    path: `${AppRoute.Members}/:id`,
+    module: CHURCH,
+    standalone: true,
+    element: <MemberProfilePage />,
+    roles: GENERAL_ADMIN,
+    list: MEMBERS_LIST,
+  },
+  {
+    path: `${AppRoute.Members}/:id/:section`,
+    module: CHURCH,
+    standalone: true,
+    element: <MemberProfilePage />,
+    roles: GENERAL_ADMIN,
+    list: MEMBERS_LIST,
+  },
   { path: AppRoute.Ministries, module: CHURCH, element: <MinistriesPage />, roles: GENERAL_ADMIN },
   { path: AppRoute.SmallGroups, module: CHURCH, element: <SmallGroupsPage />, roles: GENERAL_ADMIN },
-  { path: `${AppRoute.CommunityGroups}/:type/:id`, module: CHURCH, element: <CommunityGroupDetailPage />, roles: GENERAL_ADMIN },
+  {
+    path: `${AppRoute.CommunityGroups}/:type/:id`,
+    module: CHURCH,
+    element: <CommunityGroupDetailPage />,
+    roles: GENERAL_ADMIN,
+  },
   { path: AppRoute.Volunteers, module: CHURCH, element: <VolunteersPage />, roles: LEADERSHIP_ROLES },
-  { path: `${AppRoute.Volunteers}/:id`, module: CHURCH, element: <VolunteerDetailPage />, roles: LEADERSHIP_ROLES },
   { path: `${AppRoute.Store}/*`, module: CHURCH, element: <StoreRoutes />, roles: GENERAL_ADMIN },
 
   { path: AppRoute.Reports, element: <ReportsPage />, roles: LEADERSHIP_ROLES },
@@ -108,6 +151,14 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
   { path: `${COUNCILS_PATH}/:id`, element: <CouncilRosterPage />, roles: LEADERSHIP_ROLES },
   { path: `${AppRoute.Reports}/turmas/:id`, element: <CohortRosterPage />, roles: LEADERSHIP_ROLES },
 ];
+
+export function isStandalone(pathname: string): boolean {
+  const match = matchRoutes(PRIVATE_ROUTES, pathname)?.[0];
+  if (!match) return false;
+  const { route, params } = match;
+  const target = route.list && !isEntityId(params.id) ? route.list : route;
+  return !!target.standalone;
+}
 
 export function moduleOf(pathname: string): SystemModule {
   return matchRoutes(PRIVATE_ROUTES, pathname)?.[0]?.route.module ?? SystemModule.Integration;

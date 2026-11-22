@@ -13,7 +13,8 @@ import {
 import { ENTRY_TYPE_LABELS, MEMBERSHIP_ANSWER_LABELS } from '../../types/church';
 
 type FieldKind =
-  | { kind: 'text'; placeholder?: string; maxLength?: number; numeric?: boolean }
+  | { kind: 'text'; placeholder?: string; maxLength?: number; numeric?: boolean; mask?: 'cpf' }
+  | { kind: 'zip' }
   | { kind: 'phone' }
   | { kind: 'email' }
   | { kind: 'date' }
@@ -21,7 +22,7 @@ type FieldKind =
   | { kind: 'select'; labels: Record<string, string>; emptyLabel?: string }
   | { kind: 'council' };
 
-export type RecordField = { name: keyof MemberRecord; label: string } & FieldKind;
+export type RecordField = { name: keyof MemberRecord; label: string; wide?: boolean } & FieldKind;
 
 export interface RecordSection {
   id: string;
@@ -60,16 +61,15 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
     title: 'Contato',
     fields: [
       { name: 'phone', label: 'Celular', kind: 'phone' },
-      { name: 'email', label: text.fields.email, kind: 'email' },
-      { name: 'otherPhone', label: 'Outro telefone para contato', kind: 'phone' },
+      { name: 'email', label: text.fields.email, kind: 'email', wide: true },
     ],
   },
   {
     id: 'personal',
     title: 'Dados pessoais',
     fields: [
-      { name: 'name', label: text.fields.name, kind: 'text', placeholder: text.fields.fullName },
-      { name: 'cpf', label: 'CPF', kind: 'text', numeric: true, placeholder: '000.000.000-00' },
+      { name: 'name', label: text.fields.name, kind: 'text', placeholder: text.fields.fullName, wide: true },
+      { name: 'cpf', label: 'CPF', kind: 'text', numeric: true, mask: 'cpf', placeholder: '000.000.000-00' },
       { name: 'birthDate', label: 'Nascimento', kind: 'date' },
       { name: 'gender', label: 'Sexo', kind: 'select', labels: GENDER_LABELS, emptyLabel: 'Não informado' },
       {
@@ -85,8 +85,7 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
     id: 'church',
     title: 'Vida na igreja',
     fields: [
-      { name: 'baptismDate', label: 'Data de batismo', kind: 'date' },
-      { name: 'baptismChurch', label: 'Igreja do batismo', kind: 'text' },
+      { name: 'baptismChurch', label: 'Igreja do batismo', kind: 'text', wide: true },
       {
         name: 'entryType',
         label: MEMBERSHIP_ANSWER_LABELS.entryType,
@@ -94,7 +93,7 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
         labels: ENTRY_TYPE_LABELS,
         emptyLabel: 'Não informado',
       },
-      { name: 'originChurch', label: MEMBERSHIP_ANSWER_LABELS.originChurch, kind: 'text' },
+      { name: 'originChurch', label: MEMBERSHIP_ANSWER_LABELS.originChurch, kind: 'text', wide: true },
       { name: 'councilId', label: 'Aprovado no Conselho Administrativo de', kind: 'council' },
     ],
   },
@@ -103,7 +102,7 @@ export const MEMBER_RECORD_SECTIONS: RecordSection[] = [
     title: 'Endereço',
     summary: addressLines,
     fields: [
-      { name: 'addressZip', label: 'CEP', kind: 'text', numeric: true },
+      { name: 'addressZip', label: 'CEP', kind: 'zip' },
       { name: 'addressStreet', label: 'Rua', kind: 'text' },
       { name: 'addressNumber', label: 'Número', kind: 'text' },
       { name: 'addressComplement', label: 'Complemento', kind: 'text' },

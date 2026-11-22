@@ -1,16 +1,58 @@
 // Libs
 import styled from 'styled-components';
 
-export const Sections = styled.div`
+export const FilterBar = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.xs};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+export const FilterItem = styled.button<{ $active: boolean }>`
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: ${({ theme }) => theme.rounded.full};
+  background: ${({ theme, $active }) => ($active ? theme.colors.primary : 'transparent')};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+  white-space: nowrap;
+  color: ${({ theme, $active }) => ($active ? theme.colors.onPrimary : theme.colors.ink)};
+  cursor: pointer;
+  scroll-snap-align: center;
+  transition: background 0.15s;
+
+  &:hover {
+    background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.surfaceSoft)};
+  }
+`;
+
+export const FilterCount = styled.span<{ $active: boolean }>`
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: ${({ theme }) => theme.rounded.full};
+  background: ${({ theme, $active }) => ($active ? 'rgba(255, 255, 255, 0.28)' : theme.colors.surfaceSoft)};
+  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
+  font-weight: 600;
+  text-align: center;
+  color: ${({ theme, $active }) => ($active ? theme.colors.onPrimary : theme.colors.muted)};
+`;
+
+export const Modules = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.xl};
-`;
-
-export const EmptySectionHint = styled.p`
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  color: ${({ theme }) => theme.colors.muted};
 `;
 
 export const ModuleSection = styled.section`
@@ -29,10 +71,65 @@ export const ModuleTitle = styled.h2`
   color: ${({ theme }) => theme.colors.ink};
 `;
 
+export const GroupLabel = styled.h3`
+  margin: 0 0 ${({ theme }) => theme.spacing.xs};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.microLabel.fontSize};
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.muted};
+`;
+
+export const PersonList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li + li {
+    border-top: 1px solid ${({ theme }) => theme.colors.hairline};
+  }
+`;
+
+export const PersonRow = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  width: 100%;
+  min-height: 56px;
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.sm};
+  border: 0;
+  border-radius: ${({ theme }) => theme.rounded.sm};
+  background: transparent;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
+  color: ${({ theme }) => theme.colors.ink};
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.surfaceSoft};
+  }
+`;
+
+export const PersonName = styled.span`
+  min-width: 0;
+  overflow-wrap: anywhere;
+`;
+
+export const EmptySectionHint = styled.p`
+  margin: 0;
+  padding: ${({ theme }) => theme.spacing.sm};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  color: ${({ theme }) => theme.colors.muted};
+`;
+
 export const DropZone = styled.div<{ $active: boolean; $accepts: boolean; $over: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: ${({ theme }) => theme.spacing.xs};
   margin: -${({ theme }) => theme.spacing.sm};
   padding: ${({ theme }) => theme.spacing.sm};
   border: 2px dashed

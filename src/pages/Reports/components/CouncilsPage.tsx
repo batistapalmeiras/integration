@@ -27,7 +27,7 @@ export function CouncilsPage() {
       {!loading && !loadError && councils?.length === 0 && (
         <Empty
           title="Nenhum Conselho Administrativo criado"
-          description='Crie um em Membresia, no botão "Novo Conselho".'
+          description='Crie um em Conselho, no botão "Conselho".'
         />
       )}
 

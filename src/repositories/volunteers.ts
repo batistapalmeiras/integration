@@ -13,7 +13,7 @@ export interface VolunteerRow {
   email: string | null;
   origin: string;
   role: UserRole;
-  active: boolean;
+  membershipStatus: string | null;
 }
 
 export interface VolunteerCandidate {
@@ -28,13 +28,20 @@ export interface NewVolunteer {
   role: UserRole;
 }
 
-const VOLUNTEER_COLUMNS = 'id, role, active, person:people!profiles_person_id_fkey(id, name, phone, email, origin)';
+const VOLUNTEER_COLUMNS =
+  'id, role, person:people!profiles_person_id_fkey(id, name, phone, email, origin, membership_status)';
 
 interface VolunteerRecord {
   id: string;
   role: string;
-  active: boolean;
-  person: { id: string; name: string; phone: string | null; email: string | null; origin: string } | null;
+  person: {
+    id: string;
+    name: string;
+    phone: string | null;
+    email: string | null;
+    origin: string;
+    membership_status: string | null;
+  } | null;
 }
 
 function toVolunteer(row: VolunteerRecord): VolunteerRow {
@@ -46,7 +53,7 @@ function toVolunteer(row: VolunteerRecord): VolunteerRow {
     email: row.person?.email ?? null,
     origin: row.person?.origin ?? '',
     role: toUserRole(row.role),
-    active: row.active,
+    membershipStatus: row.person?.membership_status ?? null,
   };
 }
 
@@ -67,8 +74,8 @@ async function invokeFunction<T = unknown>(name: string, body: object): Promise<
 export async function countActiveVolunteers(): Promise<number> {
   const { count, error } = await supabase
     .from('profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('active', true);
+    .select('id, person:people!profiles_person_id_fkey!inner(membership_status)', { count: 'exact', head: true })
+    .eq('person.membership_status', 'active');
   if (error) throw error;
   return count ?? 0;
 }
@@ -83,6 +90,16 @@ export async function getVolunteer(id: string): Promise<VolunteerRow> {
   const { data, error } = await supabase.from('profiles').select(VOLUNTEER_COLUMNS).eq('id', id).single();
   if (error) throw error;
   return toVolunteer(data);
+}
+
+export async function getVolunteerByPerson(personId: string): Promise<VolunteerRow | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(VOLUNTEER_COLUMNS)
+    .eq('person_id', personId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? toVolunteer(data) : null;
 }
 
 export async function listVolunteerCandidates(): Promise<VolunteerCandidate[]> {
@@ -100,34 +117,15 @@ export async function createVolunteer(volunteer: NewVolunteer): Promise<void> {
   await invokeFunction('create-volunteer', volunteer);
 }
 
-export async function updateVolunteer(
-  id: string,
-  fields: Partial<Pick<VolunteerRow, 'role' | 'active'>>,
-): Promise<VolunteerRow> {
+export async function updateVolunteerRole(id: string, role: UserRole): Promise<VolunteerRow> {
   const { data, error } = await supabase
     .from('profiles')
-    .update(fields)
+    .update({ role })
     .eq('id', id)
     .select(VOLUNTEER_COLUMNS)
     .single();
   if (error) throw error;
   return toVolunteer(data);
-}
-
-export interface VolunteerIdentity {
-  name: string;
-  email: string;
-  phone: string;
-}
-
-export async function updateVolunteerIdentity(id: string, identity: VolunteerIdentity): Promise<void> {
-  const { error } = await supabase.rpc('update_volunteer_identity', {
-    p_profile_id: id,
-    p_name: identity.name,
-    p_email: identity.email,
-    p_phone: identity.phone,
-  });
-  if (error) throw error;
 }
 
 export async function deleteVolunteer(id: string): Promise<void> {

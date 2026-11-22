@@ -39,7 +39,20 @@ describe('isTabPath', () => {
 
   it('does not treat details or other screens under a tab as the tab itself', () => {
     expect(isTabPath('/visitantes/cc3b3af8-00d1-440c-8734-56b412890040', AppRoute.Visitors)).toBe(false);
-    expect(isTabPath(AppRoute.NewVisitor, AppRoute.Visitors)).toBe(false);
     expect(isTabPath(AppRoute.ArchivedVisitors, AppRoute.Visitors)).toBe(false);
+  });
+});
+
+describe('church area tabs', () => {
+  it('has the birthdays as the fourth tab, leaving only the access control in the more screen', () => {
+    const church = GENERAL_ADMIN_NAV_AREAS.find((area) => area.id === 'church');
+
+    expect(church?.tabs.map((tab) => tab.path)).toEqual([
+      AppRoute.Members,
+      AppRoute.SmallGroups,
+      AppRoute.Ministries,
+      AppRoute.Birthdays,
+    ]);
+    expect(church?.more.map((entry) => ('path' in entry ? entry.path : entry.id))).toEqual([AppRoute.Volunteers]);
   });
 });

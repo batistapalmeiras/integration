@@ -3,13 +3,6 @@ import styled from 'styled-components';
 // Components
 import { ErrorMsg } from '../../components/PublicPage/styles';
 
-export const Hint = styled.p`
-  margin: calc(-1 * ${({ theme }) => theme.spacing.sm}) 0 0;
-  font-size: ${({ theme }) => theme.typography.caption.fontSize};
-  line-height: ${({ theme }) => theme.typography.caption.lineHeight};
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
 export const FieldRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -20,7 +20,7 @@ export function MembersTopBar({ back, title, showFilters, filterCount, onFilters
   const scrolled = useWindowScrolled();
 
   return (
-    <TopBar $scrolled={scrolled}>
+    <TopBar data-top-bar $scrolled={scrolled}>
       {back ? (
         <BackLink type="button" onClick={() => navigate(AppRoute.Dashboard)}>
           <ChevronLeft size={20} />

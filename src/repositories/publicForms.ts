@@ -31,7 +31,6 @@ export interface SavedMembershipAnswers {
   gender: string;
   cpf: string;
   maritalStatus: string;
-  otherPhone: string;
   zip: string;
   street: string;
   number: string;
@@ -41,7 +40,6 @@ export interface SavedMembershipAnswers {
   state: string;
   entryType: string;
   baptismChurch: string;
-  baptismDate: string;
   originChurch: string;
   previousChurch: string;
   baptismInfo: string;
@@ -67,7 +65,6 @@ export interface MembershipFormAnswers {
   maritalStatus: string;
   phone: string;
   email: string;
-  otherPhone: string;
   zip: string;
   street: string;
   number: string;
@@ -77,7 +74,6 @@ export interface MembershipFormAnswers {
   state: string;
   entryType: string;
   baptismChurch: string;
-  baptismDate: string | null;
   lastChurch: string;
   ministryInterests: string[];
   wantsSmallGroup: string;
@@ -170,7 +166,6 @@ export async function checkMembershipInterestPhone(phone: string): Promise<Membe
       gender: data.gender,
       cpf: data.cpf,
       maritalStatus: data.marital_status,
-      otherPhone: data.other_phone,
       zip: data.address_zip,
       street: data.address_street,
       number: data.address_number,
@@ -180,7 +175,6 @@ export async function checkMembershipInterestPhone(phone: string): Promise<Membe
       state: data.address_state,
       entryType: data.entry_type,
       baptismChurch: data.baptism_church,
-      baptismDate: data.baptism_date,
       originChurch: data.origin_church,
       previousChurch: data.previous_church,
       baptismInfo: data.baptism_info,
@@ -202,7 +196,6 @@ const membershipAnswerParams = (answers: MembershipFormAnswers) => ({
   p_birth_date: answers.birthDate,
   p_marital_status: answers.maritalStatus,
   p_email: answers.email,
-  p_other_phone: answers.otherPhone,
   p_address_zip: answers.zip,
   p_address_street: answers.street,
   p_address_number: answers.number,
@@ -212,7 +205,6 @@ const membershipAnswerParams = (answers: MembershipFormAnswers) => ({
   p_address_state: answers.state,
   p_entry_type: answers.entryType,
   p_baptism_church: answers.baptismChurch,
-  p_baptism_date: answers.baptismDate,
   p_last_church: answers.lastChurch,
   p_ministry_interests: answers.ministryInterests,
   p_wants_small_group: answers.wantsSmallGroup,

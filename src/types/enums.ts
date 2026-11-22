@@ -49,6 +49,8 @@ export function groupRolesByModule(roles: UserRole[]): { module: SystemModule; l
 
 export const ADMIN_MANAGEABLE_ROLES = [UserRole.IntegrationTeam, UserRole.Teacher];
 
+export const MEMBER_RECORD_ROLES = [UserRole.GeneralAdmin, UserRole.Developer];
+
 export const LEADERSHIP_ROLES = [UserRole.Admin, UserRole.GeneralAdmin];
 export const PRIVILEGED_ACCOUNT_ROLES = [...LEADERSHIP_ROLES, UserRole.Developer];
 export const INTEGRATION_TEAM_ROLES = [UserRole.IntegrationTeam, ...LEADERSHIP_ROLES];

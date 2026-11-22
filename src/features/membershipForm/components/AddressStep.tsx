@@ -3,10 +3,10 @@ import { Control, UseFormSetValue, useWatch } from 'react-hook-form';
 // Libs
 import { onlyDigits, text, TextInput } from 'bp-kit';
 // Local
+import { ZipField, ZipAddress } from '../../../components/ZipField';
 import { PHONE_PLACEHOLDER } from '../../../domain/text';
-import { useZipLookup } from '../hooks/useZipLookup';
 import { MembershipFormValues } from '../schema';
-import { FieldRow, Hint } from '../styles';
+import { FieldRow } from '../styles';
 
 interface Props {
   control: Control<MembershipFormValues>;
@@ -16,8 +16,15 @@ interface Props {
 
 export function AddressStep({ control, setValue, optionalPhone }: Props) {
   const zip = useWatch({ control, name: 'zip' });
-  const { looking, notFound } = useZipLookup(zip, setValue);
-  const showAddress = onlyDigits(zip).length === 8 && !looking;
+  const showAddress = onlyDigits(zip).length === 8;
+
+  const fillAddress = (address: ZipAddress) => {
+    const options = { shouldValidate: true, shouldDirty: true };
+    if (address.street) setValue('street', address.street, options);
+    if (address.neighborhood) setValue('neighborhood', address.neighborhood, options);
+    if (address.city) setValue('city', address.city, options);
+    if (address.state) setValue('state', address.state, options);
+  };
 
   return (
     <>
@@ -40,25 +47,9 @@ export function AddressStep({ control, setValue, optionalPhone }: Props) {
           placeholder={PHONE_PLACEHOLDER}
         />
       )}
-      <TextInput
-        label="Outro telefone para contato (opcional)"
-        control={control}
-        name="otherPhone"
-        mask="phone"
-        inputMode="numeric"
-        placeholder={PHONE_PLACEHOLDER}
-      />
-      <Hint>Pode ser um telefone fixo ou o celular de alguém da sua casa.</Hint>
-
-      <TextInput label="CEP" control={control} name="zip" mask="cep" inputMode="numeric" placeholder="00000-000" />
-      <Hint>
-        {looking
-          ? 'Buscando endereço…'
-          : notFound
-            ? 'Não encontramos esse CEP. Preencha o endereço abaixo.'
-            : 'Digite o CEP para preencher o endereço.'}
-      </Hint>
-      {showAddress && (
+      <ZipField control={control} name="zip" onAddress={fillAddress}>
+        {({ looking }) =>
+          showAddress && !looking && (
         <>
           <TextInput label="Rua" control={control} name="street" autoComplete="address-line1" />
           <FieldRow>
@@ -71,7 +62,9 @@ export function AddressStep({ control, setValue, optionalPhone }: Props) {
             <TextInput label="Estado" control={control} name="state" placeholder="MG" maxLength={2} />
           </FieldRow>
         </>
-      )}
+          )
+        }
+      </ZipField>
     </>
   );
 }

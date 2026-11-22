@@ -50,7 +50,6 @@ export interface MemberRecord {
   birthDate: string;
   gender: Gender | '';
   maritalStatus: MaritalStatus | '';
-  otherPhone: string;
   addressZip: string;
   addressStreet: string;
   addressNumber: string;
@@ -60,7 +59,6 @@ export interface MemberRecord {
   addressState: string;
   addressReference: string;
   cpf: string;
-  baptismDate: string;
   baptismChurch: string;
   entryType: EntryType | '';
   originChurch: string;
@@ -71,7 +69,6 @@ export type MemberProfile = Pick<
   MemberRecord,
   | 'gender'
   | 'maritalStatus'
-  | 'otherPhone'
   | 'addressZip'
   | 'addressStreet'
   | 'addressNumber'
@@ -81,7 +78,6 @@ export type MemberProfile = Pick<
   | 'addressState'
   | 'addressReference'
   | 'cpf'
-  | 'baptismDate'
   | 'baptismChurch'
 >;
 

@@ -1,6 +1,6 @@
 // Local
 import { NAV_ITEMS } from '../../../routes/navigation';
-import { AgendaPanel, cohortEntry, coffeeEntry } from '../components/AgendaPanel';
+import { AgendaPanel, agendaEntries } from '../components/AgendaPanel';
 import { DashboardShell } from '../components/DashboardShell';
 import { countInIntegration } from '../components/FunnelSection';
 import { HighlightCards } from '../components/HighlightCards';
@@ -14,12 +14,12 @@ export function AdminDashboard() {
   return (
     <DashboardShell loading={loading || !overview} error={error}>
       {() => {
-        const { funnel, coffee, cohort, makeupNotes, volunteers } = overview!;
+        const { funnel, makeupNotes, volunteers } = overview!;
 
         return (
           <>
             <AgendaPanel
-              entries={[...(coffee ? [coffeeEntry(coffee)] : []), ...(cohort ? [cohortEntry(cohort)] : [])]}
+              entries={agendaEntries(overview!)}
               emptyText="Nenhum café ou turma agendado."
             />
             <HighlightCards

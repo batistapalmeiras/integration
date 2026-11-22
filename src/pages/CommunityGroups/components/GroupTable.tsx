@@ -1,8 +1,10 @@
 // React
 import { ReactNode } from 'react';
 // Libs
-import { Button, Empty, Skeleton, text, useModal } from 'bp-kit';
+import { Button, Empty, Skeleton, text, theme, useMediaQuery, useModal } from 'bp-kit';
+import { Plus } from 'lucide-react';
 // Components
+import { CountRow } from '../../../components/CountRow';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
@@ -25,6 +27,7 @@ interface Props {
 
 export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup, counts, onAdd, onRowClick }: Props) {
   const { open, close, modal } = useModal('drawer');
+  const inlineAction = useMediaQuery(`(min-width: ${theme.breakpoints.tablet})`);
 
   const openAdd = () =>
     open(
@@ -37,11 +40,25 @@ export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup
       />,
     );
 
+  const addButton = (
+    <Button variant="secondary" onClick={openAdd}>
+      <Plus size={16} />
+      Adicionar
+    </Button>
+  );
+
   return (
     <div>
-      <PageHeader title={title} back action={<Button onClick={openAdd}>Adicionar</Button>} />
+      <PageHeader title={title} back action={inlineAction ? undefined : addButton} />
 
-      {!loading && !error && counts}
+      {inlineAction ? (
+        <CountRow>
+          {!loading && !error ? counts : <span />}
+          {addButton}
+        </CountRow>
+      ) : (
+        !loading && !error && counts
+      )}
 
       {loading && <Skeleton $h="240px" />}
       {!loading && error && <Empty title={text.feedback.loadError} description={error} />}

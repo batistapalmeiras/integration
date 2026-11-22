@@ -7,7 +7,6 @@ const journey = stepSchemas(false)[3];
 const answers = (entryType: string, baptismChurch: string) => ({
   entryType,
   baptismChurch,
-  baptismDate: '',
   lastChurch: 'Igreja Batista Central',
 });
 

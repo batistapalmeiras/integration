@@ -4,8 +4,8 @@ import { useCallback, useState } from 'react';
 const columnsOf = (element: HTMLElement) =>
   getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
 
-export function fullRowsPageSize(columns: number, target: number): number {
-  return columns * Math.ceil(target / columns);
+export function fullRowsPageSize(columns: number, target: number, minRows = 1): number {
+  return columns * Math.max(minRows, Math.ceil(target / columns));
 }
 
 export function useGridColumns(): [number, (element: HTMLElement | null) => void] {

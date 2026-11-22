@@ -8,7 +8,7 @@ const Badge = styled.span<{ $strong?: boolean }>`
   width: 48px;
   height: 52px;
   border-radius: ${({ theme }) => theme.rounded.sm};
-  background: ${({ theme, $strong }) => ($strong ? theme.colors.primary : theme.colors.primarySoft)};
+  background: ${({ theme, $strong }) => ($strong ? theme.gradients.primary : theme.colors.primarySoft)};
   color: ${({ theme, $strong }) => ($strong ? theme.colors.onPrimary : theme.colors.luxe)};
   display: flex;
   flex-direction: column;

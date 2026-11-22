@@ -1,5 +1,5 @@
 // Libs
-import { formatCPF, maskCEP, maskPhone } from 'bp-kit';
+import { formatCPF, maskCEP } from 'bp-kit';
 // Local
 import { GENDER_LABELS, MARITAL_STATUS_LABELS } from '../../domain/memberRecords';
 import { readBaptismAnswer, readMaritalStatusAnswer } from '../../domain/signupAnswers';
@@ -35,7 +35,6 @@ export function prefilledForm(phone: string, { name, saved }: MembershipInterest
       knownKey(MARITAL_STATUS_LABELS, saved.maritalStatus) || readMaritalStatusAnswer(saved.maritalStatusStory),
     phone,
     email: saved.email,
-    otherPhone: saved.otherPhone && maskPhone(saved.otherPhone),
     zip: saved.zip && maskCEP(saved.zip),
     street: saved.street,
     number: saved.number,
@@ -45,7 +44,6 @@ export function prefilledForm(phone: string, { name, saved }: MembershipInterest
     state: saved.state,
     entryType: knownKey(ENTRY_TYPE_LABELS, saved.entryType) || (baptism.baptized === 'no' ? 'baptism' : ''),
     baptismChurch: saved.baptismChurch || baptism.church,
-    baptismDate: saved.baptismDate,
     lastChurch: saved.originChurch || saved.previousChurch,
     wantsToServe: saved.ministryInterests.length > 0 ? 'yes' : '',
     ministryInterests: saved.ministryInterests,
@@ -67,7 +65,6 @@ export function toMembershipFormAnswers(values: MembershipFormValues, photoToken
     maritalStatus: values.maritalStatus,
     phone: values.phone,
     email: values.email,
-    otherPhone: values.otherPhone,
     zip: values.zip,
     street: values.street,
     number: values.number,
@@ -77,7 +74,6 @@ export function toMembershipFormAnswers(values: MembershipFormValues, photoToken
     state: values.state,
     entryType: values.entryType,
     baptismChurch: baptizedElsewhere ? values.baptismChurch : '',
-    baptismDate: baptizedElsewhere && values.baptismDate ? values.baptismDate : null,
     lastChurch: values.lastChurch,
     ministryInterests: values.wantsToServe === 'yes' ? values.ministryInterests : [],
     wantsSmallGroup: values.wantsSmallGroup,

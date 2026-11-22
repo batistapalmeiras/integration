@@ -3,7 +3,8 @@ import { ReactNode, useState } from 'react';
 // Libs
 import { Checkbox, text, Typography } from 'bp-kit';
 // Local
-import { List, ListChevron, ListHeader, ListItem, ListItemRow, ListName, ListSlot, ListStatusCell } from '../../../components/List';
+import { List, ListChevron, ListHeader, ListItem, ListItemRow, ListSlot, ListStatusCell } from '../../../components/List';
+import { NameWithAvatar } from '../../../components/NameWithAvatar';
 import { StatusPill } from '../../../components/StatusPill';
 import { currentLesson } from '../../../domain/cohortSchedule';
 import { hasCompletedLessons } from '../../../domain/membership';
@@ -74,10 +75,11 @@ export function LessonAttendanceList({ lessons, rows, onToggle, onOpen, summary,
                     onChange={(e) => onToggle(row.id, lesson.id, e.target.checked)}
                   />
                   <StudentText type="button" onClick={() => onOpen(row.person.id)}>
-                    <ListName>{row.person.name}</ListName>
-                    <CountBadge $eligible={hasCompletedLessons(row.attendedCount, lessons.length)}>
-                      {row.attendedCount} de {lessons.length} aulas
-                    </CountBadge>
+                    <NameWithAvatar name={row.person.name}>
+                      <CountBadge $eligible={hasCompletedLessons(row.attendedCount, lessons.length)}>
+                        {row.attendedCount} de {lessons.length} aulas
+                      </CountBadge>
+                    </NameWithAvatar>
                   </StudentText>
                   <ListStatusCell>
                     <StatusPill person={row.person} compact />

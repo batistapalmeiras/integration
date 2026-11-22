@@ -14,12 +14,20 @@ const Circle = styled.span<{ $size: number; $muted?: boolean }>`
   font-weight: 700;
   background: ${({ theme, $muted }) => ($muted ? theme.colors.surfaceStrong : theme.colors.primarySoft)};
   color: ${({ theme, $muted }) => ($muted ? theme.colors.body : theme.colors.luxe)};
+  overflow: hidden;
+`;
+
+const Photo = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 interface Props {
   name: string;
   size?: number;
   muted?: boolean;
+  photoUrl?: string | null;
 }
 
 function initials(name: string): string {
@@ -29,10 +37,10 @@ function initials(name: string): string {
   return (first + last).toUpperCase();
 }
 
-export function Avatar({ name, size = 40, muted }: Props) {
+export function Avatar({ name, size = 40, muted, photoUrl }: Props) {
   return (
     <Circle aria-hidden="true" $size={size} $muted={muted}>
-      {initials(name)}
+      {photoUrl ? <Photo src={photoUrl} alt="" /> : initials(name)}
     </Circle>
   );
 }

@@ -1,4 +1,5 @@
 // React
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import {
@@ -13,19 +14,32 @@ import {
   useModal,
   useToast,
 } from 'bp-kit';
+import { Church, LayoutGrid, LucideIcon, Plus, Sprout } from 'lucide-react';
 // Components
+import { Avatar } from '../../components/Avatar';
 import { PageHeader } from '../../components/PageHeader';
+import { TonePill } from '../../components/StatusPill';
 // Local
 import { useRole } from '../../features/access/useRole';
-import { Table, TableWrapper, Td, Th, Tr } from '../../components/Table';
-import { AppRoute } from '../../routes/paths';
+import { profilePath } from '../../routes/paths';
 import { assignableRoles, canChangeRole } from '../../domain/volunteers';
-import { groupRolesByModule, ROLE_LABELS, UserRole } from '../../types/enums';
+import { groupRolesByModule, ROLE_LABELS, SystemModule, UserRole } from '../../types/enums';
 import { VolunteerRow } from '../../repositories/volunteers';
 import { AddVolunteerModal } from './components/AddVolunteerModal';
 import { DraggableVolunteer, RoleBoard, RoleDropZone } from './components/RoleBoard';
 import { useVolunteers } from './hooks/useVolunteers';
-import { EmptySectionHint, ModuleSection, ModuleTitle, Sections } from './styles';
+import { ModuleFilter, ModuleFilterOption } from './components/ModuleFilter';
+import { accessModule } from './persistence';
+import {
+  EmptySectionHint,
+  GroupLabel,
+  ModuleSection,
+  ModuleTitle,
+  Modules,
+  PersonList,
+  PersonName,
+  PersonRow,
+} from './styles';
 
 const ROLE_SECTION_LABELS: Record<UserRole, string> = {
   [UserRole.Developer]: 'Desenvolvedores',
@@ -33,6 +47,13 @@ const ROLE_SECTION_LABELS: Record<UserRole, string> = {
   [UserRole.Admin]: 'Administradores',
   [UserRole.Teacher]: 'Professores',
   [UserRole.IntegrationTeam]: 'Equipe de Integração',
+};
+
+const ALL_MODULES = 'all';
+
+const MODULE_ICONS: Record<SystemModule, LucideIcon> = {
+  [SystemModule.Church]: Church,
+  [SystemModule.Integration]: Sprout,
 };
 
 const MODULE_GROUPS = groupRolesByModule([
@@ -50,6 +71,7 @@ export function VolunteersPage() {
   const { volunteers, loading, error, addVolunteer, changeRole } = useVolunteers();
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
+  const [savedModule, setSavedModule] = useState(() => accessModule.load());
 
   const allowedRoles = assignableRoles(role);
   const actor = { id: user?.id ?? '', role: role ?? '' };
@@ -96,42 +118,60 @@ export function VolunteersPage() {
       volunteers: volunteers.filter((v) => v.role === role),
     })),
   }));
+  const selected = modules.find((group) => group.module === savedModule)?.module ?? ALL_MODULES;
+  const visibleModules = selected === ALL_MODULES ? modules : modules.filter((group) => group.module === selected);
 
-  const renderTable = (rows: VolunteerRow[]) => (
-    <TableWrapper>
-      <Table>
-        <thead>
-          <tr>
-            <Th>{text.fields.name}</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((volunteer) => (
-            <DraggableVolunteer key={volunteer.id} volunteer={volunteer} enabled={canDrag(volunteer)}>
-              {({ ref, dragProps, isDragging }) => (
-                <Tr
-                  ref={ref}
-                  {...dragProps}
-                  $clickable
-                  style={{ opacity: isDragging ? 0.4 : 1, touchAction: canDrag(volunteer) ? 'pan-y' : undefined }}
-                  onClick={() => navigate(`${AppRoute.Volunteers}/${volunteer.id}`)}
-                >
-                  <Td data-label={text.fields.name}>
-                    {volunteer.name}
-                    {!volunteer.active && ' (desabilitado)'}
-                  </Td>
-                </Tr>
-              )}
-            </DraggableVolunteer>
-          ))}
-        </tbody>
-      </Table>
-    </TableWrapper>
+  const filterOptions: ModuleFilterOption[] = [
+    { value: ALL_MODULES, label: 'Todos os Módulos', icon: LayoutGrid, count: volunteers.length },
+    ...modules.map((group) => ({
+      value: group.module,
+      label: group.label,
+      icon: MODULE_ICONS[group.module],
+      count: group.sections.reduce((sum, section) => sum + section.volunteers.length, 0),
+    })),
+  ];
+
+  const chooseModule = (module: string) => {
+    setSavedModule(module);
+    accessModule.save(module);
+  };
+
+  const renderPeople = (rows: VolunteerRow[]) => (
+    <PersonList>
+      {rows.map((volunteer) => (
+        <li key={volunteer.id}>
+          <DraggableVolunteer volunteer={volunteer} enabled={canDrag(volunteer)}>
+            {({ ref, dragProps, isDragging }) => (
+              <PersonRow
+                ref={ref}
+                type="button"
+                {...dragProps}
+                style={{ opacity: isDragging ? 0.4 : 1, touchAction: canDrag(volunteer) ? 'pan-y' : undefined }}
+                onClick={() => navigate(profilePath(volunteer.id))}
+              >
+                <Avatar name={volunteer.name} size={36} muted={volunteer.membershipStatus !== 'active'} />
+                <PersonName>{volunteer.name}</PersonName>
+                {volunteer.membershipStatus !== 'active' && <TonePill $tone="neutral">Sem acesso</TonePill>}
+              </PersonRow>
+            )}
+          </DraggableVolunteer>
+        </li>
+      ))}
+    </PersonList>
   );
 
   return (
     <div>
-      <PageHeader title="Controle de acesso" back action={<Button onClick={openAddModal}>Adicionar</Button>} />
+      <PageHeader
+        title="Controle de acesso"
+        back
+        action={
+          <Button variant="secondary" onClick={openAddModal}>
+            <Plus size={16} />
+            Adicionar
+          </Button>
+        }
+      />
 
       {loading && <Skeleton $h="240px" />}
       {!loading && error && <Empty title={text.feedback.loadError} description={error} />}
@@ -141,25 +181,29 @@ export function VolunteersPage() {
       )}
 
       {!loading && !error && volunteers.length > 0 && (
-        <RoleBoard canMove={canMove} onMove={confirmMove}>
-          <Sections>
-            {modules.map((group) => (
-              <ModuleSection key={group.module} aria-labelledby={`module-${group.module}`}>
-                <ModuleTitle id={`module-${group.module}`}>{group.label}</ModuleTitle>
-                {group.sections.map((section) => (
-                  <RoleDropZone key={section.role} role={section.role}>
-                    <Typography type="label">{section.label}</Typography>
-                    {section.volunteers.length > 0 ? (
-                      renderTable(section.volunteers)
-                    ) : (
-                      <EmptySectionHint>Nenhum usuário cadastrado.</EmptySectionHint>
-                    )}
-                  </RoleDropZone>
-                ))}
-              </ModuleSection>
-            ))}
-          </Sections>
-        </RoleBoard>
+        <>
+          <ModuleFilter options={filterOptions} value={selected} onChange={chooseModule} />
+
+          <RoleBoard canMove={canMove} onMove={confirmMove}>
+            <Modules>
+              {visibleModules.map((group) => (
+                <ModuleSection key={group.module} aria-label={group.label}>
+                  {selected === ALL_MODULES && <ModuleTitle>{group.label}</ModuleTitle>}
+                  {group.sections.map((section) => (
+                    <RoleDropZone key={section.role} role={section.role}>
+                      <GroupLabel>{section.label}</GroupLabel>
+                      {section.volunteers.length > 0 ? (
+                        renderPeople(section.volunteers)
+                      ) : (
+                        <EmptySectionHint>Ninguém por aqui.</EmptySectionHint>
+                      )}
+                    </RoleDropZone>
+                  ))}
+                </ModuleSection>
+              ))}
+            </Modules>
+          </RoleBoard>
+        </>
       )}
 
       {modal}

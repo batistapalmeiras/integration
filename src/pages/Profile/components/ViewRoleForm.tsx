@@ -1,20 +1,23 @@
 // Libs
 import { RawSelect } from 'bp-kit';
+import styled from 'styled-components';
 // Components
-import { Panel, PanelHeader, PanelTitle } from '../../../components/Panel';
+import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { setViewRole, useViewRole } from '../../../features/access/viewRole';
 import { toViewRole, VIEW_ROLES } from '../../../domain/access';
 import { ROLE_LABELS } from '../../../types/enums';
 
-export function ViewRolePanel() {
+const Form = styled.div`
+  max-width: 560px;
+`;
+
+export function ViewRoleForm() {
   const viewRole = useViewRole();
 
   return (
-    <Panel>
-      <PanelHeader>
-        <PanelTitle>Visão dos módulos</PanelTitle>
-      </PanelHeader>
+    <Form>
+      <PageHeader title="Visão dos módulos" />
       <RawSelect
         label="Ver a Integração como"
         value={viewRole}
@@ -26,6 +29,6 @@ export function ViewRolePanel() {
           </option>
         ))}
       </RawSelect>
-    </Panel>
+    </Form>
   );
 }

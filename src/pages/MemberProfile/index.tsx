@@ -1,13 +1,12 @@
 // React
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 // Libs
 import { Empty, LinkButton, Skeleton, useModal } from 'bp-kit';
 import { Camera, ImagePlus, HeartHandshake, Pencil, UsersRound } from 'lucide-react';
 // Components
-import { MemberPhoto } from '../../components/MemberPhoto';
+import { MEMBER_PHOTO_SIZE, MemberPhoto } from '../../components/MemberPhoto';
 import { NotesPanel } from '../../components/NotesPanel';
 import { PageHeader } from '../../components/PageHeader';
-import { Columns, SideColumn, WideContent } from '../../components/PageColumns';
 import { Field, FieldLabel, Fields, FieldValue, Panel, PanelHeader, PanelTitle } from '../../components/Panel';
 // Local
 import { InfoLine, InfoPanel } from '../../components/InfoLine';
@@ -15,7 +14,6 @@ import { MembershipAlerts } from '../../components/MembershipAlerts';
 import { CouncilDate } from '../../domain/councils';
 import { DirectSignupFlag } from '../../components/DirectSignupFlag';
 import { TonePill } from '../../components/StatusPill';
-import { formatTimestampDate } from '../../domain/dates';
 import { isDirectSignup } from '../../domain/origin';
 import {
   canLeavePhoneEmpty,
@@ -26,6 +24,8 @@ import {
 import { displayValue, MEMBER_RECORD_SECTIONS, RecordSection } from '../../features/memberRecord';
 import { errorMessage, invalidateQueries, markPipelineStale } from '../../lib/queryCache';
 import { queryKeys } from '../../lib/queryKeys';
+import { memberPath } from '../../routes/paths';
+import { AccessSection } from '../Profile/components/AccessSection';
 import { useMemberPhotoUrls } from '../../queries/memberPhotos';
 import { useFamily, useMemberPage, usePersonNotes } from '../../queries/person';
 import { useMinistries, useSmallGroups } from '../../queries/reference';
@@ -33,26 +33,53 @@ import { savePersonCommunity } from '../../repositories/communityGroups';
 import { GroupChecklistModal } from './components/GroupChecklistModal';
 import { MemberFlagsCard } from './components/MemberFlagsCard';
 import { EditSectionModal } from './components/EditSectionModal';
+import { AccessRolePill } from './components/AccessRolePill';
 import { FamilyModal } from './components/FamilyModal';
 import { FamilyPanel } from './components/FamilyPanel';
 import { GroupNames } from './components/GroupNames';
 import { MemberHistory } from './components/MemberHistory';
 import { PhotoModal } from './components/PhotoModal';
-import { HeroCards, HeroGrid, HeroStatus, PhotoBadge, PhotoButton } from './styles';
+import {
+  HeroCards,
+  HeroFrame,
+  HeroGrid,
+  HeroStatus,
+  HeroTitle,
+  PhotoBadge,
+  PhotoButton,
+  RecordBlock,
+  RecordColumn,
+  RecordColumns,
+  RecordContent,
+} from './styles';
+import { MemberShell } from './components/MemberShell';
 
 const MEMBERSHIP_SECTION = 'membership';
-const SIDE_SECTIONS = ['contact'];
-const FAMILY_AFTER = 'personal';
+const CADASTRO_SECTIONS = ['contact', 'personal', 'address'];
 const CHURCH_SECTION = 'church';
 
 const MEMBERSHIP = MEMBER_RECORD_SECTIONS.find((section) => section.id === MEMBERSHIP_SECTION);
-const SIDE = MEMBER_RECORD_SECTIONS.filter((section) => SIDE_SECTIONS.includes(section.id));
-const MAIN = MEMBER_RECORD_SECTIONS.filter(
-  (section) => section.id !== MEMBERSHIP_SECTION && !SIDE_SECTIONS.includes(section.id),
-);
+const CADASTRO = MEMBER_RECORD_SECTIONS.filter((section) => CADASTRO_SECTIONS.includes(section.id));
+const CHURCH = MEMBER_RECORD_SECTIONS.find((section) => section.id === CHURCH_SECTION);
+
+const ACCESS_SECTION = 'acesso';
 
 export function MemberProfilePage() {
-  const { id = '' } = useParams<{ id: string }>();
+  const { id = '', section } = useParams<{ id: string; section: string }>();
+  if (section !== undefined && section !== ACCESS_SECTION) return <Navigate to={memberPath(id)} replace />;
+
+  return (
+    <MemberShell personId={id}>
+      {section === ACCESS_SECTION ? <AccessSection personId={id} /> : <MemberProfile id={id} />}
+    </MemberShell>
+  );
+}
+
+interface MemberProfileProps {
+  id: string;
+}
+
+export function MemberProfile({ id }: MemberProfileProps) {
   const { open, close, modal } = useModal('drawer', { fullScreenOnMobile: true });
   const familyModal = useModal('drawer', { fullScreenOnMobile: true });
   const pageQuery = useMemberPage(id);
@@ -135,123 +162,111 @@ export function MemberProfilePage() {
       />,
     );
 
-  const churchInfo: InfoField[] = [{ label: 'Cadastrado em', value: formatTimestampDate(info.createdAt) }];
-
-  const renderPanel = (section: RecordSection) => (
-    <SectionPanel
-      key={section.id}
-      section={section}
+  const blockOf = (recordSection: RecordSection) => (
+    <RecordPanelBlock
+      key={recordSection.id}
+      section={recordSection}
       record={record}
       councils={councils}
-      info={section.id === CHURCH_SECTION ? churchInfo : []}
-      onEdit={() => edit(section)}
+      onEdit={() => edit(recordSection)}
     />
   );
 
   return (
-    <WideContent>
-      <PageHeader title={record.name} back sticky />
-
-      <HeroGrid>
-        <PhotoButton
-          type="button"
-          $empty={!photo}
-          aria-label={photo ? 'Trocar foto' : 'Adicionar foto'}
-          onClick={() =>
-            open(
-              <PhotoModal
-                personId={id}
-                photoUrl={photoUrl}
-                photo={photo}
-                spouse={spouse}
-                close={close}
-              />,
-            )
-          }
-        >
-          {photo ? (
-            <>
-              <MemberPhoto url={photoUrl} size={104} />
-              <PhotoBadge>
-                <Camera size={14} aria-hidden="true" />
-              </PhotoBadge>
-            </>
-          ) : (
-            <>
-              <ImagePlus size={24} aria-hidden="true" />
-              Adicionar
-            </>
-          )}
-        </PhotoButton>
-        <HeroStatus>
-          <TonePill $tone={MEMBERSHIP_STATUS_TONES[record.membershipStatus]}>
-            {MEMBERSHIP_STATUS_LABELS[record.membershipStatus]}
-          </TonePill>
-          {isDirectSignup(info.origin) && <DirectSignupFlag />}
-          {MEMBERSHIP && (
-            <LinkButton icon={<Pencil size={14} />} onClick={() => edit(MEMBERSHIP)}>
-              Alterar
-            </LinkButton>
-          )}
-        </HeroStatus>
-        <HeroCards>
-          <MemberFlagsCard flags={flags} />
-          <InfoPanel>
-            <InfoLine
-              icon={UsersRound}
-              label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}
-              empty={smallGroups.length === 0}
-              action={
-                <LinkButton icon={<Pencil size={14} />} onClick={editSmallGroups}>
-                  Editar
-                </LinkButton>
-              }
-            >
-              {smallGroups.length > 0 ? <GroupNames groups={smallGroupsWithRoles} /> : 'Não participa de um PG'}
-            </InfoLine>
-            <InfoLine
-              icon={HeartHandshake}
-              label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}
-              empty={ministries.length === 0}
-              action={
-                <LinkButton icon={<Pencil size={14} />} onClick={editMinistries}>
-                  Editar
-                </LinkButton>
-              }
-            >
-              {ministries.length > 0 ? <GroupNames groups={ministriesWithRoles} /> : 'Não serve em um ministério'}
-            </InfoLine>
-          </InfoPanel>
-        </HeroCards>
-      </HeroGrid>
+    <RecordContent>
+      <HeroFrame>
+        <HeroGrid>
+          <HeroTitle>
+            <PageHeader title={record.name} />
+          </HeroTitle>
+          <PhotoButton
+            type="button"
+            $empty={!photo}
+            aria-label={photo ? 'Trocar foto' : 'Adicionar foto'}
+            onClick={() =>
+              open(<PhotoModal personId={id} photoUrl={photoUrl} photo={photo} spouse={spouse} close={close} />)
+            }
+          >
+            {photo ? (
+              <>
+                <MemberPhoto url={photoUrl} size={MEMBER_PHOTO_SIZE} shape="square" interactive />
+                <PhotoBadge>
+                  <Camera size={14} aria-hidden="true" />
+                </PhotoBadge>
+              </>
+            ) : (
+              <>
+                <ImagePlus size={24} aria-hidden="true" />
+                Adicionar
+              </>
+            )}
+          </PhotoButton>
+          <HeroStatus>
+            <TonePill $tone={MEMBERSHIP_STATUS_TONES[record.membershipStatus]}>
+              {MEMBERSHIP_STATUS_LABELS[record.membershipStatus]}
+            </TonePill>
+            {isDirectSignup(info.origin) && <DirectSignupFlag />}
+            {MEMBERSHIP && (
+              <LinkButton icon={<Pencil size={14} />} onClick={() => edit(MEMBERSHIP)}>
+                Alterar
+              </LinkButton>
+            )}
+            <AccessRolePill personId={id} />
+          </HeroStatus>
+          <HeroCards>
+            <MemberFlagsCard flags={flags} />
+            <InfoPanel>
+              <InfoLine
+                icon={UsersRound}
+                label={smallGroups.length === 1 ? 'Pequeno Grupo' : 'Pequenos Grupos'}
+                empty={smallGroups.length === 0}
+                action={
+                  <LinkButton icon={<Pencil size={14} />} onClick={editSmallGroups}>
+                    Editar
+                  </LinkButton>
+                }
+              >
+                {smallGroups.length > 0 ? <GroupNames groups={smallGroupsWithRoles} /> : 'Não participa de um PG'}
+              </InfoLine>
+              <InfoLine
+                icon={HeartHandshake}
+                label={ministries.length === 1 ? 'Ministério' : 'Ministérios'}
+                empty={ministries.length === 0}
+                action={
+                  <LinkButton icon={<Pencil size={14} />} onClick={editMinistries}>
+                    Editar
+                  </LinkButton>
+                }
+              >
+                {ministries.length > 0 ? <GroupNames groups={ministriesWithRoles} /> : 'Não serve em um ministério'}
+              </InfoLine>
+            </InfoPanel>
+          </HeroCards>
+        </HeroGrid>
+      </HeroFrame>
 
       <MembershipAlerts personId={id} onlyPending />
 
-      <Columns>
-        <SideColumn>{SIDE.map(renderPanel)}</SideColumn>
-        <div>
-          {MAIN.flatMap((section) =>
-            section.id === FAMILY_AFTER && family
-              ? [
-                  renderPanel(section),
-                  <FamilyPanel
-                    key="family"
-                    family={family}
-                    onEdit={() =>
-                      familyModal.open(<FamilyModal personId={id} family={family} close={familyModal.close} />)
-                    }
-                  />,
-                ]
-              : [renderPanel(section)],
+      <RecordColumns>
+        <RecordColumn>
+          <Panel aria-label="Cadastro">{CADASTRO.map(blockOf)}</Panel>
+          {CHURCH && <Panel aria-label={CHURCH.title}>{blockOf(CHURCH)}</Panel>}
+        </RecordColumn>
+        <RecordColumn>
+          {family && (
+            <FamilyPanel
+              family={family}
+              onEdit={() => familyModal.open(<FamilyModal personId={id} family={family} close={familyModal.close} />)}
+            />
           )}
           <MemberHistory personId={id} name={record.name} info={info} />
           <NotesPanel personId={id} notes={notes} />
-        </div>
-      </Columns>
+        </RecordColumn>
+      </RecordColumns>
 
       {modal}
       {familyModal.modal}
-    </WideContent>
+    </RecordContent>
   );
 }
 
@@ -261,25 +276,21 @@ interface InfoField {
   wide?: boolean;
 }
 
-interface SectionPanelProps {
+interface RecordPanelBlockProps {
   section: RecordSection;
   record: MemberRecord;
   councils: CouncilDate[];
-  info: InfoField[];
   onEdit: () => void;
 }
 
-function SectionPanel({ section, record, councils, info, onEdit }: SectionPanelProps) {
-  const fields: InfoField[] = [
-    ...section.fields.map((field) => ({
-      label: field.label,
-      value: displayValue(record, field, councils),
-      wide: field.kind === 'textarea',
-    })),
-    ...info,
-  ];
+function RecordPanelBlock({ section, record, councils, onEdit }: RecordPanelBlockProps) {
+  const fields: InfoField[] = section.fields.map((field) => ({
+    label: field.label,
+    value: displayValue(record, field, councils),
+    wide: field.wide || field.kind === 'textarea',
+  }));
   return (
-    <Panel aria-label={section.title}>
+    <RecordBlock>
       <PanelHeader>
         <PanelTitle>{section.title}</PanelTitle>
         <LinkButton icon={<Pencil size={14} />} onClick={onEdit}>
@@ -298,7 +309,7 @@ function SectionPanel({ section, record, councils, info, onEdit }: SectionPanelP
           ))}
         </Fields>
       )}
-    </Panel>
+    </RecordBlock>
   );
 }
 

@@ -34,7 +34,6 @@ const record: MemberRecord = {
   birthDate: '',
   gender: '',
   maritalStatus: '',
-  otherPhone: '',
   addressZip: '',
   addressStreet: '',
   addressNumber: '',
@@ -44,7 +43,6 @@ const record: MemberRecord = {
   addressState: '',
   addressReference: '',
   cpf: '',
-  baptismDate: '',
   baptismChurch: '',
   entryType: '',
   originChurch: '',
@@ -138,5 +136,50 @@ describe('edit section modal', () => {
 
     expect(removeMemberFlags).toHaveBeenCalledWith('p2', ['absent']);
     expect(close).toHaveBeenCalled();
+  });
+});
+
+describe('edit the personal data and the address', () => {
+  const sectionOf = (id: string) => MEMBER_RECORD_SECTIONS.find((section) => section.id === id)!;
+
+  const renderSection = (id: string) =>
+    renderScreen(
+      <EditSectionModal personId="p1" record={record} section={sectionOf(id)} optionalPhone={false} close={vi.fn()} />,
+      { role: UserRole.GeneralAdmin },
+    );
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('masks the CPF as it is typed', async () => {
+    renderSection('personal');
+
+    await userEvent.type(screen.getByPlaceholderText('000.000.000-00'), '52998224725');
+
+    expect(screen.getByPlaceholderText('000.000.000-00')).toHaveValue('529.982.247-25');
+  });
+
+  it('fills the rest of the address when the zip is typed', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        json: () =>
+          Promise.resolve({
+            logradouro: 'Rua Júlio de Castilho',
+            bairro: 'Cinquentenário',
+            localidade: 'Belo Horizonte',
+            uf: 'MG',
+          }),
+      }),
+    );
+    renderSection('address');
+
+    await userEvent.type(screen.getByPlaceholderText('00000-000'), '30570080');
+
+    await vi.waitFor(() => expect(screen.getByDisplayValue('Rua Júlio de Castilho')).toBeInTheDocument());
+    expect(screen.getByDisplayValue('Cinquentenário')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Belo Horizonte')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('MG')).toBeInTheDocument();
   });
 });

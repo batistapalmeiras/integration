@@ -1,10 +1,11 @@
 // React
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 // Libs
 import { useMediaQuery } from 'bp-kit';
-import { ChevronDown, ChevronLeft, LogOut, User } from 'lucide-react';
+import { ChevronDown, ChevronLeft } from 'lucide-react';
 // Components
 import logo from '../../assets/palmeiras-horizontal-verde.png';
+import { ProfileMenu } from '../ProfileMenu';
 import {
   activeNavPath,
   areaItems,
@@ -17,28 +18,29 @@ import {
   NavItem,
 } from '../../routes/navigation';
 import { useNavAreas } from '../../features/access/useRole';
+import { isStandalone } from '../../routes/table';
 import { homeRouteFor } from '../../routes/HomeRedirect';
 import { AppRoute } from '../../routes/paths';
-import { ROLE_LABELS } from '../../types/enums';
 import { useHideOnScroll } from '../../lib/useHideOnScroll';
 import { useWindowScrolled } from '../../lib/useScrolled';
 // Local
+import { FlowContext } from './flow';
 import { useLayout } from './hooks';
 import { ModuleBarContext } from './moduleBar';
 import { NavDestinationContext } from './navDestination';
+import { ProfileSlotContext } from './profileSlot';
 import { closedSideNavKeys } from './persistence';
 import {
   BottomBar,
   BottomTab,
   BottomTabLabel,
-  DropdownItem,
   Main,
   MainInner,
   ModuleBar,
+  ModuleBarLink,
   SideBrand,
   SideBrandLink,
   SideBrandLogo,
-  SideFooter,
   SideMenu,
   SIDEMENU_MEDIA,
   SideNav,
@@ -47,10 +49,9 @@ import {
   SideNavCount,
   SideNavGroupToggle,
   SideNavLink,
-  SideUserInfo,
-  SideUserName,
-  SideUserRole,
   TabCount,
+  ProfileAnchor,
+  ProfileSlot,
   TabIcon,
 } from './styles';
 
@@ -61,7 +62,13 @@ interface ILayoutProps {
 }
 
 export function Layout({ children }: ILayoutProps) {
-  const { user, navigate, handleLogout, isExactTab, pathname, membershipCount } = useLayout();
+  const { isExactTab, pathname, search, membershipCount } = useLayout();
+  const standalone = isStandalone(pathname);
+  const flowPath = useRef<string>(AppRoute.Dashboard);
+
+  useEffect(() => {
+    if (!standalone) flowPath.current = `${pathname}${search}`;
+  }, [standalone, pathname, search]);
   const navAreas = useNavAreas();
   const navPaths = [NAV_ITEMS.dashboard.path, ...navAreas.flatMap((area) => areaItems(area).map((item) => item.path))];
   const activePath = activeNavPath(pathname, navPaths);
@@ -101,15 +108,18 @@ export function Layout({ children }: ILayoutProps) {
     : [
         NAV_ITEMS.dashboard,
         ...navAreas.map((area) => ({ label: area.title, path: area.tabs[0].path, icon: area.icon })),
-        NAV_ITEMS.profile,
       ];
   const hasOuterTabs = navAreas.length > 1;
-  const isOnTab = !!currentArea || (hasOuterTabs && (isExactTab(AppRoute.Dashboard) || isExactTab(AppRoute.Profile)));
+  const isOnTab = !!currentArea || (hasOuterTabs && isExactTab(AppRoute.Dashboard));
 
   const shouldShowBottomBar = isOnTab && bottomTabs.length > 1;
   const bottomBarHidden = useHideOnScroll(shouldShowBottomBar, pathname);
   const scrolled = useWindowScrolled();
   const isNavDestination = hasSidebar ? isSidebarDestination : isOnTab;
+  const showModuleBar = !!currentArea && !moduleBarHidden && !hasSidebar;
+  const showProfileSlot = !showModuleBar;
+
+  if (standalone) return <FlowContext.Provider value={flowPath}>{children}</FlowContext.Provider>;
 
   return (
     <>
@@ -159,33 +169,30 @@ export function Layout({ children }: ILayoutProps) {
             );
           })}
         </SideNav>
-
-        <SideFooter>
-          <SideUserInfo>
-            <SideUserName>{user?.name}</SideUserName>
-            <SideUserRole>{user ? ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] : ''}</SideUserRole>
-          </SideUserInfo>
-          <DropdownItem onClick={() => navigate(AppRoute.Profile)}>
-            <User size={16} />
-            Meu perfil
-          </DropdownItem>
-          <DropdownItem className="danger" onClick={handleLogout}>
-            <LogOut size={16} />
-            Sair
-          </DropdownItem>
-        </SideFooter>
       </SideMenu>
 
-      <Main $hasBottomBar={shouldShowBottomBar} $hasModuleBar={!!currentArea && !moduleBarHidden}>
-        {currentArea && !moduleBarHidden && (
-          <ModuleBar to={AppRoute.Dashboard} $scrolled={scrolled}>
-            <ChevronLeft size={20} />
-            {currentArea.title}
+      <Main $hasBottomBar={shouldShowBottomBar} $hasModuleBar={showModuleBar}>
+        {showModuleBar && (
+          <ModuleBar $scrolled={scrolled}>
+            <ModuleBarLink to={AppRoute.Dashboard}>
+              <ChevronLeft size={20} />
+              {currentArea.title}
+            </ModuleBarLink>
+            <ProfileMenu />
           </ModuleBar>
         )}
-        <MainInner>
+        <MainInner $profileSlot={showProfileSlot}>
+          {showProfileSlot && (
+            <ProfileSlot>
+              <ProfileAnchor>
+                <ProfileMenu />
+              </ProfileAnchor>
+            </ProfileSlot>
+          )}
           <ModuleBarContext.Provider value={setModuleBarHidden}>
-            <NavDestinationContext.Provider value={isNavDestination}>{children}</NavDestinationContext.Provider>
+            <NavDestinationContext.Provider value={isNavDestination}>
+              <ProfileSlotContext.Provider value={showProfileSlot}>{children}</ProfileSlotContext.Provider>
+            </NavDestinationContext.Provider>
           </ModuleBarContext.Provider>
         </MainInner>
       </Main>

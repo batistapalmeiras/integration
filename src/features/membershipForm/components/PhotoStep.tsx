@@ -10,7 +10,8 @@ import { MemberPhoto } from '../../../components/MemberPhoto';
 import { errorMessage } from '../../../lib/queryCache';
 import { choosePhoto, PhotoCropper } from '../../memberPhoto';
 import { MembershipFormValues } from '../schema';
-import { Hint, PhotoActions, PhotoError, PhotoInput, PhotoPreview } from '../styles';
+import { Hint } from '../../../components/FormLayout';
+import { PhotoActions, PhotoError, PhotoInput, PhotoPreview } from '../styles';
 
 const PLACEHOLDER_SIZE = 160;
 const ACCEPTED_TYPES = 'image/jpeg,image/png';

@@ -3,7 +3,7 @@ import { loadIntegrationOverview } from '../../../src/pages/Dashboard/hooks/inte
 
 vi.mock('../../../src/repositories/cafeSchedule', () => ({ getUpcomingCoffeeRoster: vi.fn().mockResolvedValue(null) }));
 vi.mock('../../../src/repositories/classesRoster', () => ({
-  getUpcomingCohortWithLessons: vi.fn().mockResolvedValue(null),
+  listOpenCohorts: vi.fn().mockResolvedValue([]),
 }));
 vi.mock('../../../src/repositories/lessonMakeups', () => ({ listRecentMakeupNotes: vi.fn().mockResolvedValue([]) }));
 vi.mock('../../../src/repositories/integrationPeople', () => ({

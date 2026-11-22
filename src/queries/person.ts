@@ -9,6 +9,8 @@ import { getMemberPage, getPersonRecords } from '../repositories/memberRecords';
 import { listMembershipAlerts } from '../repositories/membership';
 import { listPersonNotes } from '../repositories/personNotes';
 import { listMemberEvents } from '../repositories/memberEvents';
+import { getOwnPersonId, getPersonAccessRole } from '../repositories/profiles';
+import { getVolunteerByPerson } from '../repositories/volunteers';
 import { listStatusHistory } from '../repositories/people';
 import { listVisitorEvents } from '../repositories/visitorEvents';
 
@@ -21,6 +23,15 @@ export const usePersonMakeups = (personId: string, enabled = true) =>
   useQuery(queryKeys.personMakeups(personId), () => getPersonLessonMakeups(personId), {
     enabled: enabled && !!personId,
   });
+
+export const usePersonAccessRole = (personId: string) =>
+  useQuery(queryKeys.personAccess(personId), () => getPersonAccessRole(personId), { enabled: !!personId });
+
+export const useOwnPersonId = (userId: string, enabled: boolean) =>
+  useQuery(queryKeys.ownPersonId(userId), () => getOwnPersonId(userId), { enabled: enabled && !!userId });
+
+export const usePersonVolunteer = (personId: string) =>
+  useQuery(queryKeys.personVolunteer(personId), () => getVolunteerByPerson(personId), { enabled: !!personId });
 
 export const useMemberPage = (personId: string) =>
   useQuery(queryKeys.memberPage(personId), () => getMemberPage(personId), { enabled: !!personId });

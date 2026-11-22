@@ -41,7 +41,6 @@ const sensitive: PersonSensitive = {
 const profile: MemberProfile = {
   gender: 'male',
   maritalStatus: 'single',
-  otherPhone: '',
   addressZip: '30000000',
   addressStreet: 'Rua A',
   addressNumber: '10',
@@ -51,7 +50,6 @@ const profile: MemberProfile = {
   addressState: 'MG',
   addressReference: '',
   cpf: '123.456.789-09',
-  baptismDate: '2015-05-10',
   baptismChurch: 'Igreja Batista do Bairro',
 };
 
@@ -73,7 +71,8 @@ describe('membership sections', () => {
     expect(sectionOf(sections, 'Endereço')?.entries[0]).toMatchObject({ wide: true });
     expect(sectionOf(sections, 'Endereço')?.entries[0].value).toContain('Rua A, 10');
     expect(valueOf(sections, 'Igreja do batismo')).toBe('Igreja Batista do Bairro');
-    expect(valueOf(sections, 'Data de batismo')).toBe('10/05/2015');
+    expect(valueOf(sections, 'Data de batismo')).toBeUndefined();
+    expect(valueOf(sections, 'Outro telefone para contato')).toBeUndefined();
     expect(valueOf(sections, 'Quer participar de um PG')).toBe('Já faço — PG Centro');
   });
 
@@ -91,17 +90,16 @@ describe('membership sections', () => {
     expect(email?.wide).toBe(true);
   });
 
-  it('keeps the short contact fields side by side, before the e-mail', () => {
+  it('puts the e-mail after the phone', () => {
     const contact = sectionOf(membershipSections(person, sensitive, profile, []), 'Contato');
 
-    expect(contact?.entries.map((item) => item.label)).toEqual(['Celular', 'Outro telefone para contato', 'E-mail']);
+    expect(contact?.entries.map((item) => item.label)).toEqual(['Celular', 'E-mail']);
   });
 
   it('leaves out the baptism questions for who is joining by baptism', () => {
     const sections = membershipSections({ ...person, entry_type: 'baptism' }, sensitive, profile, []);
 
     expect(valueOf(sections, 'Igreja do batismo')).toBeUndefined();
-    expect(valueOf(sections, 'Data de batismo')).toBeUndefined();
   });
 
   it('shows no for who does not want to serve in a ministry', () => {

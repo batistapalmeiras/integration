@@ -133,7 +133,7 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
                   <EndActions>
                     <Button type="button" variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
                       <Plus size={16} />
-                      Novo Conselho
+                      Conselho
                     </Button>
                   </EndActions>
                 </>

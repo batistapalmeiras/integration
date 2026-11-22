@@ -36,12 +36,12 @@ export function MembershipPage() {
   return (
     <div>
       <PageHeader
-        title="Membresia"
+        title="Conselho"
         action={
           isGeneralAdmin && (
             <Button variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
               <Plus size={16} />
-              Novo Conselho
+              Conselho
             </Button>
           )
         }

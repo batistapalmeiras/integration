@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 // Libs
 import { LucideIcon } from 'lucide-react';
 // Local
-import { Action, Badge, Body, Item, Label, Panel } from './styles';
+import { Action, Badge, Body, Frame, Item, Label, Panel } from './styles';
 
 interface Props {
   icon: LucideIcon;
@@ -29,5 +29,9 @@ export function InfoLine({ icon: Icon, label, empty = false, action, children }:
 }
 
 export function InfoPanel({ children }: { children: ReactNode }) {
-  return <Panel>{children}</Panel>;
+  return (
+    <Frame>
+      <Panel>{children}</Panel>
+    </Frame>
+  );
 }

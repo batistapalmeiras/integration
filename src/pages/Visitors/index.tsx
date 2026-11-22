@@ -1,16 +1,18 @@
 // React
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { ChevronRight } from 'lucide-react';
-import { Button, Chip, Empty, SearchInput, Skeleton, Tab, TabBar, text } from 'bp-kit';
+import { ChevronRight, Plus } from 'lucide-react';
+import { Button, Chip, Empty, SearchInput, Skeleton, text, useModal } from 'bp-kit';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
+import { CountRow } from '../../components/CountRow';
 import { PeopleCount } from '../../components/PeopleCount';
 import { AppRoute } from '../../routes/paths';
 import { PersonStatus, STATUS_META, VISITOR_QUEUE_STATUSES } from '../../types/person';
 import { useVisitors } from './hooks/useVisitors';
 import { VisitorList } from './components/VisitorList';
+import { NewVisitorModal } from './New/NewVisitorModal';
 import { ArchivedLink, QueueChips, SearchRow } from './styles';
 
 export function VisitorsPage() {
@@ -36,14 +38,17 @@ export function VisitorsPage() {
       statusFilter.includes(status) ? statusFilter.filter((s) => s !== status) : [...statusFilter, status],
     );
 
+  const { open, close, modal } = useModal('drawer', { fullScreenOnMobile: true });
+  const newVisitor = (
+    <Button variant="secondary" onClick={() => open(<NewVisitorModal close={close} />)}>
+      <Plus size={16} />
+      Visitante
+    </Button>
+  );
+
   return (
     <div>
-      <PageHeader
-        title="Visitantes"
-        action={<Button onClick={() => navigate(AppRoute.NewVisitor)}>Novo visitante</Button>}
-      />
-
-      {!loading && !error && <PeopleCount count={totalCount} />}
+      <PageHeader title="Visitantes" action={newVisitor} />
 
       {loading && <Skeleton $h="240px" />}
 
@@ -51,13 +56,6 @@ export function VisitorsPage() {
 
       {!loading && !error && (
         <>
-          <TabBar>
-            <Tab $active>Na fila ({totalCount})</Tab>
-            <ArchivedLink type="button" onClick={() => navigate(AppRoute.ArchivedVisitors)}>
-              Arquivados ({archivedCount})
-              <ChevronRight size={16} aria-hidden="true" />
-            </ArchivedLink>
-          </TabBar>
           <SearchRow>
             <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
           </SearchRow>
@@ -77,6 +75,16 @@ export function VisitorsPage() {
         </>
       )}
 
+      {!loading && !error && (
+        <CountRow>
+          <PeopleCount count={totalCount} />
+          <ArchivedLink type="button" onClick={() => navigate(AppRoute.ArchivedVisitors)}>
+            Arquivados ({archivedCount})
+            <ChevronRight size={16} aria-hidden="true" />
+          </ArchivedLink>
+        </CountRow>
+      )}
+
       {!loading && !error && rows.length === 0 && (
         <Empty
           title="Ninguém na fila"
@@ -91,6 +99,8 @@ export function VisitorsPage() {
       {!loading && !error && rows.length > 0 && (
         <VisitorList rows={rows} page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
+
+      {modal}
     </div>
   );
 }

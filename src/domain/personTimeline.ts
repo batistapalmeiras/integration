@@ -79,14 +79,15 @@ function visitorEventEntry(event: VisitorEventSource): TimelineEntry {
   }
 }
 
-const AUTOMATIC_NOTES = [
-  'Não se inscreveu na turma até o início da primeira aula',
-  'Concluiu as aulas de Integração com a ficha de interesse já preenchida',
+const SELF_SERVICE_NOTES = [
+  'Inscrição via formulário público',
+  'Ficha de Interesse de Membresia preenchida',
+  'Cadastro direto de membresia',
 ];
 
 const changeActor = (change: StatusChangeSource): string | null => {
   if (change.authorName) return actorName(change.authorName);
-  return change.note && AUTOMATIC_NOTES.includes(change.note) ? SYSTEM_ACTOR : null;
+  return change.note && SELF_SERVICE_NOTES.includes(change.note) ? null : SYSTEM_ACTOR;
 };
 
 const statusName = (status: string | null) => (status ? (STATUS_LABELS[status] ?? status) : 'Sem status');
@@ -182,7 +183,6 @@ export interface MembershipSource {
 }
 
 const BULK_JOIN_WINDOW_MS = 24 * 60 * 60 * 1000;
-const GENERAL_ADMIN_ACTOR = 'Administrador Geral';
 
 const ROLE_LABELS: Record<string, string> = { leader: 'Líder', host: 'Anfitrião' };
 
@@ -313,7 +313,6 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
           timestampDateKey(join.joinedAt),
           join.joinedAt,
           join.kind === 'small_group' ? `Entrou no Pequeno Grupo ${join.name}` : `Passou a servir em ${join.name}`,
-          GENERAL_ADMIN_ACTOR,
         ),
       );
     });

@@ -1,12 +1,12 @@
 // Libs
-import { StatCard, StatLabel, StatValue } from 'bp-kit';
+import { StatCard, StatLabel } from 'bp-kit';
 // Components
 import { IconBadge } from '../../../components/MenuOptions';
 import { NAV_ITEMS } from '../../../routes/navigation';
 import { PersonStatus, STATUS_META } from '../../../types/person';
 import { visitorsPath } from '../../Visitors/persistence';
 // Local
-import { StageGrid, StageLink, StatRow, StatText } from '../styles';
+import { HighlightValue, StageGrid, StageLink, StageStat } from '../styles';
 
 interface FunnelStage {
   status: PersonStatus;
@@ -40,21 +40,23 @@ function StageIcon({ status }: { status: PersonStatus }) {
   return <Icon size={22} />;
 }
 
+const STAGE_LABELS: Partial<Record<PersonStatus, string>> = { membership_pending: 'Conselho' };
+
 export function FunnelCards({ counts }: Props) {
   return (
     <StageGrid aria-labelledby="integration">
       {INTEGRATION_FUNNEL.map((stage) => (
         <StageLink key={stage.status} to={stage.path}>
           <StatCard>
-            <StatRow>
+            <StageStat>
               <IconBadge>
                 <StageIcon status={stage.status} />
               </IconBadge>
-              <StatText>
-                <StatLabel>{STATUS_META[stage.status].label}</StatLabel>
-                <StatValue>{counts[stage.status] ?? 0}</StatValue>
-              </StatText>
-            </StatRow>
+              <div>
+                <StatLabel>{STAGE_LABELS[stage.status] ?? STATUS_META[stage.status].label}</StatLabel>
+                <HighlightValue>{counts[stage.status] ?? 0}</HighlightValue>
+              </div>
+            </StageStat>
           </StatCard>
         </StageLink>
       ))}

@@ -1,5 +1,5 @@
 // Libs
-import { isCompletePhone, isSamePhone, isValidCpf, onlyDigits, text } from 'bp-kit';
+import { isCompletePhone, isValidCpf, onlyDigits, text } from 'bp-kit';
 import { z } from 'zod';
 // Local
 import { todayKey } from '../../domain/dates';
@@ -14,7 +14,6 @@ export type MembershipFormValues = {
   maritalStatus: MaritalStatus | '';
   phone: string;
   email: string;
-  otherPhone: string;
   zip: string;
   street: string;
   number: string;
@@ -24,7 +23,6 @@ export type MembershipFormValues = {
   state: string;
   entryType: 'baptism' | 'transfer_letter' | 'acclamation' | 'reconciliation' | '';
   baptismChurch: string;
-  baptismDate: string;
   lastChurch: string;
   statuteAgreed: boolean;
   ministryInterests: string[];
@@ -45,7 +43,6 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   maritalStatus: '',
   phone: '',
   email: '',
-  otherPhone: '',
   zip: '',
   street: '',
   number: '',
@@ -55,7 +52,6 @@ export const EMPTY_MEMBERSHIP_FORM: MembershipFormValues = {
   state: '',
   entryType: '',
   baptismChurch: '',
-  baptismDate: '',
   lastChurch: '',
   statuteAgreed: false,
   ministryInterests: [],
@@ -101,7 +97,6 @@ const contactSchema = (optionalPhone: boolean) =>
         whenFilled((value) => z.string().email().safeParse(value.trim()).success),
         text.validation.emailInvalid,
       ),
-      otherPhone: z.string().refine((value) => value === '' || isCompletePhone(value), text.validation.phoneIncomplete),
       zip: required('o CEP').refine(
         whenFilled((value) => onlyDigits(value).length === 8),
         'O CEP tem 8 dígitos',
@@ -115,11 +110,6 @@ const contactSchema = (optionalPhone: boolean) =>
         whenFilled((value) => /^[A-Za-z]{2}$/.test(value.trim())),
         'Use a sigla, ex.: MG',
       ),
-    })
-    .refine((values) => !isSamePhone(values.otherPhone, values.phone), {
-      message: 'Informe um número diferente do seu telefone',
-      path: ['otherPhone'],
-      when: () => true,
     });
 
 const photoFrameSchema = z.object({
@@ -142,7 +132,6 @@ const journeySchema = z
   .object({
     entryType: choice(['baptism', 'transfer_letter', 'acclamation', 'reconciliation'], 'Selecione uma das formas'),
     baptismChurch: z.string(),
-    baptismDate: z.string().refine(whenFilled(pastDate), 'Escolha uma data que já passou.'),
     lastChurch: required('o nome da igreja'),
   })
   .refine((values) => values.entryType === 'baptism' || values.baptismChurch.trim() !== '', {

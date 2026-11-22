@@ -75,9 +75,9 @@ vi.mock('../../../src/repositories/councils', async (importOriginal) => ({
 const renderPage = () =>
   renderScreen(
     <Routes>
-      <Route path="/membresia/:id/confirmar" element={<ConfirmMemberPage />} />
+      <Route path="/conselho/:id/confirmar" element={<ConfirmMemberPage />} />
     </Routes>,
-    { role: UserRole.GeneralAdmin, route: '/membresia/p1/confirmar' },
+    { role: UserRole.GeneralAdmin, route: '/conselho/p1/confirmar' },
   );
 
 describe('confirm member page', () => {

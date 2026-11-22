@@ -39,6 +39,7 @@ export function EditSectionModal({ personId, record, section, optionalPhone, fla
   const {
     control,
     handleSubmit,
+    setValue,
     watch,
     formState: { isSubmitting, isDirty },
   } = useForm<MemberRecord>({ resolver: sectionResolver(section, optionalPhone), defaultValues: record });
@@ -130,7 +131,7 @@ export function EditSectionModal({ personId, record, section, optionalPhone, fla
     <>
       <ModalTitle onClose={close}>{section.title}</ModalTitle>
       <Form onSubmit={submit}>
-        <RecordSectionFields section={section} control={control} />
+        <RecordSectionFields section={section} control={control} setValue={setValue} />
         {flaggable && (
           <SectionDivider aria-label="Sinalizações" role="region">
             <FilterGroup>

@@ -41,6 +41,10 @@ export const Label = styled.span`
   color: ${({ theme }) => theme.colors.muted};
 `;
 
+export const Frame = styled.div`
+  container-type: inline-size;
+`;
+
 export const Panel = styled.div`
   display: flex;
   flex-direction: column;
@@ -58,7 +62,7 @@ export const Panel = styled.div`
     border-top: 1px solid ${({ theme }) => theme.colors.hairline};
   }
 
-  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
+  @container (min-width: 560px) {
     flex-direction: row;
 
     & > * + * {

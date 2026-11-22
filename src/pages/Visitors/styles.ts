@@ -9,7 +9,6 @@ export const QueueChips = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.sm};
   overflow-x: auto;
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
 
   & > * {
     flex-shrink: 0;

@@ -1,5 +1,5 @@
 // Local
-import { AGENDA_TITLE, AgendaPanel, cohortEntry, coffeeEntry } from '../components/AgendaPanel';
+import { AGENDA_TITLE, AgendaPanel, agendaEntries } from '../components/AgendaPanel';
 import { BirthdaysHighlight } from '../components/BirthdaysHighlight';
 import { ChurchMembersCard } from '../components/ChurchMembersCard';
 import { DashboardShell } from '../components/DashboardShell';
@@ -14,7 +14,7 @@ export function GeneralAdminDashboard() {
   return (
     <DashboardShell loading={loading || !overview} error={error}>
       {() => {
-        const { funnel, coffee, cohort, makeupNotes } = overview!;
+        const { funnel, makeupNotes } = overview!;
 
         return (
           <GeneralAdminGrid>
@@ -30,7 +30,7 @@ export function GeneralAdminDashboard() {
             <GridArea $area="agenda">
               <AgendaPanel
                 titled={false}
-                entries={[...(coffee ? [coffeeEntry(coffee)] : []), ...(cohort ? [cohortEntry(cohort)] : [])]}
+                entries={agendaEntries(overview!)}
                 emptyText="Nenhum café ou turma agendado."
               />
               {makeupNotes.length > 0 && <MakeupNotesPanel notes={makeupNotes} />}

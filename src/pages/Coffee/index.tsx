@@ -29,10 +29,10 @@ import {
   ListHeader,
   ListItem,
   ListItemRow,
-  ListName,
   ListSlot,
   ListStatusCell,
 } from '../../components/List';
+import { NameWithAvatar } from '../../components/NameWithAvatar';
 import { OptionsMenuActions, OptionsMenuButton } from '../../components/OptionsMenu';
 import { StatusPill } from '../../components/StatusPill';
 import { canMarkCoffeeAttendance } from '../../domain/cafeSchedule';
@@ -118,7 +118,7 @@ export function CoffeePage() {
             }}
           >
             <Plus size={16} />
-            Novo café
+            Café
           </Button>
           {event && (
             <Button
@@ -247,7 +247,7 @@ export function CoffeePage() {
           ) : (
             <Button variant="secondary" onClick={openCreateModal}>
               <Plus size={16} />
-              Novo café
+              Café
             </Button>
           ))
         }
@@ -260,7 +260,7 @@ export function CoffeePage() {
       {!loading && !error && !event && (
         <Empty
           title="Nenhum café agendado"
-          description={canPlan ? 'Agende o próximo café pelo botão Novo café.' : 'Aguarde o próximo café ser agendado.'}
+          description={canPlan ? 'Agende o próximo café pelo botão Café.' : 'Aguarde o próximo café ser agendado.'}
         />
       )}
 
@@ -300,7 +300,7 @@ export function CoffeePage() {
                         type="button"
                         onClick={() => navigate(`${AppRoute.Visitors}/${attendance.person.id}`)}
                       >
-                        <ListName>{attendance.person.name}</ListName>
+                        <NameWithAvatar name={attendance.person.name} />
                       </PersonLink>
                       {hasActions(attendance) ? (
                         <RowActions>

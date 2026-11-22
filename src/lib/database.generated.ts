@@ -515,11 +515,9 @@ export type Database = {
           address_street: string | null
           address_zip: string | null
           baptism_church: string | null
-          baptism_date: string | null
           cpf: string | null
           gender: string | null
           marital_status: string | null
-          other_phone: string | null
           person_id: string
           photo_folder: string | null
           photo_updated_at: string | null
@@ -534,11 +532,9 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           baptism_church?: string | null
-          baptism_date?: string | null
           cpf?: string | null
           gender?: string | null
           marital_status?: string | null
-          other_phone?: string | null
           person_id: string
           photo_folder?: string | null
           photo_updated_at?: string | null
@@ -553,11 +549,9 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           baptism_church?: string | null
-          baptism_date?: string | null
           cpf?: string | null
           gender?: string | null
           marital_status?: string | null
-          other_phone?: string | null
           person_id?: string
           photo_folder?: string | null
           photo_updated_at?: string | null
@@ -1333,7 +1327,6 @@ export type Database = {
           address_zip: string
           already_submitted: boolean
           baptism_church: string
-          baptism_date: string
           baptism_info: string
           birth_date: string
           cpf: string
@@ -1347,7 +1340,6 @@ export type Database = {
           membership_note: string
           ministry_interests: string[]
           origin_church: string
-          other_phone: string
           person_name: string
           previous_church: string
           secret_society: string
@@ -1547,7 +1539,6 @@ export type Database = {
           p_address_street: string
           p_address_zip: string
           p_baptism_church: string
-          p_baptism_date: string
           p_birth_date: string
           p_cpf: string
           p_email: string
@@ -1558,7 +1549,6 @@ export type Database = {
           p_membership_note: string
           p_ministry_interests: string[]
           p_name: string
-          p_other_phone: string
           p_person_id: string
           p_secret_society: string
           p_small_group_id: string
@@ -1621,7 +1611,6 @@ export type Database = {
           p_address_street: string
           p_address_zip: string
           p_baptism_church: string
-          p_baptism_date: string
           p_birth_date: string
           p_cpf: string
           p_email: string
@@ -1632,7 +1621,6 @@ export type Database = {
           p_membership_note: string
           p_ministry_interests: string[]
           p_name: string
-          p_other_phone: string
           p_phone: string
           p_photo_token: string
           p_secret_society: string
@@ -1654,7 +1642,6 @@ export type Database = {
           p_address_street: string
           p_address_zip: string
           p_baptism_church: string
-          p_baptism_date: string
           p_birth_date: string
           p_cpf: string
           p_email: string
@@ -1665,7 +1652,6 @@ export type Database = {
           p_membership_note: string
           p_ministry_interests: string[]
           p_name: string
-          p_other_phone: string
           p_phone: string
           p_photo_token: string
           p_secret_society: string

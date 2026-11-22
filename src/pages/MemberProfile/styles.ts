@@ -1,6 +1,8 @@
 // Libs
 import styled from 'styled-components';
 // Components
+import { MEMBER_PHOTO_SIZE, SQUARE_PHOTO_RADIUS } from '../../components/MemberPhoto';
+import { WideContent } from '../../components/PageColumns';
 import { Fields } from '../../components/Panel';
 
 export const StatusRow = styled.div`
@@ -50,32 +52,60 @@ export const ChildLinks = styled.ul`
   gap: 2px;
 `;
 
+export const HeroFrame = styled.div`
+  container-type: inline-size;
+`;
+
 export const HeroGrid = styled.div`
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    'photo status'
-    'cards cards';
-  align-items: center;
+    'photo'
+    'name'
+    'status'
+    'cards';
+  justify-items: center;
   gap: ${({ theme }) => theme.spacing.base};
 
-  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
+  @container (min-width: 720px) {
+    grid-template-columns: auto minmax(0, 1fr);
     grid-template-areas:
+      'name name'
       'photo status'
       'photo cards';
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
+    justify-items: stretch;
     align-items: start;
     row-gap: ${({ theme }) => theme.spacing.sm};
+  }
+`;
+
+export const HeroTitle = styled.div`
+  grid-area: name;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  text-align: center;
+
+  @container (min-width: 720px) {
+    justify-content: flex-start;
+    text-align: left;
   }
 `;
 
 export const HeroStatus = styled(StatusRow)`
   grid-area: status;
   flex-wrap: wrap;
+  justify-content: center;
+
+  @container (min-width: 720px) {
+    justify-content: flex-start;
+  }
 `;
 
 export const HeroCards = styled.div`
   grid-area: cards;
+  width: 100%;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -93,11 +123,11 @@ export const PhotoButton = styled.button<{ $empty: boolean }>`
   grid-area: photo;
   position: relative;
   flex-shrink: 0;
-  width: 104px;
-  height: 104px;
+  width: ${MEMBER_PHOTO_SIZE}px;
+  height: ${MEMBER_PHOTO_SIZE}px;
   padding: 0;
   border: ${({ $empty, theme }) => ($empty ? `1.5px dashed ${theme.colors.borderStrong}` : 'none')};
-  border-radius: ${({ theme }) => theme.rounded.full};
+  border-radius: ${SQUARE_PHOTO_RADIUS};
   background: transparent;
   cursor: pointer;
   display: inline-flex;
@@ -159,4 +189,37 @@ export const ChecklistItems = styled.ul`
 
 export const ChecklistItem = styled.li`
   padding: ${({ theme }) => theme.spacing.xs} 0;
+`;
+
+export const RecordBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.base};
+
+  & + & {
+    padding-top: ${({ theme }) => theme.spacing.base};
+    border-top: 1px solid ${({ theme }) => theme.colors.hairline};
+  }
+`;
+
+export const RecordContent = styled(WideContent)`
+  max-width: 1280px;
+`;
+
+export const RecordColumns = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: ${({ theme }) => theme.spacing.lg};
+  align-items: start;
+
+  @media (min-width: 1100px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`;
+
+export const RecordColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.lg};
+  min-width: 0;
 `;

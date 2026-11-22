@@ -35,6 +35,30 @@ function byFirstLesson(a: CohortLike, b: CohortLike): number {
   return (firstLessonDate(a.lessons) ?? '').localeCompare(firstLessonDate(b.lessons) ?? '');
 }
 
+export interface UpcomingLesson {
+  cohortName: string;
+  number: number;
+  date: string;
+}
+
+export function upcomingLessons<T extends CohortLike & { cohort: { name: string } }>(
+  cohorts: T[],
+  today: string,
+  now: Date = new Date(),
+): UpcomingLesson[] {
+  return cohorts
+    .filter((c) => {
+      const date = firstLessonDate(c.lessons);
+      return !!date && hasFirstLessonStarted(date, now);
+    })
+    .flatMap((c) =>
+      c.lessons
+        .filter((lesson) => lesson.date >= today)
+        .map((lesson) => ({ cohortName: c.cohort.name, number: lesson.number, date: lesson.date })),
+    )
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
 export function selectUpcomingCohort<T extends CohortLike>(cohorts: T[], now: Date = new Date()): T | null {
   return (
     cohorts

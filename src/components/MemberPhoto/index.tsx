@@ -3,20 +3,29 @@ import { ReactNode } from 'react';
 // Libs
 import { UserRound } from 'lucide-react';
 // Local
-import { Circle, NameText, PhotoImage, PhotoNameRow } from './styles';
+import { Circle, NameText, PhotoImage, PhotoNameRow, Square } from './styles';
+
+export { SQUARE_PHOTO_RADIUS } from './styles';
 
 interface Props {
   url: string | null;
   size: number;
+  shape?: 'circle' | 'square';
+  interactive?: boolean;
 }
 
-export function MemberPhoto({ url, size }: Props) {
-  return (
-    <Circle $size={size}>
-      {url ? <PhotoImage src={url} alt="" /> : <UserRound size={Math.round(size * 0.45)} aria-hidden="true" />}
-    </Circle>
+export function MemberPhoto({ url, size, shape = 'circle', interactive = false }: Props) {
+  const content = url ? <PhotoImage src={url} alt="" /> : <UserRound size={Math.round(size * 0.35)} aria-hidden="true" />;
+  return shape === 'square' ? (
+    <Square $size={size} $interactive={interactive}>
+      {content}
+    </Square>
+  ) : (
+    <Circle $size={size}>{content}</Circle>
   );
 }
+
+export const MEMBER_PHOTO_SIZE = 120;
 
 const LIST_PHOTO_SIZE = 48;
 

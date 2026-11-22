@@ -61,8 +61,8 @@ describe('visitors screens', () => {
       { role: UserRole.GeneralAdmin, route: '/visitantes?q=ana' },
     );
 
-    expect(await screen.findByText('Na fila (1)')).toBeInTheDocument();
-    expect(screen.getByText('Arquivados (1)')).toBeInTheDocument();
+    expect(await screen.findByText('Arquivados (1)')).toBeInTheDocument();
+    expect(screen.queryByText('Na fila')).not.toBeInTheDocument();
   });
 
   it('opens a separate screen with only the archived visitors', async () => {

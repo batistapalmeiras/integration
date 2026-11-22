@@ -1,10 +1,16 @@
 // React
 import { useEffect, useState } from 'react';
-import { UseFormSetValue } from 'react-hook-form';
 // Libs
 import { onlyDigits } from 'bp-kit';
 // Local
-import { MembershipFormValues } from '../schema';
+import { useLatest } from '../../lib/useLatest';
+
+export interface ZipAddress {
+  street: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+}
 
 interface ViaCepAddress {
   logradouro?: string;
@@ -14,10 +20,11 @@ interface ViaCepAddress {
   erro?: boolean | string;
 }
 
-export function useZipLookup(zip: string, setValue: UseFormSetValue<MembershipFormValues>) {
+export function useZipLookup(zip: string, onAddress: (address: ZipAddress) => void) {
   const zipDigits = onlyDigits(zip);
   const [initialZip] = useState(zipDigits);
   const [settled, setSettled] = useState<{ zip: string; found: boolean } | null>(null);
+  const onAddressRef = useLatest(onAddress);
   const shouldLookUp = zipDigits.length === 8 && zipDigits !== initialZip;
 
   useEffect(() => {
@@ -30,14 +37,11 @@ export function useZipLookup(zip: string, setValue: UseFormSetValue<MembershipFo
           setSettled({ zip: zipDigits, found: false });
           return;
         }
-        const fill = {
-          street: address.logradouro,
-          neighborhood: address.bairro,
-          city: address.localidade,
-          state: address.uf,
-        };
-        Object.entries(fill).forEach(([field, value]) => {
-          if (value) setValue(field as keyof typeof fill, value, { shouldValidate: true, shouldDirty: true });
+        onAddressRef.current({
+          street: address.logradouro ?? '',
+          neighborhood: address.bairro ?? '',
+          city: address.localidade ?? '',
+          state: address.uf ?? '',
         });
         setSettled({ zip: zipDigits, found: true });
       })
@@ -46,7 +50,7 @@ export function useZipLookup(zip: string, setValue: UseFormSetValue<MembershipFo
           setSettled({ zip: zipDigits, found: false });
       });
     return () => controller.abort();
-  }, [zipDigits, shouldLookUp, setValue]);
+  }, [zipDigits, shouldLookUp, onAddressRef]);
 
   return {
     looking: shouldLookUp && settled?.zip !== zipDigits,

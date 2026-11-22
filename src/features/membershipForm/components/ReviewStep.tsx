@@ -58,17 +58,11 @@ function reviewRows(values: MembershipFormValues, smallGroups: SmallGroupOption[
     [
       ['E-mail', values.email],
       ['Telefone', values.phone],
-      ['Outro telefone', values.otherPhone],
       ['Endereço', address, true],
     ],
     [
       ['Forma de entrada', label(ENTRY_TYPE_LABELS, values.entryType)],
-      ...(values.entryType !== 'baptism'
-        ? ([
-            ['Igreja de batismo', values.baptismChurch],
-            ['Data do batismo', values.baptismDate && formatDate(values.baptismDate)],
-          ] as Row[])
-        : []),
+      ...(values.entryType !== 'baptism' ? ([['Igreja de batismo', values.baptismChurch]] as Row[]) : []),
       [values.entryType ? LAST_CHURCH_PROMPTS[values.entryType].review : 'Igreja anterior', values.lastChurch],
     ],
     [['Estatuto', values.statuteAgreed ? 'Declarou estar de acordo' : '']],

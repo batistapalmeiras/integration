@@ -48,7 +48,7 @@ describe('visitTimeline', () => {
     expect(entries[4].detail).toBe('Inscrição via formulário público');
   });
 
-  it('says the first name of who did each change and nothing when no one is recorded', () => {
+  it('says the first name of who did each change and the system when no one is recorded', () => {
     const [, byPerson, bySystem] = visitTimeline({
       ...base,
       changes: [
@@ -58,7 +58,7 @@ describe('visitTimeline', () => {
     });
 
     expect(byPerson.actor).toBe('Ana');
-    expect(bySystem.actor).toBeNull();
+    expect(bySystem.actor).toBe('Sistema');
   });
 
   it('calls a coffee no-show by its name and not as a contact without answer', () => {
@@ -157,6 +157,15 @@ describe('visitor events', () => {
 });
 
 describe('actor of a change without an author', () => {
+  it('says the system did it when the author was removed, as with a temporary account', () => {
+    const [, entry] = visitTimeline({
+      ...base,
+      changes: [change('retry_contact', '2026-10-05T13:00:00Z', { fromStatus: 'initial_contact' })],
+    });
+
+    expect(entry.actor).toBe('Sistema');
+  });
+
   it('says the system did it when an automatic routine moved the person', () => {
     const [, entry] = visitTimeline({
       ...base,
@@ -221,7 +230,7 @@ describe('membershipTimeline', () => {
       'Confirmado como membro',
       'Entrou no Pequeno Grupo PG Centro',
     ]);
-    expect(entries[3].actor).toBe('Administrador Geral');
+    expect(entries[3].actor).toBeNull();
   });
 
   it('marks an imported member and ignores the groups that came along with the import', () => {
@@ -374,7 +383,7 @@ describe('membershipTimeline', () => {
     ]);
   });
 
-  it('shows the groups joined on the day of the signup and says the general admin placed the person', () => {
+  it('shows the groups joined on the day of the signup and names nobody, since the join was not logged', () => {
     const entries = membershipTimeline({
       ...source,
       origin: 'membership_signup',
@@ -382,6 +391,6 @@ describe('membershipTimeline', () => {
       communityJoins: [{ kind: 'ministry', name: 'Kids Palmeiras', joinedAt: '2026-11-10T21:00:28Z' }],
     });
 
-    expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([['Passou a servir em Kids Palmeiras', 'Administrador Geral']]);
+    expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([['Passou a servir em Kids Palmeiras', null]]);
   });
 });

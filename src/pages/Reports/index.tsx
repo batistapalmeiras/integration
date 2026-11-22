@@ -26,7 +26,7 @@ export function ReportsPage() {
         title="Relatórios"
         back
         action={
-          <Button onClick={() => showToast('A geração do arquivo do relatório ainda não está disponível.')}>
+          <Button variant="secondary" onClick={() => showToast('A geração do arquivo do relatório ainda não está disponível.')}>
             <FileDown size={16} />
             Gerar relatório
           </Button>

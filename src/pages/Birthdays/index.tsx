@@ -8,6 +8,7 @@ import { ArrowSwitcher } from '../../components/ArrowSwitcher';
 import { DateBadge } from '../../components/DateBadge';
 import { ListChevron, ListGrow } from '../../components/List';
 import { PageHeader } from '../../components/PageHeader';
+import { CountRow } from '../../components/CountRow';
 import { PeopleCount } from '../../components/PeopleCount';
 import { TonePill } from '../../components/StatusPill';
 import {
@@ -23,7 +24,7 @@ import { errorMessage } from '../../lib/queryCache';
 import { useMemberBirthdays } from '../../queries/person';
 import { AppRoute } from '../../routes/paths';
 // Local
-import { BirthdayCard, BirthdayGrid, CountRow, Detail, MonthButton, MonthTabs, Name, RowButton } from './styles';
+import { BirthdayCard, BirthdayGrid, Detail, MonthButton, MonthTabs, Name, RowButton } from './styles';
 
 const MONTH_PARAM = 'month';
 

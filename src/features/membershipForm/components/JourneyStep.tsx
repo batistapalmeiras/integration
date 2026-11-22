@@ -1,12 +1,11 @@
 // React
 import { Control, useWatch } from 'react-hook-form';
 // Libs
-import { DatePicker, TextInput } from 'bp-kit';
+import { TextInput } from 'bp-kit';
 // Local
 import { ENTRY_TYPE_OPTIONS, LAST_CHURCH_PROMPTS } from '../options';
 import { MembershipFormValues } from '../schema';
-import { Hint } from '../styles';
-import { isFutureDate } from '../../../domain/dates';
+import { Hint } from '../../../components/FormLayout';
 import { ChoiceField } from './ChoiceField';
 
 interface Props {
@@ -27,15 +26,7 @@ export function JourneyStep({ control }: Props) {
       />
 
       {entryType && entryType !== 'baptism' && (
-        <>
-          <TextInput label="Igreja onde foi batizado(a)" control={control} name="baptismChurch" />
-          <DatePicker
-            label="Data do batismo (opcional)"
-            control={control}
-            name="baptismDate"
-            isDateDisabled={isFutureDate}
-          />
-        </>
+        <TextInput label="Igreja onde foi batizado(a)" control={control} name="baptismChurch" />
       )}
 
       {lastChurch && (
