@@ -15,7 +15,7 @@ const developerCanAccess = (pathname: string, view: EffectiveRole) =>
 
 describe('module of a route', () => {
   it('puts members, groups, ministries and access control in the church and the rest in the integration', () => {
-    for (const path of [AppRoute.Members, `${AppRoute.Members}/${ID}`, AppRoute.Ministries, AppRoute.SmallGroups, AppRoute.Birthdays, AppRoute.Volunteers, AppRoute.ChurchMore]) {
+    for (const path of [AppRoute.Members, `${AppRoute.Members}/${ID}`, AppRoute.Ministries, AppRoute.SmallGroups, AppRoute.Birthdays, AppRoute.Volunteers]) {
       expect([path, moduleOf(path)]).toEqual([path, SystemModule.Church]);
     }
     for (const path of [AppRoute.Visitors, AppRoute.Coffee, AppRoute.Classes, AppRoute.Membership, AppRoute.Reports, AppRoute.Dashboard]) {

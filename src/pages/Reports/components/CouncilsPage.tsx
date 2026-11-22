@@ -18,7 +18,7 @@ export function CouncilsPage() {
 
   return (
     <div>
-      <PageHeader title="Conselho Administrativo" back />
+      <PageHeader title="Conselhos Administrativos" back />
 
       {loading && <Skeleton $h="180px" />}
 

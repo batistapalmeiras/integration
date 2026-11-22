@@ -3,7 +3,6 @@ export enum AppRoute {
   ForgotPassword = '/entrar/recuperar',
   ResetPassword = '/entrar/nova-senha',
   Dashboard = '/painel',
-  ChurchMore = '/igreja/mais',
   IntegrationMore = '/integracao/mais',
   Visitors = '/visitantes',
   ArchivedVisitors = '/visitantes/arquivado',
@@ -38,7 +37,7 @@ export const memberPath = (personId: string, section?: string) => sectionPath(`$
 
 export const confirmMemberPath = (personId: string) => `${AppRoute.Membership}/${personId}/confirmar`;
 
-export const COUNCILS_PATH = `${AppRoute.Reports}/conselho-administrativo`;
+export const COUNCILS_PATH = `${AppRoute.Reports}/conselhos-administrativos`;
 
 export const councilPath = (councilId: string) => `${COUNCILS_PATH}/${councilId}`;
 

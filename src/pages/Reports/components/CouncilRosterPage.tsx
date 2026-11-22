@@ -1,9 +1,10 @@
 // React
 import { useNavigate, useParams } from 'react-router-dom';
 // Libs
-import { Empty, LinkButton, Skeleton, useModal } from 'bp-kit';
+import { Button, Empty, Skeleton, useModal } from 'bp-kit';
 import { Pencil } from 'lucide-react';
 // Components
+import { CountRow } from '../../../components/CountRow';
 import { EntryTypeTable } from '../../../components/EntryTypeTable';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
@@ -36,27 +37,29 @@ export function CouncilRosterPage() {
         title="Conselho Administrativo"
         subtitle={formatDate(council.meetingDate)}
         back
-        action={
-          isGeneralAdmin && (
-            <LinkButton
-              icon={<Pencil size={16} />}
-              onClick={() =>
-                open(
-                  <CouncilModal
-                    council={council}
-                    close={close}
-                    onDeleted={() => navigate(COUNCILS_PATH, { replace: true })}
-                  />,
-                )
-              }
-            >
-              Editar
-            </LinkButton>
-          )
-        }
       />
 
-      <PeopleCount count={members.length} />
+      <CountRow>
+        <PeopleCount count={members.length} />
+        {isGeneralAdmin && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              open(
+                <CouncilModal
+                  council={council}
+                  close={close}
+                  onDeleted={() => navigate(COUNCILS_PATH, { replace: true })}
+                />,
+              )
+            }
+          >
+            <Pencil size={16} />
+            Editar
+          </Button>
+        )}
+      </CountRow>
 
       {members.length === 0 ? (
         <Empty

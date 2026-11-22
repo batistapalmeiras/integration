@@ -42,7 +42,15 @@ export function VisitorInfoPage() {
   const memberProfile = records?.memberProfile ?? null;
 
   if (loading) return <Skeleton $h="240px" />;
-  if (error || !person) return <NotFound title="Cadastro não encontrado" description={error ?? ''} backTo={AppRoute.Visitors} backLabel="Voltar para visitantes" />;
+  if (error || !person)
+    return (
+      <NotFound
+        title="Cadastro não encontrado"
+        description={error ?? ''}
+        backTo={AppRoute.Visitors}
+        backLabel="Voltar para visitantes"
+      />
+    );
 
   const current = tab && tabs.includes(tab) ? tab : tabs[0];
 
@@ -60,9 +68,11 @@ export function VisitorInfoPage() {
         action={
           fromMembershipQueue &&
           !isDirectSignup(person.origin) && (
-            <LinkButton icon={<UserRound size={16} />} onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
-              Ver perfil
-            </LinkButton>
+            <span>
+              <LinkButton icon={<UserRound size={16} />} onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
+                Ver perfil
+              </LinkButton>
+            </span>
           )
         }
       />

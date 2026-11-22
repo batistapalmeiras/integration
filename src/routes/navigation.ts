@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LucideIcon,
   Menu,
+  Settings,
   Sprout,
   Store,
   User,
@@ -79,8 +80,21 @@ const LEADERSHIP_HISTORY_GROUP: NavGroup = {
   items: [
     { ...NAV_ITEMS.coffeeHistory, label: 'Cafés' },
     { ...NAV_ITEMS.cohortHistory, label: 'Turmas' },
-    { ...NAV_ITEMS.councilHistory, label: 'Conselho Administrativo' },
   ],
+};
+
+export const ADMINISTRATION_AREA_ID = 'administration';
+
+const ADMINISTRATION_AREA: NavArea = {
+  id: ADMINISTRATION_AREA_ID,
+  title: 'Administração',
+  icon: Settings,
+  tabs: [
+    NAV_ITEMS.volunteers,
+    NAV_ITEMS.reports,
+    { ...NAV_ITEMS.councilHistory, label: 'Conselhos Administrativos', tabLabel: 'Conselhos' },
+  ],
+  more: [],
 };
 
 export const GENERAL_ADMIN_NAV_AREAS: NavArea[] = [
@@ -89,17 +103,17 @@ export const GENERAL_ADMIN_NAV_AREAS: NavArea[] = [
     title: 'Igreja',
     icon: Church,
     tabs: [NAV_ITEMS.members, NAV_ITEMS.smallGroups, NAV_ITEMS.ministries, NAV_ITEMS.birthdays],
-    more: [NAV_ITEMS.volunteers],
-    morePath: AppRoute.ChurchMore,
+    more: [],
   },
   {
     id: 'integration',
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
-    more: [LEADERSHIP_HISTORY_GROUP, NAV_ITEMS.reports],
+    more: [LEADERSHIP_HISTORY_GROUP],
     morePath: AppRoute.IntegrationMore,
   },
+  ADMINISTRATION_AREA,
 ];
 
 export const INTEGRATION_TEAM_NAV_AREAS: NavArea[] = [
@@ -118,13 +132,10 @@ const ADMIN_NAV_AREAS: NavArea[] = [
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
-    more: [
-      NAV_ITEMS.volunteers,
-      LEADERSHIP_HISTORY_GROUP,
-      NAV_ITEMS.reports,
-    ],
+    more: [LEADERSHIP_HISTORY_GROUP],
     morePath: AppRoute.IntegrationMore,
   },
+  ADMINISTRATION_AREA,
 ];
 
 const TEACHER_NAV_AREAS: NavArea[] = [
@@ -146,9 +157,17 @@ const NAV_AREAS_BY_ROLE: Record<EffectiveRole, NavArea[]> = {
 
 export function navAreasFor(role: string | undefined, viewRole: EffectiveRole = DEFAULT_VIEW_ROLE): NavArea[] {
   if (role === UserRole.Developer) {
+    const viewAdministration = navAreasFor(viewRole).find((area) => area.id === ADMINISTRATION_AREA_ID);
+    const viewPaths = viewAdministration?.tabs.map((item) => item.path) ?? [];
     return [
       ...navAreasFor(UserRole.GeneralAdmin).filter((area) => area.id === SystemModule.Church),
-      ...navAreasFor(viewRole).filter((area) => area.id !== SystemModule.Church),
+      ...navAreasFor(viewRole).filter((area) => area.id !== SystemModule.Church && area.id !== ADMINISTRATION_AREA_ID),
+      {
+        ...ADMINISTRATION_AREA,
+        tabs: ADMINISTRATION_AREA.tabs.filter(
+          (item) => item.path === NAV_ITEMS.volunteers.path || viewPaths.includes(item.path),
+        ),
+      },
     ];
   }
   return NAV_AREAS_BY_ROLE[role as EffectiveRole] ?? [];
@@ -167,8 +186,11 @@ function areaTabPaths(area: NavArea): string[] {
 
 const STATIC_ROUTES: string[] = Object.values(AppRoute);
 
+const EXACT_TAB_PATHS: string[] = [AppRoute.Reports];
+
 export function isTabPath(pathname: string, tabPath: string): boolean {
   if (pathname === tabPath) return true;
+  if (EXACT_TAB_PATHS.includes(tabPath)) return false;
   if (!pathname.startsWith(`${tabPath}/`) || STATIC_ROUTES.includes(pathname)) return false;
   const [firstSegment] = pathname.slice(tabPath.length + 1).split('/');
   return !isEntityId(firstSegment);

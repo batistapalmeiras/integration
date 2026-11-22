@@ -102,7 +102,6 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
       </ProfileShell>
     ),
   },
-  { path: AppRoute.ChurchMore, module: CHURCH, element: <ModuleMorePage areaId="church" />, roles: GENERAL_ADMIN },
   { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: LEADERSHIP_ROLES },
 
   { path: `${AppRoute.Visitors}/*`, ...VISITORS_LIST },

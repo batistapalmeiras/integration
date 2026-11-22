@@ -1,11 +1,13 @@
 // Local
 import { activeNavPath, findNavArea, isTabPath, INTEGRATION_TEAM_NAV_AREAS, GENERAL_ADMIN_NAV_AREAS } from '../../src/routes/navigation';
-import { AppRoute } from '../../src/routes/paths';
+import { AppRoute, COUNCILS_PATH } from '../../src/routes/paths';
 
 describe('general admin modules', () => {
   it('finds the module of each module tab and of its Mais page', () => {
     expect(findNavArea(GENERAL_ADMIN_NAV_AREAS, AppRoute.Members)?.id).toBe('church');
-    expect(findNavArea(GENERAL_ADMIN_NAV_AREAS, AppRoute.ChurchMore)?.id).toBe('church');
+    expect(findNavArea(GENERAL_ADMIN_NAV_AREAS, AppRoute.Birthdays)?.id).toBe('church');
+    expect(findNavArea(GENERAL_ADMIN_NAV_AREAS, AppRoute.Volunteers)?.id).toBe('administration');
+    expect(findNavArea(GENERAL_ADMIN_NAV_AREAS, AppRoute.Reports)?.id).toBe('administration');
     expect(findNavArea(GENERAL_ADMIN_NAV_AREAS, AppRoute.Coffee)?.id).toBe('integration');
     expect(findNavArea(GENERAL_ADMIN_NAV_AREAS, AppRoute.IntegrationMore)?.id).toBe('integration');
   });
@@ -43,16 +45,31 @@ describe('isTabPath', () => {
   });
 });
 
-describe('church area tabs', () => {
-  it('has the birthdays as the fourth tab, leaving only the access control in the more screen', () => {
-    const church = GENERAL_ADMIN_NAV_AREAS.find((area) => area.id === 'church');
+describe('menu areas', () => {
+  const area = (id: string) => GENERAL_ADMIN_NAV_AREAS.find((item) => item.id === id);
 
-    expect(church?.tabs.map((tab) => tab.path)).toEqual([
+  it('has the birthdays as the fourth church tab and nothing in the more screen', () => {
+    expect(area('church')?.tabs.map((tab) => tab.path)).toEqual([
       AppRoute.Members,
       AppRoute.SmallGroups,
       AppRoute.Ministries,
       AppRoute.Birthdays,
     ]);
-    expect(church?.more.map((entry) => ('path' in entry ? entry.path : entry.id))).toEqual([AppRoute.Volunteers]);
+    expect(area('church')?.more).toEqual([]);
+  });
+
+  it('gathers the access control, the reports and the council history in the administration area', () => {
+    expect(area('administration')?.tabs.map((tab) => tab.path)).toEqual([
+      AppRoute.Volunteers,
+      AppRoute.Reports,
+      COUNCILS_PATH,
+    ]);
+    expect(area('integration')?.more.map((entry) => ('path' in entry ? entry.path : entry.id))).toEqual(['history']);
+  });
+
+  it('keeps the report screens apart from the reports tab, so they open with a back arrow', () => {
+    expect(isTabPath(AppRoute.Reports, AppRoute.Reports)).toBe(true);
+    expect(isTabPath(`${AppRoute.Reports}/turmas`, AppRoute.Reports)).toBe(false);
+    expect(isTabPath(COUNCILS_PATH, COUNCILS_PATH)).toBe(true);
   });
 });

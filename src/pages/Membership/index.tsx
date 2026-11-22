@@ -36,7 +36,7 @@ export function MembershipPage() {
   return (
     <div>
       <PageHeader
-        title="Conselho"
+        title="Conselho Administrativo"
         action={
           isGeneralAdmin && (
             <Button variant="secondary" onClick={() => open(<CouncilModal close={close} />)}>
