@@ -81,13 +81,14 @@ function ConfirmMemberForm({ person, smallGroupIds, family, sensitive, councils,
     values: { smallGroupIds, ministryIds: [] },
   });
   const familyForm = useForm<FamilyFormValues>({ defaultValues: familyFormValues(family) });
+  const familyChanged = familyForm.formState.isDirty;
   const councilForm = useForm<{ councilId: string }>({ defaultValues: { councilId: '' } });
   const councilId = useWatch({ control: councilForm.control, name: 'councilId' });
   const hasCouncil = councils.length > 0;
 
   const submit = community.handleSubmit(async (values) => {
     try {
-      if (familyForm.formState.isDirty) await saveFamily(person.id, familyForm.getValues());
+      if (familyChanged) await saveFamily(person.id, familyForm.getValues());
       await confirmMember({
         councilId: councilId || null,
         smallGroupIds: values.smallGroupIds,

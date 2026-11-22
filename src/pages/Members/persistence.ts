@@ -30,8 +30,6 @@ export const MEMBERS_FILTERS: PathFilter<MembersFilterKey>[] = [
   { key: 'recent', slugs: slugTable(RECENT_ACCEPTANCE_LABELS) },
 ];
 
-export const DEFAULT_MEMBER_FILTERS: ListFilters<MembersFilterKey> = { status: ['active'] };
-
 export const membersPath = (filters: ListFilters<MembersFilterKey>): string =>
   [AppRoute.Members, ...encodePathFilters(MEMBERS_FILTERS, filters)].join('/');
 

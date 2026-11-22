@@ -26,7 +26,7 @@ function StatusPill({ member }: { member: MemberRow }) {
 export function MemberTileContent({ member, photoUrl, interactive = false }: EntryProps) {
   return (
     <>
-      <MemberPhoto url={photoUrl} size={MEMBER_PHOTO_SIZE} shape="square" interactive={interactive} />
+      <MemberPhoto url={photoUrl} size={MEMBER_PHOTO_SIZE} shape="square" interactive={interactive} fluid />
       <MemberCardName>{member.name}</MemberCardName>
       <StatusPill member={member} />
     </>

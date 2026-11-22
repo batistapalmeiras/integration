@@ -1,3 +1,5 @@
+// React
+import { useState } from 'react';
 // Local
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
@@ -10,8 +12,9 @@ import { MEMBER_FLAG_LABELS } from '../../../domain/memberFlags';
 import { GENDER_LABELS, MARITAL_STATUS_LABELS, MEMBERSHIP_STATUS_LABELS } from '../../../domain/memberRecords';
 import { ENTRY_TYPE_LABELS } from '../../../types/church';
 import { useFamilyTraits } from '../../../queries/person';
-import { activeFilterCountOf, filtersFor, matchesCouple, matchesMember, MemberFilters } from '../filters';
-import { DEFAULT_MEMBER_FILTERS, MEMBERS_FILTERS, membersFilters } from '../persistence';
+import { activeFilterCountOf, DEFAULT_MEMBER_FILTERS, filtersFor, matchesCouple, matchesMember, MemberFilters } from '../filters';
+import { MEMBERS_FILTERS, membersFilters } from '../persistence';
+import { isMemberSort, MemberSort, memberSortStore, sortByName } from '../sort';
 import { listMemberRows } from '../../../repositories/memberRecords';
 import { AppRoute } from '../../../routes/paths';
 
@@ -26,6 +29,10 @@ export function useMembers(pageSizeOf: (grouping: MemberGrouping) => number | un
   const grouping: MemberGrouping =
     couplesAllowed && list.filter('grouping').includes('couple') ? 'couple' : 'individual';
   const coupled = grouping === 'couple';
+  const [sort, setSortState] = useState<MemberSort>(() => {
+    const stored = memberSortStore.load();
+    return isMemberSort(stored) ? stored : 'name_asc';
+  });
   const traitsQuery = useFamilyTraits(coupled);
   const filters = filtersFor(grouping, {
     status: pickKeys(list.filter('status'), MEMBERSHIP_STATUS_LABELS),
@@ -41,17 +48,35 @@ export function useMembers(pageSizeOf: (grouping: MemberGrouping) => number | un
   const today = todayKey();
   const traits = traitsQuery.data ?? {};
 
-  const members = coupled ? [] : rows.filter((member) => matchesMember(member, filters, list.debouncedSearch, today));
+  const members = coupled
+    ? []
+    : sortByName(
+        rows.filter((member) => matchesMember(member, filters, list.debouncedSearch, today)),
+        (member) => member.name,
+        sort,
+      );
   const couples = coupled
-    ? pairCouples(rows, traits).filter((couple) => matchesCouple(couple, filters, list.debouncedSearch))
+    ? sortByName(
+        pairCouples(rows, traits).filter((couple) => matchesCouple(couple, filters, list.debouncedSearch)),
+        (couple) => couple[0].name,
+        sort,
+      )
     : [];
   const pageSize = pageSizeOf(grouping);
   const memberPage = list.paginate(members, pageSize);
   const couplePage = list.paginate(couples, pageSize);
   const { page, totalPages } = coupled ? couplePage : memberPage;
 
+  const setSort = (next: MemberSort) => {
+    setSortState(next);
+    memberSortStore.save(next);
+    if (list.page > 1) list.setPage(1);
+  };
+
   return {
     grouping,
+    sort,
+    setSort,
     members: memberPage.items,
     couples: couplePage.items,
     totalCount: coupled ? couples.length : members.length,

@@ -39,4 +39,10 @@ export const ActionRow = styled.div`
   justify-content: flex-end;
   gap: ${({ theme }) => theme.spacing.sm};
   margin-bottom: ${({ theme }) => theme.spacing.md};
+
+  @media (max-width: 744px) {
+    & > button:not([aria-label]) {
+      width: 100%;
+    }
+  }
 `;

@@ -16,9 +16,9 @@ export const Circle = styled.span<{ $size: number }>`
 
 export const SQUARE_PHOTO_RADIUS = '14px';
 
-export const Square = styled.span<{ $size: number; $interactive: boolean }>`
+export const Square = styled.span<{ $size: number; $interactive: boolean; $fluid: boolean }>`
   flex-shrink: 0;
-  width: ${({ $size }) => $size}px;
+  width: ${({ $size, $fluid }) => ($fluid ? '100%' : `${$size}px`)};
   max-width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: ${SQUARE_PHOTO_RADIUS};

@@ -12,12 +12,13 @@ interface Props {
   size: number;
   shape?: 'circle' | 'square';
   interactive?: boolean;
+  fluid?: boolean;
 }
 
-export function MemberPhoto({ url, size, shape = 'circle', interactive = false }: Props) {
+export function MemberPhoto({ url, size, shape = 'circle', interactive = false, fluid = false }: Props) {
   const content = url ? <PhotoImage src={url} alt="" /> : <UserRound size={Math.round(size * 0.35)} aria-hidden="true" />;
   return shape === 'square' ? (
-    <Square $size={size} $interactive={interactive}>
+    <Square $size={size} $interactive={interactive} $fluid={fluid}>
       {content}
     </Square>
   ) : (

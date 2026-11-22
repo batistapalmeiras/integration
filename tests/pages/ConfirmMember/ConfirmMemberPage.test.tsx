@@ -1,10 +1,11 @@
 // React
 import { Route, Routes } from 'react-router-dom';
 // Libs
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // Local
 import { clearQueries } from '../../../src/lib/queryCache';
+import { setFamily } from '../../../src/repositories/family';
 import { ConfirmMemberPage } from '../../../src/pages/ConfirmMember';
 import { listCouncils } from '../../../src/repositories/councils';
 import { UserRole } from '../../../src/types/enums';
@@ -22,6 +23,8 @@ vi.mock('../../../src/lib/supabase', () => ({
 }));
 vi.mock('../../../src/repositories/people', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../src/repositories/people')>()),
+  updatePersonStatus: vi.fn().mockResolvedValue(undefined),
+  insertStatusHistory: vi.fn().mockResolvedValue(undefined),
   fetchPersonWithProfile: vi.fn().mockResolvedValue({
     person: {
       id: 'p1',
@@ -55,6 +58,8 @@ vi.mock('../../../src/repositories/people', async (importOriginal) => ({
 vi.mock('../../../src/repositories/family', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../src/repositories/family')>()),
   getFamily: vi.fn().mockResolvedValue([]),
+  setFamily: vi.fn().mockResolvedValue(undefined),
+  listFamilyTraits: vi.fn().mockResolvedValue({}),
 }));
 vi.mock('../../../src/repositories/personSensitive', () => ({ getPersonSensitive: vi.fn().mockResolvedValue(null) }));
 vi.mock('../../../src/repositories/membership', async (importOriginal) => ({
@@ -65,7 +70,8 @@ vi.mock('../../../src/repositories/communityGroups', async (importOriginal) => (
   ...(await importOriginal<typeof import('../../../src/repositories/communityGroups')>()),
   listSmallGroups: vi.fn().mockResolvedValue([]),
   listMinistries: vi.fn().mockResolvedValue([]),
-  listMembers: vi.fn().mockResolvedValue([]),
+  listMembers: vi.fn().mockResolvedValue([{ id: 'p2', name: 'Lucas Souza Bianchi' }]),
+  savePersonCommunity: vi.fn().mockResolvedValue({}),
 }));
 vi.mock('../../../src/repositories/councils', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../src/repositories/councils')>()),
@@ -107,5 +113,21 @@ describe('confirm member page', () => {
     await userEvent.selectOptions(council as HTMLSelectElement, 'c2');
 
     expect(confirm).toBeEnabled();
+  });
+
+  it('saves the relatives added on the page when confirming', async () => {
+    vi.mocked(listCouncils).mockResolvedValue([]);
+    renderPage();
+
+    await userEvent.click(await screen.findByRole('button', { name: /Adicionar familiar/ }));
+    const relation = screen.getAllByRole('combobox').find((el) => el.textContent?.includes('Selecione o parentesco'));
+    await userEvent.selectOptions(relation as HTMLSelectElement, 'spouse');
+    await userEvent.click(screen.getAllByRole('combobox').find((el) => el.tagName === 'INPUT') as HTMLElement);
+    await userEvent.click(await screen.findByText('Lucas Souza Bianchi'));
+    await userEvent.click(screen.getByRole('button', { name: /Confirmar como membro/ }));
+
+    await waitFor(() =>
+      expect(setFamily).toHaveBeenCalledWith('p1', [{ relativeId: 'p2', relation: 'spouse' }], []),
+    );
   });
 });

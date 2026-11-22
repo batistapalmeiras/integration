@@ -2,6 +2,7 @@
 import { screen } from '@testing-library/react';
 // Local
 import { Layout } from '../../src/components/Layout';
+import { PageHeader } from '../../src/components/PageHeader';
 import { AppRoute } from '../../src/routes/paths';
 import { UserRole } from '../../src/types/enums';
 import { renderScreen } from '../support/render';
@@ -91,5 +92,28 @@ describe('side menu by role', () => {
     expect(trigger).toHaveTextContent('Ana');
     expect(screen.getAllByRole('button', { name: 'Menu do usuário', hidden: true })).toHaveLength(1);
     expect(screen.queryByRole('link', { name: /^Meu perfil,/, hidden: true })).not.toBeInTheDocument();
+  });
+
+  it('names the module bar after the screen on phones and leaves only the action of the page header', () => {
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      ...original(query),
+      matches: query.includes('max-width'),
+    })) as typeof window.matchMedia;
+
+    renderScreen(
+      <Layout>
+        <PageHeader title="Pequenos Grupos" action={<button type="button">Adicionar</button>} />
+      </Layout>,
+      { role: UserRole.GeneralAdmin, route: AppRoute.SmallGroups },
+    );
+    window.matchMedia = original;
+
+    const moduleBarLink = screen
+      .getAllByRole('link', { name: 'Pequenos Grupos', hidden: true })
+      .find((link) => link.getAttribute('href') === AppRoute.Dashboard);
+    expect(moduleBarLink).toBeDefined();
+    expect(screen.queryByRole('heading', { name: 'Pequenos Grupos', hidden: true })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Adicionar', hidden: true })).toBeInTheDocument();
   });
 });

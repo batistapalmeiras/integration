@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Control, Controller, useController, useForm } from 'react-hook-form';
 // Libs
-import { Button, IconButton, LinkButton, Select } from 'bp-kit';
+import { IconButton, LinkButton, Select } from 'bp-kit';
 import { Plus, Trash2 } from 'lucide-react';
 // Components
 import { WideField } from '../../components/FormLayout';
@@ -96,16 +96,15 @@ function FamilyList({
     return rankOf(a.relation) - rankOf(b.relation) || byName(a, b);
   });
 
-  const add = picker.handleSubmit((values) => {
-    onChange([...value, { relativeId: values.relativeId, relation: values.relation }]);
-    picker.reset(EMPTY_PICK);
-    setPicking(false);
-  });
-
-  const cancel = () => {
-    picker.reset(EMPTY_PICK);
-    setPicking(false);
-  };
+  useEffect(() => {
+    const subscription = picker.watch((values) => {
+      if (!values.relation || !values.relativeId) return;
+      onChange([...value, { relativeId: values.relativeId, relation: values.relation }]);
+      picker.reset(EMPTY_PICK);
+      setPicking(false);
+    });
+    return () => subscription.unsubscribe();
+  }, [picker, value, onChange]);
 
   return (
     <ItemStack>
@@ -153,13 +152,6 @@ function FamilyList({
               </option>
             ))}
           </Select>
-          <Button type="button" variant="primary" disabled={!picked.relation || !picked.relativeId} onClick={add}>
-            <Plus size={16} />
-            Adicionar
-          </Button>
-          <LinkButton type="button" onClick={cancel}>
-            Cancelar
-          </LinkButton>
         </ItemStack>
       ) : (
         <AddLink>

@@ -1,10 +1,12 @@
 // React
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, Pagination, SearchInput, Skeleton, text, useMediaQuery, useModal } from 'bp-kit';
-import { SlidersHorizontal, Users, X } from 'lucide-react';
+import { Button, Empty, OptionsSheet, Pagination, SearchInput, Skeleton, text, useMediaQuery, useModal } from 'bp-kit';
+import { ArrowUpDown, SlidersHorizontal, Users, X } from 'lucide-react';
 // Components
 import { CountBadge } from '../../components/CountBadge';
+import { CountRow } from '../../components/CountRow';
 import { PageHeader } from '../../components/PageHeader';
 import { useHideModuleBar } from '../../components/Layout/moduleBar';
 import { useInView } from '../../lib/useInView';
@@ -22,6 +24,7 @@ import { CoupleCards, MemberTileContent } from './components/MemberEntries';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
 import { MembersTopBar } from './components/MembersTopBar';
 import { useMembers } from './hooks/useMembers';
+import { MEMBER_SORT_OPTIONS } from './sort';
 import { ActiveFilters, MemberCard, MemberGrid, RecentChip } from './styles';
 
 const GRID_PAGE_TARGET = 15;
@@ -37,6 +40,7 @@ export function MembersPage() {
   const navigate = useNavigate();
   const role = useRole();
   const { open, close, modal } = useModal('drawer');
+  const [sorting, setSorting] = useState(false);
   const mobile = useMediaQuery('(max-width: 744px)');
   const withTopBar = useMediaQuery('(max-width: 1024px)');
   const [searchRowRef, searchRowVisible] = useInView<HTMLDivElement>(TOP_BAR_HEIGHT);
@@ -45,6 +49,8 @@ export function MembersPage() {
   const canOpenRecord = role === UserRole.GeneralAdmin;
   const {
     grouping,
+    sort,
+    setSort,
     members,
     couples,
     totalCount,
@@ -87,7 +93,7 @@ export function MembersPage() {
       {withTopBar ? (
         <MembersTopBar
           back={mobile}
-          title={mobile ? 'Igreja' : 'Membros'}
+          title="Membros"
           showFilters={!searchRowVisible}
           filterCount={activeFilterCount}
           onFilters={openFilters}
@@ -95,8 +101,6 @@ export function MembersPage() {
       ) : (
         <PageHeader title="Membros" back sticky />
       )}
-
-      {mobile && <PageHeader title="Membros" />}
 
       <SearchFiltersRow ref={searchRowRef}>
         <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
@@ -115,13 +119,18 @@ export function MembersPage() {
         </ActiveFilters>
       )}
 
-      {!loading &&
-        !error &&
-        (coupled ? (
-          <CountBadge icon={Users} count={totalCount} singular="casal" plural="casais" />
-        ) : (
-          <PeopleCount count={totalCount} />
-        ))}
+      {!loading && !error && (
+        <CountRow>
+          {coupled ? (
+            <CountBadge icon={Users} count={totalCount} singular="casal" plural="casais" />
+          ) : (
+            <PeopleCount count={totalCount} />
+          )}
+          <Button variant="secondary" size="sm" aria-label="Ordenar" onClick={() => setSorting(true)}>
+            <ArrowUpDown size={16} />
+          </Button>
+        </CountRow>
+      )}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -162,6 +171,16 @@ export function MembersPage() {
             </PaginationWrap>
           )}
         </>
+      )}
+
+      {sorting && (
+        <OptionsSheet
+          title="Ordenar por"
+          options={MEMBER_SORT_OPTIONS}
+          value={sort}
+          onChange={setSort}
+          onClose={() => setSorting(false)}
+        />
       )}
 
       {modal}

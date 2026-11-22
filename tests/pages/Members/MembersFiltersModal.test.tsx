@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // Local
 import { MembersFiltersModal } from '../../../src/pages/Members/components/MembersFiltersModal';
-import { NO_MEMBER_FILTERS } from '../../../src/pages/Members/filters';
+import { DEFAULT_MEMBER_FILTERS, NO_MEMBER_FILTERS } from '../../../src/pages/Members/filters';
 import { UserRole } from '../../../src/types/enums';
 import { renderScreen } from '../../support/render';
 
@@ -104,5 +104,38 @@ describe('members filters modal', () => {
     );
 
     expect(screen.queryByRole('radio', { name: 'Casal' })).not.toBeInTheDocument();
+  });
+
+  it('clears back to the default, with the active status kept', async () => {
+    const onApply = vi.fn();
+    renderScreen(
+      <MembersFiltersModal
+        close={vi.fn()}
+        grouping="individual"
+        couplesAllowed
+        filters={{ ...DEFAULT_MEMBER_FILTERS, flag: ['absent'] }}
+        onApply={onApply}
+      />,
+      { role: UserRole.GeneralAdmin },
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Limpar' }));
+
+    expect(onApply).toHaveBeenCalledWith('individual', DEFAULT_MEMBER_FILTERS);
+  });
+
+  it('has nothing to clear while the filters are the default', () => {
+    renderScreen(
+      <MembersFiltersModal
+        close={vi.fn()}
+        grouping="individual"
+        couplesAllowed
+        filters={DEFAULT_MEMBER_FILTERS}
+        onApply={vi.fn()}
+      />,
+      { role: UserRole.GeneralAdmin },
+    );
+
+    expect(screen.getByRole('button', { name: 'Limpar' })).toBeDisabled();
   });
 });

@@ -16,7 +16,7 @@ import {
   MemberFlag,
 } from '../../../domain/memberFlags';
 import { pickKeys } from '../../../lib/useListParams';
-import { activeFilterCountOf, filtersFor, MemberFilters, NO_MEMBER_FILTERS } from '../filters';
+import { DEFAULT_MEMBER_FILTERS, filtersFor, isDefaultMemberFilters, MemberFilters } from '../filters';
 import {
   GENDER_LABELS,
   GENDER_OPTIONS,
@@ -60,7 +60,7 @@ export function MembersFiltersModal({ close, grouping, couplesAllowed, filters, 
   };
 
   const clear = () => {
-    onApply(draftGrouping, NO_MEMBER_FILTERS);
+    onApply(draftGrouping, DEFAULT_MEMBER_FILTERS);
     close();
   };
 
@@ -69,7 +69,7 @@ export function MembersFiltersModal({ close, grouping, couplesAllowed, filters, 
       close={close}
       onApply={apply}
       onClear={clear}
-      canClear={activeFilterCountOf(filtersFor(draftGrouping, draft)) > 0}
+      canClear={!isDefaultMemberFilters(filtersFor(draftGrouping, draft))}
     >
       {couplesAllowed && (
         <FilterGroup>

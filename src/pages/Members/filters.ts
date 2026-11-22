@@ -5,6 +5,7 @@ import { isRecentlyAccepted, RecentAcceptance } from '../../domain/memberAccepta
 import { MemberFlag } from '../../domain/memberFlags';
 import { Gender, MaritalStatus, MembershipStatus } from '../../domain/memberRecords';
 import { matchesNameOrPhone } from '../../domain/search';
+import { sameItems } from '../../lib/sameItems';
 import { MemberRow } from '../../repositories/memberRecords';
 import { EntryType } from '../../types/church';
 
@@ -28,6 +29,8 @@ export const NO_MEMBER_FILTERS: MemberFilters = {
   recent: [],
 };
 
+export const DEFAULT_MEMBER_FILTERS: MemberFilters = { ...NO_MEMBER_FILTERS, status: ['active'] };
+
 const FILTERS_BY_GROUPING: Record<MemberGrouping, (keyof MemberFilters)[]> = {
   individual: ['status', 'flag', 'recent', 'entryType', 'gender', 'maritalStatus', 'ageGroup'],
   couple: ['status', 'flag'],
@@ -37,6 +40,11 @@ export const filtersFor = (grouping: MemberGrouping, filters: MemberFilters): Me
   FILTERS_BY_GROUPING[grouping].reduce<MemberFilters>(
     (kept, key) => ({ ...kept, [key]: filters[key] }),
     NO_MEMBER_FILTERS,
+  );
+
+export const isDefaultMemberFilters = (filters: MemberFilters): boolean =>
+  (Object.keys(DEFAULT_MEMBER_FILTERS) as (keyof MemberFilters)[]).every((key) =>
+    sameItems(filters[key], DEFAULT_MEMBER_FILTERS[key]),
   );
 
 export const activeFilterCountOf = (filters: MemberFilters): number =>

@@ -28,6 +28,7 @@ import { FlowContext } from './flow';
 import { useLayout } from './hooks';
 import { ModuleBarContext } from './moduleBar';
 import { NavDestinationContext } from './navDestination';
+import { ModuleBarTitleContext } from './moduleBarTitle';
 import { ProfileSlotContext } from './profileSlot';
 import { closedSideNavKeys } from './persistence';
 import {
@@ -118,6 +119,8 @@ export function Layout({ children }: ILayoutProps) {
   const isNavDestination = hasSidebar ? isSidebarDestination : isOnTab;
   const showModuleBar = !!currentArea && !moduleBarHidden && !hasSidebar;
   const showProfileSlot = !showModuleBar;
+  const activeTab = bottomTabs.find((item) => isTabPath(pathname, item.path));
+  const moduleBarTitle = showModuleBar && activeTab ? activeTab.label : null;
 
   if (standalone) return <FlowContext.Provider value={flowPath}>{children}</FlowContext.Provider>;
 
@@ -176,7 +179,7 @@ export function Layout({ children }: ILayoutProps) {
           <ModuleBar $scrolled={scrolled}>
             <ModuleBarLink to={AppRoute.Dashboard}>
               <ChevronLeft size={20} />
-              {currentArea.title}
+              {moduleBarTitle ?? currentArea.title}
             </ModuleBarLink>
             <ProfileMenu />
           </ModuleBar>
@@ -191,7 +194,9 @@ export function Layout({ children }: ILayoutProps) {
           )}
           <ModuleBarContext.Provider value={setModuleBarHidden}>
             <NavDestinationContext.Provider value={isNavDestination}>
-              <ProfileSlotContext.Provider value={showProfileSlot}>{children}</ProfileSlotContext.Provider>
+              <ProfileSlotContext.Provider value={showProfileSlot}>
+                <ModuleBarTitleContext.Provider value={moduleBarTitle}>{children}</ModuleBarTitleContext.Provider>
+              </ProfileSlotContext.Provider>
             </NavDestinationContext.Provider>
           </ModuleBarContext.Provider>
         </MainInner>
