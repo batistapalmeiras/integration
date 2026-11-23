@@ -2,6 +2,7 @@
 import { DateBadge } from '../../../components/DateBadge';
 import { UpcomingLesson } from '../../../domain/cohortSchedule';
 import { todayKey, weekdayLabel } from '../../../domain/dates';
+import { plural } from '../../../domain/text';
 // Local
 import { AgendaItem, AgendaList, AgendaTitle, Detail, Panel, PanelText, PanelTitle } from '../styles';
 
@@ -19,10 +20,6 @@ export interface UpcomingCoffee {
 export interface UpcomingCohort {
   name: string;
   firstLesson: string;
-}
-
-export function plural(count: number, singular: string, pluralForm: string): string {
-  return `${count} ${count === 1 ? singular : pluralForm}`;
 }
 
 export function dayLabel(date: string): string {

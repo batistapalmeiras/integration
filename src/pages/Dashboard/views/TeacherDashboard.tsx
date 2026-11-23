@@ -1,5 +1,6 @@
 // Local
-import { AgendaPanel, dayLabel, plural } from '../components/AgendaPanel';
+import { plural } from '../../../domain/text';
+import { AgendaPanel, dayLabel } from '../components/AgendaPanel';
 import { DashboardShell } from '../components/DashboardShell';
 import { MakeupNotesPanel } from '../components/MakeupNotesPanel';
 import { useTeacherDashboard } from '../hooks/useTeacherDashboard';

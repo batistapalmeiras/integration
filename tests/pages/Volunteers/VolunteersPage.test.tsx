@@ -43,7 +43,7 @@ const renderPage = () =>
 
 const filter = (name: RegExp) => screen.getByRole('button', { name });
 const groupLabels = () =>
-  screen.getAllByRole('heading', { level: 3 }).map((item) => item.textContent?.replace(/\d+$/, ''));
+  screen.getAllByRole('heading', { level: 3 }).map((item) => item.textContent);
 const groupToggle = (name: RegExp) => screen.getByRole('button', { name });
 
 describe('access control page', () => {
@@ -89,7 +89,7 @@ describe('access control page', () => {
     expect(screen.queryByRole('heading', { name: 'Igreja' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Integração', level: 2 })).not.toBeInTheDocument();
     expect(filter(/^Integração/)).toHaveAttribute('aria-pressed', 'true');
-    expect(groupToggle(/^Administradores 0/)).toHaveAttribute('aria-expanded', 'true');
+    expect(groupToggle(/^Administradores/)).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText('Ninguém por aqui.')).toBeInTheDocument();
   });
 
@@ -132,35 +132,5 @@ describe('access control page', () => {
 
     expect(groupToggle(/^Desenvolvedores/)).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('button', { name: /Iago Santos/ })).toBeInTheDocument();
-  });
-
-  it('shows how many people each group has, even when it is closed', async () => {
-    renderPage();
-    await screen.findByRole('heading', { name: 'Igreja', level: 2 });
-
-    expect(groupToggle(/^Administradores Gerais/)).toHaveTextContent('2');
-    expect(groupToggle(/^Equipe de Integração/)).toHaveTextContent('2');
-  });
-
-  it('opens by itself the groups that have a result when searching, and counts only the results', async () => {
-    renderPage();
-    await screen.findByRole('heading', { name: 'Igreja', level: 2 });
-
-    await userEvent.type(screen.getByPlaceholderText('Buscar usuário…'), 'karine');
-
-    expect(groupToggle(/^Equipe de Integração/)).toHaveAttribute('aria-expanded', 'true');
-    expect(groupToggle(/^Equipe de Integração/)).toHaveTextContent('1');
-    expect(screen.getByRole('button', { name: /Karine Rangel/ })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Bruno Alves/ })).not.toBeInTheDocument();
-    expect(groupToggle(/^Administradores Gerais/)).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  it('says so when nobody matches the search', async () => {
-    renderPage();
-    await screen.findByRole('heading', { name: 'Igreja', level: 2 });
-
-    await userEvent.type(screen.getByPlaceholderText('Buscar usuário…'), 'zzzz');
-
-    expect(screen.getByText('Nenhum usuário encontrado')).toBeInTheDocument();
   });
 });

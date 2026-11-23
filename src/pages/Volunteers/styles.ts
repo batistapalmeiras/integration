@@ -20,7 +20,7 @@ export const FilterItem = styled.button<{ $active: boolean }>`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
   height: 40px;
-  padding: 0 14px;
+  padding: 0 ${({ theme }) => theme.spacing.base};
   border: 0;
   border-radius: ${({ theme }) => theme.rounded.full};
   background: ${({ theme, $active }) => ($active ? theme.gradients.primary : 'transparent')};
@@ -40,7 +40,7 @@ export const FilterItem = styled.button<{ $active: boolean }>`
 
 export const FilterCount = styled.span<{ $active: boolean }>`
   min-width: 22px;
-  padding: 1px 7px;
+  padding: ${({ theme }) => theme.spacing.xxs} ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.rounded.full};
   background: ${({ theme, $active }) => ($active ? 'rgba(255, 255, 255, 0.28)' : theme.colors.surfaceSoft)};
   font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
@@ -71,53 +71,57 @@ export const ModuleTitle = styled.h2`
   color: ${({ theme }) => theme.colors.ink};
 `;
 
+export const GroupCard = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.hairline};
+  border-radius: ${({ theme }) => theme.rounded.md};
+  background: ${({ theme }) => theme.colors.canvas};
+  overflow: hidden;
+`;
+
 export const GroupLabel = styled.h3`
-  margin: 0 0 ${({ theme }) => theme.spacing.xs};
+  margin: 0;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.microLabel.fontSize};
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.muted};
+  font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.ink};
 `;
 
 export const GroupToggle = styled.button<{ $open: boolean }>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
+  gap: ${({ theme }) => theme.spacing.md};
   width: 100%;
-  padding: ${({ theme }) => theme.spacing.xs} 0;
+  min-height: 72px;
+  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.base};
   border: 0;
   background: transparent;
   font: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
   color: inherit;
   text-align: left;
   cursor: pointer;
+  transition: background 0.15s;
 
-  &:disabled {
-    cursor: default;
+  &:hover {
+    background: ${({ theme }) => theme.colors.surfaceSoft};
   }
 
-  svg {
+  & > svg:last-child {
     flex-shrink: 0;
+    color: ${({ theme }) => theme.colors.muted};
     transition: transform 0.15s;
-    transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
+    transform: rotate(${({ $open }) => ($open ? '180deg' : '0deg')});
   }
 `;
 
-export const GroupCount = styled.span`
-  padding: 1px 7px;
-  border-radius: ${({ theme }) => theme.rounded.full};
-  background: ${({ theme }) => theme.colors.surfaceSoft};
-  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
-  letter-spacing: 0;
-  color: ${({ theme }) => theme.colors.muted};
+export const GroupName = styled.span`
+  flex: 1;
+  min-width: 0;
+  font-size: ${({ theme }) => theme.typography.titleMd.fontSize};
+  font-weight: ${({ theme }) => theme.typography.titleMd.fontWeight};
 `;
 
-export const SearchSlot = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing.md};
+export const GroupBody = styled.div`
+  border-top: 1px solid ${({ theme }) => theme.colors.hairline};
 `;
 
 export const PersonList = styled.ul`
@@ -136,9 +140,8 @@ export const PersonRow = styled.button`
   gap: ${({ theme }) => theme.spacing.md};
   width: 100%;
   min-height: 56px;
-  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.sm};
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base};
   border: 0;
-  border-radius: ${({ theme }) => theme.rounded.sm};
   background: transparent;
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
