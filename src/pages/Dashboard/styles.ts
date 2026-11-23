@@ -194,6 +194,35 @@ export const ChurchCardValue = styled.span`
   line-height: 1.1;
 `;
 
+export const ChurchActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-top: auto;
+
+  @container dashboard (min-width: 720px) {
+    flex-wrap: nowrap;
+  }
+`;
+
+export const ChurchButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xxs};
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base};
+  border-radius: ${({ theme }) => theme.rounded.full};
+  background: ${({ theme }) => theme.colors.canvas};
+  color: ${({ theme }) => theme.colors.luxe};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primarySoft};
+  }
+`;
+
 export const AgendaItem = styled.div`
   display: flex;
   align-items: center;
