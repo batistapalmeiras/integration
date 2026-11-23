@@ -55,41 +55,6 @@ export const CoupleCard = styled.div`
   gap: ${({ theme }) => theme.spacing.sm};
 `;
 
-export const ActiveFilters = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-top: ${({ theme }) => theme.spacing.base};
-`;
-
-export const RecentChip = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
-  margin-right: auto;
-  height: 32px;
-  padding: 0 ${({ theme }) => theme.spacing.sm} 0 ${({ theme }) => theme.spacing.md};
-  border: 1px solid ${({ theme }) => theme.colors.ink};
-  border-radius: ${({ theme }) => theme.rounded.full};
-  background: ${({ theme }) => theme.colors.canvas};
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.ink};
-  cursor: pointer;
-  transition: background 0.15s;
-
-  svg {
-    flex-shrink: 0;
-    color: ${({ theme }) => theme.colors.muted};
-  }
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.surfaceSoft};
-  }
-`;
-
 export const TopBar = styled.div<{ $scrolled: boolean }>`
   position: sticky;
   top: 0;

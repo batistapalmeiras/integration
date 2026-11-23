@@ -2,7 +2,6 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
 // Libs
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 // Local
 import { MembersPage } from '../../../src/pages/Members';
 import { membersPath } from '../../../src/pages/Members/persistence';
@@ -44,34 +43,8 @@ const renderMembers = (route: string) =>
     { role: UserRole.GeneralAdmin, route },
   );
 
-const recentChip = () => screen.queryByRole('button', { name: 'Remover filtro Aceitos nos últimos 3 meses' });
-
 describe('members page filters', () => {
-  it('shows a chip for the three months filter and drops it when the chip is removed', async () => {
-    renderMembers(membersPath({ recent: ['recent'] }));
-
-    await userEvent.click(await screen.findByRole('button', { name: 'Remover filtro Aceitos nos últimos 3 meses' }));
-
-    expect(recentChip()).not.toBeInTheDocument();
-    expect(screen.getByText(`at:${AppRoute.Members}`)).toBeInTheDocument();
-  });
-
-  it('keeps the other filters when only the three months chip is removed', async () => {
-    renderMembers(membersPath({ recent: ['recent'], flag: ['absent'] }));
-
-    await userEvent.click(await screen.findByRole('button', { name: 'Remover filtro Aceitos nos últimos 3 meses' }));
-
-    expect(screen.getByText(`at:${membersPath({ flag: ['absent'] })}`)).toBeInTheDocument();
-  });
-
-  it('makes no chip for any other filter', async () => {
-    renderMembers(membersPath({ status: ['active'], flag: ['absent'] }));
-
-    expect(await screen.findByText(/pessoas|pessoa/)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /^Remover filtro/ })).not.toBeInTheDocument();
-  });
-
-  it('has no clear filters button, since the filters sheet and the chip already clear them', async () => {
+  it('has no clear filters button, since the filters sheet already clears them', async () => {
     renderMembers(membersPath({ status: ['active'], flag: ['absent'] }));
 
     expect(await screen.findByText(/pessoas|pessoa/)).toBeInTheDocument();
@@ -79,9 +52,9 @@ describe('members page filters', () => {
   });
 
   it('shows the members only as cards, with no list and cards switch', async () => {
-    renderMembers(membersPath({ recent: ['recent'] }));
+    renderMembers(membersPath({ status: ['active'] }));
 
-    expect(await screen.findByRole('button', { name: 'Remover filtro Aceitos nos últimos 3 meses' })).toBeInTheDocument();
+    expect(await screen.findByText(/pessoas|pessoa/)).toBeInTheDocument();
     expect(screen.queryByRole('group', { name: 'Modo de exibição' })).not.toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });

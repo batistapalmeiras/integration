@@ -278,7 +278,7 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
           entry(
             timestampDateKey(change.changedAt),
             change.changedAt,
-            'Preencheu o cadastro e foi para o Conselho',
+            'Preencheu o cadastro',
             changeActor(change),
           ),
         );

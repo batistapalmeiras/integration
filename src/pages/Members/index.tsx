@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, BottomSheet, Pagination, SearchInput, Skeleton, text, useMediaQuery, useModal } from 'bp-kit';
-import { ArrowUpDown, SlidersHorizontal, Users, X } from 'lucide-react';
+import { ArrowUpDown, SlidersHorizontal, Users } from 'lucide-react';
 // Components
 import { CountBadge } from '../../components/CountBadge';
 import { CountRow } from '../../components/CountRow';
@@ -19,13 +19,12 @@ import { AppRoute } from '../../routes/paths';
 import { UserRole } from '../../types/enums';
 import { PaginationWrap, SearchFiltersRow } from '../../components/ListLayout';
 import { fullRowsPageSize, useGridColumns } from '../../lib/useGridColumns';
-import { RECENT_ACCEPTANCE_LABELS } from '../../domain/memberAcceptance';
 import { CoupleCards, MemberTileContent } from './components/MemberEntries';
 import { MembersFiltersModal } from './components/MembersFiltersModal';
 import { MembersTopBar } from './components/MembersTopBar';
 import { useMembers } from './hooks/useMembers';
 import { MEMBER_SORT_OPTIONS } from './sort';
-import { ActiveFilters, MemberCard, MemberGrid, RecentChip } from './styles';
+import { MemberCard, MemberGrid } from './styles';
 
 const GRID_PAGE_TARGET = 15;
 const GRID_MIN_ROWS = 3;
@@ -75,8 +74,6 @@ export function MembersPage() {
   const openMember = (memberId: string) => navigate(`${AppRoute.Members}/${memberId}`);
   const onOpen = canOpenRecord ? openMember : undefined;
 
-  const clearRecent = () => setFilters(grouping, { ...filters, recent: [] });
-
   const openFilters = () =>
     open(
       <MembersFiltersModal
@@ -109,15 +106,6 @@ export function MembersPage() {
           Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         </Button>
       </SearchFiltersRow>
-
-      {!coupled && filters.recent.length > 0 && (
-        <ActiveFilters>
-          <RecentChip type="button" aria-label={`Remover filtro ${RECENT_ACCEPTANCE_LABELS.recent}`} onClick={clearRecent}>
-            {RECENT_ACCEPTANCE_LABELS.recent}
-            <X size={14} aria-hidden="true" />
-          </RecentChip>
-        </ActiveFilters>
-      )}
 
       {!loading && !error && (
         <CountRow>

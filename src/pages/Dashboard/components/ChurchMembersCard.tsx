@@ -37,12 +37,6 @@ export function ChurchMembersCard() {
           Ver todos
           <ChevronRight size={16} aria-hidden="true" />
         </ChurchButton>
-        {recent > 0 && (
-          <ChurchButton to={membersPath({ recent: ['recent'] })}>
-            Ver {recent === 1 ? 'o aceito' : `os ${recent} aceitos`}
-            <ChevronRight size={16} aria-hidden="true" />
-          </ChurchButton>
-        )}
       </ChurchActions>
     </ChurchCard>
   );

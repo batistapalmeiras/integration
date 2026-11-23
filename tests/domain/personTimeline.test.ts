@@ -379,7 +379,7 @@ describe('membershipTimeline', () => {
     });
 
     expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([
-      ['Preencheu o cadastro e foi para o Conselho', null],
+      ['Preencheu o cadastro', null],
     ]);
   });
 
