@@ -81,7 +81,7 @@ export type MemberProfile = Pick<
   | 'baptismChurch'
 >;
 
-export const toMembershipStatus = keyParser(MEMBERSHIP_STATUS_LABELS, 'Situação de membresia');
+export const toMembershipStatus = keyParser(MEMBERSHIP_STATUS_LABELS, 'Situação do membro');
 
 export const toGender = optional(keyParser(GENDER_LABELS, 'Sexo'));
 

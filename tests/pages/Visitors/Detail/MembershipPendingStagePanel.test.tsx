@@ -34,7 +34,7 @@ describe('membership pending stage panel', () => {
   it('credits the form to whoever signed up directly', () => {
     renderScreen(<MembershipPendingStagePanel person={{ ...person, origin: 'membership_signup' as const }} />);
 
-    expect(screen.getByText('Preencheu a Ficha de Interesse de Membresia')).toBeInTheDocument();
+    expect(screen.getByText('Preencheu a Ficha de Interesse do Conselho')).toBeInTheDocument();
     expect(screen.queryByText('Concluiu as 4 aulas')).not.toBeInTheDocument();
   });
 });

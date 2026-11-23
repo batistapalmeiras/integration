@@ -44,8 +44,8 @@ export function MakeupAttendancePage() {
           </InfoBox>
 
           <Typography type="p">
-            Se você tem interesse em se tornar membro da nossa igreja, já pode preencher a Ficha de Interesse de
-            Membresia.
+            Se você tem interesse em se tornar membro da nossa igreja, já pode preencher a Ficha de Interesse do
+            Conselho.
           </Typography>
 
           <Button

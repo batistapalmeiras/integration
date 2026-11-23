@@ -12,7 +12,7 @@ import { CpfStep } from './components/CpfStep';
 import { SignupDone } from './components/SignupDone';
 import { Phase, signupFormProgress, signupPhase } from './persistence';
 
-const BAR_TITLE = 'Cadastro de Membresia';
+const BAR_TITLE = 'Cadastro do Conselho';
 
 export function MembershipSignupPage() {
   const [phase, setPhase] = useState<Phase>(() => signupPhase.load() ?? 'cpf');
@@ -55,7 +55,7 @@ export function MembershipSignupPage() {
   }
 
   return (
-    <PublicPage barTitle={BAR_TITLE} title="Cadastro de Membresia">
+    <PublicPage barTitle={BAR_TITLE} title="Cadastro do Conselho">
       {phase === 'done' ? <SignupDone /> : <CpfStep initialCpf={initialValues?.cpf ?? ''} onAvailable={start} />}
     </PublicPage>
   );

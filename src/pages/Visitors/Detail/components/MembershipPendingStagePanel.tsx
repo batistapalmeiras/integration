@@ -23,7 +23,7 @@ export function MembershipPendingStagePanel({ person }: Props) {
       title="Confirmar como membro"
       summary={{
         icon: UserCheck,
-        title: isDirectSignup(person.origin) ? 'Preencheu a Ficha de Interesse de Membresia' : 'Concluiu as 4 aulas',
+        title: isDirectSignup(person.origin) ? 'Preencheu a Ficha de Interesse do Conselho' : 'Concluiu as 4 aulas',
         text: 'Aguardando a confirmação como membro.',
       }}
     >

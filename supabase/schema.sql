@@ -2109,7 +2109,7 @@ AS $function$
       update public.people set status = 'membership_pending', updated_at = now() where id = v_person_id;
 
       insert into public.status_history (person_id, from_status, to_status, note)
-        values (v_person_id, 'integration', 'membership_pending', 'Ficha de Interesse de Membresia preenchida');
+        values (v_person_id, 'integration', 'membership_pending', 'Ficha de Interesse do Conselho preenchida');
     end if;
 
     return query select v_attended, v_total;
@@ -2152,7 +2152,7 @@ AS $function$
     perform public.attach_membership_photo(v_person_id, p_photo_token);
 
     insert into public.status_history (person_id, from_status, to_status, note)
-      values (v_person_id, null, 'membership_pending', 'Cadastro direto de membresia');
+      values (v_person_id, null, 'membership_pending', 'Cadastro direto do Conselho');
   end;
   $function$
 ;

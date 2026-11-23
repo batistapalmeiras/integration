@@ -29,8 +29,8 @@ describe('history card', () => {
   it('shortens a long history and opens every event with who did it in the modal', async () => {
     renderScreen(
       <HistoryCard
-        title="Histórico da Membresia"
-        modalTitle="Membresia de Ana"
+        title="Histórico do Conselho"
+        modalTitle="Conselho de Ana"
         entries={[
           entry(1, 'Um', 'Ana'),
           entry(2, 'Dois', 'Ana'),
@@ -47,7 +47,7 @@ describe('history card', () => {
     await userEvent.click(screen.getByText('Ver histórico completo'));
 
     expect(await screen.findByText('Quatro')).toBeInTheDocument();
-    expect(screen.getByText('Membresia de Ana')).toBeInTheDocument();
+    expect(screen.getByText('Conselho de Ana')).toBeInTheDocument();
     expect(screen.getAllByText('Bruno')).toHaveLength(2);
   });
 
@@ -61,7 +61,7 @@ describe('history card', () => {
         entries={[...integration, ...membership]}
         sections={[
           { title: 'Integração', entries: integration },
-          { title: 'Membresia', entries: membership },
+          { title: 'Conselho', entries: membership },
         ]}
       />,
     );
@@ -69,7 +69,7 @@ describe('history card', () => {
     await userEvent.click(screen.getByText('Ver histórico completo'));
 
     expect(await screen.findByText('Integração')).toBeInTheDocument();
-    expect(screen.getByText('Membresia')).toBeInTheDocument();
+    expect(screen.getByText('Conselho')).toBeInTheDocument();
   });
 
   it('leaves the section title out when only one part has events', async () => {
@@ -80,7 +80,7 @@ describe('history card', () => {
         entries={[entry(5, 'Confirmado como membro')]}
         sections={[
           { title: 'Integração', entries: [] },
-          { title: 'Membresia', entries: [entry(5, 'Confirmado como membro')] },
+          { title: 'Conselho', entries: [entry(5, 'Confirmado como membro')] },
         ]}
       />,
     );
@@ -88,6 +88,6 @@ describe('history card', () => {
     await userEvent.click(screen.getByText('Ver histórico completo'));
 
     expect(await screen.findByText('Histórico de Ana')).toBeInTheDocument();
-    expect(screen.queryByText('Membresia')).not.toBeInTheDocument();
+    expect(screen.queryByText('Conselho')).not.toBeInTheDocument();
   });
 });

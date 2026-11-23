@@ -186,7 +186,7 @@ describe('actor of a change without an author', () => {
       changes: [
         change('membership_pending', '2026-11-12T01:11:00Z', {
           fromStatus: 'integration',
-          note: 'Ficha de Interesse de Membresia preenchida',
+          note: 'Ficha de Interesse do Conselho preenchida',
         }),
       ],
     });
@@ -371,7 +371,7 @@ describe('membershipTimeline', () => {
         {
           fromStatus: null,
           toStatus: 'membership_pending',
-          note: 'Cadastro direto de membresia',
+          note: 'Cadastro direto do Conselho',
           changedAt: '2026-11-10T20:47:00Z',
           authorName: null,
         },
@@ -379,7 +379,7 @@ describe('membershipTimeline', () => {
     });
 
     expect(entries.map((entry) => [entry.label, entry.actor])).toEqual([
-      ['Preencheu o cadastro de membresia', null],
+      ['Preencheu o cadastro e foi para o Conselho', null],
     ]);
   });
 

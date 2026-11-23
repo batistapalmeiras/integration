@@ -81,8 +81,8 @@ function visitorEventEntry(event: VisitorEventSource): TimelineEntry {
 
 const SELF_SERVICE_NOTES = [
   'Inscrição via formulário público',
-  'Ficha de Interesse de Membresia preenchida',
-  'Cadastro direto de membresia',
+  'Ficha de Interesse do Conselho preenchida',
+  'Cadastro direto do Conselho',
 ];
 
 const changeActor = (change: StatusChangeSource): string | null => {
@@ -102,7 +102,7 @@ function changeLabel({ fromStatus, toStatus }: StatusChangeSource, cohortName: s
   if (toStatus === 'welcome_coffee') return 'Aceitou o convite para o café';
   if (toStatus === 'pending_signup') return 'Compareceu ao Café de boas-vindas';
   if (toStatus === 'integration') return cohortName ? `Inscrito na ${cohortName}` : 'Inscrito na turma de integração';
-  if (toStatus === 'membership_pending') return 'Ficha de Interesse de Membresia preenchida';
+  if (toStatus === 'membership_pending') return 'Ficha de Interesse do Conselho preenchida';
   if (toStatus === 'member') return 'Confirmado como membro';
   return `${statusName(fromStatus)} → ${statusName(toStatus)}`;
 }
@@ -278,7 +278,7 @@ export function membershipTimeline(source: MembershipSource): TimelineEntry[] {
           entry(
             timestampDateKey(change.changedAt),
             change.changedAt,
-            'Preencheu o cadastro de membresia',
+            'Preencheu o cadastro e foi para o Conselho',
             changeActor(change),
           ),
         );

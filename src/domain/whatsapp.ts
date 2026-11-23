@@ -37,8 +37,8 @@ export function membershipInterestMessage(name: string, completedClasses: boolea
   const firstName = firstNameOf(name);
   const formUrl = `${window.location.origin}${AppRoute.MembershipInterest}`;
   const opening = completedClasses
-    ? `Olá, ${firstName}! Você concluiu as 4 aulas de Integração 🎉 Agora é hora de preencher sua Ficha de Interesse de Membresia.`
-    : `Olá, ${firstName}! Se você tem interesse em se tornar membro da nossa igreja, já pode preencher a Ficha de Interesse de Membresia — ela fica guardada e será analisada quando você concluir as aulas de Integração.`;
+    ? `Olá, ${firstName}! Você concluiu as 4 aulas de Integração 🎉 Agora é hora de preencher sua Ficha de Interesse do Conselho.`
+    : `Olá, ${firstName}! Se você tem interesse em se tornar membro da nossa igreja, já pode preencher a Ficha de Interesse do Conselho — ela fica guardada e será analisada quando você concluir as aulas de Integração.`;
   return `${opening} Preencha por este link: ${formUrl}`;
 }
 
@@ -53,6 +53,6 @@ export function makeupLessonMessage(name: string, lessonNumber: number, link: st
     '',
     link,
     '',
-    'A reposição é necessária para concluir o processo de membresia.',
+    'A reposição é necessária para concluir o processo do Conselho.',
   ].join('\n');
 }

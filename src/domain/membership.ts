@@ -37,4 +37,4 @@ export function hasCompletedLessons(lessonsAttended: number, lessonsTotal: numbe
   return lessonsTotal > 0 && lessonsAttended >= lessonsTotal;
 }
 
-export const toMembershipAlertCode = keyParser(MEMBERSHIP_ALERT_LABELS, 'Pendência de membresia');
+export const toMembershipAlertCode = keyParser(MEMBERSHIP_ALERT_LABELS, 'Pendência do membro');

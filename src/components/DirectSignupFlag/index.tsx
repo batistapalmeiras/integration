@@ -11,7 +11,7 @@ const Flag = styled(TonePill)`
 
 export function DirectSignupFlag() {
   return (
-    <Flag $tone="info" title="Fez o cadastro direto de membresia, sem passar pela Integração">
+    <Flag $tone="info" title="Fez o cadastro direto do Conselho, sem passar pela Integração">
       <UserPlus size={12} aria-hidden="true" />
       Cadastro direto
     </Flag>

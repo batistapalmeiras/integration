@@ -32,7 +32,7 @@ export function ConfirmationStep({ eligibility }: Props) {
             {missingCount === 1 ? 'A aula que perdeu deverá ser reposta' : 'As aulas que perdeu deverão ser repostas'},
             e nossa equipe entrará em contato para orientar você.
           </Typography>
-          <Typography type="p">A reposição é obrigatória para a conclusão do processo de membresia.</Typography>
+          <Typography type="p">A reposição é obrigatória para a conclusão do processo do Conselho.</Typography>
         </>
       )}
 

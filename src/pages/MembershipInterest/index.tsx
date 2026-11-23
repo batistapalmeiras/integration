@@ -13,7 +13,7 @@ import { ConfirmationStep } from './components/ConfirmationStep';
 import { IdentificationStep } from './components/IdentificationStep';
 import { interestFormProgress, interestProgress, Phase } from './persistence';
 
-const BAR_TITLE = 'Ficha de Membresia';
+const BAR_TITLE = 'Ficha do Conselho';
 
 export function MembershipInterestPage() {
   const [saved] = useState(() => interestProgress.load());
@@ -66,7 +66,7 @@ export function MembershipInterestPage() {
   }
 
   return (
-    <PublicPage barTitle={BAR_TITLE} title="Ficha de Interesse de Membresia">
+    <PublicPage barTitle={BAR_TITLE} title="Ficha de Interesse do Conselho">
       {phase === 'done' ? <ConfirmationStep eligibility={eligibility} /> : <IdentificationStep onFound={open} />}
     </PublicPage>
   );
