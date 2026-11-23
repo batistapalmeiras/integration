@@ -3,6 +3,7 @@ import { AGE_GROUP_NAMES } from '../../domain/ageGroups';
 import { GROUPING_PATH_LABELS } from '../../domain/couples';
 import { RECENT_ACCEPTANCE_LABELS } from '../../domain/memberAcceptance';
 import { MEMBER_FLAG_LABELS } from '../../domain/memberFlags';
+import { MISSING_COMMUNITY_LABELS } from '../../domain/missingCommunity';
 import { GENDER_LABELS, MARITAL_STATUS_LABELS, MEMBERSHIP_STATUS_LABELS } from '../../domain/memberRecords';
 import { encodePathFilters, ListFilters, PathFilter, slugTable } from '../../lib/pathFilters';
 import { AppRoute } from '../../routes/paths';
@@ -17,7 +18,8 @@ export type MembersFilterKey =
   | 'maritalStatus'
   | 'ageGroup'
   | 'flag'
-  | 'recent';
+  | 'recent'
+  | 'missing';
 
 export const MEMBERS_FILTERS: PathFilter<MembersFilterKey>[] = [
   { key: 'grouping', slugs: slugTable(GROUPING_PATH_LABELS) },
@@ -28,6 +30,7 @@ export const MEMBERS_FILTERS: PathFilter<MembersFilterKey>[] = [
   { key: 'ageGroup', slugs: slugTable(AGE_GROUP_NAMES) },
   { key: 'flag', slugs: slugTable(MEMBER_FLAG_LABELS) },
   { key: 'recent', slugs: slugTable(RECENT_ACCEPTANCE_LABELS) },
+  { key: 'missing', slugs: slugTable(MISSING_COMMUNITY_LABELS) },
 ];
 
 export const membersPath = (filters: ListFilters<MembersFilterKey>): string =>

@@ -12,6 +12,8 @@ const rows: Record<string, unknown[]> = {
       member_profiles: { photo_updated_at: null, photo_folder: null, gender: 'female', marital_status: 'married' },
       member_flags: [{ flag: 'absent' }],
       person_sensitive: { birth_date: '1990-05-01' },
+      person_small_groups: [{ small_group_id: 'g1' }],
+      person_ministries: [],
     },
     {
       id: 'p2',
@@ -22,6 +24,8 @@ const rows: Record<string, unknown[]> = {
       member_profiles: null,
       member_flags: [],
       person_sensitive: null,
+      person_small_groups: [],
+      person_ministries: [{ ministry_id: 'm1' }],
     },
   ],
 };
@@ -49,6 +53,8 @@ describe('listMemberRows', () => {
       maritalStatus: 'married',
       birthDate: '1990-05-01',
       flags: ['absent'],
+      inSmallGroup: true,
+      inMinistry: false,
     });
     expect(members[1]).toMatchObject({
       id: 'p2',
@@ -56,6 +62,8 @@ describe('listMemberRows', () => {
       maritalStatus: null,
       birthDate: null,
       flags: [],
+      inSmallGroup: false,
+      inMinistry: true,
     });
   });
 });

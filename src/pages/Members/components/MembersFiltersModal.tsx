@@ -15,6 +15,7 @@ import {
   MEMBER_FLAGS,
   MemberFlag,
 } from '../../../domain/memberFlags';
+import { MISSING_COMMUNITY_LABELS } from '../../../domain/missingCommunity';
 import { pickKeys } from '../../../lib/useListParams';
 import { DEFAULT_MEMBER_FILTERS, filtersFor, isDefaultMemberFilters, MemberFilters } from '../filters';
 import {
@@ -26,12 +27,14 @@ import {
 } from '../../../domain/memberRecords';
 import { toOptions } from '../../../domain/text';
 import { ENTRY_TYPE_LABELS } from '../../../types/church';
+import { CheckboxFilter } from './CheckboxFilter';
 
 const STATUS_OPTIONS = toOptions(MEMBERSHIP_STATUS_LABELS);
 const ENTRY_TYPE_OPTIONS = toOptions(ENTRY_TYPE_LABELS);
 const ALL_GENDERS = 'all';
 const GENDER_CHOICES = [{ value: ALL_GENDERS, label: 'Todos' }, ...GENDER_OPTIONS];
 const AGE_GROUP_OPTIONS = AGE_GROUPS.map((group) => ({ value: group, label: ageGroupLabel(group) }));
+const MISSING_COMMUNITY_OPTIONS = toOptions(MISSING_COMMUNITY_LABELS);
 const GROUPING_OPTIONS = toOptions(MEMBER_GROUPING_LABELS);
 
 interface Props {
@@ -82,7 +85,7 @@ export function MembersFiltersModal({ close, grouping, couplesAllowed, filters, 
         </FilterGroup>
       )}
 
-      <FilterGroup title="Membresia">
+      <FilterGroup title="Situação do membro">
         <MultiSelect
           label="Situação"
           options={STATUS_OPTIONS}
@@ -105,14 +108,20 @@ export function MembersFiltersModal({ close, grouping, couplesAllowed, filters, 
 
       {!coupled && (
         <>
+          <FilterGroup title="Comunidade">
+            <CheckboxFilter
+              options={MISSING_COMMUNITY_OPTIONS}
+              value={draft.missing}
+              onChange={(value) => change('missing', pickKeys(value, MISSING_COMMUNITY_LABELS))}
+            />
+          </FilterGroup>
+
           <FilterGroup title="Chegada à igreja">
-            <MultiSelect
+            <CheckboxFilter
               label="Forma de entrada"
               options={ENTRY_TYPE_OPTIONS}
               value={draft.entryType}
               onChange={(value) => change('entryType', pickKeys(value, ENTRY_TYPE_LABELS))}
-              emptyText="Todas"
-              searchable={false}
             />
           </FilterGroup>
 
@@ -124,13 +133,11 @@ export function MembersFiltersModal({ close, grouping, couplesAllowed, filters, 
               onChange={(value) => change('gender', pickKeys([value], GENDER_LABELS))}
             />
 
-            <MultiSelect
+            <CheckboxFilter
               label="Estado civil"
               options={MARITAL_STATUS_OPTIONS}
               value={draft.maritalStatus}
               onChange={(value) => change('maritalStatus', pickKeys(value, MARITAL_STATUS_LABELS))}
-              emptyText="Todos"
-              searchable={false}
             />
 
             <MultiSelect

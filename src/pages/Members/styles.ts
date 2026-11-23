@@ -171,3 +171,25 @@ export const FilterCount = styled.span`
   font-size: 11px;
   font-weight: 600;
 `;
+
+export const CheckboxSet = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+  padding: ${({ theme }) => theme.spacing.sm} 0;
+`;
+
+export const CheckboxLabel = styled.p`
+  margin: 0;
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.caption.fontSize};
+  font-weight: ${({ theme }) => theme.typography.caption.fontWeight};
+  line-height: ${({ theme }) => theme.typography.caption.lineHeight};
+  color: ${({ theme }) => theme.colors.muted};
+`;
+
+export const CheckboxColumns = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
+`;

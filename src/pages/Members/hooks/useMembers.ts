@@ -10,6 +10,7 @@ import { todayKey } from '../../../domain/dates';
 import { RECENT_ACCEPTANCE_LABELS } from '../../../domain/memberAcceptance';
 import { MEMBER_FLAG_LABELS } from '../../../domain/memberFlags';
 import { GENDER_LABELS, MARITAL_STATUS_LABELS, MEMBERSHIP_STATUS_LABELS } from '../../../domain/memberRecords';
+import { MISSING_COMMUNITY_LABELS } from '../../../domain/missingCommunity';
 import { ENTRY_TYPE_LABELS } from '../../../types/church';
 import { useFamilyTraits } from '../../../queries/person';
 import { activeFilterCountOf, DEFAULT_MEMBER_FILTERS, filtersFor, matchesCouple, matchesMember, MemberFilters } from '../filters';
@@ -42,6 +43,7 @@ export function useMembers(pageSizeOf: (grouping: MemberGrouping) => number | un
     ageGroup: pickKeys(list.filter('ageGroup'), AGE_GROUP_NAMES),
     flag: pickKeys(list.filter('flag'), MEMBER_FLAG_LABELS),
     recent: pickKeys(list.filter('recent'), RECENT_ACCEPTANCE_LABELS),
+    missing: pickKeys(list.filter('missing'), MISSING_COMMUNITY_LABELS),
   });
   const activeFilterCount = activeFilterCountOf(filters);
   const rows = query.data ?? [];
