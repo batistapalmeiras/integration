@@ -65,7 +65,7 @@ export function matchesMember(member: MemberRow, filters: MemberFilters, search:
     allows(filters.ageGroup, member.birthDate ? ageGroupOf(ageOn(member.birthDate, today)) : null) &&
     allows(filters.consolidation, member.consolidation) &&
     (filters.flag.length === 0 || member.flags.some((flag) => filters.flag.includes(flag))) &&
-    (filters.missing.length === 0 || filters.missing.some((missing) => isMissingCommunity(member, missing)))
+    (filters.missing.length === 0 || filters.missing.every((missing) => isMissingCommunity(member, missing)))
   );
 }
 

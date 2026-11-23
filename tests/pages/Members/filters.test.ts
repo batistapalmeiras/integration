@@ -14,7 +14,6 @@ const member = (overrides: Partial<MemberRow>): MemberRow => ({
   birthDate: null,
   gender: null,
   maritalStatus: null,
-  acceptedOn: null,
   inSmallGroup: true,
   inMinistry: true,
   ...overrides,
@@ -38,10 +37,11 @@ describe('members without a small group or a ministry', () => {
     expect(matches(member({ inSmallGroup: false }), ['ministry'])).toBe(false);
   });
 
-  it('keeps who lacks either one when both are chosen', () => {
+  it('keeps only who lacks both when both are chosen', () => {
     const both: ('small_group' | 'ministry')[] = ['small_group', 'ministry'];
-    expect(matches(member({ inSmallGroup: false }), both)).toBe(true);
-    expect(matches(member({ inMinistry: false }), both)).toBe(true);
+    expect(matches(member({ inSmallGroup: false, inMinistry: false }), both)).toBe(true);
+    expect(matches(member({ inSmallGroup: false }), both)).toBe(false);
+    expect(matches(member({ inMinistry: false }), both)).toBe(false);
     expect(matches(member({}), both)).toBe(false);
   });
 });
