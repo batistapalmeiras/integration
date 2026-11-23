@@ -99,8 +99,7 @@ export const GroupToggle = styled.button<{ $open: boolean }>`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
   width: 100%;
-  min-height: 72px;
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.base};
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   border: 0;
   background: transparent;
   font: inherit;
@@ -124,8 +123,8 @@ export const GroupToggle = styled.button<{ $open: boolean }>`
 export const GroupName = styled.span`
   flex: 1;
   min-width: 0;
-  font-size: ${({ theme }) => theme.typography.titleMd.fontSize};
-  font-weight: ${({ theme }) => theme.typography.titleMd.fontWeight};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  font-weight: 600;
 `;
 
 export const GroupBody = styled.div`
@@ -147,12 +146,11 @@ export const PersonRow = styled.button`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
   width: 100%;
-  min-height: 56px;
-  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.base};
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   border: 0;
   background: transparent;
   font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.bodyMd.fontSize};
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
   color: ${({ theme }) => theme.colors.ink};
   text-align: left;
   cursor: pointer;
