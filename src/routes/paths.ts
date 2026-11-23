@@ -18,6 +18,8 @@ export enum AppRoute {
   MembershipSignup = '/cadastro-do-conselho',
   Members = '/membros',
   Birthdays = '/membros/aniversariantes',
+  Consolidation = '/consolidacao',
+  ConsolidationHistory = '/consolidacao/historico',
   Membership = '/conselho',
   CommunityGroups = '/comunidade',
   Ministries = '/comunidade/ministerios',

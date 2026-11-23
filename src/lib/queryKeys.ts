@@ -20,6 +20,8 @@ export const queryKeys = {
   adminDashboard: ['people', 'admin-dashboard'] as const,
   teacherDashboard: ['cohorts', 'teacher-dashboard'] as const,
   memberBirthdays: ['people', 'birthdays'] as const,
+  consolidationQueue: ['people', 'consolidation-queue'] as const,
+  consolidationHistory: ['people', 'consolidation-history'] as const,
 
   person: (id: string) => ['person', id] as const,
   personCoffeeAttendance: (id: string, status: string) => ['person', id, 'coffee-attendance', status] as const,

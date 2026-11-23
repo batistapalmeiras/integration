@@ -2,6 +2,7 @@
 import { AGENDA_TITLE, AgendaPanel, agendaEntries } from '../components/AgendaPanel';
 import { BirthdaysHighlight } from '../components/BirthdaysHighlight';
 import { ChurchMembersCard } from '../components/ChurchMembersCard';
+import { ConsolidationNotice } from '../components/ConsolidationNotice';
 import { DashboardShell } from '../components/DashboardShell';
 import { FunnelCards } from '../components/FunnelSection';
 import { MakeupNotesPanel } from '../components/MakeupNotesPanel';
@@ -23,6 +24,7 @@ export function GeneralAdminDashboard() {
             </GridArea>
             <GridArea $area="birthdays">
               <BirthdaysHighlight />
+              <ConsolidationNotice />
             </GridArea>
             <AreaTitle $area="agenda-title" id="agenda">
               {AGENDA_TITLE}

@@ -1,5 +1,6 @@
 // Local
 import { AGE_GROUP_NAMES } from '../../domain/ageGroups';
+import { CONSOLIDATION_STATE_LABELS } from '../../domain/consolidation';
 import { GROUPING_PATH_LABELS } from '../../domain/couples';
 import { MEMBER_FLAG_LABELS } from '../../domain/memberFlags';
 import { MISSING_COMMUNITY_LABELS } from '../../domain/missingCommunity';
@@ -17,6 +18,7 @@ export type MembersFilterKey =
   | 'maritalStatus'
   | 'ageGroup'
   | 'flag'
+  | 'consolidation'
   | 'missing';
 
 export const MEMBERS_FILTERS: PathFilter<MembersFilterKey>[] = [
@@ -27,6 +29,7 @@ export const MEMBERS_FILTERS: PathFilter<MembersFilterKey>[] = [
   { key: 'maritalStatus', slugs: slugTable(MARITAL_STATUS_LABELS) },
   { key: 'ageGroup', slugs: slugTable(AGE_GROUP_NAMES) },
   { key: 'flag', slugs: slugTable(MEMBER_FLAG_LABELS) },
+  { key: 'consolidation', slugs: slugTable(CONSOLIDATION_STATE_LABELS) },
   { key: 'missing', slugs: slugTable(MISSING_COMMUNITY_LABELS) },
 ];
 

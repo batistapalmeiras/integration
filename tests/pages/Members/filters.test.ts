@@ -10,6 +10,7 @@ const member = (overrides: Partial<MemberRow>): MemberRow => ({
   membership_status: 'active',
   photo: null,
   flags: [],
+  consolidation: null,
   birthDate: null,
   gender: null,
   maritalStatus: null,
@@ -42,5 +43,26 @@ describe('members without a small group or a ministry', () => {
     expect(matches(member({ inSmallGroup: false }), both)).toBe(true);
     expect(matches(member({ inMinistry: false }), both)).toBe(true);
     expect(matches(member({}), both)).toBe(false);
+  });
+});
+
+describe('members in consolidation', () => {
+  const inState = (row: MemberRow, consolidation: ('in_progress' | 'overdue')[]) =>
+    matchesMember(row, { ...NO_MEMBER_FILTERS, consolidation }, '', '2026-11-23');
+
+  it('keeps everyone when nothing is chosen', () => {
+    expect(inState(member({}), [])).toBe(true);
+  });
+
+  it('keeps only who is in the chosen state', () => {
+    expect(inState(member({ consolidation: 'in_progress' }), ['in_progress'])).toBe(true);
+    expect(inState(member({ consolidation: 'overdue' }), ['in_progress'])).toBe(false);
+    expect(inState(member({ consolidation: null }), ['overdue'])).toBe(false);
+  });
+
+  it('keeps who is in either state when both are chosen', () => {
+    const both: ('in_progress' | 'overdue')[] = ['in_progress', 'overdue'];
+    expect(inState(member({ consolidation: 'overdue' }), both)).toBe(true);
+    expect(inState(member({ consolidation: null }), both)).toBe(false);
   });
 });

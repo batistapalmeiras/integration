@@ -13,11 +13,13 @@ import {
 } from '../domain/memberRecords';
 import { EntryType, toEntryType } from '../types/church';
 import { groupNames } from '../domain/communityGroups';
+import { ConsolidationState } from '../domain/consolidation';
 import { CouncilDate } from '../domain/councils';
 import { isMemberFlag, MemberFlag, MemberFlagMark } from '../domain/memberFlags';
 import { acceptedOn } from '../domain/memberAcceptance';
 import { PersonSensitive } from '../domain/personSensitive';
 import { supabase } from '../lib/supabase';
+import { listConsolidationStates } from './consolidations';
 import { PhotoOwner, photoOwnerOf } from './memberPhotos';
 
 export async function countMembers(): Promise<number> {
@@ -225,6 +227,7 @@ export interface MemberRow {
   membership_status: MembershipStatus;
   photo: PhotoOwner | null;
   flags: MemberFlag[];
+  consolidation: ConsolidationState | null;
   birthDate: string | null;
   gender: Gender | null;
   maritalStatus: MaritalStatus | null;
@@ -234,11 +237,14 @@ export interface MemberRow {
 }
 
 export async function listMemberRows(): Promise<MemberRow[]> {
-  const { data, error } = await supabase
-    .from('people')
-    .select('id, name, phone, entry_type, membership_status, origin, council:councils!people_council_id_fkey(meeting_date), member_profiles(photo_updated_at, photo_folder, gender, marital_status), member_flags(flag), person_sensitive(birth_date), person_small_groups!person_small_groups_person_id_fkey(small_group_id), person_ministries(ministry_id)')
-    .eq('status', 'member')
-    .order('name', { ascending: true });
+  const [{ data, error }, consolidations] = await Promise.all([
+    supabase
+      .from('people')
+      .select('id, name, phone, entry_type, membership_status, origin, council:councils!people_council_id_fkey(meeting_date), member_profiles(photo_updated_at, photo_folder, gender, marital_status), member_flags(flag), person_sensitive(birth_date), person_small_groups!person_small_groups_person_id_fkey(small_group_id), person_ministries(ministry_id)')
+      .eq('status', 'member')
+      .order('name', { ascending: true }),
+    listConsolidationStates(),
+  ]);
   if (error) throw error;
   return (data ?? []).map(
     ({ member_profiles: profile, member_flags: flags, person_sensitive: sensitive, person_small_groups: smallGroups, person_ministries: ministries, origin, council, ...row }) => ({
@@ -247,6 +253,7 @@ export async function listMemberRows(): Promise<MemberRow[]> {
       membership_status: toMembershipStatus(row.membership_status ?? ''),
       photo: photoOwnerOf(row.id, profile),
       flags: flags.map((item) => item.flag).filter(isMemberFlag),
+      consolidation: consolidations[row.id] ?? null,
       inSmallGroup: smallGroups.length > 0,
       inMinistry: ministries.length > 0,
       birthDate: sensitive?.birth_date ?? null,

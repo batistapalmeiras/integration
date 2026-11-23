@@ -1,4 +1,5 @@
 // Components
+import { ConsolidationPill } from '../../../components/ConsolidationPill';
 import { MEMBER_PHOTO_SIZE, MemberPhoto } from '../../../components/MemberPhoto';
 import { TonePill } from '../../../components/StatusPill';
 // Local
@@ -29,6 +30,7 @@ export function MemberTileContent({ member, photoUrl, interactive = false }: Ent
       <MemberPhoto url={photoUrl} size={MEMBER_PHOTO_SIZE} shape="square" interactive={interactive} fluid />
       <MemberCardName>{member.name}</MemberCardName>
       <StatusPill member={member} />
+      {member.consolidation && <ConsolidationPill state={member.consolidation} />}
     </>
   );
 }

@@ -7,13 +7,8 @@ import { BadgeRow, CountBadge, TextBadge } from '../../../components/CountBadge'
 import { percentOf } from '../../../domain/communityGroups';
 import { AppRoute } from '../../../routes/paths';
 import { GroupTable } from '../components/GroupTable';
-import { ministryIconFor } from '../ministryIcons';
+import { ministryTile } from '../ministryTile';
 import { useMemberTotal, useMinistriesList, useMinistryVolunteerCount } from '../hooks/useCommunityGroupsList';
-
-function ministryTile(name: string) {
-  const Icon = ministryIconFor(name);
-  return <Icon size={20} aria-hidden="true" />;
-}
 
 export function MinistriesPage() {
   const navigate = useNavigate();

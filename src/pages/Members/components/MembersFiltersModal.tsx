@@ -15,6 +15,7 @@ import {
   MEMBER_FLAGS,
   MemberFlag,
 } from '../../../domain/memberFlags';
+import { CONSOLIDATION_STATE_LABELS } from '../../../domain/consolidation';
 import { MISSING_COMMUNITY_LABELS } from '../../../domain/missingCommunity';
 import { pickKeys } from '../../../lib/useListParams';
 import { DEFAULT_MEMBER_FILTERS, filtersFor, isDefaultMemberFilters, MemberFilters } from '../filters';
@@ -35,6 +36,7 @@ const ALL_GENDERS = 'all';
 const GENDER_CHOICES = [{ value: ALL_GENDERS, label: 'Todos' }, ...GENDER_OPTIONS];
 const AGE_GROUP_OPTIONS = AGE_GROUPS.map((group) => ({ value: group, label: ageGroupLabel(group) }));
 const MISSING_COMMUNITY_OPTIONS = toOptions(MISSING_COMMUNITY_LABELS);
+const CONSOLIDATION_OPTIONS = toOptions(CONSOLIDATION_STATE_LABELS);
 const GROUPING_OPTIONS = toOptions(MEMBER_GROUPING_LABELS);
 
 interface Props {
@@ -109,6 +111,14 @@ export function MembersFiltersModal({ close, grouping, couplesAllowed, filters, 
       {!coupled && (
         <>
           <FilterGroup title="Comunidade">
+            <MultiSelect
+              label="Consolidação"
+              options={CONSOLIDATION_OPTIONS}
+              value={draft.consolidation}
+              onChange={(value) => change('consolidation', pickKeys(value, CONSOLIDATION_STATE_LABELS))}
+              emptyText="Todas"
+              searchable={false}
+            />
             <CheckboxFilter
               options={MISSING_COMMUNITY_OPTIONS}
               value={draft.missing}

@@ -47,11 +47,12 @@ describe('isTabPath', () => {
 describe('menu areas', () => {
   const area = (id: string) => GENERAL_ADMIN_NAV_AREAS.find((item) => item.id === id);
 
-  it('has the birthdays as the fourth church tab', () => {
+  it('has the consolidation before the birthdays in the church tabs', () => {
     expect(area('church')?.tabs.map((tab) => tab.path)).toEqual([
       AppRoute.Members,
       AppRoute.SmallGroups,
       AppRoute.Ministries,
+      AppRoute.Consolidation,
       AppRoute.Birthdays,
     ]);
   });

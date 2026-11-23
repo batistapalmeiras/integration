@@ -18,6 +18,7 @@ import { CalendarDays, Crown, House, LucideIcon, Pencil, Plus, Trash2, UserMinus
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AddButton } from '../../../components/AddButton';
+import { ConsolidationPill } from '../../../components/ConsolidationPill';
 import { InfoLine, InfoPanel } from '../../../components/InfoLine';
 import { PeopleCount } from '../../../components/PeopleCount';
 import { TonePill } from '../../../components/StatusPill';
@@ -39,6 +40,7 @@ import {
 } from '../../../repositories/communityGroups';
 import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
+import { useGroupConsolidations } from '../../../queries/consolidations';
 import { refreshGroupLists } from '../hooks/useCommunityGroupsList';
 import { AppRoute } from '../../../routes/paths';
 import { AddMembersModal } from '../components/AddMembersModal';
@@ -67,6 +69,7 @@ export function CommunityGroupDetailPage() {
     },
     { enabled: !!id },
   );
+  const consolidating = useGroupConsolidations(isPg ? 'small_group' : 'ministry', id ?? '');
   const group = query.data?.group ?? null;
   const people = query.data?.people ?? [];
   const loading = query.loading;
@@ -260,6 +263,7 @@ export function CommunityGroupDetailPage() {
                             {role}
                           </TonePill>
                         ))}
+                        {consolidating[person.id] && <ConsolidationPill state={consolidating[person.id]} />}
                       </NameCell>
                     </Td>
                     {!group.automatic && (

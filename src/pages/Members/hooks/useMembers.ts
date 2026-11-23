@@ -5,6 +5,7 @@ import { errorMessage, useQuery } from '../../../lib/queryCache';
 import { queryKeys } from '../../../lib/queryKeys';
 import { pickKeys, useListParams } from '../../../lib/useListParams';
 import { AGE_GROUP_NAMES } from '../../../domain/ageGroups';
+import { CONSOLIDATION_STATE_LABELS } from '../../../domain/consolidation';
 import { MemberGrouping, pairCouples } from '../../../domain/couples';
 import { todayKey } from '../../../domain/dates';
 import { MEMBER_FLAG_LABELS } from '../../../domain/memberFlags';
@@ -41,6 +42,7 @@ export function useMembers(pageSizeOf: (grouping: MemberGrouping) => number | un
     maritalStatus: pickKeys(list.filter('maritalStatus'), MARITAL_STATUS_LABELS),
     ageGroup: pickKeys(list.filter('ageGroup'), AGE_GROUP_NAMES),
     flag: pickKeys(list.filter('flag'), MEMBER_FLAG_LABELS),
+    consolidation: pickKeys(list.filter('consolidation'), CONSOLIDATION_STATE_LABELS),
     missing: pickKeys(list.filter('missing'), MISSING_COMMUNITY_LABELS),
   });
   const activeFilterCount = activeFilterCountOf(filters);

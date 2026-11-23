@@ -59,7 +59,7 @@ interface ILayoutProps {
 }
 
 export function Layout({ children }: ILayoutProps) {
-  const { isExactTab, pathname, search, membershipCount } = useLayout();
+  const { isExactTab, pathname, search, navCountFor } = useLayout();
   const standalone = isStandalone(pathname);
   const flowPath = useRef<string>(AppRoute.Dashboard);
 
@@ -88,7 +88,7 @@ export function Layout({ children }: ILayoutProps) {
     <SideNavLink key={item.path} to={item.path} $active={activePath === item.path}>
       <item.icon size={18} />
       {item.label}
-      {item.path === AppRoute.Membership && membershipCount > 0 && <SideNavCount>{membershipCount}</SideNavCount>}
+      {navCountFor(item.path) > 0 && <SideNavCount>{navCountFor(item.path)}</SideNavCount>}
     </SideNavLink>
   );
   const hasSidebar = useMediaQuery(SIDEMENU_MEDIA);
@@ -182,7 +182,7 @@ export function Layout({ children }: ILayoutProps) {
               <BottomTab key={item.path} to={item.path} $active={active}>
                 <TabIcon>
                   <item.icon size={22} />
-                  {item.path === AppRoute.Membership && membershipCount > 0 && <TabCount>{membershipCount}</TabCount>}
+                  {navCountFor(item.path) > 0 && <TabCount>{navCountFor(item.path)}</TabCount>}
                 </TabIcon>
                 <BottomTabLabel $active={active}>{item.tabLabel ?? item.label}</BottomTabLabel>
               </BottomTab>

@@ -28,6 +28,10 @@ const rows: Record<string, unknown[]> = {
       person_ministries: [{ ministry_id: 'm1' }],
     },
   ],
+  consolidation_queue: [
+    { person_id: 'p2', overdue: false },
+    { person_id: 'p2', overdue: true },
+  ],
 };
 
 const { supabase } = vi.hoisted(() => {
@@ -35,7 +39,7 @@ const { supabase } = vi.hoisted(() => {
   return {
     supabase: {
       from: (table: string) => ({
-        select: () => ({ eq: () => ({ order: () => result(table) }) }),
+        select: () => (table === 'consolidation_queue' ? result(table) : { eq: () => ({ order: () => result(table) }) }),
       }),
     },
   };
@@ -53,6 +57,7 @@ describe('listMemberRows', () => {
       maritalStatus: 'married',
       birthDate: '1990-05-01',
       flags: ['absent'],
+      consolidation: null,
       inSmallGroup: true,
       inMinistry: false,
     });
@@ -62,6 +67,7 @@ describe('listMemberRows', () => {
       maritalStatus: null,
       birthDate: null,
       flags: [],
+      consolidation: 'overdue',
       inSmallGroup: false,
       inMinistry: true,
     });

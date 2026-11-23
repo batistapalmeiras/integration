@@ -99,6 +99,74 @@ export type Database = {
         }
         Relationships: []
       }
+      consolidations: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          id: string
+          kind: string
+          ministry_id: string | null
+          origin_group_id: string | null
+          outcome: string | null
+          person_id: string
+          small_group_id: string | null
+          started_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          id?: string
+          kind: string
+          ministry_id?: string | null
+          origin_group_id?: string | null
+          outcome?: string | null
+          person_id: string
+          small_group_id?: string | null
+          started_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          id?: string
+          kind?: string
+          ministry_id?: string | null
+          origin_group_id?: string | null
+          outcome?: string | null
+          person_id?: string
+          small_group_id?: string | null
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consolidations_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consolidations_ministry_id_fkey"
+            columns: ["ministry_id"]
+            isOneToOne: false
+            referencedRelation: "ministries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consolidations_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consolidations_small_group_id_fkey"
+            columns: ["small_group_id"]
+            isOneToOne: false
+            referencedRelation: "small_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_attempts: {
         Row: {
           channel: string
@@ -1243,6 +1311,20 @@ export type Database = {
       }
     }
     Views: {
+      consolidation_queue: {
+        Row: {
+          due_at: string | null
+          id: string | null
+          kind: string | null
+          ministry_id: string | null
+          origin_group_id: string | null
+          overdue: boolean | null
+          person_id: string | null
+          small_group_id: string | null
+          started_at: string | null
+        }
+        Relationships: []
+      }
       enrollment_attendance_summary: {
         Row: {
           cohort_id: string | null
@@ -1356,6 +1438,10 @@ export type Database = {
         Returns: {
           person_name: string
         }[]
+      }
+      close_consolidation: {
+        Args: { p_consolidation_id: string; p_outcome: string }
+        Returns: undefined
       }
       count_integration_people_by_status: {
         Args: never
@@ -1531,6 +1617,10 @@ export type Database = {
           lessons_total: number
         }[]
       }
+      move_person_group: {
+        Args: { p_from_id: string; p_kind: string; p_person_id: string; p_to_id: string }
+        Returns: undefined
+      }
       place_in_coffee: {
         Args: { p_coffee_event_id: string; p_person_id: string }
         Returns: string
@@ -1541,6 +1631,10 @@ export type Database = {
       }
       prune_family_shares: { Args: { p_before: Json }; Returns: undefined }
       run_pipeline_maintenance: { Args: never; Returns: Json }
+      redirect_consolidation: {
+        Args: { p_consolidation_id: string; p_to_id: string; p_to_kind: string }
+        Returns: undefined
+      }
       save_membership_answers: {
         Args: {
           p_address_city: string

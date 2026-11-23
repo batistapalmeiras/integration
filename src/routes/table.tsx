@@ -26,6 +26,8 @@ import {
   CouncilRosterPage,
   CouncilsPage,
   CommunityGroupDetailPage,
+  ConsolidationHistoryPage,
+  ConsolidationPage,
   DashboardPage,
   IntegrationSignupPage,
   MakeupAttendancePage,
@@ -113,6 +115,8 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
 
   { path: `${AppRoute.Members}/*`, module: CHURCH, ...MEMBERS_LIST },
   { path: AppRoute.Birthdays, module: CHURCH, element: <BirthdaysPage />, roles: GENERAL_ADMIN },
+  { path: AppRoute.Consolidation, module: CHURCH, element: <ConsolidationPage />, roles: GENERAL_ADMIN },
+  { path: AppRoute.ConsolidationHistory, module: CHURCH, element: <ConsolidationHistoryPage />, roles: GENERAL_ADMIN },
   {
     path: `${AppRoute.Members}/:id`,
     module: CHURCH,

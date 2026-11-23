@@ -1,5 +1,6 @@
 // Local
 import { AgeGroup, ageGroupOf, ageOn } from '../../domain/ageGroups';
+import { ConsolidationState } from '../../domain/consolidation';
 import { Couple, MemberGrouping } from '../../domain/couples';
 import { MemberFlag } from '../../domain/memberFlags';
 import { isMissingCommunity, MissingCommunity } from '../../domain/missingCommunity';
@@ -16,6 +17,7 @@ export interface MemberFilters {
   maritalStatus: MaritalStatus[];
   ageGroup: AgeGroup[];
   flag: MemberFlag[];
+  consolidation: ConsolidationState[];
   missing: MissingCommunity[];
 }
 
@@ -26,13 +28,14 @@ export const NO_MEMBER_FILTERS: MemberFilters = {
   maritalStatus: [],
   ageGroup: [],
   flag: [],
+  consolidation: [],
   missing: [],
 };
 
 export const DEFAULT_MEMBER_FILTERS: MemberFilters = { ...NO_MEMBER_FILTERS, status: ['active'] };
 
 const FILTERS_BY_GROUPING: Record<MemberGrouping, (keyof MemberFilters)[]> = {
-  individual: ['status', 'flag', 'missing', 'entryType', 'gender', 'maritalStatus', 'ageGroup'],
+  individual: ['status', 'flag', 'consolidation', 'missing', 'entryType', 'gender', 'maritalStatus', 'ageGroup'],
   couple: ['status', 'flag'],
 };
 
@@ -60,6 +63,7 @@ export function matchesMember(member: MemberRow, filters: MemberFilters, search:
     allows(filters.gender, member.gender) &&
     allows(filters.maritalStatus, member.maritalStatus) &&
     allows(filters.ageGroup, member.birthDate ? ageGroupOf(ageOn(member.birthDate, today)) : null) &&
+    allows(filters.consolidation, member.consolidation) &&
     (filters.flag.length === 0 || member.flags.some((flag) => filters.flag.includes(flag))) &&
     (filters.missing.length === 0 || filters.missing.some((missing) => isMissingCommunity(member, missing)))
   );
