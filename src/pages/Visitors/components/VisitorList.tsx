@@ -5,12 +5,21 @@ import { Pagination, text } from 'bp-kit';
 // Components
 import { PaginationWrap } from '../../../components/ListLayout';
 import { NameWithAvatar } from '../../../components/NameWithAvatar';
-import { List, ListChevron, ListGrow, ListHeader, ListItem, ListSlot, ListStatusCell } from '../../../components/List';
+import {
+  List,
+  ListChevron,
+  ListGrow,
+  ListHeader,
+  ListItem,
+  ListRowButton,
+  ListRowText,
+  ListSlot,
+  ListStatusCell,
+} from '../../../components/List';
 import { StatusPill } from '../../../components/StatusPill';
 // Local
 import { Person } from '../../../features/visitors';
 import { AppRoute } from '../../../routes/paths';
-import { RowButton, RowText } from '../styles';
 
 interface Props {
   rows: Person[];
@@ -32,15 +41,15 @@ export function VisitorList({ rows, page, totalPages, onPageChange }: Props) {
         </ListHeader>
         {rows.map((person) => (
           <ListItem key={person.id}>
-            <RowButton type="button" onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
-              <RowText>
+            <ListRowButton type="button" onClick={() => navigate(`${AppRoute.Visitors}/${person.id}`)}>
+              <ListRowText>
                 <NameWithAvatar name={person.name} />
-              </RowText>
+              </ListRowText>
               <ListStatusCell>
                 <StatusPill person={person} compact />
               </ListStatusCell>
               <ListChevron />
-            </RowButton>
+            </ListRowButton>
           </ListItem>
         ))}
       </List>

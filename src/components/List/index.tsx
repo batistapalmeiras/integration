@@ -3,7 +3,18 @@ import { ChevronRight } from 'lucide-react';
 // Local
 import { ChevronButton, ChevronMark } from './styles';
 
-export { List, ListGrow, ListHeader, ListItem, ListItemRow, ListName, ListSlot, ListStatusCell } from './styles';
+export {
+  List,
+  ListGrow,
+  ListHeader,
+  ListItem,
+  ListItemRow,
+  ListName,
+  ListRowButton,
+  ListRowText,
+  ListSlot,
+  ListStatusCell,
+} from './styles';
 
 interface Props {
   label?: string;

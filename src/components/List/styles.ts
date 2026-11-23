@@ -83,3 +83,26 @@ export const ListName = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+export const ListRowButton = styled.button`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+`;
+
+export const ListRowText = styled.span`
+  flex: 1;
+  min-width: 0;
+  font-size: ${({ theme }) => theme.typography.bodySm.fontSize};
+  color: ${({ theme }) => theme.colors.ink};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;

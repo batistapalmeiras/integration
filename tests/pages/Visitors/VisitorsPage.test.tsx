@@ -93,7 +93,7 @@ describe('visitors screens', () => {
     expect(screen.getByRole('status')).toHaveTextContent('/visitantes/arquivado');
   });
 
-  it('keeps the status chips in a sheet opened by the filters button', async () => {
+  it('picks one status in a sheet opened by the filters button, like the sort', async () => {
     vi.mocked(listVisitors).mockResolvedValue([visitor('1', 'Ana Souza', 'initial_contact')]);
     renderScreen(
       <Routes>
@@ -103,12 +103,12 @@ describe('visitors screens', () => {
     );
 
     await screen.findByText('Ana Souza');
-    expect(screen.queryByRole('button', { name: 'Contato Inicial' })).not.toBeInTheDocument();
-
     await userEvent.click(screen.getByRole('button', { name: 'Filtros' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Contato Inicial' }));
+    expect(screen.getByRole('radio', { name: 'Todos' })).toHaveAttribute('aria-checked', 'true');
 
-    expect(screen.getByRole('button', { name: 'Contato Inicial' })).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(screen.getByRole('radio', { name: 'Contato Inicial' }));
+
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Filtros (1)' })).toBeInTheDocument();
   });
 });
