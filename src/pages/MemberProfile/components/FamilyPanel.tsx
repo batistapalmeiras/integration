@@ -6,7 +6,7 @@ import { Pencil } from 'lucide-react';
 // Components
 import { Field, FieldLabel, FieldValue, Panel, PanelHeader, PanelTitle } from '../../../components/Panel';
 // Local
-import { relationLabel } from '../../../domain/family';
+import { groupRelatives } from '../../../domain/family';
 import { Relative } from '../../../repositories/family';
 import { AppRoute } from '../../../routes/paths';
 import { ChildLinks, RelativeGrid } from '../styles';
@@ -52,11 +52,17 @@ export function FamilyPanel({ family, onEdit }: Props) {
             <FieldValue $empty>—</FieldValue>
           )}
         </Field>
-        {others.map((relative) => (
-          <Field key={relative.id} $wide={false}>
-            <FieldLabel>{relationLabel(relative.relation, relative.gender)}</FieldLabel>
+        {groupRelatives(others).map((group) => (
+          <Field key={group.key} $wide={false}>
+            <FieldLabel>{group.label}</FieldLabel>
             <FieldValue $empty={false}>
-              <Link to={relativePath(relative)}>{relative.name}</Link>
+              <ChildLinks>
+                {group.members.map((relative) => (
+                  <li key={relative.id}>
+                    <Link to={relativePath(relative)}>{relative.name}</Link>
+                  </li>
+                ))}
+              </ChildLinks>
             </FieldValue>
           </Field>
         ))}

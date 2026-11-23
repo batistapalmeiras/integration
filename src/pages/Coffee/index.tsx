@@ -1,7 +1,9 @@
 // React
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
 import {
+  BottomSheet,
   Button,
   Empty,
   ModalActions,
@@ -13,13 +15,13 @@ import {
   useModal,
   useToast,
 } from 'bp-kit';
-import { Archive, Check, Eraser, Pencil, Plus, X, XCircle } from 'lucide-react';
+import { Archive, Check, Eraser, History, Pencil, Plus, X, XCircle } from 'lucide-react';
 // Components
 import { PageHeader } from '../../components/PageHeader';
 // Local
 import { useRole } from '../../features/access/useRole';
 import { AddButton } from '../../components/AddButton';
-import { ArrowSwitcher } from '../../components/ArrowSwitcher';
+import { ArrowSwitcher, SwitcherActionRow } from '../../components/ArrowSwitcher';
 import { EnrollPersonModal } from '../../components/EnrollPersonModal';
 import { PeopleCount } from '../../components/PeopleCount';
 import {
@@ -50,6 +52,7 @@ const PRESENCE_LABELS: Record<'came' | 'missed', string> = { came: 'Veio', misse
 
 export function CoffeePage() {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
   const role = useRole();
   const {
     events,
@@ -101,41 +104,7 @@ export function CoffeePage() {
       />,
     );
 
-  const openEventMenu = () =>
-    open(
-      <>
-        <ModalTitle onClose={close}>Café de Boas-vindas</ModalTitle>
-        <OptionsMenuActions>
-          <Button
-            type="button"
-            disabled={!canCreateEvent}
-            title={
-              canCreateEvent ? undefined : 'Encerre um café antes de criar outro — só é possível ter 2 ao mesmo tempo.'
-            }
-            onClick={() => {
-              close();
-              openCreateModal();
-            }}
-          >
-            <Plus size={16} />
-            Café
-          </Button>
-          {event && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                close();
-                openEditModal();
-              }}
-            >
-              <Pencil size={16} />
-              Editar café
-            </Button>
-          )}
-        </OptionsMenuActions>
-      </>,
-    );
+  const openEventMenu = () => setMenuOpen(true);
 
   const confirmCanceled = (personId: string, personName: string) =>
     open(
@@ -155,7 +124,7 @@ export function CoffeePage() {
             }}
           >
             <XCircle size={16} />
-            Cancelar presença
+            Cancelar
           </Button>
         </ModalActions>
       </>,
@@ -221,7 +190,7 @@ export function CoffeePage() {
             }}
           >
             <Eraser size={16} />
-            Tirar a marcação
+            Desmarcar
           </Button>
         </PresenceChoices>
       </>,
@@ -240,18 +209,13 @@ export function CoffeePage() {
     <div>
       <PageHeader
         title="Café"
-        action={
-          canPlan &&
-          (events.length > 0 ? (
-            <OptionsMenuButton label="Opções do café" onClick={openEventMenu} />
-          ) : (
-            <Button variant="secondary" onClick={openCreateModal}>
-              <Plus size={16} />
-              Café
-            </Button>
-          ))
-        }
       />
+
+      {!loading && !error && !event && (
+        <SwitcherActionRow>
+          <OptionsMenuButton label="Opções do café" onClick={openEventMenu} />
+        </SwitcherActionRow>
+      )}
 
       {loading && <Skeleton $h="240px" />}
 
@@ -260,19 +224,20 @@ export function CoffeePage() {
       {!loading && !error && !event && (
         <Empty
           title="Nenhum café agendado"
-          description={canPlan ? 'Agende o próximo café pelo botão Café.' : 'Aguarde o próximo café ser agendado.'}
+          description={canPlan ? 'Agende o próximo café pelas opções (⋯).' : 'Aguarde o próximo café ser agendado.'}
         />
       )}
 
       {!loading && !error && event && (
         <>
           <ArrowSwitcher
-            title={`${weekdayLabel(event.event_date)}, ${formatDate(event.event_date).slice(0, 5)} · ${event.event_time.slice(0, 5)}`}
+            title={`${weekdayLabel(event.event_date)}, ${formatDate(event.event_date).slice(0, 5)}`}
             caption={event.event_date === todayKey() ? 'Hoje' : undefined}
             previousLabel="Café anterior"
             nextLabel="Próximo café"
             onPrevious={eventIndex > 0 ? () => selectEvent(events[eventIndex - 1].id) : undefined}
             onNext={eventIndex < events.length - 1 ? () => selectEvent(events[eventIndex + 1].id) : undefined}
+            action={<OptionsMenuButton label="Opções do café" onClick={openEventMenu} />}
           />
 
           <PeopleCount count={totalCount} />
@@ -376,12 +341,49 @@ export function CoffeePage() {
           {canAddPeople && event.event_date >= todayKey() && (
             <AddButton type="button" onClick={openEnrollModal}>
               <Plus size={18} />
-              Adicionar pessoa a este café
+              Adicionar pessoa
             </AddButton>
           )}
         </>
       )}
 
+      {menuOpen && (
+        <BottomSheet title="Café de Boas-vindas" height="half" onClose={() => setMenuOpen(false)}>
+          <OptionsMenuActions>
+          <Button
+            type="button"
+            disabled={!canCreateEvent}
+            title={
+              canCreateEvent ? undefined : 'Encerre um café antes de criar outro — só é possível ter 2 ao mesmo tempo.'
+            }
+            onClick={() => {
+              setMenuOpen(false);
+              openCreateModal();
+            }}
+          >
+            <Plus size={16} />
+            Café
+          </Button>
+          {event && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setMenuOpen(false);
+                openEditModal();
+              }}
+            >
+              <Pencil size={16} />
+              Editar
+            </Button>
+          )}
+          <Button type="button" variant="secondary" onClick={() => navigate(`${AppRoute.Reports}/cafes`)}>
+            <History size={16} />
+            Histórico
+          </Button>
+          </OptionsMenuActions>
+        </BottomSheet>
+      )}
       {modal}
       {toast}
     </div>

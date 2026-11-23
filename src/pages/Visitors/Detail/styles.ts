@@ -61,6 +61,10 @@ export const StatusLine = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.xs};
 `;
 
+export const MenuSlot = styled.span`
+  margin-left: auto;
+`;
+
 export const PersonCardRow = styled.div`
   display: flex;
   align-items: center;

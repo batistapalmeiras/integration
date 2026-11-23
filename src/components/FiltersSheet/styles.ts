@@ -1,31 +1,10 @@
 // Libs
 import styled from 'styled-components';
 
-export const Sheet = styled.div<{ $scrolled: boolean }>`
-  --sheet-x: 32px;
-  --sheet-y: 32px;
+export const Sheet = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100%;
-
-  @media (max-width: 744px) {
-    --sheet-y: 28px;
-  }
-
-  @media (max-width: 480px) {
-    --sheet-x: 20px;
-    --sheet-y: 24px;
-  }
-
-  & > :first-child {
-    position: sticky;
-    top: calc(-1 * var(--sheet-y));
-    z-index: 2;
-    margin: calc(-1 * var(--sheet-y)) calc(-1 * var(--sheet-x)) ${({ theme }) => theme.spacing.lg};
-    padding: var(--sheet-y) var(--sheet-x) ${({ theme }) => theme.spacing.base};
-    border-bottom: 1px solid ${({ theme, $scrolled }) => ($scrolled ? theme.colors.hairline : 'transparent')};
-    background: ${({ theme }) => theme.colors.canvas};
-  }
 `;
 
 export const Group = styled.div`
@@ -54,14 +33,14 @@ export const GroupTitle = styled.h3`
 
 export const Footer = styled.div`
   position: sticky;
-  bottom: calc(-1 * var(--sheet-y));
+  bottom: calc(-1 * var(--modal-bottom, 0px));
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.md};
-  margin: auto calc(-1 * var(--sheet-x)) calc(-1 * var(--sheet-y));
-  padding: ${({ theme }) => theme.spacing.md} var(--sheet-x)
+  margin: auto calc(-1 * var(--modal-x, 0px)) calc(-1 * var(--modal-bottom, 0px));
+  padding: ${({ theme }) => theme.spacing.md} var(--modal-x, 0px)
     calc(${({ theme }) => theme.spacing.md} + env(safe-area-inset-bottom));
   border-top: 1px solid ${({ theme }) => theme.colors.hairline};
   background: ${({ theme }) => theme.colors.canvas};

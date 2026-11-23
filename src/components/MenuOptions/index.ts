@@ -1,2 +1,1 @@
-export { MenuOptionCard } from './MenuOptionCard';
-export { IconBadge, OptionsGrid } from './styles';
+export { IconBadge } from './styles';

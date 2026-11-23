@@ -4,7 +4,6 @@ import { FormEvent, ReactNode } from 'react';
 import { Button, Form, LinkButton, ModalTitle } from 'bp-kit';
 import { FilterX } from 'lucide-react';
 // Local
-import { useParentScrolled } from '../../lib/useScrolled';
 import { Footer, Group, GroupTitle, Sheet } from './styles';
 
 interface Props {
@@ -16,10 +15,8 @@ interface Props {
 }
 
 export function FiltersSheet({ close, onApply, onClear, canClear, children }: Props) {
-  const [sheetRef, scrolled] = useParentScrolled<HTMLDivElement>();
-
   return (
-    <Sheet ref={sheetRef} $scrolled={scrolled}>
+    <Sheet>
       <ModalTitle onClose={close}>Filtros</ModalTitle>
       <Form onSubmit={(event: FormEvent) => event.preventDefault()}>{children}</Form>
       <Footer>

@@ -23,7 +23,7 @@ import { PersonDetailsCard } from './components/PersonDetailsCard';
 import { ProgressStepper } from './components/ProgressStepper';
 import { VisitHistory } from './components/VisitHistory';
 import { useVisitorMenu } from './components/useVisitorMenu';
-import { ActionArea, Hero, HistoryArea, Layout, NotesArea, SideArea, StatusLine } from './styles';
+import { ActionArea, Hero, HistoryArea, Layout, MenuSlot, NotesArea, SideArea, StatusLine } from './styles';
 
 export function VisitorDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -72,15 +72,13 @@ function VisitorDetailContent({ detail, person }: ContentProps) {
     <WideContent>
       <Hero>
         <div>
-          <PageHeader
-            title={person.name}
-            back
-            actionAlign="end"
-            action={<OptionsMenuButton label="Mais ações" onClick={menu.openMenu} />}
-          />
+          <PageHeader title={person.name} back />
           <StatusLine>
             <StatusPill person={person} />
             {isDirectSignup(person.origin) && <DirectSignupFlag />}
+            <MenuSlot>
+              <OptionsMenuButton label="Mais ações" onClick={menu.openMenu} />
+            </MenuSlot>
           </StatusLine>
         </div>
         <ProgressStepper status={person.status} />

@@ -41,4 +41,26 @@ describe('family panel', () => {
 
     expect(screen.getByText('Irmão(ã)')).toBeInTheDocument();
   });
+
+  it('groups relatives of the same kind under one plural label, with every name beneath', () => {
+    renderScreen(
+      <FamilyPanel
+        family={[
+          { id: 'a', name: 'Daniel Braga', relation: 'uncle', gender: 'male', derived: true },
+          { id: 'b', name: 'Ruth Braga', relation: 'uncle', gender: 'female', derived: true },
+          { id: 'c', name: 'Joel Florenzano', relation: 'grandfather', gender: 'male', derived: true },
+          { id: 'd', name: 'Lael Florenzano', relation: 'grandmother', gender: 'female', derived: true },
+          { id: 'e', name: 'Ana Lima', relation: 'sibling_in_law', gender: 'female', derived: false },
+        ]}
+        onEdit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Tios')).toBeInTheDocument();
+    expect(screen.getByText('Avós')).toBeInTheDocument();
+    expect(screen.getByText('Cunhada')).toBeInTheDocument();
+    expect(screen.queryByText('Tio')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Daniel Braga' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ruth Braga' })).toBeInTheDocument();
+  });
 });

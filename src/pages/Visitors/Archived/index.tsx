@@ -1,7 +1,7 @@
 // React
 import { useState } from 'react';
 // Libs
-import { Button, Empty, OptionsSheet, SearchInput, Skeleton, text } from 'bp-kit';
+import { Button, Empty, BottomSheet, SearchInput, Skeleton, text } from 'bp-kit';
 import { ArrowUpDown } from 'lucide-react';
 // Components
 import { PageHeader } from '../../../components/PageHeader';
@@ -49,7 +49,7 @@ export function ArchivedVisitorsPage() {
       )}
 
       {sorting && (
-        <OptionsSheet
+        <BottomSheet
           title="Ordenar por"
           options={ARCHIVED_SORT_OPTIONS}
           value={sort}

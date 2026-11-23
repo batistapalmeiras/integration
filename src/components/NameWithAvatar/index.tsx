@@ -10,6 +10,7 @@ const Wrap = styled.span`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
   min-width: 0;
+  max-width: 100%;
 `;
 
 const AvatarSlot = styled.span`

@@ -1,5 +1,5 @@
 // React
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function useWindowScrolled(): boolean {
   const [scrolled, setScrolled] = useState(false);
@@ -12,20 +12,4 @@ export function useWindowScrolled(): boolean {
   }, []);
 
   return scrolled;
-}
-
-export function useParentScrolled<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const parent = ref.current?.parentElement;
-    if (!parent) return undefined;
-    const update = () => setScrolled(parent.scrollTop > 0);
-    update();
-    parent.addEventListener('scroll', update, { passive: true });
-    return () => parent.removeEventListener('scroll', update);
-  }, []);
-
-  return [ref, scrolled] as const;
 }

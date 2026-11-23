@@ -27,7 +27,6 @@ export const MembershipInterestPage = lazyPage(() => import('../pages/Membership
 export const MembershipSignupPage = lazyPage(() => import('../pages/MembershipSignup'), 'MembershipSignupPage');
 
 export const DashboardPage = lazyPage(() => import('../pages/Dashboard'), 'DashboardPage');
-export const ModuleMorePage = lazyPage(() => import('../pages/ModuleMore'), 'ModuleMorePage');
 export const ProfilePage = lazyPage(() => import('../pages/Profile'), 'ProfilePage');
 export const ViewRolePage = lazyPage(() => import('../pages/Profile/ViewRole'), 'ViewRolePage');
 

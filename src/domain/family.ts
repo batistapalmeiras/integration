@@ -95,3 +95,46 @@ export function fitsRelation(
   }
   return true;
 }
+
+const RELATION_GROUPS: Record<FamilyRelation, { key: string; plural: string }> = {
+  spouse: { key: 'spouse', plural: 'Cônjuges' },
+  child: { key: 'child', plural: 'Filhos' },
+  grandfather: { key: 'grandparent', plural: 'Avós' },
+  grandmother: { key: 'grandparent', plural: 'Avós' },
+  father: { key: 'parent', plural: 'Pais' },
+  mother: { key: 'parent', plural: 'Pais' },
+  sibling: { key: 'sibling', plural: 'Irmãos' },
+  friend: { key: 'friend', plural: 'Amigos' },
+  grandchild: { key: 'grandchild', plural: 'Netos' },
+  parent_in_law: { key: 'parent_in_law', plural: 'Sogros' },
+  son_in_law: { key: 'child_in_law', plural: 'Genros e noras' },
+  daughter_in_law: { key: 'child_in_law', plural: 'Genros e noras' },
+  sibling_in_law: { key: 'sibling_in_law', plural: 'Cunhados' },
+  uncle: { key: 'uncle', plural: 'Tios' },
+  nephew: { key: 'nephew', plural: 'Sobrinhos' },
+  cousin: { key: 'cousin', plural: 'Primos' },
+};
+
+export interface RelativeGroup<T> {
+  key: string;
+  label: string;
+  members: T[];
+}
+
+export function groupRelatives<T extends { relation: FamilyRelation; gender: Gender | null }>(
+  relatives: T[],
+): RelativeGroup<T>[] {
+  const groups = new Map<string, T[]>();
+  for (const relative of relatives) {
+    const key = RELATION_GROUPS[relative.relation].key;
+    groups.set(key, [...(groups.get(key) ?? []), relative]);
+  }
+  return [...groups.entries()].map(([key, members]) => ({
+    key,
+    label:
+      members.length === 1
+        ? relationLabel(members[0].relation, members[0].gender)
+        : RELATION_GROUPS[members[0].relation].plural,
+    members,
+  }));
+}

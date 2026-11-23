@@ -36,7 +36,6 @@ import {
   MembershipSignupPage,
   MembershipPage,
   MinistriesPage,
-  ModuleMorePage,
   ProfilePage,
   ReportsPage,
   SmallGroupsPage,
@@ -102,7 +101,6 @@ export const PRIVATE_ROUTES: RouteDefinition[] = [
       </ProfileShell>
     ),
   },
-  { path: AppRoute.IntegrationMore, element: <ModuleMorePage areaId="integration" />, roles: LEADERSHIP_ROLES },
 
   { path: `${AppRoute.Visitors}/*`, ...VISITORS_LIST },
   { path: AppRoute.ArchivedVisitors, element: <ArchivedVisitorsPage />, roles: INTEGRATION_TEAM_ROLES },

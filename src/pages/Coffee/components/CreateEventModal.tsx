@@ -56,7 +56,7 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
             ) : (
               <>
                 <Trash2 size={16} />
-                Cancelar café
+                Cancelar
               </>
             )}
           </Button>
@@ -94,7 +94,7 @@ export function CreateEventModal({ close, onCreate, onDelete, initialDate }: Pro
           {onDelete && (
             <Button type="button" variant="danger" onClick={() => setConfirmingDelete(true)}>
               <Trash2 size={16} />
-              Cancelar café agendado
+              Cancelar
             </Button>
           )}
         </FormButtons>

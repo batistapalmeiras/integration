@@ -6,7 +6,7 @@ const STAGES: { statuses: PersonStatus[]; label: string }[] = [
   { statuses: ['initial_contact', 'retry_contact'], label: 'Contato' },
   { statuses: ['welcome_coffee', 'pending_signup'], label: 'Café' },
   { statuses: ['integration'], label: 'Integração' },
-  { statuses: ['membership_pending'], label: 'Membresia' },
+  { statuses: ['membership_pending'], label: 'Conselho' },
 ];
 
 interface Props {

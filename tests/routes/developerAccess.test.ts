@@ -42,7 +42,7 @@ describe('developer menus', () => {
   it('only lists entries the developer can open in each view', () => {
     for (const view of VIEWS) {
       for (const area of navAreasFor(UserRole.Developer, view)) {
-        const paths = [...areaItems(area).map((item) => item.path), ...(area.morePath ? [area.morePath] : [])];
+        const paths = areaItems(area).map((item) => item.path);
         for (const path of paths) expect([view, path, developerCanAccess(path, view)]).toEqual([view, path, true]);
       }
     }

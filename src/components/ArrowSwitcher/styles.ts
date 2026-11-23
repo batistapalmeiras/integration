@@ -8,6 +8,28 @@ export const Wrapper = styled.div`
   padding: 6px;
   border-radius: ${({ theme }) => theme.rounded.md};
   background: ${({ theme }) => theme.colors.surfaceStrong};
+`;
+
+export const Row = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.base};
+
+  & > :first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  & > button {
+    width: 56px;
+    height: 56px;
+  }
+`;
+
+export const ActionRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
   margin-bottom: ${({ theme }) => theme.spacing.base};
 `;
 

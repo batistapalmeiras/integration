@@ -40,8 +40,6 @@ function StageIcon({ status }: { status: PersonStatus }) {
   return <Icon size={22} />;
 }
 
-const STAGE_LABELS: Partial<Record<PersonStatus, string>> = { membership_pending: 'Conselho' };
-
 export function FunnelCards({ counts }: Props) {
   return (
     <StageGrid aria-labelledby="integration">
@@ -53,7 +51,7 @@ export function FunnelCards({ counts }: Props) {
                 <StageIcon status={stage.status} />
               </IconBadge>
               <div>
-                <StatLabel>{STAGE_LABELS[stage.status] ?? STATUS_META[stage.status].label}</StatLabel>
+                <StatLabel>{STATUS_META[stage.status].label}</StatLabel>
                 <HighlightValue>{counts[stage.status] ?? 0}</HighlightValue>
               </div>
             </StageStat>

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, Empty, OptionsSheet, Pagination, SearchInput, Skeleton, text, useMediaQuery, useModal } from 'bp-kit';
+import { Button, Empty, BottomSheet, Pagination, SearchInput, Skeleton, text, useMediaQuery, useModal } from 'bp-kit';
 import { ArrowUpDown, SlidersHorizontal, Users, X } from 'lucide-react';
 // Components
 import { CountBadge } from '../../components/CountBadge';
@@ -174,7 +174,7 @@ export function MembersPage() {
       )}
 
       {sorting && (
-        <OptionsSheet
+        <BottomSheet
           title="Ordenar por"
           options={MEMBER_SORT_OPTIONS}
           value={sort}

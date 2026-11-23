@@ -4,13 +4,11 @@ import {
   Church,
   Coffee,
   FileBarChart,
-  Gavel,
   GraduationCap,
   HeartHandshake,
   History,
   LayoutDashboard,
   LucideIcon,
-  Menu,
   Settings,
   Sprout,
   Store,
@@ -23,7 +21,7 @@ import {
 // Local
 import { DEFAULT_VIEW_ROLE } from '../domain/access';
 import { EffectiveRole, SystemModule, UserRole } from '../types/enums';
-import { AppRoute, COUNCILS_PATH, isEntityId } from './paths';
+import { AppRoute, isEntityId } from './paths';
 
 export interface NavItem {
   label: string;
@@ -40,7 +38,6 @@ export const NAV_ITEMS = {
   membership: { label: 'Conselho', path: AppRoute.Membership, icon: UserCheck },
   cohortHistory: { label: 'Histórico de turmas', path: `${AppRoute.Reports}/turmas`, icon: GraduationCap },
   coffeeHistory: { label: 'Histórico de cafés', path: `${AppRoute.Reports}/cafes`, icon: Coffee },
-  councilHistory: { label: 'Histórico do Conselho Administrativo', path: COUNCILS_PATH, icon: Gavel },
   volunteers: { label: 'Controle de acesso', path: AppRoute.Volunteers, icon: UserPlus },
   reports: { label: 'Relatórios', path: AppRoute.Reports, icon: FileBarChart },
   members: { label: 'Membros', path: AppRoute.Members, icon: Users },
@@ -51,50 +48,20 @@ export const NAV_ITEMS = {
   profile: { label: 'Perfil', path: AppRoute.Profile, icon: User },
 } satisfies Record<string, NavItem>;
 
-export interface NavGroup {
-  id: string;
-  label: string;
-  icon: LucideIcon;
-  items: NavItem[];
-}
-
-export type NavEntry = NavItem | NavGroup;
-
-export function isNavGroup(entry: NavEntry): entry is NavGroup {
-  return 'items' in entry;
-}
-
 interface NavArea {
   id: string;
   title: string;
   icon: LucideIcon;
   tabs: NavItem[];
-  more: NavEntry[];
-  morePath?: AppRoute;
 }
 
-const LEADERSHIP_HISTORY_GROUP: NavGroup = {
-  id: 'history',
-  label: 'Histórico',
-  icon: History,
-  items: [
-    { ...NAV_ITEMS.coffeeHistory, label: 'Cafés' },
-    { ...NAV_ITEMS.cohortHistory, label: 'Turmas' },
-  ],
-};
-
-export const ADMINISTRATION_AREA_ID = 'administration';
+const ADMINISTRATION_AREA_ID = 'administration';
 
 const ADMINISTRATION_AREA: NavArea = {
   id: ADMINISTRATION_AREA_ID,
   title: 'Administração',
   icon: Settings,
-  tabs: [
-    NAV_ITEMS.volunteers,
-    NAV_ITEMS.reports,
-    { ...NAV_ITEMS.councilHistory, label: 'Conselhos Administrativos', tabLabel: 'Conselhos' },
-  ],
-  more: [],
+  tabs: [NAV_ITEMS.volunteers, NAV_ITEMS.reports],
 };
 
 export const GENERAL_ADMIN_NAV_AREAS: NavArea[] = [
@@ -103,15 +70,12 @@ export const GENERAL_ADMIN_NAV_AREAS: NavArea[] = [
     title: 'Igreja',
     icon: Church,
     tabs: [NAV_ITEMS.members, NAV_ITEMS.smallGroups, NAV_ITEMS.ministries, NAV_ITEMS.birthdays],
-    more: [],
-  },
+    },
   {
     id: 'integration',
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
-    more: [LEADERSHIP_HISTORY_GROUP],
-    morePath: AppRoute.IntegrationMore,
   },
   ADMINISTRATION_AREA,
 ];
@@ -122,8 +86,7 @@ export const INTEGRATION_TEAM_NAV_AREAS: NavArea[] = [
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, { ...NAV_ITEMS.coffeeHistory, label: 'Histórico', icon: History }],
-    more: [],
-  },
+    },
 ];
 
 const ADMIN_NAV_AREAS: NavArea[] = [
@@ -132,8 +95,6 @@ const ADMIN_NAV_AREAS: NavArea[] = [
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.visitors, NAV_ITEMS.coffee, NAV_ITEMS.classes, NAV_ITEMS.membership],
-    more: [LEADERSHIP_HISTORY_GROUP],
-    morePath: AppRoute.IntegrationMore,
   },
   ADMINISTRATION_AREA,
 ];
@@ -144,8 +105,7 @@ const TEACHER_NAV_AREAS: NavArea[] = [
     title: 'Integração',
     icon: Sprout,
     tabs: [NAV_ITEMS.classes],
-    more: [],
-  },
+    },
 ];
 
 const NAV_AREAS_BY_ROLE: Record<EffectiveRole, NavArea[]> = {
@@ -173,15 +133,12 @@ export function navAreasFor(role: string | undefined, viewRole: EffectiveRole = 
   return NAV_AREAS_BY_ROLE[role as EffectiveRole] ?? [];
 }
 
-export const MORE_TAB_LABEL = 'Mais';
-export const MORE_TAB_ICON = Menu;
-
 export function areaItems(area: NavArea): NavItem[] {
-  return [...area.tabs, ...area.more.flatMap((entry) => (isNavGroup(entry) ? entry.items : [entry]))];
+  return area.tabs;
 }
 
 function areaTabPaths(area: NavArea): string[] {
-  return [...area.tabs.map((item) => item.path), ...(area.morePath ? [area.morePath] : [])];
+  return area.tabs.map((item) => item.path);
 }
 
 const STATIC_ROUTES: string[] = Object.values(AppRoute);
@@ -198,10 +155,6 @@ export function isTabPath(pathname: string, tabPath: string): boolean {
 
 export function findNavArea(areas: NavArea[], pathname: string): NavArea | undefined {
   return areas.find((area) => areaTabPaths(area).some((tabPath) => isTabPath(pathname, tabPath)));
-}
-
-export function findNavAreaById(areas: NavArea[], id: string): NavArea | undefined {
-  return areas.find((area) => area.id === id);
 }
 
 export function activeNavPath(pathname: string, paths: string[]): string | null {

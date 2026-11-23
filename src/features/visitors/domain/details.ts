@@ -6,7 +6,7 @@ export type DetailTab = 'integration' | 'membership' | 'makeup';
 
 export const DETAIL_TAB_LABELS: Record<DetailTab, string> = {
   integration: 'Integração',
-  membership: 'Membresia',
+  membership: 'Conselho',
   makeup: 'Reposição',
 };
 

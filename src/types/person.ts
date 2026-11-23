@@ -54,7 +54,7 @@ export const STATUS_META: Record<
   welcome_coffee: { label: 'Café de Boas-vindas', compactLabel: 'Café', tone: 'info', icon: Coffee },
   pending_signup: { label: 'Aguardando inscrição', compactLabel: 'Inscrição', tone: 'warning', icon: ClipboardList },
   integration: { label: 'Integração', tone: 'info', icon: GraduationCap },
-  membership_pending: { label: 'Membresia', tone: 'warning', icon: Clock },
+  membership_pending: { label: 'Conselho', tone: 'warning', icon: Clock },
   member: { label: 'Membro', tone: 'success', icon: UserCheck },
   archived: { label: 'Arquivado', tone: 'danger', icon: Archive },
 };

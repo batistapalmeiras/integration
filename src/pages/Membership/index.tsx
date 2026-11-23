@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 // Libs
 import { Button, Empty, LinkButton, Skeleton, text, useModal } from 'bp-kit';
-import { CalendarDays, ChevronRight, Plus } from 'lucide-react';
+import { CalendarDays, History, Plus } from 'lucide-react';
 // Components
 import { EntryTypeTable } from '../../components/EntryTypeTable';
 import { PageHeader } from '../../components/PageHeader';
@@ -54,11 +54,9 @@ export function MembershipPage() {
             ? `Conselho Administrativo: ${formatDate(council.meetingDate)}`
             : 'Nenhum Conselho Administrativo criado'}
         </CouncilLabel>
-        {council && (
-          <LinkButton icon={<ChevronRight size={16} />} onClick={() => navigate(COUNCILS_PATH)}>
-            Ver lista
-          </LinkButton>
-        )}
+        <LinkButton icon={<History size={16} />} onClick={() => navigate(COUNCILS_PATH)}>
+          Histórico
+        </LinkButton>
       </CouncilBar>
 
       {loading && <Skeleton $h="240px" />}

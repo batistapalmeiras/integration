@@ -15,7 +15,7 @@ import { EntryType, toEntryType } from '../types/church';
 import { groupNames } from '../domain/communityGroups';
 import { CouncilDate } from '../domain/councils';
 import { isMemberFlag, MemberFlag, MemberFlagMark } from '../domain/memberFlags';
-import { isDirectSignup } from '../domain/origin';
+import { acceptedOn } from '../domain/memberAcceptance';
 import { PersonSensitive } from '../domain/personSensitive';
 import { supabase } from '../lib/supabase';
 import { PhotoOwner, photoOwnerOf } from './memberPhotos';
@@ -234,12 +234,12 @@ export interface MemberRow {
 export async function listMemberRows(): Promise<MemberRow[]> {
   const { data, error } = await supabase
     .from('people')
-    .select('id, name, phone, entry_type, membership_status, origin, council:councils!people_council_id_fkey(meeting_date), member_profiles(photo_updated_at, photo_folder, gender, marital_status), member_flags(flag), person_sensitive(birth_date)')
+    .select('id, name, phone, entry_type, membership_status, origin, created_at, council:councils!people_council_id_fkey(meeting_date), member_profiles(photo_updated_at, photo_folder, gender, marital_status), member_flags(flag), person_sensitive(birth_date)')
     .eq('status', 'member')
     .order('name', { ascending: true });
   if (error) throw error;
   return (data ?? []).map(
-    ({ member_profiles: profile, member_flags: flags, person_sensitive: sensitive, origin, council, ...row }) => ({
+    ({ member_profiles: profile, member_flags: flags, person_sensitive: sensitive, origin, council, created_at: createdAt, ...row }) => ({
       ...row,
       entry_type: toEntryType(row.entry_type),
       membership_status: toMembershipStatus(row.membership_status ?? ''),
@@ -248,7 +248,12 @@ export async function listMemberRows(): Promise<MemberRow[]> {
       birthDate: sensitive?.birth_date ?? null,
       gender: toGender(profile?.gender ?? null),
       maritalStatus: toMaritalStatus(profile?.marital_status ?? null),
-      acceptedOn: isDirectSignup(origin) ? null : (council?.meeting_date ?? null),
+      acceptedOn: acceptedOn({
+        origin,
+        entryType: toEntryType(row.entry_type),
+        councilDate: council?.meeting_date ?? null,
+        createdAt,
+      }),
     }),
   );
 }

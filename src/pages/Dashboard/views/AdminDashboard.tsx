@@ -27,7 +27,7 @@ export function AdminDashboard() {
               items={[
                 { label: 'Na Integração', value: countInIntegration(funnel), icon: NAV_ITEMS.visitors.icon },
                 {
-                  label: 'Em processo de membresia',
+                  label: 'No Conselho',
                   value: funnel.membership_pending ?? 0,
                   icon: NAV_ITEMS.membership.icon,
                 },

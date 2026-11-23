@@ -77,7 +77,7 @@ export function EditCohortModal({ lessons, close, onSave, onCloseCohort }: Props
           }}
         >
           <Lock size={16} />
-          Encerrar turma
+          Encerrar
         </Button>
       </Form>
     </>

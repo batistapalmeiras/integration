@@ -1,5 +1,5 @@
 // React
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // Libs
 import { useMediaQuery } from 'bp-kit';
 import { ChevronDown, ChevronLeft } from 'lucide-react';
@@ -11,9 +11,6 @@ import {
   areaItems,
   findNavArea,
   isTabPath,
-  isNavGroup,
-  MORE_TAB_ICON,
-  MORE_TAB_LABEL,
   NAV_ITEMS,
   NavItem,
 } from '../../routes/navigation';
@@ -48,7 +45,6 @@ import {
   SideNavArea,
   SideNavAreaToggle,
   SideNavCount,
-  SideNavGroupToggle,
   SideNavLink,
   TabCount,
   ProfileAnchor,
@@ -88,8 +84,8 @@ export function Layout({ children }: ILayoutProps) {
     if (!isLastOpenArea) toggleKey(areaId);
   };
 
-  const renderNavLink = (item: NavItem, nested = false) => (
-    <SideNavLink key={item.path} to={item.path} $active={activePath === item.path} $nested={nested}>
+  const renderNavLink = (item: NavItem) => (
+    <SideNavLink key={item.path} to={item.path} $active={activePath === item.path}>
       <item.icon size={18} />
       {item.label}
       {item.path === AppRoute.Membership && membershipCount > 0 && <SideNavCount>{membershipCount}</SideNavCount>}
@@ -102,10 +98,7 @@ export function Layout({ children }: ILayoutProps) {
 
   const currentArea = findNavArea(navAreas, pathname);
   const bottomTabs: NavItem[] = currentArea
-    ? [
-        ...currentArea.tabs,
-        ...(currentArea.morePath ? [{ label: MORE_TAB_LABEL, path: currentArea.morePath, icon: MORE_TAB_ICON }] : []),
-      ]
+    ? currentArea.tabs
     : [
         NAV_ITEMS.dashboard,
         ...navAreas.map((area) => ({ label: area.title, path: area.tabs[0].path, icon: area.icon })),
@@ -147,27 +140,6 @@ export function Layout({ children }: ILayoutProps) {
                   <ChevronDown size={14} />
                 </SideNavAreaToggle>
                 {open && area.tabs.map((item) => renderNavLink(item))}
-                {open &&
-                  area.more.map((entry) => {
-                    if (!isNavGroup(entry)) return renderNavLink(entry);
-                    const key = `${area.id}/${entry.id}`;
-                    const groupOpen = isOpen(key);
-                    return (
-                      <Fragment key={key}>
-                        <SideNavGroupToggle
-                          type="button"
-                          $open={groupOpen}
-                          aria-expanded={groupOpen}
-                          onClick={() => toggleKey(key)}
-                        >
-                          <entry.icon size={18} />
-                          {entry.label}
-                          <ChevronDown size={14} />
-                        </SideNavGroupToggle>
-                        {groupOpen && entry.items.map((item) => renderNavLink(item, true))}
-                      </Fragment>
-                    );
-                  })}
               </SideNavArea>
             );
           })}

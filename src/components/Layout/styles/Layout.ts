@@ -110,7 +110,6 @@ export const SideNavLink = styled(Link)<{
   gap: ${({ theme }) => theme.spacing.sm};
   height: 42px;
   padding: 0 ${({ theme }) => theme.spacing.md};
-  padding-left: ${({ theme, $nested }) => ($nested ? `calc(${theme.spacing.md} + 26px)` : theme.spacing.md)};
   border-radius: ${({ theme }) => theme.rounded.sm};
   font-family: ${({ theme }) => theme.typography.fontFamily};
   font-size: ${({ theme }) => theme.typography.navLink.fontSize};
@@ -125,43 +124,6 @@ export const SideNavLink = styled(Link)<{
   svg {
     flex-shrink: 0;
     stroke-width: ${({ $active }) => ($active ? 2 : 1.5)};
-  }
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.surfaceSoft};
-    color: ${({ theme }) => theme.colors.ink};
-  }
-`;
-
-export const SideNavGroupToggle = styled.button<{ $open: boolean }>`
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
-  height: 42px;
-  padding: 0 ${({ theme }) => theme.spacing.md};
-  border: 0;
-  border-radius: ${({ theme }) => theme.rounded.sm};
-  background: transparent;
-  font-family: ${({ theme }) => theme.typography.fontFamily};
-  font-size: ${({ theme }) => theme.typography.navLink.fontSize};
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.muted};
-  text-align: left;
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s;
-
-  svg {
-    flex-shrink: 0;
-    stroke-width: 1.5;
-  }
-
-  svg:last-child {
-    margin-left: auto;
-    transition: transform 0.15s;
-    transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
   }
 
   &:hover {
@@ -330,7 +292,7 @@ export const ProfileAnchor = styled.div`
 const PROFILE_RESERVE = '52px';
 
 export const MainInner = styled.div<{ $profileSlot: boolean }>`
-  --page-gutter: ${({ theme }) => theme.spacing.xl};
+  --page-gutter: ${({ theme }) => theme.spacing.lg};
   --profile-reserve: ${({ $profileSlot }) => ($profileSlot ? PROFILE_RESERVE : '0px')};
   flex: 1 0 auto;
   display: flex;
@@ -338,7 +300,7 @@ export const MainInner = styled.div<{ $profileSlot: boolean }>`
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: ${({ theme }) => theme.spacing.base} ${({ theme }) => theme.spacing.xl} ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing.base} var(--page-gutter) ${({ theme }) => theme.spacing.xl};
   animation: ${fadeUp} 0.25s ease;
 
   @media (max-width: 744px) {

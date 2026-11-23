@@ -1,7 +1,8 @@
 // React
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { Button, ModalActions, ModalTitle, Typography, useModal, useToast } from 'bp-kit';
+import { BottomSheet, Button, ModalActions, ModalTitle, Typography, useModal, useToast } from 'bp-kit';
 import { Archive, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 // Components
 import { OptionsMenuActions } from '../../../../components/OptionsMenu';
@@ -23,6 +24,7 @@ interface Options {
 export function useVisitorMenu({ person, canManage, onSave, onArchive, onReactivate, onDelete }: Options) {
   const navigate = useNavigate();
   const { open, close, modal } = useModal('drawer');
+  const [menuOpen, setMenuOpen] = useState(false);
   const { show: showToast, toast } = useToast();
 
   const canArchive = canManage && person.status !== 'archived';
@@ -67,64 +69,82 @@ export function useVisitorMenu({ person, canManage, onSave, onArchive, onReactiv
             <Trash2 size={16} />
             Excluir
           </Button>
-          <Button type="button" variant="secondary" onClick={() => openMenu()}>
+          <Button type="button" variant="secondary" onClick={backToMenu}>
             Voltar
           </Button>
         </ModalActions>
       </>,
     );
 
-  const openMenu = () =>
-    open(
-      <>
-        <ModalTitle onClose={close}>{person.name}</ModalTitle>
-        <OptionsMenuActions>
-          <Button type="button" variant="secondary" onClick={() => openEdit(openMenu)}>
-            <Pencil size={16} />
-            Editar dados
-          </Button>
-          {canArchive && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={async () => {
-                await onArchive();
-                close();
-                navigate(AppRoute.Visitors);
-              }}
-            >
-              <Archive size={16} />
-              Arquivar
-            </Button>
-          )}
-          {canManage && person.status === 'archived' && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={async () => {
-                await onReactivate();
-                close();
-              }}
-            >
-              <RotateCcw size={16} />
-              Reativar
-            </Button>
-          )}
-          {canDelete && (
-            <Button type="button" variant="danger" onClick={confirmDelete}>
-              <Trash2 size={16} />
-              Excluir cadastro
-            </Button>
-          )}
-        </OptionsMenuActions>
-      </>,
-    );
+  const openMenu = () => setMenuOpen(true);
+
+  const backToMenu = () => {
+    close();
+    setMenuOpen(true);
+  };
 
   return {
     openMenu,
     openEdit: () => openEdit(close),
     overlays: (
       <>
+        {menuOpen && (
+          <BottomSheet title={person.name} height="half" onClose={() => setMenuOpen(false)}>
+            <OptionsMenuActions>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setMenuOpen(false);
+                  openEdit(backToMenu);
+                }}
+              >
+                <Pencil size={16} />
+                Editar dados
+              </Button>
+              {canArchive && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={async () => {
+                    await onArchive();
+                    setMenuOpen(false);
+                    navigate(AppRoute.Visitors);
+                  }}
+                >
+                  <Archive size={16} />
+                  Arquivar
+                </Button>
+              )}
+              {canManage && person.status === 'archived' && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={async () => {
+                    await onReactivate();
+                    setMenuOpen(false);
+                  }}
+                >
+                  <RotateCcw size={16} />
+                  Reativar
+                </Button>
+              )}
+              {canDelete && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    confirmDelete();
+                  }}
+                >
+                  <Trash2 size={16} />
+                  Excluir cadastro
+                </Button>
+              )}
+            </OptionsMenuActions>
+          </BottomSheet>
+        )}
         {modal}
         {toast}
       </>

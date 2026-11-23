@@ -25,7 +25,7 @@ export const LessonTabs = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.base};
 
   @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    grid-template-columns: repeat(4, 120px);
+    grid-template-columns: repeat(4, minmax(0, 120px));
     justify-content: center;
   }
 `;

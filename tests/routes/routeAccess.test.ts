@@ -18,7 +18,7 @@ describe('route access', () => {
   it('only shows a role menu entries that its routes allow', () => {
     for (const role of ROLES) {
       for (const area of navAreasFor(role)) {
-        const paths = [...areaItems(area).map((item) => item.path), ...(area.morePath ? [area.morePath] : [])];
+        const paths = areaItems(area).map((item) => item.path);
         for (const path of paths) expect([role, path, canAccess(role, path)]).toEqual([role, path, true]);
       }
     }
