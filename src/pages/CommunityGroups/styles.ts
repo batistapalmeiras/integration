@@ -59,3 +59,10 @@ export const DaySuffix = styled.span`
     display: inline;
   }
 `;
+
+export const NameWithIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  min-width: 0;
+`;

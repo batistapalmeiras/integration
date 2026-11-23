@@ -7,7 +7,13 @@ import { BadgeRow, CountBadge, TextBadge } from '../../../components/CountBadge'
 import { percentOf } from '../../../domain/communityGroups';
 import { AppRoute } from '../../../routes/paths';
 import { GroupTable } from '../components/GroupTable';
+import { ministryIconFor } from '../ministryIcons';
 import { useMemberTotal, useMinistriesList, useMinistryVolunteerCount } from '../hooks/useCommunityGroupsList';
+
+function ministryTile(name: string) {
+  const Icon = ministryIconFor(name);
+  return <Icon size={20} aria-hidden="true" />;
+}
 
 export function MinistriesPage() {
   const navigate = useNavigate();
@@ -20,6 +26,7 @@ export function MinistriesPage() {
       title="Ministérios"
       fieldLabel="Ministério"
       rows={rows}
+      tileFor={ministryTile}
       loading={loading}
       error={error}
       counts={

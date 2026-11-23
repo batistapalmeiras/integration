@@ -5,12 +5,13 @@ import { Button, Empty, Skeleton, text, theme, useMediaQuery, useModal } from 'b
 import { Plus } from 'lucide-react';
 // Components
 import { CountRow } from '../../../components/CountRow';
+import { IconBadge } from '../../../components/MenuOptions';
 import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { Table, TableWrapper, Td, Th, Tr } from '../../../components/Table';
 import { GroupInput, WEEK_DAY_LABELS, WeekDay } from '../../../domain/communityGroups';
 import { GroupRow } from '../hooks/useCommunityGroupsList';
-import { CountPill, DaySuffix } from '../styles';
+import { CountPill, DaySuffix, NameWithIcon } from '../styles';
 import { GroupModal } from './GroupModal';
 
 interface Props {
@@ -20,12 +21,13 @@ interface Props {
   loading: boolean;
   error: string | null;
   smallGroup?: boolean;
+  tileFor?: (name: string) => ReactNode;
   counts: ReactNode;
   onAdd: (input: GroupInput) => Promise<void>;
   onRowClick: (id: string) => void;
 }
 
-export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup, counts, onAdd, onRowClick }: Props) {
+export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup, tileFor, counts, onAdd, onRowClick }: Props) {
   const { open, close, modal } = useModal('drawer');
   const inlineAction = useMediaQuery(`(min-width: ${theme.breakpoints.tablet})`);
 
@@ -79,7 +81,7 @@ export function GroupTable({ title, fieldLabel, rows, loading, error, smallGroup
             <tbody>
               {rows.map((row) => (
                 <Tr key={row.id} $clickable onClick={() => onRowClick(row.id)}>
-                  <Td data-label="Nome">{row.name}</Td>
+                  <Td data-label="Nome">{tileFor ? <RowName name={row.name} tile={tileFor(row.name)} /> : row.name}</Td>
                   {smallGroup && <Td data-label="Dia">{row.meetingDay ? <DayName day={row.meetingDay} /> : '—'}</Td>}
                   <Td data-label="Pessoas">
                     <CountPill>{row.peopleCount}</CountPill>
@@ -106,5 +108,14 @@ function DayName({ day }: { day: WeekDay }) {
       {label.slice(0, -WEEKDAY_SUFFIX.length)}
       <DaySuffix>{WEEKDAY_SUFFIX}</DaySuffix>
     </>
+  );
+}
+
+function RowName({ name, tile }: { name: string; tile: ReactNode }) {
+  return (
+    <NameWithIcon>
+      <IconBadge>{tile}</IconBadge>
+      {name}
+    </NameWithIcon>
   );
 }

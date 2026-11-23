@@ -1,5 +1,7 @@
 // Libs
 import styled from 'styled-components';
+// Local
+import { initialsOf } from '../../domain/text';
 
 const Circle = styled.span<{ $size: number; $muted?: boolean }>`
   flex-shrink: 0;
@@ -30,17 +32,10 @@ interface Props {
   photoUrl?: string | null;
 }
 
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] ?? '';
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
-  return (first + last).toUpperCase();
-}
-
 export function Avatar({ name, size = 40, muted, photoUrl }: Props) {
   return (
     <Circle aria-hidden="true" $size={size} $muted={muted}>
-      {photoUrl ? <Photo src={photoUrl} alt="" /> : initials(name)}
+      {photoUrl ? <Photo src={photoUrl} alt="" /> : initialsOf(name)}
     </Circle>
   );
 }

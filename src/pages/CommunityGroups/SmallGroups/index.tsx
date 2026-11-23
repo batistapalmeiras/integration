@@ -5,9 +5,12 @@ import { Users, UsersRound } from 'lucide-react';
 // Local
 import { BadgeRow, CountBadge, TextBadge } from '../../../components/CountBadge';
 import { percentOf } from '../../../domain/communityGroups';
+import { initialsOf } from '../../../domain/text';
 import { AppRoute } from '../../../routes/paths';
 import { GroupTable } from '../components/GroupTable';
 import { useMemberTotal, useSmallGroupPeopleCount, useSmallGroupsList } from '../hooks/useCommunityGroupsList';
+
+const twoLettersOf = (name: string) => initialsOf(name, 2);
 
 export function SmallGroupsPage() {
   const navigate = useNavigate();
@@ -23,6 +26,7 @@ export function SmallGroupsPage() {
       loading={loading}
       error={error}
       smallGroup
+      tileFor={twoLettersOf}
       counts={
         <BadgeRow>
           <CountBadge icon={UsersRound} count={rows.length} singular="PG" plural="PGs" />

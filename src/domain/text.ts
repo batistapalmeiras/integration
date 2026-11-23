@@ -16,6 +16,14 @@ export const byName = (a: { name: string }, b: { name: string }) => a.name.local
 
 export const firstNameOf = (name: string) => name.trim().split(/\s+/)[0] ?? '';
 
+export function initialsOf(name: string, minLetters = 1): string {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] ?? '';
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+  const initials = first + last;
+  return (initials.length >= minLetters ? initials : name.trim().slice(0, minLetters)).toUpperCase();
+}
+
 export const foldText = (text: string) =>
   text
     .normalize('NFD')
