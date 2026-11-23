@@ -106,9 +106,7 @@ create table public.member_profiles (
   person_id uuid not null,
   gender text,
   marital_status text,
-  baptism_date date,
   baptism_church text,
-  other_phone text,
   address_zip text,
   address_street text,
   address_number text,
@@ -390,7 +388,7 @@ $function$
 ;
 
 CREATE OR REPLACE FUNCTION public.check_membership_interest_phone(p_phone text)
- RETURNS TABLE(person_name text, already_submitted boolean, lessons_attended integer, lessons_total integer, email text, birth_date text, gender text, cpf text, marital_status text, other_phone text, address_zip text, address_street text, address_number text, address_complement text, address_neighborhood text, address_city text, address_state text, entry_type text, baptism_church text, baptism_date text, origin_church text, previous_church text, baptism_info text, marital_status_story text, ministry_interests text[], wants_small_group text, small_group_id text, secret_society text, membership_note text)
+ RETURNS TABLE(person_name text, already_submitted boolean, lessons_attended integer, lessons_total integer, email text, birth_date text, gender text, cpf text, marital_status text, address_zip text, address_street text, address_number text, address_complement text, address_neighborhood text, address_city text, address_state text, entry_type text, baptism_church text, origin_church text, previous_church text, baptism_info text, marital_status_story text, ministry_interests text[], wants_small_group text, small_group_id text, secret_society text, membership_note text)
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public'
@@ -410,7 +408,6 @@ begin
            coalesce(m.gender, ''),
            coalesce(m.cpf, ''),
            coalesce(m.marital_status, ''),
-           coalesce(m.other_phone, ''),
            coalesce(m.address_zip, ''),
            coalesce(m.address_street, ''),
            coalesce(m.address_number, ''),
@@ -420,7 +417,6 @@ begin
            coalesce(m.address_state, ''),
            coalesce(p.entry_type, ''),
            coalesce(m.baptism_church, ''),
-           coalesce(m.baptism_date::text, ''),
            coalesce(s.origin_church, ''),
            coalesce(s.previous_church, ''),
            coalesce(s.baptism_info, ''),
@@ -600,6 +596,194 @@ AS $function$
        select 1 from public.derive_family(l.person_id) d
         where d.relative_id = l.relative_id and d.relation = l.relation
      );
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.expand_family_links(p_person_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_round integer := 0;
+  v_added integer;
+  v_person uuid;
+  v_shared record;
+begin
+  loop
+    v_added := 0;
+
+    for v_person in
+      select d.relative_id from public.derive_family(p_person_id) d where d.relation = 'sibling'
+    loop
+      for v_shared in
+        select l.relative_id, l.relation
+          from public.family_links l
+         where l.person_id = p_person_id
+           and l.relation in ('uncle', 'grandfather', 'grandmother', 'cousin')
+           and l.relative_id <> v_person
+           and not exists (select 1 from public.family_links x where x.person_id = v_person and x.relative_id = l.relative_id)
+           and not exists (select 1 from public.derive_family(v_person) d where d.relative_id = l.relative_id)
+      loop
+        begin
+          insert into public.family_links (person_id, relative_id, relation)
+          values (v_person, v_shared.relative_id, v_shared.relation),
+                 (v_shared.relative_id, v_person, public.family_inverse(v_shared.relation, public.family_parent_gender(v_person)));
+          v_added := v_added + 1;
+        exception when unique_violation or not_null_violation then
+          null;
+        end;
+      end loop;
+    end loop;
+
+    for v_person in
+      select p_person_id
+      union
+      select d.relative_id from public.derive_family(p_person_id) d where d.relation = 'sibling'
+    loop
+      v_added := v_added + public.expand_family_person(v_person);
+    end loop;
+
+    v_round := v_round + 1;
+    exit when v_added = 0 or v_round >= 4;
+  end loop;
+end;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.expand_family_person(p_person_id uuid)
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_row record;
+  v_gender text := public.family_parent_gender(p_person_id);
+  v_inverse text;
+  v_added integer := 0;
+  v_parent uuid;
+  v_parent_gender text;
+  v_partner uuid;
+begin
+  if not exists (
+    select 1 from public.family_links where person_id = p_person_id and relation in ('father', 'mother')
+  ) then
+    select only_one.relative_id, g.gender into v_parent, v_parent_gender
+      from (
+        select min(x.relative_id::text)::uuid as relative_id, count(*) as total
+          from (
+            select distinct s.relative_id
+              from public.family_links u
+              cross join lateral (
+                select l.relative_id from public.family_links l where l.person_id = u.relative_id and l.relation = 'sibling'
+                union
+                select d.relative_id from public.derive_family(u.relative_id) d where d.relation = 'sibling'
+              ) s
+             where u.person_id = p_person_id and u.relation = 'uncle' and s.relative_id <> p_person_id
+          ) x
+      ) only_one
+      join public.member_profiles g on g.person_id = only_one.relative_id
+     where only_one.total = 1 and g.gender in ('male', 'female');
+
+    if v_parent is not null then
+      select l.relative_id into v_partner from public.family_links l where l.person_id = v_parent and l.relation = 'spouse';
+      delete from public.family_links
+       where (person_id = p_person_id and relative_id in (v_parent, v_partner))
+          or (relative_id = p_person_id and person_id in (v_parent, v_partner));
+      insert into public.family_links (person_id, relative_id, relation)
+      values (p_person_id, v_parent, case v_parent_gender when 'male' then 'father' else 'mother' end),
+             (v_parent, p_person_id, 'child');
+      v_added := v_added + 1;
+      if v_partner is not null
+         and not exists (select 1 from public.family_links where person_id = p_person_id and relation = case v_parent_gender when 'male' then 'mother' else 'father' end) then
+        insert into public.family_links (person_id, relative_id, relation)
+        values (p_person_id, v_partner, case v_parent_gender when 'male' then 'mother' else 'father' end),
+               (v_partner, p_person_id, 'child');
+        v_added := v_added + 1;
+      end if;
+    end if;
+  end if;
+
+  for v_row in
+    with mine as (
+      select l.relative_id as u, l.relation as r
+        from public.family_links l
+       where l.person_id = p_person_id
+         and l.relation not in ('spouse', 'father', 'mother', 'friend')
+    ),
+    theirs as (
+      select m.r, t.relative_id as s, t.relation as nxt
+        from mine m join public.family_links t on t.person_id = m.u
+      union
+      select m.r, d.relative_id, d.relation
+        from mine m cross join lateral public.derive_family(m.u) d
+    ),
+    composed as (
+      select distinct on (t.s)
+             t.s,
+             case public.family_compose(t.r, t.nxt)
+               when 'grandparent' then case g.gender when 'male' then 'grandfather' when 'female' then 'grandmother' end
+               else public.family_compose(t.r, t.nxt)
+             end as relation
+        from theirs t
+        left join public.member_profiles g on g.person_id = t.s
+       where public.family_compose(t.r, t.nxt) is not null
+       order by t.s
+    )
+    select c.s, c.relation
+      from composed c
+      join public.people p on p.id = c.s and p.status = 'member'
+     where c.relation is not null
+       and c.s <> p_person_id
+       and not exists (select 1 from public.family_links x where x.person_id = p_person_id and x.relative_id = c.s)
+       and not exists (select 1 from public.derive_family(p_person_id) d where d.relative_id = c.s)
+  loop
+    v_inverse := public.family_inverse(v_row.relation, v_gender);
+    if v_inverse is null then
+      continue;
+    end if;
+    begin
+      insert into public.family_links (person_id, relative_id, relation)
+      values (p_person_id, v_row.s, v_row.relation), (v_row.s, p_person_id, v_inverse);
+      v_added := v_added + 1;
+    exception when unique_violation then
+      null;
+    end;
+  end loop;
+  return v_added;
+end;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.family_compose(p_link text, p_next text)
+ RETURNS text
+ LANGUAGE sql
+ IMMUTABLE
+AS $function$
+  select case
+    when p_link = 'sibling' and p_next in ('father', 'mother', 'sibling', 'uncle', 'grandfather', 'grandmother', 'cousin', 'nephew') then p_next
+    when p_link = 'sibling' and p_next = 'spouse' then 'sibling_in_law'
+    when p_link = 'sibling' and p_next = 'child' then 'nephew'
+    when p_link = 'uncle' and p_next = 'father' then 'grandfather'
+    when p_link = 'uncle' and p_next = 'mother' then 'grandmother'
+    when p_link = 'uncle' and p_next in ('sibling', 'spouse') then 'uncle'
+    when p_link = 'uncle' and p_next in ('child', 'nephew') then 'cousin'
+    when p_link in ('grandfather', 'grandmother') and p_next = 'child' then 'uncle'
+    when p_link in ('grandfather', 'grandmother') and p_next = 'spouse' then 'grandparent'
+    when p_link in ('grandfather', 'grandmother') and p_next = 'grandchild' then 'cousin'
+    when p_link = 'cousin' and p_next in ('father', 'mother') then 'uncle'
+    when p_link = 'cousin' and p_next in ('sibling', 'grandfather', 'grandmother') then case p_next when 'sibling' then 'cousin' else p_next end
+    when p_link = 'nephew' and p_next = 'sibling' then 'nephew'
+    when p_link = 'grandchild' and p_next = 'sibling' then 'grandchild'
+    when p_link = 'parent_in_law' and p_next = 'spouse' then 'parent_in_law'
+    when p_link = 'parent_in_law' and p_next = 'child' then 'sibling_in_law'
+    when p_link in ('son_in_law', 'daughter_in_law') and p_next = 'spouse' then 'child'
+    when p_link in ('son_in_law', 'daughter_in_law') and p_next = 'child' then 'grandchild'
+    when p_link = 'child' and p_next = 'sibling' then 'child'
+    when p_link = 'sibling_in_law' and p_next in ('father', 'mother') then 'parent_in_law'
+  end;
 $function$
 ;
 
@@ -1644,7 +1828,7 @@ end;
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.save_membership_answers(p_person_id uuid, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text)
+CREATE OR REPLACE FUNCTION public.save_membership_answers(p_person_id uuid, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text)
  RETURNS void
  LANGUAGE plpgsql
  SET search_path TO 'public'
@@ -1678,16 +1862,15 @@ begin
   end if;
 
   insert into public.member_profiles (
-    person_id, gender, cpf, marital_status, other_phone,
+    person_id, gender, cpf, marital_status,
     address_zip, address_street, address_number, address_complement, address_neighborhood, address_city, address_state,
-    baptism_church, baptism_date
+    baptism_church
   )
   values (
     p_person_id,
     nullif(p_gender, ''),
     nullif(regexp_replace(p_cpf, '\D', '', 'g'), ''),
     nullif(p_marital_status, ''),
-    nullif(regexp_replace(p_other_phone, '\D', '', 'g'), ''),
     nullif(regexp_replace(p_address_zip, '\D', '', 'g'), ''),
     nullif(btrim(p_address_street), ''),
     nullif(btrim(p_address_number), ''),
@@ -1695,14 +1878,12 @@ begin
     nullif(btrim(p_address_neighborhood), ''),
     nullif(btrim(p_address_city), ''),
     nullif(upper(btrim(p_address_state)), ''),
-    nullif(btrim(p_baptism_church), ''),
-    p_baptism_date
+    nullif(btrim(p_baptism_church), '')
   )
   on conflict (person_id) do update
     set gender = excluded.gender,
         cpf = excluded.cpf,
         marital_status = excluded.marital_status,
-        other_phone = excluded.other_phone,
         address_zip = excluded.address_zip,
         address_street = excluded.address_street,
         address_number = excluded.address_number,
@@ -1710,8 +1891,7 @@ begin
         address_neighborhood = excluded.address_neighborhood,
         address_city = excluded.address_city,
         address_state = excluded.address_state,
-        baptism_church = excluded.baptism_church,
-        baptism_date = excluded.baptism_date;
+        baptism_church = excluded.baptism_church;
 
   insert into public.person_sensitive (
     person_id, birth_date, origin_church, ministry_interests, secret_society, wants_small_group, membership_note
@@ -1840,6 +2020,17 @@ begin
      where (person_id = p_person_id and relative_id = v_relative)
         or (person_id = v_relative and relative_id = p_person_id);
   end loop;
+
+  if exists (
+    select 1 from public.family_links l
+     where l.person_id = p_person_id
+       and not exists (
+         select 1 from jsonb_to_recordset(v_before) as b(p uuid, r uuid, rel text)
+          where b.p = l.person_id and b.r = l.relative_id and b.rel = l.relation
+       )
+  ) then
+    delete from public.family_hidden where p_person_id in (person_id, relative_id);
+  end if;
 
   for v_hidden in select value::uuid from jsonb_array_elements_text(p_hidden) loop
     insert into public.family_hidden (person_id, relative_id)
@@ -2077,7 +2268,7 @@ end;
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text)
+CREATE OR REPLACE FUNCTION public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text)
  RETURNS TABLE(lessons_attended integer, lessons_total integer)
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -2093,8 +2284,8 @@ AS $function$
 
     perform public.save_membership_answers(
       v_person_id, p_name, p_gender, p_cpf, p_birth_date, p_marital_status, p_email,
-      p_other_phone, p_address_zip, p_address_street, p_address_number, p_address_complement, p_address_neighborhood,
-      p_address_city, p_address_state, p_entry_type, p_baptism_church, p_baptism_date, p_last_church,
+      p_address_zip, p_address_street, p_address_number, p_address_complement, p_address_neighborhood,
+      p_address_city, p_address_state, p_entry_type, p_baptism_church, p_last_church,
       p_ministry_interests, p_wants_small_group, p_small_group_id, p_secret_society, p_membership_note
     );
 
@@ -2117,7 +2308,7 @@ AS $function$
   $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text)
+CREATE OR REPLACE FUNCTION public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text)
  RETURNS void
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -2144,8 +2335,8 @@ AS $function$
 
     perform public.save_membership_answers(
       v_person_id, p_name, p_gender, p_cpf, p_birth_date, p_marital_status, p_email,
-      p_other_phone, p_address_zip, p_address_street, p_address_number, p_address_complement, p_address_neighborhood,
-      p_address_city, p_address_state, p_entry_type, p_baptism_church, p_baptism_date, p_last_church,
+      p_address_zip, p_address_street, p_address_number, p_address_complement, p_address_neighborhood,
+      p_address_city, p_address_state, p_entry_type, p_baptism_church, p_last_church,
       p_ministry_interests, p_wants_small_group, p_small_group_id, p_secret_society, p_membership_note
     );
 
@@ -2155,6 +2346,64 @@ AS $function$
       values (v_person_id, null, 'membership_pending', 'Cadastro direto do Conselho');
   end;
   $function$
+;
+
+CREATE OR REPLACE FUNCTION public.suggest_family_links(p_person_id uuid, p_links jsonb)
+ RETURNS TABLE(relation text, person_id uuid, name text, gender text, derived boolean)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_link jsonb;
+  v_relative uuid;
+  v_relation text;
+  v_gender text;
+  v_inverse text;
+  v_result jsonb := '[]'::jsonb;
+begin
+  if public."current_role"() is distinct from 'general_admin' then
+    raise exception 'Só o Administrador Geral pode alterar a família.';
+  end if;
+
+  v_gender := public.family_parent_gender(p_person_id);
+
+  begin
+    delete from public.family_links l where p_person_id in (l.person_id, l.relative_id);
+    delete from public.family_hidden h where p_person_id in (h.person_id, h.relative_id);
+
+    for v_link in select * from jsonb_array_elements(p_links) loop
+      v_relative := (v_link ->> 'relative_id')::uuid;
+      v_relation := v_link ->> 'relation';
+      v_inverse := case when v_relation is null then null else public.family_inverse(v_relation, v_gender) end;
+      if v_inverse is null or v_relative = p_person_id
+         or not exists (select 1 from public.people p where p.id = v_relative and p.status = 'member') then
+        continue;
+      end if;
+      begin
+        insert into public.family_links (person_id, relative_id, relation)
+        values (p_person_id, v_relative, v_relation), (v_relative, p_person_id, v_inverse);
+      exception when others then
+        null;
+      end;
+    end loop;
+
+    perform public.expand_family_links(p_person_id);
+    perform public.propagate_family_to_spouse(p_person_id);
+    perform public.drop_derivable_links();
+
+    select coalesce(jsonb_agg(to_jsonb(g)), '[]'::jsonb) into v_result from public.get_family_links(p_person_id) g;
+
+    raise exception 'family preview' using errcode = 'ZZ001';
+  exception when sqlstate 'ZZ001' then
+    null;
+  end;
+
+  return query
+    select r.relation, r.person_id, r.name, r.gender, r.derived
+      from jsonb_to_recordset(v_result) as r(relation text, person_id uuid, name text, gender text, derived boolean);
+end;
+$function$
 ;
 
 CREATE OR REPLACE FUNCTION public.sync_family_couples()
@@ -2620,7 +2869,7 @@ create view public.membership_alerts with (security_invoker=true) as
    FROM ((((people p
      JOIN person_sensitive s ON ((s.person_id = p.id)))
      LEFT JOIN member_profiles m ON ((m.person_id = p.id)))
-     CROSS JOIN LATERAL ( VALUES ('secret_society'::text,s.secret_society,(btrim(regexp_replace(lower(btrim(COALESCE(s.secret_society, ''::text))), '[.!]+$'::text, ''::text)) <> ALL (ARRAY[''::text, 'não'::text, 'nao'::text]))), ('baptism'::text,s.baptism_info,((p.entry_type IS DISTINCT FROM 'baptism'::text) AND (btrim(COALESCE(m.baptism_church, ''::text)) = ''::text) AND (m.baptism_date IS NULL) AND (btrim(COALESCE(s.baptism_info, ''::text)) = ''::text)))) alert(code, answer, applies))
+     CROSS JOIN LATERAL ( VALUES ('secret_society'::text,s.secret_society,(btrim(regexp_replace(lower(btrim(COALESCE(s.secret_society, ''::text))), '[.!]+$'::text, ''::text)) <> ALL (ARRAY[''::text, 'não'::text, 'nao'::text]))), ('baptism'::text,s.baptism_info,((p.entry_type IS DISTINCT FROM 'baptism'::text) AND (btrim(COALESCE(m.baptism_church, ''::text)) = ''::text) AND (btrim(COALESCE(s.baptism_info, ''::text)) = ''::text)))) alert(code, answer, applies))
      LEFT JOIN membership_alert_resolutions r ON (((r.person_id = p.id) AND (r.code = alert.code))))
   WHERE (alert.applies AND (p.origin <> 'imported'::text) AND (p.status = ANY (ARRAY['membership_pending'::text, 'member'::text])));
 
@@ -3036,6 +3285,15 @@ grant execute on function public.drop_derivable_links() to anon;
 grant execute on function public.drop_derivable_links() to authenticated;
 grant execute on function public.drop_derivable_links() to service_role;
 
+revoke all on function public.expand_family_links(p_person_id uuid) from public, anon, authenticated;
+grant execute on function public.expand_family_links(p_person_id uuid) to service_role;
+
+revoke all on function public.expand_family_person(p_person_id uuid) from public, anon, authenticated;
+grant execute on function public.expand_family_person(p_person_id uuid) to service_role;
+
+revoke all on function public.family_compose(p_link text, p_next text) from public, anon, authenticated;
+grant execute on function public.family_compose(p_link text, p_next text) to service_role;
+
 revoke all on function public.family_inverse(p_relation text, p_gender text) from public, anon, authenticated;
 grant execute on function public.family_inverse(p_relation text, p_gender text) to anon;
 grant execute on function public.family_inverse(p_relation text, p_gender text) to authenticated;
@@ -3216,18 +3474,17 @@ revoke all on function public.run_pipeline_maintenance() from public, anon, auth
 grant execute on function public.run_pipeline_maintenance() to authenticated;
 grant execute on function public.run_pipeline_maintenance() to service_role;
 
-revoke all on function public.save_membership_answers(p_person_id uuid, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text) from public, anon, authenticated;
-grant execute on function public.save_membership_answers(p_person_id uuid, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text) to service_role;
+revoke all on function public.save_membership_answers(p_person_id uuid, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text) from public, anon, authenticated;
+grant execute on function public.save_membership_answers(p_person_id uuid, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text) to service_role;
 
 revoke all on function public.service_sunday(p_at timestamp with time zone) from public, anon, authenticated;
 grant execute on function public.service_sunday(p_at timestamp with time zone) to anon;
 grant execute on function public.service_sunday(p_at timestamp with time zone) to authenticated;
 grant execute on function public.service_sunday(p_at timestamp with time zone) to service_role;
 
-revoke all on function public.set_family_links(p_person_id uuid, p_links jsonb, p_hidden jsonb) from public, anon, authenticated;
-grant execute on function public.set_family_links(p_person_id uuid, p_links jsonb, p_hidden jsonb) to anon;
-grant execute on function public.set_family_links(p_person_id uuid, p_links jsonb, p_hidden jsonb) to authenticated;
-grant execute on function public.set_family_links(p_person_id uuid, p_links jsonb, p_hidden jsonb) to service_role;
+revoke all on function public.set_family_links(p_person_id uuid, p_links jsonb, p_hidden jsonb DEFAULT '[]'::jsonb) from public, anon, authenticated;
+grant execute on function public.set_family_links(p_person_id uuid, p_links jsonb, p_hidden jsonb DEFAULT '[]'::jsonb) to authenticated;
+grant execute on function public.set_family_links(p_person_id uuid, p_links jsonb, p_hidden jsonb DEFAULT '[]'::jsonb) to service_role;
 
 revoke all on function public.set_family(p_person_id uuid, p_spouse_id uuid, p_father_id uuid, p_mother_id uuid, p_child_ids uuid[]) from public, anon, authenticated;
 grant execute on function public.set_family(p_person_id uuid, p_spouse_id uuid, p_father_id uuid, p_mother_id uuid, p_child_ids uuid[]) to anon;
@@ -3258,15 +3515,19 @@ grant execute on function public.submit_makeup_attendance(p_token uuid, p_notes 
 grant execute on function public.submit_makeup_attendance(p_token uuid, p_notes text) to authenticated;
 grant execute on function public.submit_makeup_attendance(p_token uuid, p_notes text) to service_role;
 
-revoke all on function public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) from public, anon, authenticated;
-grant execute on function public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to anon;
-grant execute on function public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to authenticated;
-grant execute on function public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to service_role;
+revoke all on function public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) from public, anon, authenticated;
+grant execute on function public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to anon;
+grant execute on function public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to authenticated;
+grant execute on function public.submit_membership_form(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to service_role;
 
-revoke all on function public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) from public, anon, authenticated;
-grant execute on function public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to anon;
-grant execute on function public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to authenticated;
-grant execute on function public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_other_phone text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_baptism_date date, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to service_role;
+revoke all on function public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) from public, anon, authenticated;
+grant execute on function public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to anon;
+grant execute on function public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to authenticated;
+grant execute on function public.submit_membership_signup(p_phone text, p_name text, p_gender text, p_cpf text, p_birth_date date, p_marital_status text, p_email text, p_address_zip text, p_address_street text, p_address_number text, p_address_complement text, p_address_neighborhood text, p_address_city text, p_address_state text, p_entry_type text, p_baptism_church text, p_last_church text, p_ministry_interests text[], p_wants_small_group text, p_small_group_id uuid, p_secret_society text, p_membership_note text, p_photo_token text) to service_role;
+
+revoke all on function public.suggest_family_links(p_person_id uuid, p_links jsonb) from public, anon, authenticated;
+grant execute on function public.suggest_family_links(p_person_id uuid, p_links jsonb) to authenticated;
+grant execute on function public.suggest_family_links(p_person_id uuid, p_links jsonb) to service_role;
 
 revoke all on function public.sync_family_couples() from public, anon, authenticated;
 grant execute on function public.sync_family_couples() to anon;
