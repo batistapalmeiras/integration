@@ -1,10 +1,18 @@
 // Libs
 import styled from 'styled-components';
 
+export const FilterRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
+
 export const FilterBar = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.xs};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  min-width: 0;
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scrollbar-width: none;

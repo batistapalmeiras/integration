@@ -9,8 +9,10 @@ import {
   ModalTitle,
   Skeleton,
   text,
+  theme,
   Typography,
   useAuthCtx,
+  useMediaQuery,
   useModal,
   useToast,
 } from 'bp-kit';
@@ -45,6 +47,7 @@ import { ModuleFilter, ModuleFilterOption } from './components/ModuleFilter';
 import { accessModule } from './persistence';
 import {
   EmptySectionHint,
+  FilterRow,
   GroupBody,
   GroupCard,
   GroupLabel,
@@ -101,6 +104,7 @@ export function VolunteersPage() {
   const { volunteers, loading, error, addVolunteer, changeRole } = useVolunteers();
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
+  const inlineAction = useMediaQuery(`(min-width: ${theme.breakpoints.tablet})`);
   const [savedModule, setSavedModule] = useState(() => accessModule.load());
   const [openRoles, setOpenRoles] = useState<UserRole[]>(() => MODULE_GROUPS.map((group) => group.roles[0]));
 
@@ -141,6 +145,15 @@ export function VolunteersPage() {
 
   const openAddModal = () => open(<AddVolunteerModal close={close} onAdd={addVolunteer} allowedRoles={allowedRoles} />);
 
+  const showFilterRow = !loading && !error && volunteers.length > 0;
+
+  const addButton = (
+    <Button variant="secondary" onClick={openAddModal}>
+      <Plus size={16} />
+      Adicionar
+    </Button>
+  );
+
   const modules = MODULE_GROUPS.map((group) => ({
     ...group,
     sections: group.roles.map((role) => ({
@@ -153,7 +166,7 @@ export function VolunteersPage() {
   const visibleModules = selected === ALL_MODULES ? modules : modules.filter((group) => group.module === selected);
 
   const filterOptions: ModuleFilterOption[] = [
-    { value: ALL_MODULES, label: 'Todos os Módulos', icon: LayoutGrid, count: volunteers.length },
+    { value: ALL_MODULES, label: 'Todos', icon: LayoutGrid, count: volunteers.length },
     ...modules.map((group) => ({
       value: group.module,
       label: group.label,
@@ -200,12 +213,7 @@ export function VolunteersPage() {
       <PageHeader
         title="Controle de acesso"
         back
-        action={
-          <Button variant="secondary" onClick={openAddModal}>
-            <Plus size={16} />
-            Adicionar
-          </Button>
-        }
+        action={showFilterRow && inlineAction ? undefined : addButton}
       />
 
       {loading && <Skeleton $h="240px" />}
@@ -215,9 +223,12 @@ export function VolunteersPage() {
         <Empty title="Nenhum usuário cadastrado" description="Adicione o primeiro pelo botão acima." />
       )}
 
-      {!loading && !error && volunteers.length > 0 && (
+      {showFilterRow && (
         <>
-          <ModuleFilter options={filterOptions} value={selected} onChange={chooseModule} />
+          <FilterRow>
+            <ModuleFilter options={filterOptions} value={selected} onChange={chooseModule} />
+            {inlineAction && addButton}
+          </FilterRow>
 
           <RoleBoard canMove={canMove} onMove={confirmMove}>
             <Modules>

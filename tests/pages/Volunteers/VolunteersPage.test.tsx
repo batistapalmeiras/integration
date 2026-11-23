@@ -69,14 +69,14 @@ describe('access control page', () => {
       'Professores',
       'Equipe de Integração',
     ]);
-    expect(filter(/^Todos os Módulos/)).toHaveAttribute('aria-pressed', 'true');
+    expect(filter(/^Todos/)).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('shows how many people each module has on the filter', async () => {
     renderPage();
 
     await screen.findByRole('heading', { name: 'Igreja', level: 2 });
-    expect(filter(/^Todos os Módulos/)).toHaveTextContent('5');
+    expect(filter(/^Todos/)).toHaveTextContent('5');
     expect(filter(/^Igreja/)).toHaveTextContent('3');
     expect(filter(/^Integração/)).toHaveTextContent('2');
   });
@@ -115,8 +115,9 @@ describe('access control page', () => {
 
   it('keeps the add button and has no description under the title', async () => {
     renderPage();
+    await screen.findByRole('heading', { name: 'Igreja', level: 2 });
 
-    expect(await screen.findByRole('button', { name: 'Adicionar' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Adicionar' })).toBeInTheDocument();
     expect(screen.queryByText(/Gerencie quem acessa/)).not.toBeInTheDocument();
   });
 
