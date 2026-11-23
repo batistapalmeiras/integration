@@ -1,10 +1,12 @@
 // React
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Libs
-import { ChevronRight, Plus } from 'lucide-react';
-import { Button, Chip, Empty, SearchInput, Skeleton, text, useModal } from 'bp-kit';
+import { ChevronRight, Plus, SlidersHorizontal } from 'lucide-react';
+import { BottomSheet, Button, Chip, Empty, SearchInput, Skeleton, text, useModal } from 'bp-kit';
 // Components
 import { PageHeader } from '../../components/PageHeader';
+import { SearchFiltersRow } from '../../components/ListLayout';
 // Local
 import { CountRow } from '../../components/CountRow';
 import { PeopleCount } from '../../components/PeopleCount';
@@ -38,6 +40,7 @@ export function VisitorsPage() {
       statusFilter.includes(status) ? statusFilter.filter((s) => s !== status) : [...statusFilter, status],
     );
 
+  const [filtering, setFiltering] = useState(false);
   const { open, close, modal } = useModal('drawer', { fullScreenOnMobile: true });
   const newVisitor = (
     <Button variant="secondary" onClick={() => open(<NewVisitorModal close={close} />)}>
@@ -57,21 +60,14 @@ export function VisitorsPage() {
       {!loading && !error && (
         <>
           <SearchRow>
-            <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
+            <SearchFiltersRow>
+              <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar por nome ou telefone…" />
+              <Button variant="secondary" size="sm" onClick={() => setFiltering(true)}>
+                <SlidersHorizontal size={16} />
+                Filtros{statusFilter.length > 0 ? ` (${statusFilter.length})` : ''}
+              </Button>
+            </SearchFiltersRow>
           </SearchRow>
-          <QueueChips role="group" aria-label="Filtrar por status">
-              {VISITOR_QUEUE_STATUSES.map((status) => (
-                <Chip
-                  key={status}
-                  type="button"
-                  aria-pressed={statusFilter.includes(status)}
-                  $active={statusFilter.includes(status)}
-                  onClick={() => toggleStatus(status)}
-                >
-                  {STATUS_META[status].label}
-                </Chip>
-              ))}
-            </QueueChips>
         </>
       )}
 
@@ -98,6 +94,24 @@ export function VisitorsPage() {
 
       {!loading && !error && rows.length > 0 && (
         <VisitorList rows={rows} page={page} totalPages={totalPages} onPageChange={setPage} />
+      )}
+
+      {filtering && (
+        <BottomSheet title="Filtrar por status" onClose={() => setFiltering(false)}>
+          <QueueChips role="group" aria-label="Filtrar por status">
+            {VISITOR_QUEUE_STATUSES.map((status) => (
+              <Chip
+                key={status}
+                type="button"
+                aria-pressed={statusFilter.includes(status)}
+                $active={statusFilter.includes(status)}
+                onClick={() => toggleStatus(status)}
+              >
+                {STATUS_META[status].label}
+              </Chip>
+            ))}
+          </QueueChips>
+        </BottomSheet>
       )}
 
       {modal}

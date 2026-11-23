@@ -7,13 +7,9 @@ export const SearchRow = styled.div`
 
 export const QueueChips = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing.sm};
-  overflow-x: auto;
-
-  & > * {
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
+  padding: ${({ theme }) => theme.spacing.sm} 0 ${({ theme }) => theme.spacing.base};
 `;
 
 export const RowButton = styled.button`
