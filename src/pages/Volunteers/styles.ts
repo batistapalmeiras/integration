@@ -81,6 +81,45 @@ export const GroupLabel = styled.h3`
   color: ${({ theme }) => theme.colors.muted};
 `;
 
+export const GroupToggle = styled.button<{ $open: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
+  width: 100%;
+  padding: ${({ theme }) => theme.spacing.xs} 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  svg {
+    flex-shrink: 0;
+    transition: transform 0.15s;
+    transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
+  }
+`;
+
+export const GroupCount = styled.span`
+  padding: 1px 7px;
+  border-radius: ${({ theme }) => theme.rounded.full};
+  background: ${({ theme }) => theme.colors.surfaceSoft};
+  font-size: ${({ theme }) => theme.typography.captionSm.fontSize};
+  letter-spacing: 0;
+  color: ${({ theme }) => theme.colors.muted};
+`;
+
+export const SearchSlot = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+`;
+
 export const PersonList = styled.ul`
   margin: 0;
   padding: 0;

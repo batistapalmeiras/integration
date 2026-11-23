@@ -7,6 +7,7 @@ import {
   Empty,
   ModalActions,
   ModalTitle,
+  SearchInput,
   Skeleton,
   text,
   Typography,
@@ -14,7 +15,7 @@ import {
   useModal,
   useToast,
 } from 'bp-kit';
-import { Church, LayoutGrid, LucideIcon, Plus, Sprout } from 'lucide-react';
+import { ChevronDown, Church, LayoutGrid, LucideIcon, Plus, Sprout } from 'lucide-react';
 // Components
 import { Avatar } from '../../components/Avatar';
 import { PageHeader } from '../../components/PageHeader';
@@ -22,6 +23,7 @@ import { TonePill } from '../../components/StatusPill';
 // Local
 import { useRole } from '../../features/access/useRole';
 import { profilePath } from '../../routes/paths';
+import { matchesNameOrPhone } from '../../domain/search';
 import { assignableRoles, canChangeRole } from '../../domain/volunteers';
 import { groupRolesByModule, ROLE_LABELS, SystemModule, UserRole } from '../../types/enums';
 import { VolunteerRow } from '../../repositories/volunteers';
@@ -32,13 +34,16 @@ import { ModuleFilter, ModuleFilterOption } from './components/ModuleFilter';
 import { accessModule } from './persistence';
 import {
   EmptySectionHint,
+  GroupCount,
   GroupLabel,
+  GroupToggle,
   ModuleSection,
   ModuleTitle,
   Modules,
   PersonList,
   PersonName,
   PersonRow,
+  SearchSlot,
 } from './styles';
 
 const ROLE_SECTION_LABELS: Record<UserRole, string> = {
@@ -72,6 +77,9 @@ export function VolunteersPage() {
   const { open, close, modal } = useModal('drawer');
   const { show: showToast, toast } = useToast();
   const [savedModule, setSavedModule] = useState(() => accessModule.load());
+  const [search, setSearch] = useState('');
+  const [openRoles, setOpenRoles] = useState<UserRole[]>(() => MODULE_GROUPS.map((group) => group.roles[0]));
+  const searching = search.trim() !== '';
 
   const allowedRoles = assignableRoles(role);
   const actor = { id: user?.id ?? '', role: role ?? '' };
@@ -115,7 +123,8 @@ export function VolunteersPage() {
     sections: group.roles.map((role) => ({
       role,
       label: ROLE_SECTION_LABELS[role],
-      volunteers: volunteers.filter((v) => v.role === role),
+      total: volunteers.filter((v) => v.role === role).length,
+      volunteers: volunteers.filter((v) => v.role === role && matchesNameOrPhone(v, search)),
     })),
   }));
   const selected = modules.find((group) => group.module === savedModule)?.module ?? ALL_MODULES;
@@ -127,9 +136,17 @@ export function VolunteersPage() {
       value: group.module,
       label: group.label,
       icon: MODULE_ICONS[group.module],
-      count: group.sections.reduce((sum, section) => sum + section.volunteers.length, 0),
+      count: group.sections.reduce((sum, section) => sum + section.total, 0),
     })),
   ];
+
+  const matchedTotal = visibleModules.reduce(
+    (sum, group) => sum + group.sections.reduce((inner, section) => inner + section.volunteers.length, 0),
+    0,
+  );
+  const isOpen = (role: UserRole, found: number) => (searching ? found > 0 : openRoles.includes(role));
+  const toggleRole = (role: UserRole) =>
+    setOpenRoles((current) => (current.includes(role) ? current.filter((item) => item !== role) : [...current, role]));
 
   const chooseModule = (module: string) => {
     setSavedModule(module);
@@ -182,27 +199,49 @@ export function VolunteersPage() {
 
       {!loading && !error && volunteers.length > 0 && (
         <>
+          <SearchSlot>
+            <SearchInput size="sm" value={search} onChange={setSearch} placeholder="Buscar usuário…" />
+          </SearchSlot>
           <ModuleFilter options={filterOptions} value={selected} onChange={chooseModule} />
 
-          <RoleBoard canMove={canMove} onMove={confirmMove}>
-            <Modules>
-              {visibleModules.map((group) => (
-                <ModuleSection key={group.module} aria-label={group.label}>
-                  {selected === ALL_MODULES && <ModuleTitle>{group.label}</ModuleTitle>}
-                  {group.sections.map((section) => (
-                    <RoleDropZone key={section.role} role={section.role}>
-                      <GroupLabel>{section.label}</GroupLabel>
-                      {section.volunteers.length > 0 ? (
-                        renderPeople(section.volunteers)
-                      ) : (
-                        <EmptySectionHint>Ninguém por aqui.</EmptySectionHint>
-                      )}
-                    </RoleDropZone>
-                  ))}
-                </ModuleSection>
-              ))}
-            </Modules>
-          </RoleBoard>
+          {searching && matchedTotal === 0 && (
+            <Empty title="Nenhum usuário encontrado" description="Tente outro nome ou outro módulo." />
+          )}
+
+          {(!searching || matchedTotal > 0) && (
+            <RoleBoard canMove={canMove} onMove={confirmMove}>
+              <Modules>
+                {visibleModules.map((group) => (
+                  <ModuleSection key={group.module} aria-label={group.label}>
+                    {selected === ALL_MODULES && <ModuleTitle>{group.label}</ModuleTitle>}
+                    {group.sections.map((section) => (
+                      <RoleDropZone key={section.role} role={section.role}>
+                        <GroupLabel>
+                          <GroupToggle
+                            type="button"
+                            $open={isOpen(section.role, section.volunteers.length)}
+                            aria-expanded={isOpen(section.role, section.volunteers.length)}
+                            disabled={searching}
+                            onClick={() => toggleRole(section.role)}
+                          >
+                            <ChevronDown size={14} aria-hidden="true" />
+                            {section.label}
+                            <GroupCount>{searching ? section.volunteers.length : section.total}</GroupCount>
+                          </GroupToggle>
+                        </GroupLabel>
+                        {isOpen(section.role, section.volunteers.length) &&
+                          (section.volunteers.length > 0 ? (
+                            renderPeople(section.volunteers)
+                          ) : (
+                            <EmptySectionHint>Ninguém por aqui.</EmptySectionHint>
+                          ))}
+                      </RoleDropZone>
+                    ))}
+                  </ModuleSection>
+                ))}
+              </Modules>
+            </RoleBoard>
+          )}
         </>
       )}
 
