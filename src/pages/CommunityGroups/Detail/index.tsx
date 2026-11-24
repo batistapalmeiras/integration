@@ -19,6 +19,7 @@ import { PageHeader } from '../../../components/PageHeader';
 // Local
 import { AddButton } from '../../../components/AddButton';
 import { ConsolidationPill } from '../../../components/ConsolidationPill';
+import { IconBadge } from '../../../components/MenuOptions';
 import { InfoLine, InfoPanel } from '../../../components/InfoLine';
 import { PeopleCount } from '../../../components/PeopleCount';
 import { TonePill } from '../../../components/StatusPill';
@@ -45,6 +46,7 @@ import { refreshGroupLists } from '../hooks/useCommunityGroupsList';
 import { AppRoute } from '../../../routes/paths';
 import { AddMembersModal } from '../components/AddMembersModal';
 import { GroupModal } from '../components/GroupModal';
+import { ministryTile } from '../ministryTile';
 import { LeaderList, NameCell, Stack } from '../styles';
 
 type GroupType = 'ministerios' | 'pgs';
@@ -194,6 +196,7 @@ export function CommunityGroupDetailPage() {
       <PageHeader
         title={group.name}
         subtitle={label}
+        icon={isPg ? undefined : <IconBadge>{ministryTile(group.name)}</IconBadge>}
         back
         action={
           <Button variant="secondary" onClick={openEdit}>
